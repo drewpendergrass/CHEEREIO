@@ -1,7 +1,7 @@
 Overview of CHEEREIO's capabilities
 ==========
 
-About the Asynchronous Localized Ensemble Transform Kalman Filter (4D-LETKF)
+About 4D-LETKF
 -------------
 
 TKTKTK
