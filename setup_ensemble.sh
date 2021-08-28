@@ -381,6 +381,7 @@ cd ${MY_PATH}/${RUN_NAME}
 mkdir -p ensemble_runs
 mkdir -p ensemble_runs/logs
 mkdir -p scratch
+mkdir -p postprocess
 echo "GC-CHEERIO uses this directory to save out intermediate data and track its internal state. Modifying contents of this folder can lead to model failure." > scratch/README
 
 cp ${ASSIM_PATH}/templates/run_ensemble_simulations.sh ensemble_runs/
