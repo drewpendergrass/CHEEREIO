@@ -20,7 +20,7 @@ This manual assumes that you are familiar with the basics of setting up and runn
 
 .. toctree::
    :maxdepth: 3   
-   :caption: Basics of CHEEREIO:
+   :caption: Basics of CHEEREIO
 
    About-CHEEREIO
    Installing-CHEEREIO
@@ -28,7 +28,7 @@ This manual assumes that you are familiar with the basics of setting up and runn
 
 .. toctree::
    :maxdepth: 3   
-   :caption: Creating and running the CHEEREIO ensemble:
+   :caption: Using the ensemble
 
    Deploying-the-ensemble
    Guide-to-the-ensemble-directory
@@ -36,7 +36,7 @@ This manual assumes that you are familiar with the basics of setting up and runn
 
 .. toctree::
    :maxdepth: 3   
-   :caption: The chemical data assimilation toolkit:
+   :caption: The assimilation toolkit
 
    The-letkf-utils-module
    The-observation-operator-module
