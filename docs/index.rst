@@ -44,6 +44,7 @@ This manual assumes that you are familiar with the basics of setting up and runn
 .. toctree::
    :maxdepth: 3   
    :caption: Postprocessing
+
    Combining-ensemble-runs
    Plotting-with-GCPy
 
