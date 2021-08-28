@@ -1,6 +1,11 @@
 Deploying the ensemble
 ==========
 
+The Ensemble configuration file
+-------------
+
+TKTKTK
+
 The Setup Ensemble script
 -------------
 
