@@ -755,6 +755,12 @@ fi
 #Modify HEMCO_Config so that GEOS-Chem will read in assimilated scaling factors.
 cd ${ASSIM_PATH}/core
 bash prepare_template_hemco_config.sh
+printf "${thinline}"
+
+#Create parallelization list
+printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
+python prep_par.py
+printf "Done!\n"
 
 printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."
 printf "\n     Modify all configuration files BEFORE creating spinup or ensemble run directories."
