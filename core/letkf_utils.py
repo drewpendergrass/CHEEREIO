@@ -27,7 +27,8 @@ def getLETKFConfig():
 #emissions scaling factor netCDFs. After initialization it contains the necessary data
 #and can output it in useful ways to other functions in the LETKF procedure.
 class GC_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,computeStateVec = False):
+	def __init__(self, path_to_rundir,timestamp,ensnum,computeStateVec = False):
+		self.latinds,self.loninds = tx.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
 		self.restart_ds = xr.load_dataset(self.filename)
@@ -168,9 +169,9 @@ class Assimilator(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp)
+				self.nature = GC_Translator(directory, timestamp, ens)
 			else: 
-				self.gt[ens] = GC_Translator(directory, timestamp, True)
+				self.gt[ens] = GC_Translator(directory, timestamp, ens, True)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		error_multipliers_or_matrices, ObsOperatorClass_list,NatureHelperClass,self.inflation = getLETKFConfig()
