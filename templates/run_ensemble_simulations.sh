@@ -68,13 +68,15 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
     fi
     sleep 1
   done
-  #If this is ensemble member 1, execute assimilation stuff. Later this will split up
-  #and parallelize across all ensemble instances, and be followed by concatenation step
-  if [ $x -eq 1 ]; then
-    bash assimilate.sh
-  fi
+  #NEED TO IMPLEMENT PAR ASSIM
+  #But use GNU parallel to submit parallel sruns
+  parallel -N 1 "srun -n1 -N1 --exclusive bash par_assim.sh ${x} {1}" ::: {1..${SLURM_CPUS_PER_TASK}}
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
+    #THIS IS NOT YET IMPLEMENTED: If this is ensemble member 1, check if assimilation is complete.
+    if [ $x -eq 1 ]; then
+      bash check_for_assimilation_complete.sh
+    fi
     sleep 1
   done
   #If there is a problem, the KILL_ENS file will be produced. Break then

@@ -4,6 +4,8 @@ import sys
 import time
 
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
+ensnum = int(sys.argv[2])
+corenum = int(sys.argv[3])
 
 dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
