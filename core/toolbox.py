@@ -12,4 +12,5 @@ def getLatLonList(ensnum,corenum):
 		gridsplit = json.load(f)
 	return [gridsplit[f'{ensnum}'][f'{corenum}']['lat'],gridsplit[f'{ensnum}'][f'{corenum}']['lon']]
 
-def getIndsOfInterest
+def getIndsOfInterest():
+	pass
