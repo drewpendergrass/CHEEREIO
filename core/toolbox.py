@@ -12,5 +12,19 @@ def getLatLonList(ensnum,corenum):
 		gridsplit = json.load(f)
 	return [gridsplit[f'{ensnum}'][f'{corenum}']['lat'],gridsplit[f'{ensnum}'][f'{corenum}']['lon']]
 
-def getIndsOfInterest():
+#Get the lat lon values for the grid from the JSON
+def getLatLonVals(data=None):
+	if not data:
+		data = getSpeciesConfig()
+	with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
+		ll_data = json.load(f)
+	return [ll_data['lat'],ll_data['lon']]
+
+#Get index values within the localization range
+def getIndsOfInterest(latind,lonind):
+	data = getSpeciesConfig()
+	lat,lon = getLatLonVals()
+	latval = lat[latind]
+	lonval = lon[lonind]
+
 	pass

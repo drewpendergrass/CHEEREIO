@@ -19,6 +19,13 @@ lat = np.array(rst_dataset['lat'])
 lat_inds = np.arange(0,len(lat))
 lon = np.array(rst_dataset['lon'])
 lon_inds = np.arange(0,len(lon))
+
+#Save out lat/lon for quick reading later
+latlon_dict = {'lat':lat.tolist(), 'lon':lon.tolist()}
+out_file = open(f"{path_to_sim}scratch/latlon_vals.json", "w")
+json.dump(latlon_dict, out_file, indent = 6)
+out_file.close()
+
 lat_full_list = np.repeat(lat_inds,len(lon))
 lon_full_list = np.tile(lon_inds,len(lat))
 total_cells = len(lat)*len(lon)

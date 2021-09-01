@@ -348,10 +348,7 @@
 	"comment009" : "**********************************************************************************",
 	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
 	"comment011" : "**********************************************************************************",
-	"LOCALIZATION_RADII_km" : [
-		"1000",
-		"1000"
-	],
+	"LOCALIZATION_RADIUS_km" : "1000",
 	"ALLOW_ADAPTIVE_LOCALIZATION": "false",
 	"NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER" : "5.0",
 	"ENABLE_4D_LETKF" : "false",
