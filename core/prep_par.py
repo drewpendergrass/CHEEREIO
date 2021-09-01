@@ -52,8 +52,8 @@ for i in range(len(subdir_numbers)):
 	subarray_endpoints = np.insert(np.cumsum(subcolumn_count_array),0,0)
 	subdict = {}
 	for j in range(ncore):
-		startpoint = int(subarray_endpoints[i])
-		endpoint = int(subarray_endpoints[i+1])
+		startpoint = int(subarray_endpoints[j])
+		endpoint = int(subarray_endpoints[j+1])
 		subdict[j+1] = {'lat':latlist[startpoint:endpoint].tolist(),'lon':lonlist[startpoint:endpoint].tolist()}
 	dict_to_save[num] = subdict
 
