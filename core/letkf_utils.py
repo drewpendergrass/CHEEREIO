@@ -214,17 +214,18 @@ class Assimilator(object):
 			if NatureHelperClass is None:
 				raise ValueError('Need a Nature Helper class defined if assimilating simulated nature run.')
 			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,error_multipliers_or_matrices)
-			self.ObsOp = {}
-			for i in range(len(self.observed_species)):
-				spec = self.observed_species[i]
-				ObsOp_instance = self.NatureHelperInstance.makeObsOp(spec,ObsOperatorClass_list[i])
-				self.ObsOp[spec] = ObsOp_instance
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):
 		return self.gt[1].getLon()
 	def getLev(self):
 		return self.gt[1].getLev()
+	def makeObsOps(self,latind=None,lonind=None):
+		self.ObsOp = {}
+		for i in range(len(self.observed_species)):
+			spec = self.observed_species[i]
+			ObsOp_instance = self.NatureHelperInstance.makeObsOp(spec,ObsOperatorClass_list[i],latind,lonind)
+			self.ObsOp[spec] = ObsOp_instance
 	def combineEnsemble(self,latind=None,lonind=None):
 		statevecs = []
 		for num in self.ensemble_numbers:
@@ -292,6 +293,7 @@ class Assimilator(object):
 		self.analysisEnsemble = np.transpose(np.transpose(analysis_pert)+np.transpose(self.xbar_background))
 	def LETKF(self):
 		for latval,lonval in zip(self.latinds,self.loninds):
+			self.makeObsOps(latval,lonval)
 			self.prepareMeansAndPerts(latval,lonval)
 			self.makeR()
 			self.makeC()
