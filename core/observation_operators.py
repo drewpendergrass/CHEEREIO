@@ -19,7 +19,7 @@ class ObservationInfo(object):
 				self.errs = dict(zip(species_to_assimilate, cov))
 		else:
 			self.errs = dict(zip(species_to_assimilate, nature_err_covariances))
-	def getObsVal(self,species):
+	def getObsVal(self,species,latind=None,lonind=None):
 		return self.values[species]
 	def getObsErr(self,species):
 		return self.errs[species]
@@ -69,7 +69,7 @@ class NatureHelper(object):
 		return self.obs_info.getObsVal(species)
 	def getNatureErr(self,species):
 		return self.obs_info.getObsErr(species)
-	def makeObsOp(self,species,ObsOperatorClass):
+	def makeObsOp(self,species,ObsOperatorClass,latind=None,lonind=None):
 		nature_vals = self.getNatureVals(species)
 		nature_err_covariance = self.getNatureErr(species)
 		return ObsOperatorClass(nature_vals,nature_err_covariance)
