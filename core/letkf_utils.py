@@ -99,10 +99,37 @@ class GC_Translator(object):
 			statevec_components.append(self.getEmisSF(spec_emis).flatten())
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
-	def getStateVector(self):
+	def getLocalizedStateVectorIndices(self,latind,lonind):
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
+		levcount = len(self.getLev())
+		latcount = len(self.getLat())
+		loncount = len(self.getLon())
+		totalcount = levcount*latcount*loncount
+		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
+		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
+		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
+		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
+		species_config = tx.getSpeciesConfig()
+		conccount = len(species_config['STATE_VECTOR_CONC'])
+		emcount = len(species_config['STATE_VECTOR_CONC'])
+		ind_collector = []
+		cur_offset = 0
+		for i in range(conccount):
+			ind_collector.append((dummywhere_flat+cur_offset))
+			cur_offset+=totalcount
+		for i in range(emcount)
+			ind_collector.append((dummy2dwhere_flat+cur_offset))
+			cur_offset+=(latcount*loncount)
+		statevecinds = np.concatenate(ind_collector)
+		return statevecinds
+	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
 			self.buildStateVector()
-		return self.statevec
+		if latind: #User supplied ind
+			statevecinds = getLocalizedStateVectorIndices(latind,lonind)
+			return self.statevec[statevecinds]
+		else: #Return the whole vector
+			return self.statevec
 	#Randomize the restart for purposes of testing. Perturbation is 1/2 of range of percent change selected from a uniform distribution.
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
@@ -156,7 +183,10 @@ class GC_Translator(object):
 #That restart will be overwritten in place (name not changed) so next run starts from the assimilation state vector.
 #Emissions scaling factors are most recent available (one assimilation timestep ago). New values will be appended to netCDF. 
 class Assimilator(object):
-	def __init__(self,timestamp):
+	def __init__(self,timestamp,ensnum,corenum):
+		self.ensnum = ensnum
+		self.corenum = corenum
+		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum)
 		spc_config = tx.getSpeciesConfig()
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
@@ -259,14 +289,15 @@ class Assimilator(object):
 		analysis_pert = self.Xpert_background @ self.WAnalysis
 		self.analysisEnsemble = np.transpose(np.transpose(analysis_pert)+np.transpose(self.xbar_background))
 	def LETKF(self):
-		self.prepareMeansAndPerts()
-		self.makeR()
-		self.makeC()
-		self.makePtildeAnalysis()
-		self.makeWAnalysis()
-		self.makeWbarAnalysis()
-		self.adjWAnalysis()
-		self.makeAnalysisCombinedEnsemble()
+		for latval,lonval in zip(self.latinds,self.loninds):
+			self.prepareMeansAndPerts()
+			self.makeR()
+			self.makeC()
+			self.makePtildeAnalysis()
+			self.makeWAnalysis()
+			self.makeWbarAnalysis()
+			self.adjWAnalysis()
+			self.makeAnalysisCombinedEnsemble()
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
