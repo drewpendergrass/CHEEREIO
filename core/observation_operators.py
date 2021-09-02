@@ -1,5 +1,6 @@
 import numpy as np
 import xarray as xr
+import toolbox as tx
 from scipy.linalg import block_diag
 
 #TODO: CHECK IF ERROR COVARIANCE CALCULATION IS REASONABLE
@@ -9,9 +10,12 @@ from scipy.linalg import block_diag
 #Basic constructor takes a list of species names, a list of 1D observation NumPy arrays, and 2D covariance NumPy arrays
 #and pairs them.
 #Class method also can produce diagonal covariance matrices if nature_err_covariances is a 1D numpy array containing percent errors
+#Automatically subsets down according to lat and lon values.
 class ObservationInfo(object):
-	def __init__(self, species_to_assimilate, nature_vals, nature_err_covariances):
+	def __init__(self, species_to_assimilate, nature_vals, nature_err_covariances,natureval_lats,natureval_lons):
 		self.values = dict(zip(species_to_assimilate, nature_vals))
+		self.lats = dict(zip(species_to_assimilate,natureval_lats))
+		self.lons = dict(zip(species_to_assimilate,natureval_lons))
 		if type(nature_err_covariances) is np.ndarray:
 			cov = []
 			for i, nval in enumerate(nature_vals):
@@ -20,9 +24,25 @@ class ObservationInfo(object):
 		else:
 			self.errs = dict(zip(species_to_assimilate, nature_err_covariances))
 	def getObsVal(self,species,latind=None,lonind=None):
-		return self.values[species]
-	def getObsErr(self,species):
-		return self.errs[species]
+		if latind:
+			inds = self.getIndsOfInterest(species,latind,lonind)
+			return self.values[species][inds]
+		else:
+			return self.values[species]
+	def getObsErr(self,species,latind=None,lonind=None):
+		if latind:
+			inds = self.getIndsOfInterest(species,latind,lonind)
+			return self.errs[species][inds,inds]
+		else:
+			return self.errs[species]
+	def getIndsOfInterest(self,species,latind,lonind)
+		data = tx.getSpeciesConfig()
+		loc_rad = float(data['LOCALIZATION_RADIUS_km'])
+		gridlat,gridlon = tx.getLatLonVals(data)
+		latval = gridlat[latind]
+		lonval = gridlon[lonind]
+		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats[species],self.lons[species])])
+		return np.where(distvec<=loc_rad)[0]
 
 
 #Parent class for all observation operators.
@@ -34,7 +54,7 @@ class ObsOperator(object):
 	def __init__(self, nature_vals, nature_err_covariance):
 		self.nature_vals = nature_vals
 		self.nature_err_covariance = nature_err_covariance
-	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals
+	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals along with 1d vectors of lat and longitude indices to support localization.
 	def H(self, conc3D):
 		raise NotImplementedError
 	def obsMeanAndPert(self, conc4D,latval=None,lonval=None):
@@ -103,12 +123,17 @@ class SumNatureHelper(NatureHelper):
 #Returns a 1D array of the flattened 2D field.
 #Takes numpy  array for species in question containing 3D concentrations.
 def column_sum(DA_3d, bias=None, err=None):
-	csum = np.sum(DA_3d,axis = 2)
+	csum = np.sum(DA_3d,axis = 0)
 	if (bias is None) or (err is None):
 		return csum.flatten()
 	else:
 		csum += np.random.normal(bias, err, np.shape(csum))
 		return csum.flatten()
 
-def surface_obs(DA_3d, loc_latlon, bias=None, err=None):
-	return None
+def surface_obs(DA_3d, latinds,loninds, bias=None, err=None):
+	obs_vec = DA_3d[0,latinds,loninds]
+	if (bias is None) or (err is None):
+		return obs_vec
+	else:
+		obs_vec += np.random.normal(bias, err, np.shape(obs_vec))
+		return obs_vec
