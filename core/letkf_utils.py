@@ -43,9 +43,12 @@ class GC_Translator(object):
 			self.statevec = None
 			self.statevec_lengths = None #Until state vector is initialized this variable is None
 	#Since only one timestamp, returns in format lev,lat,lon
-	def getSpecies3Dconc(self, species):
-		da = self.restart_ds[f'SpeciesRst_{species}']
-		return np.array(da).squeeze()
+	def getSpecies3Dconc(self, species,latind=None,lonind=None):
+		da = np.array(self.restart_ds[f'SpeciesRst_{species}']).squeeze()
+		if latind:
+			notsurr_latinds, notsurr_loninds = tx.getIndsOfInterest(latind,lonind,negate=True)
+			da[:,notsurr_latinds,notsurr_loninds]=np.nan #NaN out stuff outside region of interest
+		return da
 	def setSpecies3Dconc(self, species, conc3d):
 		baseshape = np.shape(conc3d)
 		conc4d = conc3d.reshape(np.concatenate([np.array([1]),baseshape]))
@@ -212,47 +215,45 @@ class Assimilator(object):
 				raise ValueError('Need a Nature Helper class defined if assimilating simulated nature run.')
 			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,error_multipliers_or_matrices)
 			self.ObsOp = {}
-			self.SimObsConc4D = {}
 			for i in range(len(self.observed_species)):
 				spec = self.observed_species[i]
 				ObsOp_instance = self.NatureHelperInstance.makeObsOp(spec,ObsOperatorClass_list[i])
 				self.ObsOp[spec] = ObsOp_instance
-				self.SimObsConc4D[spec] = self.combineEnsembleForSpecies(spec)
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):
 		return self.gt[1].getLon()
 	def getLev(self):
 		return self.gt[1].getLev()
-	def combineEnsemble(self):
+	def combineEnsemble(self,latind=None,lonind=None):
 		statevecs = []
 		for num in self.ensemble_numbers:
-			statevecs.append(self.gt[num].getStateVector())
+			statevecs.append(self.gt[num].getStateVector(latind,lonind))
 		statevec_mat = np.stack(statevecs,axis = -1) #Combine along second axis
 		return statevec_mat
-	def ensMeanAndPert(self):
-		statevecs = self.combineEnsemble()
+	def ensMeanAndPert(self,latval,lonval):
+		statevecs = self.combineEnsemble(latval,lonval)
 		state_mean = np.expand_dims(np.mean(statevecs,axis = 1),axis=1) #calculate ensemble mean
 		bigX = np.transpose(np.transpose(statevecs)-np.transpose(state_mean))
 		return [state_mean,bigX]
-	def ensObsMeanPertDiff(self):
+	def ensObsMeanPertDiff(self,latval,lonval):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
 		for species in self.observed_species:
-			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(species)
+			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(species,latval,lonval)
 			obsmean = obsmean.squeeze()
 			obsmeans.append(obsmean)
 			obsperts.append(obspert)
-			obsdiffs.append(self.obsDiffForSpecies(species,obsmean))
+			obsdiffs.append(self.obsDiffForSpecies(species,obsmean,latval,lonval))
 		full_obsmeans = np.concatenate(obsmeans)
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
 		return [full_obsmeans,full_obsperts,full_obsdiffs]
-	def combineEnsembleForSpecies(self,species):
+	def combineEnsembleForSpecies(self,species,latval,lonval):
 		conc3D = []
 		for i in self.ensemble_numbers:
-			conc3D.append(self.gt[i].getSpecies3Dconc(species))
+			conc3D.append(self.gt[i].getSpecies3Dconc(species,latval,lonval))
 		conc4D = np.stack(conc3D,axis = -1) #Combine along fourth axis
 		return conc4D
 	def ensMeanAndPertForSpecies(self, species):
@@ -260,13 +261,14 @@ class Assimilator(object):
 		ens_mean = np.mean(conc4D,axis = 3) #calculate ensemble mean
 		bigX = conc4D-ens_mean
 		return [ens_mean,bigX]
-	def ensObsMeanAndPertForSpecies(self, species):
-		return self.ObsOp[species].obsMeanAndPert(self.SimObsConc4D[species])
-	def obsDiffForSpecies(self,species,ensvec):
-		return self.ObsOp[species].obsDiff(ensvec)
-	def prepareMeansAndPerts(self):
-		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff()
-		self.xbar_background, self.Xpert_background = self.ensMeanAndPert()
+	def ensObsMeanAndPertForSpecies(self, species,latval,lonval):
+		spec_4D = self.combineEnsembleForSpecies(species,latval,lonval)
+		return self.ObsOp[species].obsMeanAndPert(spec_4D,latval,lonval)
+	def obsDiffForSpecies(self,species,ensvec,latval,lonval):
+		return self.ObsOp[species].obsDiff(ensvec,latval,lonval)
+	def prepareMeansAndPerts(self,latval,lonval):
+		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
+		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
 	def makeR(self):
 		self.R = self.NatureHelperInstance.makeR()
 	def makeC(self):
@@ -290,7 +292,7 @@ class Assimilator(object):
 		self.analysisEnsemble = np.transpose(np.transpose(analysis_pert)+np.transpose(self.xbar_background))
 	def LETKF(self):
 		for latval,lonval in zip(self.latinds,self.loninds):
-			self.prepareMeansAndPerts()
+			self.prepareMeansAndPerts(latval,lonval)
 			self.makeR()
 			self.makeC()
 			self.makePtildeAnalysis()

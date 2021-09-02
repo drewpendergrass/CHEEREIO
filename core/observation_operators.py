@@ -37,14 +37,14 @@ class ObsOperator(object):
 	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals
 	def H(self, conc3D):
 		raise NotImplementedError
-	def obsMeanAndPert(self, conc4D):
+	def obsMeanAndPert(self, conc4D,latval=None,lonval=None):
 		obsEns = np.zeros([len(self.nature_vals),np.shape(conc4D)[3]]) #Observation ensemble 
 		for i in range(np.shape(conc4D)[3]):
 			obsEns[:,i] = self.H(conc4D[:,:,:,i])
 		obsMean = np.expand_dims(np.mean(obsEns,axis = 1),axis=1)
 		obsPert = np.transpose(np.transpose(obsEns)-np.transpose(obsMean))
 		return [obsMean,obsPert]
-	def obsDiff(self,vals):
+	def obsDiff(self,vals,latval=None,lonval=None):
 		return vals-self.nature_vals
 
 

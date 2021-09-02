@@ -35,7 +35,8 @@ def deg2rad(deg):
 	return deg * (np.pi/180)
 
 #Get index values within the localization range
-def getIndsOfInterest(latind,lonind):
+#If negate is true, then get index values outside the localization range
+def getIndsOfInterest(latind,lonind,negate=False):
 	data = getSpeciesConfig()
 	lat,lon = getLatLonVals(data)
 	latval = lat[latind]
@@ -45,5 +46,8 @@ def getIndsOfInterest(latind,lonind):
 	for i in range(len(lon)):
 		dists_col = np.array([calcDist_km(latval,lonval,a,lon[i]) for a in lat])
 		distgrid[:,i] = dists_col
-	valid_inds = np.where(distgrid<=loc_rad)
+	if negate:
+		valid_inds = np.where(distgrid>loc_rad)
+	else:
+		valid_inds = np.where(distgrid<=loc_rad)
 	return valid_inds
