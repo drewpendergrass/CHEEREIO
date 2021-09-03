@@ -177,10 +177,11 @@ class HEMCO_Translator():
 	#The user is expected to modify
 	def addScalingFactorNumbers(self):
 		species_to_add = self.spc_config["CONTROL_VECTOR_EMIS"].values()
+		specnames = self.spc_config["CONTROL_VECTOR_EMIS"].keys()
 		self.species_scalid = {} #Dictionary with species emission and scale factor id
 		specieskeyval = 700
-		for species in species_to_add:
-			print(f'Appending scaling factor IDs for {species} in HEMCO_Config.')
+		for species,specname in zip(species_to_add,specnames):
+			print(f'Appending scaling factor IDs for {specname} in HEMCO_Config.')
 			linenums_to_modify = self.speciesloc[species]
 			for num in linenums_to_modify:
 				line = self.lines[num]
@@ -197,7 +198,7 @@ class HEMCO_Translator():
 					newline_scalid_section = line_scalid_section.replace(f'{scalid}',f'{scalid}/{specieskeyval}')
 				newline = pre_scalid+newline_scalid_section+post_scalid
 				self.lines[num] = newline #Overwrite line.
-			self.species_scalid[species] = specieskeyval #Add scalid to dictionary
+			self.species_scalid[specname] = specieskeyval #Add scalid to dictionary
 			specieskeyval+=1 #Increment
 	def addScalingFactorFile(self):
 		#Get range of years from settings.
