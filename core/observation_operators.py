@@ -142,7 +142,7 @@ class NatureHelper(object):
 	def makeR(self,latind=None,lonind=None):
 		errmats = []
 		for species in self.species_to_assimilate:
-			errmats.append(self.getNatureErr(latind=None,lonind=None,species))
+			errmats.append(self.getNatureErr(species,latind,lonind))
 		R = block_diag(*errmats)
 		return R
 

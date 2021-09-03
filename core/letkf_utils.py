@@ -267,8 +267,8 @@ class Assimilator(object):
 	def prepareMeansAndPerts(self,latval,lonval):
 		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
-	def makeR(self):
-		self.R = self.NatureHelperInstance.makeR()
+	def makeR(self,latval=None,lonval=None):
+		self.R = self.NatureHelperInstance.makeR(latval,lonval)
 	def makeC(self):
 		self.C = np.transpose(self.Ypert_background) @ la.inv(self.R)
 	def makePtildeAnalysis(self):
@@ -292,7 +292,7 @@ class Assimilator(object):
 		for latval,lonval in zip(self.latinds,self.loninds):
 			self.makeObsOps(latval,lonval)
 			self.prepareMeansAndPerts(latval,lonval)
-			self.makeR()
+			self.makeR(latval,lonval)
 			self.makeC()
 			self.makePtildeAnalysis()
 			self.makeWAnalysis()
