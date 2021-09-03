@@ -35,7 +35,7 @@ class GC_Translator(object):
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
-			name = file.split('/')[-1].split('_')[0]
+			name = ''.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name] = xr.load_dataset(file)
 		if computeStateVec:
 			self.buildStateVector()
@@ -95,7 +95,7 @@ class GC_Translator(object):
 		statevec_components = []
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.getSpecies3Dconc(spec_conc).flatten())
-		for spec_emis in species_config['CONTROL_VECTOR_EMIS']:
+		for spec_emis in species_config['CONTROL_VECTOR_EMIS'].keys():
 			statevec_components.append(self.getEmisSF(spec_emis).flatten())
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
@@ -148,7 +148,7 @@ class GC_Translator(object):
 	def reconstructArrays(self,analysis_vector):
 		species_config = tx.getSpeciesConfig()
 		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
-		emis_shape = np.shape(self.getEmisSF(species_config['CONTROL_VECTOR_EMIS'][0]))
+		emis_shape = np.shape(self.getEmisSF(species_config['CONTROL_VECTOR_EMIS'].keys()[0]))
 		counter =  0
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			if spec_conc in species_config['CONTROL_VECTOR_CONC']: #Only overwrite if in the control vector; otherwise just increment.
@@ -158,7 +158,7 @@ class GC_Translator(object):
 				analysis_3d = np.reshape(analysis_subset,restart_shape) #Unflattens with 'C' order in python
 				self.setSpecies3Dconc(spec_conc,analysis_3d) #Overwrite.
 			counter+=1
-		for spec_emis in species_config['CONTROL_VECTOR_EMIS']: #Emissions scaling factors are all in the control vector
+		for spec_emis in species_config['CONTROL_VECTOR_EMIS'].keys(): #Emissions scaling factors are all in the control vector
 			index_start = np.sum(self.statevec_lengths[0:counter])
 			index_end = np.sum(self.statevec_lengths[0:(counter+1)])
 			analysis_subset = analysis_vector[index_start:index_end]
@@ -170,7 +170,7 @@ class GC_Translator(object):
 		self.restart_ds.to_netcdf(self.filename)
 	def saveEmissions(self):
 		for file in self.emis_sf_filenames:
-			name = file.split('/')[-1].split('_')[0]
+			name = ''.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name].to_netcdf(file)
 
 

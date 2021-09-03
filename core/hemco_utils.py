@@ -173,9 +173,10 @@ class HEMCO_Translator():
 		#Remove duplicates
 		for species in list(self.speciesloc.keys()):
 			self.speciesloc[species] = list(set(self.speciesloc[species]))
-	#Add ScalIDs to lines that we would like to scale.
+	#Add ScalIDs to lines that we would like to scale. Doesn't differentiate if multiple copies of the same species are present.
+	#The user is expected to modify
 	def addScalingFactorNumbers(self):
-		species_to_add = self.spc_config["CONTROL_VECTOR_EMIS"]
+		species_to_add = self.spc_config["CONTROL_VECTOR_EMIS"].values()
 		self.species_scalid = {} #Dictionary with species emission and scale factor id
 		specieskeyval = 700
 		for species in species_to_add:
