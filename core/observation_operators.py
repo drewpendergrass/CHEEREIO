@@ -74,7 +74,12 @@ class ObservationInfo(object):
 		else:
 			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats,self.lons)])
 		return np.where(distvec<=loc_rad)[0]
-
+	def getObsLatLon(self,latind=None,lonind=None,species=None):
+		latloninds = self.getIndsOfInterest(latind,lonind,species)
+		if species:
+			return [self.lats[species][latloninds],self.lons[species][latloninds]]
+		else:
+			return [self.lats[latloninds],self.lons[latloninds]]
 
 #Parent class for all observation operators.
 #Requires the full ensemble of concentrations, a 1D vector of "nature values",
@@ -85,17 +90,21 @@ class ObsOperator(object):
 	def __init__(self, nature_vals, nature_err_covariance,nature_lats,nature_lons):
 		self.obsinfo = ObservationInfo(nature_vals,nature_err_covariance,nature_lats,nature_lons)
 	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals along with 1d vectors of lat and longitude indices to support localization.
-	def H(self, conc3D):
+	def H(self, conc3D,latinds=None,loninds=None):
 		raise NotImplementedError
 	def obsMeanAndPert(self, conc4D,latval=None,lonval=None):
-		obsEns = np.zeros([len(self.nature_vals),np.shape(conc4D)[3]]) #Observation ensemble 
+		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
-			obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i])
+			if latval:
+				latinds,loninds = tx.getIndsOfInterest(latval,lonval)
+				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],latinds,loninds)
+			else:
+				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i])
 		obsMean = np.expand_dims(np.mean(obsEns,axis = 1),axis=1)
 		obsPert = np.transpose(np.transpose(obsEns)-np.transpose(obsMean))
 		return [obsMean,obsPert]
 	def obsDiff(self,vals,latval=None,lonval=None):
-		return vals-self.nature_vals
+		return vals-self.obsinfo.getObsVal(latval,lonval)
 
 
 #If we are doing an experiment where we model 'nature', this parent class wraps around
@@ -108,25 +117,32 @@ class NatureHelper(object):
 		self.gt = gt
 		self.species_to_assimilate = species_to_assimilate
 		nature_vecs = []
+		nature_lats = []
+		nature_lons = []
 		for species in self.species_to_assimilate:
 			conc3D = self.gt.getSpecies3Dconc(species)
 			nature_vals,nature_lat,nature_lon = self.H(conc3D)
 			nature_vecs.append(nature_vals)
-		self.obs_info = ObservationInfo(self.species_to_assimilate,nature_vecs,error_multipliers_or_matrices)
-	def H(self, conc3D):
+			nature_lats.append(nature_lat)
+			nature_lons.append(nature_lon)
+		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate)
+	def H(self, conc3D,latinds=None,loninds=None):
 		raise NotImplementedError
-	def getNatureVals(self,species):
-		return self.obs_info.getObsVal(species)
-	def getNatureErr(self,species):
-		return self.obs_info.getObsErr(species)
+	def getNatureVals(self,species,latind=None,lonind=None):
+		return self.obs_info.getObsVal(latind,lonind,species)
+	def getNatureErr(self,species,latind=None,lonind=None):
+		return self.obs_info.getObsErr(latind,lonind,species)
+	def getNatureLatLon(self,species,latind=None,lonind=None):
+		return self.obs_info.getObsLatLon(latind,lonind,species)
 	def makeObsOp(self,species,ObsOperatorClass,latind=None,lonind=None):
-		nature_vals = self.getNatureVals(species)
-		nature_err_covariance = self.getNatureErr(species)
-		return ObsOperatorClass(nature_vals,nature_err_covariance)
-	def makeR(self):
+		nature_vals = self.getNatureVals(species,latind,lonind)
+		nature_err_covariance = self.getNatureErr(species,latind,lonind)
+		nature_lats,nature_lons = self.getObsLatLon(species,latind,lonind)
+		return ObsOperatorClass(nature_vals,nature_err_covariance,)
+	def makeR(self,latind=None,lonind=None):
 		errmats = []
 		for species in self.species_to_assimilate:
-			errmats.append(self.getNatureErr(species))
+			errmats.append(self.getNatureErr(latind=None,lonind=None,species))
 		R = block_diag(*errmats)
 		return R
 
@@ -136,12 +152,12 @@ class NatureHelper(object):
 # ----------------------------------------------------------------- #
 
 class SumOperator(ObsOperator):
-	def H(self,conc3D):
-		return column_sum(conc3D)
+	def H(self,conc3D,latinds=None,loninds=None):
+		return column_sum(conc3D,latinds,loninds)
 
 class SumNatureHelper(NatureHelper):
-	def H(self,conc3D):
-		return column_sum(conc3D)
+	def H(self,conc3D,latinds=None,loninds=None):
+		return column_sum(conc3D,latinds,loninds)
 
 # ----------------------------------------------------------------- #
 # ------------------READY-MADE FUNCTIONS FOR H--------------------- #
@@ -152,18 +168,24 @@ class SumNatureHelper(NatureHelper):
 #If bias and/or error are None then the simple sum is returned.
 #Returns a 1D array of the flattened 2D field.
 #Takes numpy  array for species in question containing 3D concentrations.
-def column_sum(DA_3d, bias=None, err=None):
+def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None):
 	csum = np.sum(DA_3d,axis = 0)
+	latvals,lonvals = tx.getLatLonVals()
+	if latinds:
+		csum = csum[latinds,loninds]
+		latvals = latvals[latinds]
+		lonvals = lonvals[loninds]
 	if (bias is None) or (err is None):
-		return csum.flatten()
+		return [csum.flatten(),latvals,lonvals]
 	else:
 		csum += np.random.normal(bias, err, np.shape(csum))
-		return csum.flatten()
+		return [csum.flatten(),latvals,lonvals]
 
 def surface_obs(DA_3d, latinds,loninds, bias=None, err=None):
 	obs_vec = DA_3d[0,latinds,loninds]
+	latvals,lonvals = tx.getLatLonVals()
 	if (bias is None) or (err is None):
-		return obs_vec
+		return [obs_vec,latvals[latinds],lonvals[loninds]]
 	else:
 		obs_vec += np.random.normal(bias, err, np.shape(obs_vec))
-		return obs_vec
+		return [obs_vec,latvals[latinds],lonvals[loninds]]

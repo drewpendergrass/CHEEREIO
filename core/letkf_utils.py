@@ -43,11 +43,8 @@ class GC_Translator(object):
 			self.statevec = None
 			self.statevec_lengths = None #Until state vector is initialized this variable is None
 	#Since only one timestamp, returns in format lev,lat,lon
-	def getSpecies3Dconc(self, species,latind=None,lonind=None):
+	def getSpecies3Dconc(self, species):
 		da = np.array(self.restart_ds[f'SpeciesRst_{species}']).squeeze()
-		if latind:
-			notsurr_latinds, notsurr_loninds = tx.getIndsOfInterest(latind,lonind,negate=True)
-			da[:,notsurr_latinds,notsurr_loninds]=np.nan #NaN out stuff outside region of interest
 		return da
 	def setSpecies3Dconc(self, species, conc3d):
 		baseshape = np.shape(conc3d)
@@ -251,10 +248,10 @@ class Assimilator(object):
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
 		return [full_obsmeans,full_obsperts,full_obsdiffs]
-	def combineEnsembleForSpecies(self,species,latval,lonval):
+	def combineEnsembleForSpecies(self,species):
 		conc3D = []
 		for i in self.ensemble_numbers:
-			conc3D.append(self.gt[i].getSpecies3Dconc(species,latval,lonval))
+			conc3D.append(self.gt[i].getSpecies3Dconc(species))
 		conc4D = np.stack(conc3D,axis = -1) #Combine along fourth axis
 		return conc4D
 	def ensMeanAndPertForSpecies(self, species):
@@ -263,7 +260,7 @@ class Assimilator(object):
 		bigX = conc4D-ens_mean
 		return [ens_mean,bigX]
 	def ensObsMeanAndPertForSpecies(self, species,latval,lonval):
-		spec_4D = self.combineEnsembleForSpecies(species,latval,lonval)
+		spec_4D = self.combineEnsembleForSpecies(species)
 		return self.ObsOp[species].obsMeanAndPert(spec_4D,latval,lonval)
 	def obsDiffForSpecies(self,species,ensvec,latval,lonval):
 		return self.ObsOp[species].obsDiff(ensvec,latval,lonval)
