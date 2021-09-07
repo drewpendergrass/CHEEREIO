@@ -122,6 +122,33 @@ class GC_Translator(object):
 			cur_offset+=(latcount*loncount)
 		statevecinds = np.concatenate(ind_collector)
 		return statevecinds
+	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
+		levcount = len(self.getLev())
+		latcount = len(self.getLat())
+		loncount = len(self.getLon())
+		totalcount = levcount*latcount*loncount
+		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
+		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
+		dummywhere_flat_column = dummy3d[:,latind,lonind].flatten()
+		dummywhere_match = np.where(np.in1d(dummywhere_flat,dummywhere_flat_column))[0]
+		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
+		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
+		dummy2dwhere_flat_column = dummy2d[latind,lonind]
+		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
+		species_config = tx.getSpeciesConfig()
+		conccount = len(species_config['STATE_VECTOR_CONC'])
+		emcount = len(species_config['STATE_VECTOR_CONC'])
+		ind_collector = []
+		cur_offset = 0
+		for i in range(conccount):
+			ind_collector.append((dummy2dwhere_match+cur_offset))
+			cur_offset+=len(dummywhere_flat_column)
+		for i in range(emcount)
+			ind_collector.append((dummy2dwhere_match+cur_offset))
+			cur_offset+=len(dummy2dwhere_flat_column)
+		localizedstatevecinds = np.concatenate(ind_collector)
+		return localizedstatevecinds
 	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
 			self.buildStateVector()
@@ -189,6 +216,8 @@ class Assimilator(object):
 		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum)
 		spc_config = tx.getSpeciesConfig()
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
+		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
+		self.parfilename = f'ens_{ensnum}_core_{corenum}_time_{timestamp}'
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
 		dirnames = [d.split('/')[-2] for d in subdirs]
@@ -288,6 +317,10 @@ class Assimilator(object):
 	def makeAnalysisCombinedEnsemble(self):
 		analysis_pert = self.Xpert_background @ self.WAnalysis
 		self.analysisEnsemble = np.transpose(np.transpose(analysis_pert)+np.transpose(self.xbar_background))
+	def saveColumn(self,latval,lonval):
+		colinds = self.gt[1].getColumnIndicesFromLocalizedStateVector(latval,lonval)
+		analysisSubset = self.analysisEnsemble[colinds,:]
+		np.save(f'{self.path_to_scratch}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
 	def LETKF(self):
 		for latval,lonval in zip(self.latinds,self.loninds):
 			self.makeObsOps(latval,lonval)
@@ -299,6 +332,7 @@ class Assimilator(object):
 			self.makeWbarAnalysis()
 			self.adjWAnalysis()
 			self.makeAnalysisCombinedEnsemble()
+			self.saveColumn(latval,lonval)
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
