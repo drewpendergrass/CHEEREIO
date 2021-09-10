@@ -11,16 +11,16 @@ def getSpeciesConfig(testing=False):
 	return data
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
-def getLatLonList(ensnum,corenum):
-	data = getSpeciesConfig()
+def getLatLonList(ensnum,corenum,testing=False):
+	data = getSpeciesConfig(testing)
 	with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_par.json") as f:
 		gridsplit = json.load(f)
 	return [gridsplit[f'{ensnum}'][f'{corenum}']['lat'],gridsplit[f'{ensnum}'][f'{corenum}']['lon']]
 
 #Get the lat lon values for the grid from the JSON
-def getLatLonVals(data=None):
+def getLatLonVals(data=None,testing=False):
 	if not data:
-		data = getSpeciesConfig()
+		data = getSpeciesConfig(testing)
 	with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
 		ll_data = json.load(f)
 	return [ll_data['lat'],ll_data['lon']]
@@ -40,8 +40,8 @@ def deg2rad(deg):
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
-def getIndsOfInterest(latind,lonind,negate=False):
-	data = getSpeciesConfig()
+def getIndsOfInterest(latind,lonind,negate=False,testing=False):
+	data = getSpeciesConfig(testing)
 	lat,lon = getLatLonVals(data)
 	latval = lat[latind]
 	lonval = lon[lonind]
