@@ -3,8 +3,14 @@ import json
 import numpy as np
 import xarray as xr
 from glob import glob
+import sys 
 
-data = tx.getSpeciesConfig()
+cmdarg = str(sys.argv[1])
+if cmdarg=="TESTING":
+	data = tx.getSpeciesConfig(testing=True)
+else:
+	data = tx.getSpeciesConfig(testing=False)
+
 path_to_sim = f"{data['MY_PATH']}/{data['RUN_NAME']}/"
 subdirs = glob(f"{path_to_sim}ensemble_runs/*/")
 subdirs.remove(f"{path_to_sim}ensemble_runs/logs/")

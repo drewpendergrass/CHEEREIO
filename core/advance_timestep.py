@@ -1,7 +1,13 @@
 import toolbox as tx
 from datetime import datetime,timedelta
+import sys
 
-spc_config = tx.getSpeciesConfig()
+teststr = str(sys.argv[1])
+if teststr=="TESTING":
+	spc_config = tx.getSpeciesConfig(testing=True)
+else:
+	spc_config = tx.getSpeciesConfig(testing=False)
+
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}"
 ens_dir = f"{parent_dir}/ensemble_runs"
 ASSIM_TIME = spc_config['ASSIM_TIME']

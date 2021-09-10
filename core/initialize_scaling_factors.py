@@ -5,7 +5,11 @@ import toolbox as tx
 from glob import glob
 import sys
 
-spc_config = tx.getSpeciesConfig()
+teststr = str(sys.argv[1])
+if teststr=="TESTING":
+	spc_config = tx.getSpeciesConfig(testing=True)
+else:
+	spc_config = tx.getSpeciesConfig(testing=False)
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
@@ -13,7 +17,7 @@ dirnames = [d.split('/')[-2] for d in subdirs]
 subdir_numstring = [n.split('_')[-1] for n in dirnames]
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 
-timestamp = str(sys.argv[1]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
+timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 if len(spc_config["REGION"])==0:

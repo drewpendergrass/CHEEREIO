@@ -759,7 +759,7 @@ printf "${thinline}"
 
 #Create parallelization list
 printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
-python prep_par.py
+python prep_par.py "PRODUCTION"
 printf "Done!\n"
 
 printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."
@@ -934,7 +934,7 @@ if "$SetupEnsembleRuns"; then
 
     #Create initial scaling factors
     cd core
-    python initialize_scaling_factors.py "${START_DATE}"
+    python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}"
 
     source deactivate #Exit Conda environment
 

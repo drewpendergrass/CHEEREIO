@@ -3,7 +3,7 @@
 #This script updates input_geos in each ensemble member 
 #based on the time stored in the scratch folder.
 
-python advance_timestep.py
+python advance_timestep.py "PRODUCTION"
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"

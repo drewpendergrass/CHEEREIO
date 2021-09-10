@@ -1,9 +1,13 @@
 import json
 import numpy as np
 
-def getSpeciesConfig():
-	with open('../ens_config.json') as f:
-		data = json.load(f)
+def getSpeciesConfig(testing=False):
+	if testing:
+		with open('../testing/test_config.json') as f:
+			data = json.load(f)
+	else:
+		with open('../ens_config.json') as f:
+			data = json.load(f)
 	return data
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
