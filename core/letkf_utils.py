@@ -145,7 +145,7 @@ class GC_Translator(object):
 		for i in range(conccount):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
 			cur_offset+=len(dummywhere_flat_column)
-		for i in range(emcount)
+		for i in range(emcount):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
 			cur_offset+=len(dummy2dwhere_flat_column)
 		localizedstatevecinds = np.concatenate(ind_collector)
