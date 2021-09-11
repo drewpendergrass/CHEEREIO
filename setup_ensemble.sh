@@ -392,6 +392,7 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{Partition}:${Partition}:g" \
        -e "s:{Memory}:${Memory}:g" \
        -e "s:{WallTime}:${WallTime}:g" \
+       -e "s:{TESTBOOL}:false:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
 if [ SIMULATE_NATURE ]; then

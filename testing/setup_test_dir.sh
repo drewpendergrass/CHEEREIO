@@ -16,6 +16,13 @@ START_DATE=$(jq -r ".START_DATE" test_config.json)
 ASSIM_DATE=$(jq -r ".ASSIM_DATE" test_config.json)
 END_DATE=$(jq -r ".END_DATE" test_config.json)
 
+#Run script settings
+NumCores="$(jq -r ".NumCores" test_config.json)"
+Partition="$(jq -r ".Partition" test_config.json)"
+Memory="$(jq -r ".Memory" test_config.json)"
+WallTime="$(jq -r ".WallTime" test_config.json)"
+SpinupWallTime="$(jq -r ".SpinupWallTime" test_config.json)"
+
 # Ensemble settings
 nEnsemble=$(jq -r ".nEnsemble" test_config.json)
 pPERT="$(jq -r ".pPERT" test_config.json)"
@@ -31,6 +38,23 @@ mkdir ensemble_runs
 mkdir ensemble_runs/logs
 mkdir scratch
 echo "GC-CHEERIO uses this directory to save out intermediate data and track its internal state. Modifying contents of this folder can lead to model failure." > scratch/README
+
+cp ${ASSIM_PATH}/templates/run_ensemble_simulations.sh ensemble_runs/
+cp ${ASSIM_PATH}/templates/run_ens.sh ensemble_runs/
+
+sed -i -e "s:{RunName}:${RUN_NAME}:g" \
+       -e "s:{NumCores}:${NumCores}:g" \
+       -e "s:{Partition}:${Partition}:g" \
+       -e "s:{Memory}:${Memory}:g" \
+       -e "s:{WallTime}:${WallTime}:g" \
+       -e "s:{TESTBOOL}:true:g" \
+       -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
+
+if [ SIMULATE_NATURE ]; then
+  sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
+else
+  sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
+fi
 
 printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
 cd ${ASSIM_PATH}/core
