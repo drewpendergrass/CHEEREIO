@@ -21,6 +21,9 @@ nEnsemble=$(jq -r ".nEnsemble" test_config.json)
 pPERT="$(jq -r ".pPERT" test_config.json)"
 SIMULATE_NATURE=$(jq -r ".SIMULATE_NATURE" test_config.json) #if true, we make a run directory to simulate nature. This is for theoretical experimentation and testing
 
+  printf "${thickline}REMOVING EXISTING TESTING DIRECTORIES AND CREATING NEW ONES${thickline}"
+
+rm -rf ${MY_PATH}/${RUN_NAME}
 mkdir -p ${MY_PATH}/${RUN_NAME}
 cd ${MY_PATH}/${RUN_NAME}
 
