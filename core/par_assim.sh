@@ -25,9 +25,9 @@ py_exit_status=$?
 source deactivate #Exit Conda environment
 
 #A cleanup script will check if everyone is done
-printf "done" > ${MY_PATH}/${RUN_NAME}/scratch/complete_subprocess_${1}_${2}.CHECK
+printf "done" > ${MY_PATH}/${RUN_NAME}/scratch/complete_subprocess_${2}_${3}.CHECK
 
 #If python does not exit with exit code one, make file that will break loop
 if [ $py_exit_status != 0 ]; then
-	printf "Python assimilation script exited without code 0 in ensemble ${1} and core ${2} \n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS #This file's presence will break loop
+	printf "Python assimilation script exited without code 0 in ensemble ${2} and core ${3} \n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS #This file's presence will break loop
 fi

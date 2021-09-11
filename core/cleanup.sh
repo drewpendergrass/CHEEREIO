@@ -10,7 +10,7 @@ else
 	RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 fi
 
-bash update_current_time.sh #Advance timestep forward
+bash update_current_time.sh ${1} #Advance timestep forward
 if [ ! ${1} ]; then
 	bash update_input_geos.sh #Overwrite the input.geos files.
 fi

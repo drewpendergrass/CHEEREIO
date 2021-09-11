@@ -761,7 +761,7 @@ printf "${thinline}"
 #Create parallelization list
 printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
 source activate $(jq -r ".CondaEnv" ../ens_config.json) #Activate conda environment.
-python prep_par.py "PRODUCTION"
+python prep_par.py PRODUCTION
 source deactivate
 printf "Done!\n"
 
