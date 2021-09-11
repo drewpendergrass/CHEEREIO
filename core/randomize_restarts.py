@@ -11,16 +11,13 @@ timestamp = str(sys.argv[2]) #Restart timestamp; "20190101_0000"
 subdirs = glob(f"{path_to_ensemble}/*/")
 dirnames = [d.split('/')[-2] for d in subdirs]
 subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
+maxdir = max(subdir_numbers)
+meanval = (maxdir+1)/2
 for ens, directory in zip(subdir_numbers,subdirs):
-	if ens==0:
-		print(f'Randomizing nature directory (0).')
-		gt = lu.GC_Translator(directory, timestamp, False)
-		gt.randomizeRestart(perturbation=0,bias=0.25)
-		gt.saveRestart()
-	else:
-		print(f'Randomizing directory #{ens}.')
-		gt = lu.GC_Translator(directory, timestamp, False)
-		gt.randomizeRestart(perturbation=0.5,bias=0)
+	if ens!=0:
+		print(f'Perturbing directory #{ens}.')
+		gt = lu.GC_Translator(directory, timestamp, False, True)
+		gt.randomizeRestart(perturbation=0,bias=(ens/meanval))
 		gt.saveRestart()
 
 print('Restart randomization complete.')

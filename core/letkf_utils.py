@@ -5,8 +5,8 @@ import observation_operators as obs
 import scipy.linalg as la
 import toolbox as tx 
 
-def getLETKFConfig():
-	data = tx.getSpeciesConfig()
+def getLETKFConfig(testing=False):
+	data = tx.getSpeciesConfig(testing)
 	err_config = data['OBS_ERROR_MATRICES']
 	if '.npy' in err_config[0]: #Load error matrices from numpy files
 		raise NotImplementedError 
@@ -27,12 +27,13 @@ def getLETKFConfig():
 #emissions scaling factor netCDFs. After initialization it contains the necessary data
 #and can output it in useful ways to other functions in the LETKF procedure.
 class GC_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,computeStateVec = False):
+	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,testing=False):
 		#self.latinds,self.loninds = tx.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
 		self.restart_ds = xr.load_dataset(self.filename)
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
+		self.testing=testing
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
 			name = ''.join(file.split('/')[-1].split('_')[0:-1])
@@ -73,7 +74,7 @@ class GC_Translator(object):
 		timelist = self.getEmisTime()
 		last_time = timelist[-1]
 		new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
-		START_DATE = tx.getSpeciesConfig()['START_DATE']
+		START_DATE = tx.getSpeciesConfig(self.testing)['START_DATE']
 		orig_timestamp = f'{START_DATE[0:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}' #Start date from  JSON
 		#Create dataset with this timestep's scaling factors
 		ds = xr.Dataset(
@@ -91,7 +92,7 @@ class GC_Translator(object):
 		)
 		self.emis_ds_list[species] = xr.concat([self.emis_ds_list[species],ds],dim = 'time') #Concatenate
 	def buildStateVector(self):
-		species_config = tx.getSpeciesConfig()
+		species_config = tx.getSpeciesConfig(self.testing)
 		statevec_components = []
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.getSpecies3Dconc(spec_conc).flatten())
@@ -100,7 +101,7 @@ class GC_Translator(object):
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
 	def getLocalizedStateVectorIndices(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,self.testing)
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())
@@ -109,7 +110,7 @@ class GC_Translator(object):
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
-		species_config = tx.getSpeciesConfig()
+		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['STATE_VECTOR_CONC'])
 		ind_collector = []
@@ -123,7 +124,7 @@ class GC_Translator(object):
 		statevecinds = np.concatenate(ind_collector)
 		return statevecinds
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,self.testing)
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())
@@ -136,7 +137,7 @@ class GC_Translator(object):
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		dummy2dwhere_flat_column = dummy2d[latind,lonind]
 		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
-		species_config = tx.getSpeciesConfig()
+		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['STATE_VECTOR_CONC'])
 		ind_collector = []
@@ -153,7 +154,7 @@ class GC_Translator(object):
 		if self.statevec is None:
 			self.buildStateVector()
 		if latind: #User supplied ind
-			statevecinds = getLocalizedStateVectorIndices(latind,lonind)
+			statevecinds = self.getLocalizedStateVectorIndices(latind,lonind)
 			return self.statevec[statevecinds]
 		else: #Return the whole vector
 			return self.statevec
@@ -161,7 +162,7 @@ class GC_Translator(object):
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
 	def randomizeRestart(self,perturbation=0.1,bias=0):
-		statevec_species = tx.getSpeciesConfig()['STATE_VECTOR_CONC']
+		statevec_species = tx.getSpeciesConfig(self.testing)['STATE_VECTOR_CONC']
 		offset = 1-perturbation
 		scale = perturbation*2
 		for spec in statevec_species:
@@ -173,7 +174,7 @@ class GC_Translator(object):
 	#Also construct new scaling factors and add them as a separate array at the new timestep in each of the scaling factor netCDFs.
 	#However, only do so for species in the control vectors of emissions and concentrations.
 	def reconstructArrays(self,analysis_vector):
-		species_config = tx.getSpeciesConfig()
+		species_config = tx.getSpeciesConfig(self.testing)
 		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
 		emis_shape = np.shape(self.getEmisSF(species_config['CONTROL_VECTOR_EMIS'].keys()[0]))
 		counter =  0
@@ -210,11 +211,12 @@ class GC_Translator(object):
 #That restart will be overwritten in place (name not changed) so next run starts from the assimilation state vector.
 #Emissions scaling factors are most recent available (one assimilation timestep ago). New values will be appended to netCDF. 
 class Assimilator(object):
-	def __init__(self,timestamp,ensnum,corenum):
+	def __init__(self,timestamp,ensnum,corenum,testing=False):
+		self.testing = testing
 		self.ensnum = ensnum
 		self.corenum = corenum
-		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum)
-		spc_config = tx.getSpeciesConfig()
+		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum,self.testing)
+		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
 		self.parfilename = f'ens_{ensnum}_core_{corenum}_time_{timestamp}'
@@ -228,18 +230,18 @@ class Assimilator(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp)
+				self.nature = GC_Translator(directory, timestamp, False,self.testing)
 			else: 
-				self.gt[ens] = GC_Translator(directory, timestamp, True)
+				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
-		error_multipliers_or_matrices, ObsOperatorClass_list,NatureHelperClass,self.inflation = getLETKFConfig()
+		error_multipliers_or_matrices, ObsOperatorClass_list,NatureHelperClass,self.inflation = getLETKFConfig(self.testing)
 		if self.nature is None: #For the time being, we must have a nature run.
 			raise NotImplementedError
 		else:
 			if NatureHelperClass is None:
 				raise ValueError('Need a Nature Helper class defined if assimilating simulated nature run.')
-			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,error_multipliers_or_matrices)
+			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,error_multipliers_or_matrices,self.testing)
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):

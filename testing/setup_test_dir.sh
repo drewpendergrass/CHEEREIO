@@ -10,6 +10,7 @@ MY_PATH="$(jq -r ".MY_PATH" test_config.json)"
 RESTART_FILE="$(jq -r ".RESTART_FILE" test_config.json)"
 
 START_DATE=$(jq -r ".START_DATE" test_config.json)
+ASSIM_DATE=$(jq -r ".ASSIM_DATE" test_config.json)
 END_DATE=$(jq -r ".END_DATE" test_config.json)
 
 # Ensemble settings
@@ -162,10 +163,10 @@ fi
     cd ${ASSIM_PATH}
     source activate $(jq -r ".CondaEnv" testing/test_config.json) #Activate conda environment.
 
-    #Create initial scaling factors
+    #Create initial scaling factors and randomize restarts
     cd core
     python initialize_scaling_factors.py "TESTING" "${START_DATE}"
-
+    python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}"
     source deactivate #Exit Conda environment
 
     #Store current time.

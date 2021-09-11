@@ -12,7 +12,8 @@ from scipy.linalg import block_diag
 #Class method also can produce diagonal covariance matrices if nature_err_covariances is a 1D numpy array containing percent errors
 #Automatically subsets down according to lat and lon values.
 class ObservationInfo(object):
-	def __init__(self, nature_vals, nature_err_covariances,natureval_lats,natureval_lons,species_to_assimilate=None):
+	def __init__(self, nature_vals, nature_err_covariances,natureval_lats,natureval_lons,species_to_assimilate=None,testing=False):
+		self.testing=testing
 		#Create a dictionary for each species if multiple species
 		if species_to_assimilate:
 			self.values = dict(zip(species_to_assimilate, nature_vals))
@@ -64,9 +65,9 @@ class ObservationInfo(object):
 			else:
 				return self.errs
 	def getIndsOfInterest(self,latind,lonind,species=None)
-		data = tx.getSpeciesConfig()
+		data = tx.getSpeciesConfig(self.testing)
 		loc_rad = float(data['LOCALIZATION_RADIUS_km'])
-		gridlat,gridlon = tx.getLatLonVals(data)
+		gridlat,gridlon = tx.getLatLonVals(data,self.testing)
 		latval = gridlat[latind]
 		lonval = gridlon[lonind]
 		if species:
@@ -87,8 +88,9 @@ class ObservationInfo(object):
 #The key is the function H, which maps 3D concentrations in one ensemble member
 #to a 1D vector of length nature_vals 
 class ObsOperator(object):
-	def __init__(self, nature_vals, nature_err_covariance,nature_lats,nature_lons):
-		self.obsinfo = ObservationInfo(nature_vals,nature_err_covariance,nature_lats,nature_lons)
+	def __init__(self, nature_vals, nature_err_covariance,nature_lats,nature_lons,testing=False):
+		self.obsinfo = ObservationInfo(nature_vals,nature_err_covariance,nature_lats,nature_lons,None,testing)
+		self.testing=testing
 	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals along with 1d vectors of lat and longitude indices to support localization.
 	def H(self, conc3D,latinds=None,loninds=None):
 		raise NotImplementedError
@@ -96,7 +98,7 @@ class ObsOperator(object):
 		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
 			if latval:
-				latinds,loninds = tx.getIndsOfInterest(latval,lonval)
+				latinds,loninds = tx.getIndsOfInterest(latval,lonval,self.testing)
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],latinds,loninds)
 			else:
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i])
@@ -113,8 +115,9 @@ class ObsOperator(object):
 #and the user needs to implement the H mapper.
 
 class NatureHelper(object):
-	def __init__(self, gt, species_to_assimilate, error_multipliers_or_matrices):
+	def __init__(self, gt, species_to_assimilate, error_multipliers_or_matrices,testing=False):
 		self.gt = gt
+		self.testing = testing
 		self.species_to_assimilate = species_to_assimilate
 		nature_vecs = []
 		nature_lats = []
@@ -125,7 +128,7 @@ class NatureHelper(object):
 			nature_vecs.append(nature_vals)
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)
-		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate)
+		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate,self.testing)
 	def H(self, conc3D,latinds=None,loninds=None):
 		raise NotImplementedError
 	def getNatureVals(self,species,latind=None,lonind=None):
@@ -138,7 +141,7 @@ class NatureHelper(object):
 		nature_vals = self.getNatureVals(species,latind,lonind)
 		nature_err_covariance = self.getNatureErr(species,latind,lonind)
 		nature_lats,nature_lons = self.getObsLatLon(species,latind,lonind)
-		return ObsOperatorClass(nature_vals,nature_err_covariance,)
+		return ObsOperatorClass(nature_vals,nature_err_covariance,nature_lats,nature_lons,None,self.testing)
 	def makeR(self,latind=None,lonind=None):
 		errmats = []
 		for species in self.species_to_assimilate:
