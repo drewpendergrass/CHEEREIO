@@ -176,7 +176,7 @@ fi
     #Create initial scaling factors and randomize restarts
     cd ${ASSIM_PATH}/core
     python initialize_scaling_factors.py "TESTING" "${START_DATE}"
-    python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}"
+    python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}_0000"
     source deactivate #Exit Conda environment
 
     #Store current time.
