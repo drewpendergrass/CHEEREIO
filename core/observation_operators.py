@@ -64,7 +64,7 @@ class ObservationInfo(object):
 				return self.errs[inds,inds]
 			else:
 				return self.errs
-	def getIndsOfInterest(self,latind,lonind,species=None)
+	def getIndsOfInterest(self,latind,lonind,species=None):
 		data = tx.getSpeciesConfig(self.testing)
 		loc_rad = float(data['LOCALIZATION_RADIUS_km'])
 		gridlat,gridlon = tx.getLatLonVals(data,self.testing)
