@@ -2,7 +2,7 @@
 
 #If command arg is SETUP, setup the testdir; otherwise, just clean up
 
-if [ $1 -eq "SETUP" ]; then
+if [ "$1" = "SETUP" ]; then
 	bash setup_test_dir.sh
 else
 	RUN_NAME="$(jq -r ".RUN_NAME" test_config.json)"
