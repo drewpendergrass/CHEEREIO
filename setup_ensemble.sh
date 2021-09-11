@@ -758,12 +758,6 @@ cd ${ASSIM_PATH}/core
 bash prepare_template_hemco_config.sh
 printf "${thinline}"
 
-#Create parallelization list
-printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
-source activate $(jq -r ".CondaEnv" ../ens_config.json) #Activate conda environment.
-python prep_par.py PRODUCTION
-source deactivate
-printf "Done!\n"
 
 printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."
 printf "\n     Modify all configuration files BEFORE creating spinup or ensemble run directories."
@@ -938,7 +932,7 @@ if "$SetupEnsembleRuns"; then
     #Create initial scaling factors
     cd core
     python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}"
-
+    python prep_par.py PRODUCTION
     source deactivate #Exit Conda environment
 
     #Store current time.

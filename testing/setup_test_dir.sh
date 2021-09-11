@@ -56,14 +56,6 @@ else
   sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
 fi
 
-printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
-cd ${ASSIM_PATH}/core
-source activate $(jq -r ".CondaEnv" ../testing/test_config.json) #Activate conda environment.
-python prep_par.py TESTING
-source deactivate
-cd ${ASSIM_PATH}/testing
-printf "Done!\n"
-
 #Horizontal resolution
 RES="$(jq -r ".RES" test_config.json)"
 grid_res_long=$RES
@@ -201,6 +193,7 @@ fi
     cd ${ASSIM_PATH}/core
     python initialize_scaling_factors.py "TESTING" "${START_DATE}"
     python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}_0000"
+    python prep_par.py TESTING
     source deactivate #Exit Conda environment
 
     #Store current time.
@@ -209,6 +202,5 @@ fi
 
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
-
 
     printf "${thickline}DONE CREATING TESTING DIRECTORIES${thickline}"
