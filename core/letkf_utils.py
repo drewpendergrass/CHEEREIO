@@ -36,7 +36,7 @@ class GC_Translator(object):
 		self.testing=testing
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
-			name = ''.join(file.split('/')[-1].split('_')[0:-1])
+			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name] = xr.load_dataset(file)
 		if computeStateVec:
 			self.buildStateVector()
@@ -198,7 +198,7 @@ class GC_Translator(object):
 		self.restart_ds.to_netcdf(self.filename)
 	def saveEmissions(self):
 		for file in self.emis_sf_filenames:
-			name = ''.join(file.split('/')[-1].split('_')[0:-1])
+			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name].to_netcdf(file)
 
 
