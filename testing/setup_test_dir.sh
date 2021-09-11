@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Path to assimilation setup
 ASSIM_PATH="$(jq -r ".ASSIM_PATH" test_config.json)"
 
