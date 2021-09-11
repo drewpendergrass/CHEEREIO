@@ -1,6 +1,9 @@
 # Path to assimilation setup
 ASSIM_PATH="$(jq -r ".ASSIM_PATH" test_config.json)"
 
+thickline="\n===========================================================\n"
+thinline="\n-----------------------------------------------------------\n"
+
 # Name for this run
 RUN_NAME="$(jq -r ".RUN_NAME" test_config.json)"
 
@@ -178,6 +181,5 @@ fi
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
 
-thickline="\n===========================================================\n"
 
     printf "${thickline}DONE CREATING TESTING DIRECTORIES${thickline}"

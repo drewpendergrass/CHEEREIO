@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"BUFFER" : "",
-	"ASSIM_PATH" : "/n/home12/drewpendergrass/GC-LETKF",
+	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
 	"RUN_NAME" : "ASSIM_MATH_TESTS",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
