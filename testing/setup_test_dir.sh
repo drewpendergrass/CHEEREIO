@@ -181,7 +181,7 @@ fi
 
     #Store current time.
     printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
-    python advance_timestep "TESTING" #Update input.geos to first assimilation period.
+    python advance_timestep.py "TESTING" #Update input.geos to first assimilation period.
 
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
