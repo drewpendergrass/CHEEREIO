@@ -27,11 +27,13 @@ mkdir scratch
 echo "GC-CHEERIO uses this directory to save out intermediate data and track its internal state. Modifying contents of this folder can lead to model failure." > scratch/README
 
 printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
+cd ${ASSIM_PATH}/core
 python prep_par.py "TESTING"
+cd ${ASSIM_PATH}/testing
 printf "Done!\n"
 
 #Horizontal resolution
-RES="$(jq -r ".RES" ens_config.json)"
+RES="$(jq -r ".RES" test_config.json)"
 grid_res_long=$RES
 if [[ $RES = "4.0x5.0" ]]; then
   grid_res='4x5'
@@ -160,11 +162,11 @@ fi
 
     done
 
-    cd ${ASSIM_PATH}
-    source activate $(jq -r ".CondaEnv" testing/test_config.json) #Activate conda environment.
+    cd ${ASSIM_PATH}/testing
+    source activate $(jq -r ".CondaEnv" test_config.json) #Activate conda environment.
 
     #Create initial scaling factors and randomize restarts
-    cd core
+    cd ${ASSIM_PATH}/core
     python initialize_scaling_factors.py "TESTING" "${START_DATE}"
     python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}"
     source deactivate #Exit Conda environment
