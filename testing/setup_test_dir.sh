@@ -56,6 +56,8 @@ else
   sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
 fi
 
+cd ${ASSIM_PATH}/testing 
+
 #Horizontal resolution
 RES="$(jq -r ".RES" test_config.json)"
 grid_res_long=$RES
