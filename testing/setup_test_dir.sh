@@ -31,7 +31,9 @@ echo "GC-CHEERIO uses this directory to save out intermediate data and track its
 
 printf "\nCalculating best way to split grid for parallelized grid calculations...\n"
 cd ${ASSIM_PATH}/core
+source activate $(jq -r ".CondaEnv" ../testing/test_config.json) #Activate conda environment.
 python prep_par.py "TESTING"
+source deactivate
 cd ${ASSIM_PATH}/testing
 printf "Done!\n"
 
