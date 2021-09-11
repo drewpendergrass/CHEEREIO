@@ -22,7 +22,7 @@
 	"SPINUP_END" : "",
 	"START_DATE" : "20181231",
 	"ASSIM_DATE" : "20190101",
-	"END_DATE" : "20190101",
+	"END_DATE" : "20190101b",
 	"nEnsemble" : "2",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
