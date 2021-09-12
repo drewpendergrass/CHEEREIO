@@ -123,7 +123,7 @@ class NatureHelper(object):
 		nature_lons = []
 		for h,species in zip(nature_h_functions,self.species_to_assimilate.values()):
 			conc3D = self.gt.getSpecies3Dconc(species)
-			nature_vals,nature_lat,nature_lon = h(conc3D)
+			nature_vals,nature_lat,nature_lon = h(conc3D,testing=self.testing)
 			nature_vecs.append(nature_vals)
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)
@@ -168,9 +168,9 @@ class SurfaceOperator(ObsOperator):
 #If bias and/or error are None then the simple sum is returned.
 #Returns a 1D array of the flattened 2D field.
 #Takes numpy  array for species in question containing 3D concentrations.
-def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None):
+def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=False):
 	csum = np.sum(DA_3d,axis = 0)
-	latvals,lonvals = tx.getLatLonVals()
+	latvals,lonvals = tx.getLatLonVals(testing)
 	if latinds:
 		csum = csum[latinds,loninds]
 		latvals = latvals[latinds]
@@ -181,9 +181,9 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None):
 		csum += np.random.normal(bias, err, np.shape(csum))
 		return [csum.flatten(),latvals,lonvals]
 
-def surface_obs(DA_3d, latinds,loninds, bias=None, err=None):
+def surface_obs(DA_3d, latinds,loninds, bias=None, err=None,testing=False):
 	obs_vec = DA_3d[0,latinds,loninds]
-	latvals,lonvals = tx.getLatLonVals()
+	latvals,lonvals = tx.getLatLonVals(testing)
 	if (bias is None) or (err is None):
 		return [obs_vec,latvals[latinds],lonvals[loninds]]
 	else:
