@@ -15,7 +15,7 @@ def getLETKFConfig(testing=False):
 	#Provide a list of observation operator classes in order of the species to assimilate.
 	obs_operator_classes = [getattr(obs, s) for s in data['OBS_OPERATORS']]
 	#If you are simulating nature (SIMULATE_NATURE=true in setup_ensemble.sh), provide the nature helper class.
-	if data['NATURE_OPERATOR'] == "NA":
+	if data['SIMULATE_NATURE'] == "false":
 		raise NotImplementedError #No support for real observations yet!
 	else:
 		nature_h_functions = [getattr(obs, h) for h in data['NATURE_H_FUNCTIONS']]
