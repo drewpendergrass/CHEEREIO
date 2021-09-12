@@ -141,7 +141,7 @@ class NatureHelper(object):
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)
 			if self.testing:
-				print(f"Applying function {data["NATURE_H_FUNCTIONS"][i]} to species {species} referenced by key {obs_keys[i]}.")
+				print(f"Applying function {data['NATURE_H_FUNCTIONS'][i]} to species {species} referenced by key {obs_keys[i]}.")
 				i+=1
 		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate,self.testing)
 		if self.testing:
