@@ -170,7 +170,7 @@ class SurfaceOperator(ObsOperator):
 #Takes numpy  array for species in question containing 3D concentrations.
 def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=False):
 	csum = np.sum(DA_3d,axis = 0)
-	latvals,lonvals = tx.getLatLonVals(testing)
+	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	if latinds:
 		csum = csum[latinds,loninds]
 		latvals = latvals[latinds]
@@ -183,7 +183,7 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 
 def surface_obs(DA_3d, latinds,loninds, bias=None, err=None,testing=False):
 	obs_vec = DA_3d[0,latinds,loninds]
-	latvals,lonvals = tx.getLatLonVals(testing)
+	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	if (bias is None) or (err is None):
 		return [obs_vec,latvals[latinds],lonvals[loninds]]
 	else:
