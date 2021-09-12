@@ -21,7 +21,7 @@ class ObservationInfo(object):
 			#Error detection:
 			if (len(nature_vals) != len(natureval_lats)) or (len(nature_vals) != len(natureval_lons)) or (len(natureval_lons) != len(natureval_lats)):
 				raise ValueError('If passing lists of nature values/lats/lons, the lengths must match.')
-			for i in len(nature_vals):
+			for i in range(len(nature_vals)):
 				len_vals = len(nature_vals[i])
 				len_lats = len(natureval_lats[i])
 				len_lons = len(natureval_lons[i])
