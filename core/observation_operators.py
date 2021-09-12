@@ -181,11 +181,16 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 		csum += np.random.normal(bias, err, np.shape(csum))
 		return [csum.flatten(),latvals,lonvals]
 
-def surface_obs(DA_3d, latinds,loninds, bias=None, err=None,testing=False):
-	obs_vec = DA_3d[0,latinds,loninds]
+def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=False):
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
+	if latinds:
+		obs_vec = DA_3d[0,latinds,loninds]
+		latvals = latvals[latinds]
+		lonvals = lonvals[loninds]
+	else:
+		obs_vec = DA_3d[0,:,:].flatten()
 	if (bias is None) or (err is None):
-		return [obs_vec,latvals[latinds],lonvals[loninds]]
+		return [obs_vec,latvals,lonvals]
 	else:
 		obs_vec += np.random.normal(bias, err, np.shape(obs_vec))
-		return [obs_vec,latvals[latinds],lonvals[loninds]]
+		return [obs_vec,latvals,lonvals]
