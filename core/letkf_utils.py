@@ -244,7 +244,7 @@ class Assimilator(object):
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		if self.testing:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
-		error_multipliers_or_matrices, ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
+		error_multipliers_or_matrices, self.ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
 		if self.nature is None: #For the time being, we must have a nature run.
 			raise NotImplementedError
 		else:
@@ -259,9 +259,8 @@ class Assimilator(object):
 		return self.gt[1].getLev()
 	def makeObsOps(self,latind=None,lonind=None):
 		self.ObsOp = {}
-		for i in range(len(self.observed_species)):
-			spec = self.observed_species[i]
-			ObsOp_instance = self.NatureHelperInstance.makeObsOp(spec,ObsOperatorClass_list[i],latind,lonind)
+		for i,obs_spec_key in enumerate(self.observed_species.keys()):
+			ObsOp_instance = self.NatureHelperInstance.makeObsOp(obs_spec_key,self.ObsOperatorClass_list[i],latind,lonind)
 			self.ObsOp[spec] = ObsOp_instance
 	def combineEnsemble(self,latind=None,lonind=None):
 		statevecs = []
