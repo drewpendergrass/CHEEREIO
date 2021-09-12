@@ -239,9 +239,7 @@ class Assimilator(object):
 		if self.nature is None: #For the time being, we must have a nature run.
 			raise NotImplementedError
 		else:
-			if NatureHelperClass is None:
-				raise ValueError('Need a Nature Helper class defined if assimilating simulated nature run.')
-			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
+			self.NatureHelperInstance = obs.NatureHelper(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):
