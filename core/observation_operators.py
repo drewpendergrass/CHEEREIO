@@ -18,6 +18,15 @@ class ObservationInfo(object):
 			print("ObservationInfo constructor called.")
 		#Create a dictionary for each species if multiple species
 		if species_to_assimilate:
+			#Error detection:
+			if (len(nature_vals) != len(natureval_lats)) or (len(nature_vals) != len(natureval_lons)) or (len(natureval_lons) != len(natureval_lats)):
+				raise ValueError('If passing lists of nature values/lats/lons, the lengths must match.')
+			for i in len(nature_vals):
+				len_vals = len(nature_vals[i])
+				len_lats = len(natureval_lats[i])
+				len_lons = len(natureval_lons[i])
+				if (len_vals != len_lats) or (len_vals != len_lons) or (len_lats != len_lons):
+					raise ValueError('Lengths of vectors representing nature values, latitudes, and longitudes must match.') 
 			self.values = dict(zip(species_to_assimilate.keys(), nature_vals))
 			self.lats = dict(zip(species_to_assimilate.keys(),natureval_lats))
 			self.lons = dict(zip(species_to_assimilate.keys(),natureval_lons))
@@ -29,6 +38,11 @@ class ObservationInfo(object):
 			else:
 				raise NotImplementedError('Requires a list of error percentages')
 		else:
+			len_vals = len(nature_vals)
+			len_lats = len(natureval_lats)
+			len_lons = len(natureval_lons)
+			if (len_vals != len_lats) or (len_vals != len_lons) or (len_lats != len_lons):
+				raise ValueError('Lengths of vectors representing nature values, latitudes, and longitudes must match.') 
 			self.values = nature_vals
 			self.lats = natureval_lats
 			self.lons = natureval_lons
