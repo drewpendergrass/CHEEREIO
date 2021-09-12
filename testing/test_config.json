@@ -22,7 +22,7 @@
 	"SPINUP_END" : "",
 	"START_DATE" : "20181231",
 	"ASSIM_DATE" : "20190101",
-	"END_DATE" : "20190101b",
+	"END_DATE" : "20190101",
 	"nEnsemble" : "2",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
@@ -357,13 +357,14 @@
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
 		"0.20",
-		"0.30"
+		"0.30",
+		"0.10"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
-		"SumOperator"
+		"SumOperator",
+		"SurfaceOperator"
 	],
-	"NATURE_OPERATOR": "SumNatureHelper",
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "24"
 }

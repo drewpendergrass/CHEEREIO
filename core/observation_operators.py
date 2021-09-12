@@ -109,11 +109,10 @@ class ObsOperator(object):
 		return vals-self.obsinfo.getObsVal(latval,lonval)
 
 
-#If we are doing an experiment where we model 'nature', this parent class wraps around
+#If we are doing an experiment where we model 'nature', this class wraps around
 #the GC_Translator for the nature run. In particular, it will create an ObsOperator
 #type class when needed. Needs to be given the error covariance matrix for the observations
-#and the user needs to implement the H mapper.
-
+#and species_to_assimilate is expected to be a dictionary mapping the user tag for this species to the species name 
 class NatureHelper(object):
 	def __init__(self, gt, species_to_assimilate, error_multipliers_or_matrices,testing=False):
 		self.gt = gt
@@ -129,8 +128,6 @@ class NatureHelper(object):
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)
 		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate,self.testing)
-	def H(self, conc3D,latinds=None,loninds=None):
-		raise NotImplementedError
 	def getNatureVals(self,species,latind=None,lonind=None):
 		return self.obs_info.getObsVal(latind,lonind,species)
 	def getNatureErr(self,species,latind=None,lonind=None):
@@ -158,9 +155,9 @@ class SumOperator(ObsOperator):
 	def H(self,conc3D,latinds=None,loninds=None):
 		return column_sum(conc3D,latinds,loninds)
 
-class SumNatureHelper(NatureHelper):
-	def H(self,conc3D,latinds=None,loninds=None):
-		return column_sum(conc3D,latinds,loninds)
+class SurfaceOperator(ObsOperator):
+	def H(self,conc3D,latinds,loninds):
+		return surface_obs(conc3D,latinds,loninds)
 
 # ----------------------------------------------------------------- #
 # ------------------READY-MADE FUNCTIONS FOR H--------------------- #
