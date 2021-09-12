@@ -169,7 +169,7 @@ class NatureHelper(object):
 	def makeObsOp(self,species,ObsOperatorClass,latind=None,lonind=None):
 		nature_vals = self.getNatureVals(species,latind,lonind)
 		nature_err_covariance = self.getNatureErr(species,latind,lonind)
-		nature_lats,nature_lons = self.getObsLatLon(species,latind,lonind)
+		nature_lats,nature_lons = self.getNatureLatLon(species,latind,lonind)
 		return ObsOperatorClass(nature_vals,nature_err_covariance,nature_lats,nature_lons,None,self.testing)
 	def makeR(self,latind=None,lonind=None):
 		errmats = []
