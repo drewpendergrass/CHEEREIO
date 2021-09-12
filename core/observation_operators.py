@@ -178,6 +178,10 @@ class NatureHelper(object):
 		R = block_diag(*errmats)
 		return R
 
+def makeLatLonGrid(latvals,lonvals):
+	latval_grid = np.transpose(np.tile(latvals,(len(lonvals),1)))
+	lonval_grid = np.tile(lonvals,(len(latvals),1))
+	return [latval_grid,lonval_grid]
 
 # ----------------------------------------------------------------- #
 # -------------OPERATORS FOR TEST ASSIMILATION RUNS---------------- #
@@ -203,10 +207,14 @@ class SurfaceOperator(ObsOperator):
 def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=False):
 	csum = np.sum(DA_3d,axis = 0)
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
+	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
 	if latinds:
 		csum = csum[latinds,loninds]
-		latvals = latvals[latinds]
-		lonvals = lonvals[loninds]
+		latvals = latgrid[latinds,loninds]
+		lonvals = longrid[latinds,loninds]
+	else:
+		latvals = latgrid.flatten()
+		lonvals = longrid.flatten()
 	if (bias is None) or (err is None):
 		return [csum.flatten(),latvals,lonvals]
 	else:
@@ -215,12 +223,15 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 
 def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=False):
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
+	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
 	if latinds:
 		obs_vec = DA_3d[0,latinds,loninds]
-		latvals = latvals[latinds]
-		lonvals = lonvals[loninds]
+		latvals = latgrid[latinds,loninds]
+		lonvals = longrid[latinds,loninds]
 	else:
 		obs_vec = DA_3d[0,:,:].flatten()
+		latvals = latgrid.flatten()
+		lonvals = longrid.flatten()
 	if (bias is None) or (err is None):
 		return [obs_vec,latvals,lonvals]
 	else:
