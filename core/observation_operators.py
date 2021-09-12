@@ -16,16 +16,16 @@ class ObservationInfo(object):
 		self.testing=testing
 		#Create a dictionary for each species if multiple species
 		if species_to_assimilate:
-			self.values = dict(zip(species_to_assimilate, nature_vals))
-			self.lats = dict(zip(species_to_assimilate,natureval_lats))
-			self.lons = dict(zip(species_to_assimilate,natureval_lons))
+			self.values = dict(zip(species_to_assimilate.keys(), nature_vals))
+			self.lats = dict(zip(species_to_assimilate.keys(),natureval_lats))
+			self.lons = dict(zip(species_to_assimilate.keys(),natureval_lons))
 			if type(nature_err_covariances) is np.ndarray:
 				cov = []
 				for i, nval in enumerate(nature_vals):
 					cov.append(np.diag(nval*nature_err_covariances[i]))
-					self.errs = dict(zip(species_to_assimilate, cov))
+					self.errs = dict(zip(species_to_assimilate.keys(), cov))
 			else:
-				self.errs = dict(zip(species_to_assimilate, species=None))
+				raise NotImplementedError('Requires a list of error percentages')
 		else:
 			self.values = nature_vals
 			self.lats = natureval_lats
@@ -114,16 +114,16 @@ class ObsOperator(object):
 #type class when needed. Needs to be given the error covariance matrix for the observations
 #and species_to_assimilate is expected to be a dictionary mapping the user tag for this species to the species name 
 class NatureHelper(object):
-	def __init__(self, gt, species_to_assimilate, error_multipliers_or_matrices,testing=False):
+	def __init__(self, gt, species_to_assimilate, nature_h_functions, error_multipliers_or_matrices,testing=False):
 		self.gt = gt
 		self.testing = testing
 		self.species_to_assimilate = species_to_assimilate
 		nature_vecs = []
 		nature_lats = []
 		nature_lons = []
-		for species in self.species_to_assimilate:
+		for h,species in zip(nature_h_functions,self.species_to_assimilate.values()):
 			conc3D = self.gt.getSpecies3Dconc(species)
-			nature_vals,nature_lat,nature_lon = self.H(conc3D)
+			nature_vals,nature_lat,nature_lon = h(conc3D)
 			nature_vecs.append(nature_vals)
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)

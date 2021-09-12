@@ -18,9 +18,9 @@ def getLETKFConfig(testing=False):
 	if data['NATURE_OPERATOR'] == "NA":
 		raise NotImplementedError #No support for real observations yet!
 	else:
-		nature_operator_class = getattr(obs, data['NATURE_OPERATOR'])
+		nature_h_functions = [getattr(obs, h) for h in data['NATURE_H_FUNCTIONS']]
 	inflation = float(data['INFLATION_FACTOR'])
-	return [errs, obs_operator_classes,nature_operator_class,inflation]
+	return [errs, obs_operator_classes,nature_h_functions,inflation]
 
 
 #This class contains useful methods for getting data from GEOS-Chem restart files and 
@@ -235,13 +235,13 @@ class Assimilator(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
-		error_multipliers_or_matrices, ObsOperatorClass_list,NatureHelperClass,self.inflation = getLETKFConfig(self.testing)
+		error_multipliers_or_matrices, ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
 		if self.nature is None: #For the time being, we must have a nature run.
 			raise NotImplementedError
 		else:
 			if NatureHelperClass is None:
 				raise ValueError('Need a Nature Helper class defined if assimilating simulated nature run.')
-			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,error_multipliers_or_matrices,self.testing)
+			self.NatureHelperInstance = NatureHelperClass(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):

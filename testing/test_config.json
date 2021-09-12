@@ -365,6 +365,11 @@
 		"SumOperator",
 		"SurfaceOperator"
 	],
+	"NATURE_H_FUNCTIONS" : [
+		"column_sum",
+		"column_sum",
+		"surface_obs"
+	],
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "24"
 }
