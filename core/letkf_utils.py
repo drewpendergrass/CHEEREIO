@@ -216,6 +216,9 @@ class Assimilator(object):
 		self.ensnum = ensnum
 		self.corenum = corenum
 		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum,self.testing)
+		if self.testing:
+			print(f"Assimilator has been called for ens {self.ensnum} core {self.corenum}; construction beginning")
+			print(f"Handing lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
@@ -223,11 +226,15 @@ class Assimilator(object):
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
 		dirnames = [d.split('/')[-2] for d in subdirs]
+		if self.testing:
+			print(f"The following ensemble directories were detected: {dirnames}")
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.nature = None
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
+		if self.testing:
+			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
 				self.nature = GC_Translator(directory, timestamp, False,self.testing)
@@ -235,11 +242,15 @@ class Assimilator(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
+		if self.testing:
+			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		error_multipliers_or_matrices, ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
 		if self.nature is None: #For the time being, we must have a nature run.
 			raise NotImplementedError
 		else:
 			self.NatureHelperInstance = obs.NatureHelper(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
+		if self.testing:
+			print(f"Assimilator construction complete")
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
 	def getLon(self):
