@@ -14,6 +14,8 @@ from scipy.linalg import block_diag
 class ObservationInfo(object):
 	def __init__(self, nature_vals, nature_err_covariances,natureval_lats,natureval_lons,species_to_assimilate=None,testing=False):
 		self.testing=testing
+		if self.testing:
+			print("ObservationInfo constructor called.")
 		#Create a dictionary for each species if multiple species
 		if species_to_assimilate:
 			self.values = dict(zip(species_to_assimilate.keys(), nature_vals))
@@ -38,6 +40,12 @@ class ObservationInfo(object):
 					self.errs = nature_err_covariances
 			else:
 				self.errs = np.diag(nature_vals*nature_err_covariances)
+		if self.testing:
+			print(f'ObservationInfo values are {self.values}')
+			print(f'ObservationInfo lats are {self.lats}')
+			print(f'ObservationInfo lons are {self.lons}')
+			print(f'ObservationInfo errs are {self.errs}')
+			print(f'ObservationInfo constructor completed.')
 	def getObsVal(self,latind=None,lonind=None,species=None):
 		if species:
 			if latind:
@@ -121,13 +129,23 @@ class NatureHelper(object):
 		nature_vecs = []
 		nature_lats = []
 		nature_lons = []
+		if self.testing:
+			print("NatureHelper constructor called.")
+			data = tx.getSpeciesConfig(self.testing)
+			obs_keys=list[data["OBSERVED_SPECIES"].keys()]
+			i=0
 		for h,species in zip(nature_h_functions,self.species_to_assimilate.values()):
 			conc3D = self.gt.getSpecies3Dconc(species)
 			nature_vals,nature_lat,nature_lon = h(conc3D,testing=self.testing)
 			nature_vecs.append(nature_vals)
 			nature_lats.append(nature_lat)
 			nature_lons.append(nature_lon)
+			if self.testing:
+				print(f"Applying function {data["NATURE_H_FUNCTIONS"][i]} to species {species} referenced by key {obs_keys[i]}.")
+				i+=1
 		self.obs_info = ObservationInfo(nature_vecs,error_multipliers_or_matrices,nature_lats,nature_lons,self.species_to_assimilate,self.testing)
+		if self.testing:
+			print("NatureHelper construction completed.")
 	def getNatureVals(self,species,latind=None,lonind=None):
 		return self.obs_info.getObsVal(latind,lonind,species)
 	def getNatureErr(self,species,latind=None,lonind=None):

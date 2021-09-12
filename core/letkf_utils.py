@@ -218,7 +218,7 @@ class Assimilator(object):
 		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum,self.testing)
 		if self.testing:
 			print(f"Assimilator has been called for ens {self.ensnum} core {self.corenum}; construction beginning")
-			print(f"Handing lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")
+			print(f"This core will be handling lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
@@ -333,7 +333,11 @@ class Assimilator(object):
 		analysisSubset = self.analysisEnsemble[colinds,:]
 		np.save(f'{self.path_to_scratch}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
 	def LETKF(self):
+		if self.testing:
+			print(f"LETKF called! Beginning loop.")
 		for latval,lonval in zip(self.latinds,self.loninds):
+			if self.testing:
+				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.makeObsOps(latval,lonval)
 			self.prepareMeansAndPerts(latval,lonval)
 			self.makeR(latval,lonval)
