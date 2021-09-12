@@ -132,7 +132,7 @@ class NatureHelper(object):
 		if self.testing:
 			print("NatureHelper constructor called.")
 			data = tx.getSpeciesConfig(self.testing)
-			obs_keys=list[data["OBSERVED_SPECIES"].keys()]
+			obs_keys=list(data["OBSERVED_SPECIES"].keys())
 			i=0
 		for h,species in zip(nature_h_functions,self.species_to_assimilate.values()):
 			conc3D = self.gt.getSpecies3Dconc(species)
