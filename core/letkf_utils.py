@@ -101,7 +101,7 @@ class GC_Translator(object):
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
 	def getLocalizedStateVectorIndices(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,self.testing)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())
@@ -124,7 +124,7 @@ class GC_Translator(object):
 		statevecinds = np.concatenate(ind_collector)
 		return statevecinds
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,self.testing)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())

@@ -139,7 +139,7 @@ class ObsOperator(object):
 		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
 			if latval:
-				latinds,loninds = tx.getIndsOfInterest(latval,lonval,self.testing)
+				latinds,loninds = tx.getIndsOfInterest(latval,lonval,testing=self.testing)
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],latinds,loninds)
 			else:
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],None,None)
