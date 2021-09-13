@@ -278,12 +278,12 @@ class Assimilator(object):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
-		for species in self.observed_species:
-			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(species,latval,lonval)
+		for obskey,species in zip(list(self.observed_species.keys()),list(self.observed_species.values())):
+			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(obskey,species,latval,lonval)
 			obsmean = obsmean.squeeze()
 			obsmeans.append(obsmean)
 			obsperts.append(obspert)
-			obsdiffs.append(self.obsDiffForSpecies(species,obsmean,latval,lonval))
+			obsdiffs.append(self.obsDiffForSpecies(obskey,obsmean,latval,lonval))
 		full_obsmeans = np.concatenate(obsmeans)
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
@@ -299,11 +299,11 @@ class Assimilator(object):
 		ens_mean = np.mean(conc4D,axis = 3) #calculate ensemble mean
 		bigX = conc4D-ens_mean
 		return [ens_mean,bigX]
-	def ensObsMeanAndPertForSpecies(self, species,latval,lonval):
+	def ensObsMeanAndPertForSpecies(self, observation_key,species,latval,lonval):
 		spec_4D = self.combineEnsembleForSpecies(species)
-		return self.ObsOp[species].obsMeanAndPert(spec_4D,latval,lonval)
-	def obsDiffForSpecies(self,species,ensvec,latval,lonval):
-		return self.ObsOp[species].obsDiff(ensvec,latval,lonval)
+		return self.ObsOp[observation_key].obsMeanAndPert(spec_4D,latval,lonval)
+	def obsDiffForSpecies(self,observation_key,ensvec,latval,lonval):
+		return self.ObsOp[observation_key].obsDiff(ensvec,latval,lonval)
 	def prepareMeansAndPerts(self,latval,lonval):
 		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
