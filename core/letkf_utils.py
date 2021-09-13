@@ -249,6 +249,7 @@ class Assimilator(object):
 			raise NotImplementedError
 		else:
 			self.NatureHelperInstance = obs.NatureHelper(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
+			self.makeObsOps()
 		if self.testing:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -257,10 +258,10 @@ class Assimilator(object):
 		return self.gt[1].getLon()
 	def getLev(self):
 		return self.gt[1].getLev()
-	def makeObsOps(self,latind=None,lonind=None):
+	def makeObsOps(self):
 		self.ObsOp = {}
 		for i,obs_spec_key in enumerate(self.observed_species.keys()):
-			ObsOp_instance = self.NatureHelperInstance.makeObsOp(obs_spec_key,self.ObsOperatorClass_list[i],latind,lonind)
+			ObsOp_instance = self.NatureHelperInstance.makeObsOp(obs_spec_key,self.ObsOperatorClass_list[i])
 			self.ObsOp[spec] = ObsOp_instance
 	def combineEnsemble(self,latind=None,lonind=None):
 		statevecs = []
@@ -337,7 +338,6 @@ class Assimilator(object):
 		for latval,lonval in zip(self.latinds,self.loninds):
 			if self.testing:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
-			self.makeObsOps(latval,lonval)
 			self.prepareMeansAndPerts(latval,lonval)
 			self.makeR(latval,lonval)
 			self.makeC()
