@@ -61,6 +61,8 @@ class ObservationInfo(object):
 			print(f'ObservationInfo errs are {self.errs}')
 			print(f'ObservationInfo constructor completed.')
 	def getObsVal(self,latind=None,lonind=None,species=None):
+		if self.testing:
+			print(f'getObsVal called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind,species)
@@ -74,6 +76,8 @@ class ObservationInfo(object):
 			else:
 				return self.values
 	def getObsErr(self,latind=None,lonind=None,species=None):
+		if self.testing:
+			print(f'getObsErr called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind,species)
@@ -87,6 +91,8 @@ class ObservationInfo(object):
 			else:
 				return self.errs
 	def getIndsOfInterest(self,latind,lonind,species=None):
+		if self.testing:
+			print(f'getIndsOfInterest called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		data = tx.getSpeciesConfig(self.testing)
 		loc_rad = float(data['LOCALIZATION_RADIUS_km'])
 		gridlat,gridlon = tx.getLatLonVals(data,self.testing)
@@ -98,6 +104,8 @@ class ObservationInfo(object):
 			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats,self.lons)])
 		return np.where(distvec<=loc_rad)[0]
 	def getObsLatLon(self,latind=None,lonind=None,species=None):
+		if self.testing:
+			print(f'getObsLatLon called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
 			if latind:
 				latloninds = self.getIndsOfInterest(latind,lonind,species)
@@ -127,14 +135,14 @@ class ObsOperator(object):
 		raise NotImplementedError
 	def obsMeanAndPert(self, conc4D,latval=None,lonval=None):
 		if self.testing:
-			print('obsMeanAndPert called within ObservationOperator.')
+			print(f'obsMeanAndPert called within ObservationOperator for lat/lon inds {(latval,lonval)}.')
 		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
 			if latval:
 				latinds,loninds = tx.getIndsOfInterest(latval,lonval,self.testing)
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],latinds,loninds)
 			else:
-				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i])
+				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],None,None)
 		obsMean = np.expand_dims(np.mean(obsEns,axis = 1),axis=1)
 		obsPert = np.transpose(np.transpose(obsEns)-np.transpose(obsMean))
 		return [obsMean,obsPert]
@@ -173,24 +181,26 @@ class NatureHelper(object):
 			print("NatureHelper construction completed.")
 	def getNatureVals(self,species,latind=None,lonind=None):
 		if self.testing:
-			print("Getting nature values.")
+			print(f"Getting nature values for lat/lon inds {(latind,lonind)}.")
 		return self.obs_info.getObsVal(latind,lonind,species)
 	def getNatureErr(self,species,latind=None,lonind=None):
 		if self.testing:
-			print("Getting nature error.")
+			print(f"Getting nature error for lat/lon inds {(latind,lonind)}.")
 		return self.obs_info.getObsErr(latind,lonind,species)
 	def getNatureLatLon(self,species,latind=None,lonind=None):
 		if self.testing:
-			print("Getting nature lat/lon.")
+			print(f"Getting nature lat/lon for lat/lon inds {(latind,lonind)}.")
 		return self.obs_info.getObsLatLon(latind,lonind,species)
-	def makeObsOp(self,species,ObsOperatorClass,latind=None,lonind=None):
+	def makeObsOp(self,species,ObsOperatorClass):
 		if self.testing:
 			print(f"Making observation operator for species {species}.")
-		nature_vals = self.getNatureVals(species,latind,lonind)
-		nature_err_covariance = self.getNatureErr(species,latind,lonind)
-		nature_lats,nature_lons = self.getNatureLatLon(species,latind,lonind)
+		nature_vals = self.getNatureVals(species)
+		nature_err_covariance = self.getNatureErr(species)
+		nature_lats,nature_lons = self.getNatureLatLon(species)
 		return ObsOperatorClass(nature_vals,nature_err_covariance,nature_lats,nature_lons,self.testing)
 	def makeR(self,latind=None,lonind=None):
+		if self.testing:
+			print(f"Making R for lat/lon inds {(latind,lonind)}.")
 		errmats = []
 		for species in self.species_to_assimilate:
 			errmats.append(self.getNatureErr(species,latind,lonind))
@@ -224,6 +234,8 @@ class SurfaceOperator(ObsOperator):
 #Returns a 1D array of the flattened 2D field.
 #Takes numpy  array for species in question containing 3D concentrations.
 def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=False):
+	if testing:
+		print(f"Calculating column sum for lat/lon inds {(latind,lonind)}.")
 	csum = np.sum(DA_3d,axis = 0)
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
@@ -241,6 +253,8 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 		return [csum.flatten(),latvals,lonvals]
 
 def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=False):
+	if testing:
+		print(f"Calculating surface observations for lat/lon inds {(latind,lonind)}.")
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
 	if latinds:
