@@ -208,11 +208,11 @@ def makeLatLonGrid(latvals,lonvals):
 
 class SumOperator(ObsOperator):
 	def H(self,conc3D,latinds=None,loninds=None):
-		return column_sum(conc3D,latinds,loninds)
+		return column_sum(conc3D,latinds,loninds,testing=self.testing)
 
 class SurfaceOperator(ObsOperator):
 	def H(self,conc3D,latinds,loninds):
-		return surface_obs(conc3D,latinds,loninds)
+		return surface_obs(conc3D,latinds,loninds,testing=self.testing)
 
 # ----------------------------------------------------------------- #
 # ------------------READY-MADE FUNCTIONS FOR H--------------------- #
