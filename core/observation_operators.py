@@ -98,11 +98,18 @@ class ObservationInfo(object):
 			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats,self.lons)])
 		return np.where(distvec<=loc_rad)[0]
 	def getObsLatLon(self,latind=None,lonind=None,species=None):
-		latloninds = self.getIndsOfInterest(latind,lonind,species)
 		if species:
-			return [self.lats[species][latloninds],self.lons[species][latloninds]]
+			if latind:
+				latloninds = self.getIndsOfInterest(latind,lonind,species)
+				return [self.lats[species][latloninds],self.lons[species][latloninds]]
+			else:
+				return [self.lats[species],self.lons[species]]
 		else:
-			return [self.lats[latloninds],self.lons[latloninds]]
+			if latind:
+				latloninds = self.getIndsOfInterest(latind,lonind,species)
+				return [self.lats[latloninds],self.lons[latloninds]]
+			else:
+				return [self.lats,self.lons]
 
 #Parent class for all observation operators.
 #Requires the full ensemble of concentrations, a 1D vector of "nature values",
