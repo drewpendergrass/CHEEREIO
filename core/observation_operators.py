@@ -235,7 +235,7 @@ class SurfaceOperator(ObsOperator):
 #Takes numpy  array for species in question containing 3D concentrations.
 def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=False):
 	if testing:
-		print(f"Calculating column sum for lat/lon inds {(latind,lonind)}.")
+		print(f"Calculating column sum for lat/lon inds {(latinds,loninds)}.")
 	csum = np.sum(DA_3d,axis = 0)
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
@@ -254,7 +254,7 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 
 def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=False):
 	if testing:
-		print(f"Calculating surface observations for lat/lon inds {(latind,lonind)}.")
+		print(f"Calculating surface observations for lat/lon inds {(latinds,loninds)}.")
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
 	if latinds:
