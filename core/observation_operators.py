@@ -26,7 +26,7 @@ class ObservationInfo(object):
 				len_lats = len(natureval_lats[i])
 				len_lons = len(natureval_lons[i])
 				if (len_vals != len_lats) or (len_vals != len_lons) or (len_lats != len_lons):
-					raise ValueError('Lengths of vectors representing nature values, latitudes, and longitudes must match.') 
+					raise ValueError(f'Lengths of vectors representing nature values ({len_vals}), latitudes ({len_lats}), and longitudes ({len_lons}) must match.') 
 			self.values = dict(zip(species_to_assimilate.keys(), nature_vals))
 			self.lats = dict(zip(species_to_assimilate.keys(),natureval_lats))
 			self.lons = dict(zip(species_to_assimilate.keys(),natureval_lons))
@@ -42,7 +42,7 @@ class ObservationInfo(object):
 			len_lats = len(natureval_lats)
 			len_lons = len(natureval_lons)
 			if (len_vals != len_lats) or (len_vals != len_lons) or (len_lats != len_lons):
-				raise ValueError('Lengths of vectors representing nature values, latitudes, and longitudes must match.') 
+				raise ValueError(f'Lengths of vectors representing nature values ({len_vals}), latitudes ({len_lats}), and longitudes ({len_lons}) must match.') 
 			self.values = nature_vals
 			self.lats = natureval_lats
 			self.lons = natureval_lons
@@ -111,12 +111,16 @@ class ObservationInfo(object):
 #to a 1D vector of length nature_vals 
 class ObsOperator(object):
 	def __init__(self, nature_vals, nature_err_covariance,nature_lats,nature_lons,testing=False):
-		self.obsinfo = ObservationInfo(nature_vals,nature_err_covariance,nature_lats,nature_lons,None,testing)
 		self.testing=testing
+		if self.testing:
+			print('ObservationOperator constructor called.')
+		self.obsinfo = ObservationInfo(nature_vals,nature_err_covariance,nature_lats,nature_lons,None,testing)
 	# Should map conc3D (all but last axis of conc4D) to 1D vector of shape nature_vals along with 1d vectors of lat and longitude indices to support localization.
 	def H(self, conc3D,latinds=None,loninds=None):
 		raise NotImplementedError
 	def obsMeanAndPert(self, conc4D,latval=None,lonval=None):
+		if self.testing:
+			print('obsMeanAndPert called within ObservationOperator.')
 		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
 			if latval:
