@@ -165,12 +165,20 @@ class NatureHelper(object):
 		if self.testing:
 			print("NatureHelper construction completed.")
 	def getNatureVals(self,species,latind=None,lonind=None):
+		if self.testing:
+			print("Getting nature values.")
 		return self.obs_info.getObsVal(latind,lonind,species)
 	def getNatureErr(self,species,latind=None,lonind=None):
+		if self.testing:
+			print("Getting nature error.")
 		return self.obs_info.getObsErr(latind,lonind,species)
 	def getNatureLatLon(self,species,latind=None,lonind=None):
+		if self.testing:
+			print("Getting nature lat/lon.")
 		return self.obs_info.getObsLatLon(latind,lonind,species)
 	def makeObsOp(self,species,ObsOperatorClass,latind=None,lonind=None):
+		if self.testing:
+			print(f"Making observation operator for species {species}.")
 		nature_vals = self.getNatureVals(species,latind,lonind)
 		nature_err_covariance = self.getNatureErr(species,latind,lonind)
 		nature_lats,nature_lons = self.getNatureLatLon(species,latind,lonind)
