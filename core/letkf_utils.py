@@ -262,7 +262,7 @@ class Assimilator(object):
 		self.ObsOp = {}
 		for i,obs_spec_key in enumerate(self.observed_species.keys()):
 			ObsOp_instance = self.NatureHelperInstance.makeObsOp(obs_spec_key,self.ObsOperatorClass_list[i])
-			self.ObsOp[spec] = ObsOp_instance
+			self.ObsOp[obs_spec_key] = ObsOp_instance
 	def combineEnsemble(self,latind=None,lonind=None):
 		statevecs = []
 		for num in self.ensemble_numbers:
