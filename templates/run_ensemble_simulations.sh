@@ -86,9 +86,9 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   parallel -N 1 "srun -n1 -N1 --exclusive bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..${SLURM_CPUS_PER_TASK}}
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
-    #THIS IS NOT YET IMPLEMENTED: If this is ensemble member 1, check if assimilation is complete.
+    #THIS IS NOT YET IMPLEMENTED: If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
     if [ $x -eq 1 ]; then
-      bash check_for_assimilation_complete.sh
+      bash check_and_complete_assimilation.sh
     fi
     sleep 1
   done

@@ -17,3 +17,4 @@ fi
 
 printf "Test directory ready. Begin autotest for one core.\n"
 bash autotest_one_core.sh
+printf "Autotest for one core complete.\n"
