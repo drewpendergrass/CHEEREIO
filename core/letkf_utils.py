@@ -336,7 +336,7 @@ class Assimilator(object):
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
 		if self.testing:
-			print(f'Full ObsMeans at {(latval,lonval)} has dimensions {np.shape(full_obsmeans)}; Full ObsPerts at {(latind,lonind)} has dimensions {np.shape(full_obsperts)}; and Full ObsDiffs at {(latind,lonind)} has dimensions {np.shape(full_obsdiffs)}.')
+			print(f'Full ObsMeans at {(latval,lonval)} has dimensions {np.shape(full_obsmeans)}; Full ObsPerts at {(latval,lonval)} has dimensions {np.shape(full_obsperts)}; and Full ObsDiffs at {(latval,lonval)} has dimensions {np.shape(full_obsdiffs)}.')
 		return [full_obsmeans,full_obsperts,full_obsdiffs]
 	def combineEnsembleForSpecies(self,species):
 		if self.testing:
