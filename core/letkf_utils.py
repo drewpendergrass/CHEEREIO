@@ -36,7 +36,7 @@ class GC_Translator(object):
 		self.testing=testing
 		if self.testing:
 			self.num = path_to_rundir.split('_')[-1][0:4]
-			print(f"GC_translator number {self.num} has been called for directory {self.path_to_rundir} and restart {self.filename}; construction beginning")
+			print(f"GC_translator number {self.num} has been called for directory {path_to_rundir} and restart {self.filename}; construction beginning")
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
