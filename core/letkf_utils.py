@@ -318,7 +318,7 @@ class Assimilator(object):
 		state_mean = np.expand_dims(np.mean(statevecs,axis = 1),axis=1) #calculate ensemble mean
 		bigX = np.transpose(np.transpose(statevecs)-np.transpose(state_mean))
 		if self.testing:
-			print(f'Ensemble mean at {(latind,lonind)} has dimensions {np.shape(state_mean)} and bigX at at {(latind,lonind)} has dimensions {np.shape(bigX)}.')
+			print(f'Ensemble mean at {(latval,lonval)} has dimensions {np.shape(state_mean)} and bigX at at {(latval,lonval)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
 	def ensObsMeanPertDiff(self,latval,lonval):
 		if self.testing:
