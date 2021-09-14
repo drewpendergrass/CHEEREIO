@@ -148,6 +148,36 @@ class GC_Translator(object):
 		if self.testing:
 			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return statevecinds
+	def getColumnIndicesFromFullStateVector(self,latind,lonind):
+		if self.testing:
+			print(f"GC_Translator is getting column statevec indices FOR FULL VECTOR at {(latind,lonind)}.")
+		levcount = len(self.getLev())
+		latcount = len(self.getLat())
+		loncount = len(self.getLon())
+		totalcount = levcount*latcount*loncount
+		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
+		dummywhere_flat = dummy3d[:,latind,lonind].flatten()
+		if self.testing:
+			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat)} entries are valid.")
+		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
+		dummy2dwhere_flat = dummy2d[latind,lonind]
+		if self.testing:
+			print(f"Within a flattened 2D dummy square, {lummy2dwhere_flat} is sole valid entry.")
+		species_config = tx.getSpeciesConfig(self.testing)
+		conccount = len(species_config['STATE_VECTOR_CONC'])
+		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
+		ind_collector = []
+		cur_offset = 0
+		for i in range(conccount):
+			ind_collector.append((dummywhere_flat+cur_offset))
+			cur_offset+=totalcount
+		for i in range(emcount):
+			ind_collector.append((dummy2dwhere_flat+cur_offset))
+			cur_offset+=(latcount*loncount)
+		statevecinds = np.concatenate(ind_collector)
+		if self.testing:
+			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
+		return statevecinds
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
 		if self.testing:
@@ -177,10 +207,10 @@ class GC_Translator(object):
 		cur_offset = 0
 		for i in range(conccount):
 			ind_collector.append((dummywhere_match+cur_offset))
-			cur_offset+=len(dummywhere_match)
+			cur_offset+=len(dummywhere_flat)
 		for i in range(emcount):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
-			cur_offset+=1 #Only one value here.
+			cur_offset+=len(dummy2dwhere_flat) #Only one value here.
 		localizedstatevecinds = np.concatenate(ind_collector)
 		if self.testing:
 			print(f"There are a total of {len(localizedstatevecinds)}/{len(self.statevec)} selected from total statevec.")
@@ -262,9 +292,16 @@ class GT_Container(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
-
-
-
+	def reconstructAnalysisEnsemble(self):
+		self.analysisEnsemble = Mpme
+		pass
+	def updateRestartsAndScalingFactors(self):
+		for i in self.ensemble_numbers:
+			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
+	def saveRestartsAndScalingFactors(self):
+		for i in self.ensemble_numbers:
+			self.gt[i].saveRestart()
+			self.gt[i].saveEmissions()
 
 #Contains a dictionary referencing GC_Translators for every run directory.
 #In the special case where there is a nature run present (with number 0)
@@ -457,10 +494,3 @@ class Assimilator(object):
 			self.adjWAnalysis()
 			self.makeAnalysisCombinedEnsemble()
 			self.saveColumn(latval,lonval)
-	def updateRestartsAndScalingFactors(self):
-		for i in self.ensemble_numbers:
-			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
-	def saveRestartsAndScalingFactors(self):
-		for i in self.ensemble_numbers:
-			self.gt[i].saveRestart()
-			self.gt[i].saveEmissions()
