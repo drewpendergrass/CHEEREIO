@@ -84,13 +84,17 @@ class ObservationInfo(object):
 		if species:
 			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind,species)
-				to_return = self.errs[species][inds,inds]
+				to_return = np.zeros((len(inds),(inds)))
+				for i in range(len(inds)):
+					to_return[i,:] = self.errs[species][inds[i],inds]
 			else:
 				to_return = self.errs[species]
 		else:
 			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind)
-				to_return = self.errs[inds,inds]
+				to_return = np.zeros((len(inds),(inds)))
+				for i in range(len(inds)):
+					to_return[i,:] = self.errs[inds[i],inds]
 			else:
 				to_return = self.errs
 		if self.testing:
