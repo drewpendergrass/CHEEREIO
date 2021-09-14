@@ -248,7 +248,7 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 	csum = np.sum(DA_3d,axis = 0)
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
-	if not (latind is None)s:
+	if not (latinds is None):
 		csum = csum[latinds,loninds]
 		latvals = latgrid[latinds,loninds]
 		lonvals = longrid[latinds,loninds]
@@ -266,7 +266,7 @@ def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=Fa
 		print(f"Calculating surface observations for lat/lon inds {(latinds,loninds)}.")
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
-	if not (latind is None)s:
+	if not (latinds is None):
 		obs_vec = DA_3d[0,latinds,loninds]
 		latvals = latgrid[latinds,loninds]
 		lonvals = longrid[latinds,loninds]
