@@ -15,7 +15,7 @@ spc_config = tx.getSpeciesConfig(testing=testbool)
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
-subdirs.remove(f"{path_to_ensemble}/logs/")
+subdirs.remove(f"{parent_dir}/logs/")
 dirnames = [d.split('/')[-2] for d in subdirs]
 subdir_numstring = [int(n.split('_')[-1]) for n in dirnames]
 maxdir = max(subdir_numstring)
