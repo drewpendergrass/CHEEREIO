@@ -135,7 +135,7 @@ class GC_Translator(object):
 			print(f"Within a flattened 2D dummy square, {len(dummy2dwhere_flat)} entries are valid.")
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
-		emcount = len(species_config['STATE_VECTOR_CONC'])
+		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
 		cur_offset = 0
 		for i in range(conccount):
@@ -170,7 +170,7 @@ class GC_Translator(object):
 		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
-		emcount = len(species_config['STATE_VECTOR_CONC'])
+		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
 		cur_offset = 0
 		for i in range(conccount):
