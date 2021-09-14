@@ -289,12 +289,17 @@ class GT_Container(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
-				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
+				self.gt[ens] = GC_Translator(directory, timestamp, False,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 	def reconstructAnalysisEnsemble(self):
-		self.analysisEnsemble = Mpme
-		pass
+		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
+		for name, cols in zip(self.columns.keys(),self.columns.values()):
+			split_name = name.split('_')
+			latind = int(split_name[-3])
+			lonind = int(split_name[-1].split('.')[0])
+			colinds = self.gt[1].getColumnIndicesFromFullStateVector(latind,lonind)
+			self.analysisEnsemble[colinds,:] = cols
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
