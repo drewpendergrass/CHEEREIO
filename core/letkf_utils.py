@@ -178,7 +178,7 @@ class GC_Translator(object):
 			cur_offset+=len(dummywhere_flat_column)
 		for i in range(emcount):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
-			cur_offset+=len(dummy2dwhere_flat_column)
+			cur_offset+=1 #Only one value here.
 		localizedstatevecinds = np.concatenate(ind_collector)
 		if self.testing:
 			print(f"There are a total of {len(localizedstatevecinds)}/{len(self.statevec)} selected from total statevec.")
