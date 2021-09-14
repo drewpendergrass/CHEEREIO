@@ -159,23 +159,25 @@ class GC_Translator(object):
 		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
 		dummywhere_flat_column = dummy3d[:,latind,lonind].flatten()
+		dummywhere_match = np.where(np.in1d(dummywhere_flat,dummywhere_flat_column))[0]
 		if self.testing:
 			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat_column)} entries are valid in the column.")
-		dummywhere_match = np.where(np.in1d(dummywhere_flat,dummywhere_flat_column))[0]
+			print(f"Matched {len(dummywhere_match)} entries in the overall flattened and subsetted column; values are {dummywhere_match}")
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		dummy2dwhere_flat_column = dummy2d[latind,lonind]
+		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
 		if self.testing:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat_column} is the sole valid index in the column.")
-		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
+			print(f"Matched value in the overall flattened and subsetted square is {dummy2dwhere_match}")
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
 		cur_offset = 0
 		for i in range(conccount):
-			ind_collector.append((dummy2dwhere_match+cur_offset))
-			cur_offset+=len(dummywhere_flat_column)
+			ind_collector.append((dummywhere_match+cur_offset))
+			cur_offset+=len(dummywhere_match)
 		for i in range(emcount):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
 			cur_offset+=1 #Only one value here.
@@ -236,6 +238,32 @@ class GC_Translator(object):
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name].to_netcdf(file)
+
+#Lightweight container for GC_Translators; used to combine columns and update restarts.
+class GT_Container(object):
+	def __init__(self,timestamp,testing=False):
+		self.testing = testing
+		spc_config = tx.getSpeciesConfig(self.testing)
+		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
+		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
+		npy_column_files = glob(f'{self.path_to_scratch}/*.npy')
+		npy_col_names = [file.split('/')[-1] for file in npy_column_files]
+		npy_columns = [np.load(file) for file in npy_column_files]
+		self.columns = dict(zip(npy_col_names,npy_columns))
+		subdirs = glob(f"{path_to_ensemble}/*/")
+		subdirs.remove(f"{path_to_ensemble}/logs/")
+		dirnames = [d.split('/')[-2] for d in subdirs]
+		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
+		ensemble_numbers = []
+		self.gt = {}
+		self.observed_species = spc_config['OBSERVED_SPECIES']
+		for ens, directory in zip(subdir_numbers,subdirs):
+			if ens!=0:
+				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
+				ensemble_numbers.append(ens)
+		self.ensemble_numbers=np.array(ensemble_numbers)
+
+
 
 
 #Contains a dictionary referencing GC_Translators for every run directory.
