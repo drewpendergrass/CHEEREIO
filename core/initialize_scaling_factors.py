@@ -88,7 +88,7 @@ for num in subdir_numstring: #Loop through the non-nature directories
 		else:
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 		name = f'{emis_name}_SCALEFACTOR'
-		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{numstring}"
+		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{num}"
 		ds = xr.Dataset(
 			{"Scalar": (("time","lat","lon"), scaling_factors,{"long_name": "Scaling factor", "units":"1"})},
 			coords={
@@ -103,4 +103,4 @@ for num in subdir_numstring: #Loop through the non-nature directories
 			}
 		)
 		ds.to_netcdf(f"{outdir}/{name}.nc")
-		print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{numstring} initialized successfully!")
+		print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{num} initialized successfully!")
