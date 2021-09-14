@@ -55,10 +55,10 @@ class ObservationInfo(object):
 			else:
 				self.errs = np.diag(nature_vals*nature_err_covariances)
 		if self.testing:
-			print(f'ObservationInfo values are {self.values}')
-			print(f'ObservationInfo lats are {self.lats}')
-			print(f'ObservationInfo lons are {self.lons}')
-			print(f'ObservationInfo errs are {self.errs}')
+			print(f'ObservationInfo values have shape {np.shape(self.values)} and value {self.values}')
+			print(f'ObservationInfo lats have shape {np.shape(self.lats)} and value {self.lats}')
+			print(f'ObservationInfo lons have shape {np.shape(self.lons)} and value {self.lons}')
+			print(f'ObservationInfo errs have shape {np.shape(self.errs)} and value {self.errs}')
 			print(f'ObservationInfo constructor completed.')
 	def getObsVal(self,latind=None,lonind=None,species=None):
 		if self.testing:
@@ -66,30 +66,36 @@ class ObservationInfo(object):
 		if species:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind,species)
-				return self.values[species][inds]
+				to_return = self.values[species][inds]
 			else:
-				return self.values[species]
+				to_return = self.values[species]
 		else:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind)
-				return self.values[inds]
+				to_return = self.values[inds]
 			else:
-				return self.values
+				to_return = self.values
+		if self.testing:
+			print(f'getObsVal is returning array of shape {np.shape(to_return)}')
+		return to_return
 	def getObsErr(self,latind=None,lonind=None,species=None):
 		if self.testing:
 			print(f'getObsErr called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind,species)
-				return self.errs[species][inds,inds]
+				to_return = self.errs[species][inds,inds]
 			else:
-				return self.errs[species]
+				to_return = self.errs[species]
 		else:
 			if latind:
 				inds = self.getIndsOfInterest(latind,lonind)
-				return self.errs[inds,inds]
+				to_return = self.errs[inds,inds]
 			else:
-				return self.errs
+				to_return = self.errs
+		if self.testing:
+			print(f'getObsErr is returning array of shape {np.shape(to_return)}')
+		return to_return
 	def getIndsOfInterest(self,latind,lonind,species=None):
 		if self.testing:
 			print(f'getIndsOfInterest called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
@@ -109,15 +115,18 @@ class ObservationInfo(object):
 		if species:
 			if latind:
 				latloninds = self.getIndsOfInterest(latind,lonind,species)
-				return [self.lats[species][latloninds],self.lons[species][latloninds]]
+				to_return = [self.lats[species][latloninds],self.lons[species][latloninds]]
 			else:
-				return [self.lats[species],self.lons[species]]
+				to_return = [self.lats[species],self.lons[species]]
 		else:
 			if latind:
 				latloninds = self.getIndsOfInterest(latind,lonind,species)
-				return [self.lats[latloninds],self.lons[latloninds]]
+				to_return = [self.lats[latloninds],self.lons[latloninds]]
 			else:
-				return [self.lats,self.lons]
+				to_return = [self.lats,self.lons]
+		if self.testing:
+			print(f'getObsLatLon is returning lat array of shape {np.shape(to_return[0])} and lon array of shape {np.shape(to_return[1])}')
+		return to_return
 
 #Parent class for all observation operators.
 #Requires the full ensemble of concentrations, a 1D vector of "nature values",
