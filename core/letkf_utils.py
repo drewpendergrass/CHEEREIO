@@ -34,22 +34,33 @@ class GC_Translator(object):
 		self.restart_ds = xr.load_dataset(self.filename)
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
 		self.testing=testing
+		if self.testing:
+			self.num = path_to_rundir.split('_')[-1][0:4]
+			print(f"GC_translator number {self.num} has been called for directory {self.path_to_rundir} and restart {self.filename}; construction beginning")
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name] = xr.load_dataset(file)
+			if self.testing:
+				print(f"GC_translator number {self.num} has loaded scaling factors for {name}")
 		if computeStateVec:
 			self.buildStateVector()
 		else:
 			self.statevec = None
 			self.statevec_lengths = None #Until state vector is initialized this variable is None
+		if self.testing:
+			print(f"GC_Translator number {self.num} construction complete.")
 	#Since only one timestamp, returns in format lev,lat,lon
 	def getSpecies3Dconc(self, species):
 		da = np.array(self.restart_ds[f'SpeciesRst_{species}']).squeeze()
+		if self.testing:
+			print(f"GC_Translator number {self.num} got 3D conc for species {species} which are of dimension {np.shape(da)}.")
 		return da
 	def setSpecies3Dconc(self, species, conc3d):
 		baseshape = np.shape(conc3d)
 		conc4d = conc3d.reshape(np.concatenate([np.array([1]),baseshape]))
+		if self.testing:
+			print(f"GC_Translator number {self.num} set 3D conc for species {species} which are of dimension {np.shape(conc4d)}.")
 		self.restart_ds[f'SpeciesRst_{species}'] = (["time","lev","lat","lon"],conc4d,{"long_name":f"Dry mixing ratio of species {species}","units":"mol mol-1 dry","averaging_method":"instantaneous"})
 	def getLat(self):
 		return np.array(self.restart_ds['lat'])
@@ -92,6 +103,9 @@ class GC_Translator(object):
 		)
 		self.emis_ds_list[species] = xr.concat([self.emis_ds_list[species],ds],dim = 'time') #Concatenate
 	def buildStateVector(self):
+		if self.testing:
+			print("*****************************************************************")
+			print(f"GC_Translator number {self.num} is starting build of statevector!")
 		species_config = tx.getSpeciesConfig(self.testing)
 		statevec_components = []
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
@@ -100,16 +114,25 @@ class GC_Translator(object):
 			statevec_components.append(self.getEmisSF(spec_emis).flatten())
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
+		if self.testing:
+			print(f"GC_Translator number {self.num} has built statevector; it is of dimension {np.shape(self.statevec)}.")
+			print("*****************************************************************")
 	def getLocalizedStateVectorIndices(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
+		if self.testing:
+			print(f"GC_Translator is getting localized statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())
 		totalcount = levcount*latcount*loncount
 		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
+		if self.testing:
+			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat)} entries are valid.")
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
+		if self.testing:
+			print(f"Within a flattened 2D dummy square, {len(dummy2dwhere_flat)} entries are valid.")
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['STATE_VECTOR_CONC'])
@@ -122,9 +145,13 @@ class GC_Translator(object):
 			ind_collector.append((dummy2dwhere_flat+cur_offset))
 			cur_offset+=(latcount*loncount)
 		statevecinds = np.concatenate(ind_collector)
+		if self.testing:
+			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return statevecinds
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
+		if self.testing:
+			print(f"GC_Translator is getting column statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
 		loncount = len(self.getLon())
@@ -132,10 +159,14 @@ class GC_Translator(object):
 		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
 		dummywhere_flat_column = dummy3d[:,latind,lonind].flatten()
+		if self.testing:
+			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat_column)} entries are valid in the column.")
 		dummywhere_match = np.where(np.in1d(dummywhere_flat,dummywhere_flat_column))[0]
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		dummy2dwhere_flat_column = dummy2d[latind,lonind]
+		if self.testing:
+			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat_column} is the sole valid index in the column.")
 		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
@@ -149,15 +180,20 @@ class GC_Translator(object):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
 			cur_offset+=len(dummy2dwhere_flat_column)
 		localizedstatevecinds = np.concatenate(ind_collector)
+		if self.testing:
+			print(f"There are a total of {len(localizedstatevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return localizedstatevecinds
 	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
 			self.buildStateVector()
 		if latind: #User supplied ind
 			statevecinds = self.getLocalizedStateVectorIndices(latind,lonind)
-			return self.statevec[statevecinds]
+			statevec_toreturn = self.statevec[statevecinds]
 		else: #Return the whole vector
-			return self.statevec
+			statevec_toreturn = self.statevec
+		if self.testing:
+			print(f"GC Translator number {self.num} got statevector for inds {(latind,lonind)}; this vec has length {len(statevec_toreturn)} of total statevec {len(self.statevec)}.")
+		return statevec_toreturn
 	#Randomize the restart for purposes of testing. Perturbation is 1/2 of range of percent change selected from a uniform distribution.
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
