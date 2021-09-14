@@ -308,6 +308,8 @@ class Assimilator(object):
 		for num in self.ensemble_numbers:
 			statevecs.append(self.gt[num].getStateVector(latind,lonind))
 		statevec_mat = np.stack(statevecs,axis = -1) #Combine along second axis
+		if self.testing:
+			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevec_mat)}.')
 		return statevec_mat
 	def ensMeanAndPert(self,latval,lonval):
 		if self.testing:
@@ -315,6 +317,8 @@ class Assimilator(object):
 		statevecs = self.combineEnsemble(latval,lonval)
 		state_mean = np.expand_dims(np.mean(statevecs,axis = 1),axis=1) #calculate ensemble mean
 		bigX = np.transpose(np.transpose(statevecs)-np.transpose(state_mean))
+		if self.testing:
+			print(f'Ensemble mean at {(latind,lonind)} has dimensions {np.shape(state_mean)} and bigX at at {(latind,lonind)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
 	def ensObsMeanPertDiff(self,latval,lonval):
 		if self.testing:
@@ -331,6 +335,8 @@ class Assimilator(object):
 		full_obsmeans = np.concatenate(obsmeans)
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
+		if self.testing:
+			print(f'Full ObsMeans at {(latind,lonind)} has dimensions {np.shape(full_obsmeans)}; Full ObsPerts at {(latind,lonind)} has dimensions {np.shape(full_obsperts)}; and Full ObsDiffs at {(latind,lonind)} has dimensions {np.shape(full_obsdiffs)}.')
 		return [full_obsmeans,full_obsperts,full_obsdiffs]
 	def combineEnsembleForSpecies(self,species):
 		if self.testing:
@@ -361,6 +367,12 @@ class Assimilator(object):
 			print(f'prepareMeansAndPerts called in Assimilator for lat/lon inds {(latval,lonval)}')
 		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
+		if self.testing:
+			print(f'ybar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ybar_background)}.')
+			print(f'Ypert_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.Ypert_background)}.')
+			print(f'ydiff for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ydiff)}.')
+			print(f'xbar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.xbar_background)}.')
+			print(f'Xpert_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.Xpert_background)}.')
 	def makeR(self,latval=None,lonval=None):
 		if self.testing:
 			print(f'makeR called in Assimilator for lat/lon inds {(latval,lonval)}')
