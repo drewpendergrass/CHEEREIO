@@ -186,7 +186,7 @@ class GC_Translator(object):
 	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
 			self.buildStateVector()
-		if latind: #User supplied ind
+		if not (latind is None): #User supplied ind
 			statevecinds = self.getLocalizedStateVectorIndices(latind,lonind)
 			statevec_toreturn = self.statevec[statevecinds]
 		else: #Return the whole vector

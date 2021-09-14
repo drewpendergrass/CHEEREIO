@@ -64,13 +64,13 @@ class ObservationInfo(object):
 		if self.testing:
 			print(f'getObsVal called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
-			if latind:
+			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind,species)
 				to_return = self.values[species][inds]
 			else:
 				to_return = self.values[species]
 		else:
-			if latind:
+			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind)
 				to_return = self.values[inds]
 			else:
@@ -82,13 +82,13 @@ class ObservationInfo(object):
 		if self.testing:
 			print(f'getObsErr called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
-			if latind:
+			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind,species)
 				to_return = self.errs[species][inds,inds]
 			else:
 				to_return = self.errs[species]
 		else:
-			if latind:
+			if not (latind is None):
 				inds = self.getIndsOfInterest(latind,lonind)
 				to_return = self.errs[inds,inds]
 			else:
@@ -113,13 +113,13 @@ class ObservationInfo(object):
 		if self.testing:
 			print(f'getObsLatLon called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		if species:
-			if latind:
+			if not (latind is None):
 				latloninds = self.getIndsOfInterest(latind,lonind,species)
 				to_return = [self.lats[species][latloninds],self.lons[species][latloninds]]
 			else:
 				to_return = [self.lats[species],self.lons[species]]
 		else:
-			if latind:
+			if not (latind is None):
 				latloninds = self.getIndsOfInterest(latind,lonind,species)
 				to_return = [self.lats[latloninds],self.lons[latloninds]]
 			else:
@@ -147,7 +147,7 @@ class ObsOperator(object):
 			print(f'obsMeanAndPert called within ObservationOperator for lat/lon inds {(latval,lonval)}.')
 		obsEns = np.zeros([len(self.obsinfo.getObsVal(latval,lonval)),np.shape(conc4D)[3]]) #Observation ensemble
 		for i in range(np.shape(conc4D)[3]):
-			if latval:
+			if not (latval is None):
 				latinds,loninds = tx.getIndsOfInterest(latval,lonval,testing=self.testing)
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],latinds,loninds)
 			else:
@@ -248,7 +248,7 @@ def column_sum(DA_3d, latinds=None,loninds=None, bias=None, err=None, testing=Fa
 	csum = np.sum(DA_3d,axis = 0)
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
-	if latinds:
+	if not (latind is None)s:
 		csum = csum[latinds,loninds]
 		latvals = latgrid[latinds,loninds]
 		lonvals = longrid[latinds,loninds]
@@ -266,7 +266,7 @@ def surface_obs(DA_3d, latinds=None,loninds=None, bias=None, err=None,testing=Fa
 		print(f"Calculating surface observations for lat/lon inds {(latinds,loninds)}.")
 	latvals,lonvals = tx.getLatLonVals(testing=testing)
 	latgrid,longrid = makeLatLonGrid(latvals,lonvals)
-	if latinds:
+	if not (latind is None)s:
 		obs_vec = DA_3d[0,latinds,loninds]
 		latvals = latgrid[latinds,loninds]
 		lonvals = longrid[latinds,loninds]
