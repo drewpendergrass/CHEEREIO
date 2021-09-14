@@ -7,14 +7,20 @@ import sys
 
 teststr = str(sys.argv[1])
 if teststr=="TESTING":
-	spc_config = tx.getSpeciesConfig(testing=True)
+	testbool = True
 else:
-	spc_config = tx.getSpeciesConfig(testing=False)
+	testbool = False
+
+spc_config = tx.getSpeciesConfig(testing=testbool)
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
+subdirs.remove(f"{path_to_ensemble}/logs/")
 dirnames = [d.split('/')[-2] for d in subdirs]
-subdir_numstring = [n.split('_')[-1] for n in dirnames]
+subdir_numstring = [int(n.split('_')[-1]) for n in dirnames]
+maxdir = max(subdir_numstring)
+meanval = (maxdir+1)/2
+
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
@@ -66,19 +72,21 @@ perturbation = float(spc_config["pPERT"]) #perturbation, between 0 and 1 exclusi
 #                                          chosen from a uniform distribution
 if (perturbation <= 0) | (perturbation >= 1):
 	raise ValueError('Perturbation must be between 0 and 1 exclusive.')
-
-#Generate random uniform sdaling factors
 offset = 1-perturbation
 scale = perturbation*2
-scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 
-for numstring in subdir_numstring: #Loop through the non-nature directories
-	if numstring=='logs':
-		continue #This is the log file
-	num = int(numstring)
+for num in subdir_numstring: #Loop through the non-nature directories
 	if num == 0:
 		continue
 	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
+		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts.
+		if testbool:
+			offset = 1
+			scale = 0
+			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
+			scaling_factors *= num/meanval
+		else:
+			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 		name = f'{emis_name}_SCALEFACTOR'
 		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{numstring}"
 		ds = xr.Dataset(
