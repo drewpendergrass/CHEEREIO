@@ -169,10 +169,10 @@ class GC_Translator(object):
 		ind_collector = []
 		cur_offset = 0
 		for i in range(conccount):
-			ind_collector.append((dummywhere_flat+cur_offset))
+			ind_collector.append(dummywhere_flat+cur_offset)
 			cur_offset+=totalcount
 		for i in range(emcount):
-			ind_collector.append((dummy2dwhere_flat+cur_offset))
+			ind_collector.append(np.array([dummy2dwhere_flat+cur_offset]))
 			cur_offset+=(latcount*loncount)
 		statevecinds = np.concatenate(ind_collector)
 		if self.testing:
