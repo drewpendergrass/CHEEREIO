@@ -9,11 +9,7 @@ end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 
-#Optional arguments, or default to (1,17)
-latind=${1:-1}
-lonind=${2:-17}
-
 cd ../core
 source activate ${CONDA_ENV} #Activate conda environment.
-python -u diff_col.py ${end_timestamp} ${TESTSTR} ${latind} ${lonind} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/diffcol_${latind}_${lonind}.out
+python -u diff_col.py ${end_timestamp} ${TESTSTR} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/diffcol_onecol_test.out
 source deactivate
