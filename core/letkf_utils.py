@@ -343,15 +343,15 @@ class GT_Container(object):
 	def compareSpeciesEmis(self,species,latind,lonind):
 		colind = self.gt[1].getSpeciesEmisIndicesInColumn(species)
 		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
-		saved_col = saved_col[colind,:]
+		saved_col = saved_col[colind,:] #Now will just be a vector of length NumEnsemble
 		backgroundEnsemble = backgroundEnsemble[colind,:]
 		diff = diff[colind,:]
 		print(f'*********************************** {species} EMISSIONS SCALING AT INDEX {(latind,lonind)} ************************************')
-		for i in range(np.shape(saved_col)[1]):
+		for i in range(len(saved_col)):
 			print(f' ')
-			print(f'{species} in ensemble member {i+1} had background emissions scaling of {backgroundEnsemble[:,i]}')
-			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {saved_col[:,i]}')
-			print(f'This represents a difference of {diff[:,i]}')
+			print(f'{species} in ensemble member {i+1} had background emissions scaling of {backgroundEnsemble[i]}')
+			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {saved_col[i]}')
+			print(f'This represents a difference of {diff[i]}')
 			print(f' ')
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
