@@ -16,9 +16,8 @@ Please note that CHEEREIO is not fully operational and cannot yet be used for sc
 
 ### For localization implementation:
 
-1. Update translator to efficiently subset localization deterministically
-2. Update Assimilator to save columns to temporary directory
-3. Implement cleanup.sh to combine columns, overwrite restart and scaling factors, clean up temporary directory, and restart GEOS-Chem ensemble
+1. Fix bugs with indexing.
+2. Verify that weeklong run functions correctly. 
 
 ### After localization implementation:
 
@@ -30,7 +29,7 @@ Please note that CHEEREIO is not fully operational and cannot yet be used for sc
 ### For usability:
 
 1. Script to turn GC run directory into a CHEEREIO template run directory.
-2. Support for version 12.
+2. Documentation writing
 
 ## Documentation
 Detailed documentation is available on [ReadTheDocs](https://cheereio.readthedocs.io), including installation instructions. If you encounter any problems not covered by the documentation, please open an [issue](https://github.com/drewpendergrass/CHEEREIO/issues) on GitHub.
