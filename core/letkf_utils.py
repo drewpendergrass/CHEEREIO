@@ -162,7 +162,7 @@ class GC_Translator(object):
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[latind,lonind]
 		if self.testing:
-			print(f"Within a flattened 2D dummy square, {lummy2dwhere_flat} is sole valid entry.")
+			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat} is sole valid entry.")
 		species_config = tx.getSpeciesConfig(self.testing)
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
