@@ -15,5 +15,5 @@ lonind=${2:-17}
 
 cd ../core
 source activate ${CONDA_ENV} #Activate conda environment.
-python -u diff_col.py ${end_timestamp} ${TESTSTR} ${latind} ${lonind}  | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/diffcol_${latind}_${lonind}.out
+python -u diff_col.py ${end_timestamp} ${TESTSTR} ${latind} ${lonind} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/diffcol_${latind}_${lonind}.out
 source deactivate
