@@ -178,6 +178,24 @@ class GC_Translator(object):
 		if self.testing:
 			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return statevecinds
+	def getSpeciesConcIndicesInColumn(self,species):
+		levcount = len(self.getLev())
+		species_config = tx.getSpeciesConfig(self.testing)
+		cur_offset = 0
+		for ind,spec in enumerate(species_config['STATE_VECTOR_CONC']):
+			if species == spec:
+				return np.arange(cur_offset,cur_offset+levcount)
+			cur_offset+=levcount
+		return None #If loop doesn't terminate we did not find the species
+	def getSpeciesEmisIndicesInColumn(self,species):
+		levcount = len(self.getLev())
+		species_config = tx.getSpeciesConfig(self.testing)
+		cur_offset = len(species_config['STATE_VECTOR_CONC'])*levcount
+		for ind,spec in enumerate(species_config['CONTROL_VECTOR_EMIS']):
+			if species == spec:
+				return cur_offset
+			cur_offset+=1
+		return None #If loop doesn't terminate we did not find the species
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
 		if self.testing:
@@ -269,7 +287,7 @@ class GC_Translator(object):
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name].to_netcdf(file)
 
-#Lightweight container for GC_Translators; used to combine columns and update restarts.
+#Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
 	def __init__(self,timestamp,testing=False):
 		self.testing = testing
@@ -301,13 +319,40 @@ class GT_Container(object):
 			if i!=1:
 				backgroundEnsemble[:,i] = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
 		return backgroundEnsemble
-	def compareColumns(self,latind,lonind):
+	def diffColumns(self,latind,lonind):
 		filenames = list(self.columns.keys())
 		substr = f'lat_{latind}_lon_{lonind}.npy'
 		search = [i for i in filenames if substr in i]
 		saved_col = self.columns[search[0]]
 		backgroundEnsemble = self.constructColStatevec(latind,lonind)
 		diff = saved_col-backgroundEnsemble
+		return [saved_col,backgroundEnsemble,diff]
+	def compareSpeciesConc(self,species,latind,lonind):
+		colind = self.gt[1].getSpeciesConcIndicesInColumn(species)
+		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
+		saved_col = saved_col[colind,:]
+		backgroundEnsemble = backgroundEnsemble[colind,:]
+		diff = diff[colind,:]
+		print(f'*********************************** {species} CONCENTRATION COLUMN AT INDEX {(latind,lonind)} ************************************')
+		for i in range(np.shape(saved_col)[1]):
+			print(f' ')
+			print(f'{species} in ensemble member {i+1} had background concentration of {backgroundEnsemble[:,i]}')
+			print(f'{species} in ensemble member {i+1} had analysis concentration of {saved_col[:,i]}')
+			print(f'This represents a difference of {diff[:,i]}')
+			print(f' ')
+	def compareSpeciesEmis(self,species,latind,lonind):
+		colind = self.gt[1].getSpeciesEmisIndicesInColumn(species)
+		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
+		saved_col = saved_col[colind,:]
+		backgroundEnsemble = backgroundEnsemble[colind,:]
+		diff = diff[colind,:]
+		print(f'*********************************** {species} EMISSIONS SCALING AT INDEX {(latind,lonind)} ************************************')
+		for i in range(np.shape(saved_col)[1]):
+			print(f' ')
+			print(f'{species} in ensemble member {i+1} had background emissions scaling of {backgroundEnsemble[:,i]}')
+			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {saved_col[:,i]}')
+			print(f'This represents a difference of {diff[:,i]}')
+			print(f' ')
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
 		for name, cols in zip(self.columns.keys(),self.columns.values()):
