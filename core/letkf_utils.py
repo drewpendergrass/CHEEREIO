@@ -292,6 +292,22 @@ class GT_Container(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, False,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
+	#Gets saved column and compares to the original files
+	def constructColStatevec(self,latind,lonind):
+		col1vec = self.gt[1].getColumnIndicesFromFullStateVector(latind,lonind)
+		backgroundEnsemble = np.zeros((len(col1vec),len(self.ensemble_numbers)))
+		backgroundEnsemble[:,1] = col1vec
+		for i in self.ensemble_numbers:
+			if i!=1:
+				backgroundEnsemble[:,i] = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
+		return backgroundEnsemble
+	def compareColumns(self,latind,lonind):
+		filenames = list(self.columns.keys())
+		substr = f'lat_{latind}_lon_{lonind}.npy'
+		search = [i for i in filenames if substr in i]
+		saved_col = self.columns[search[0]]
+		backgroundEnsemble = self.constructColStatevec(latind,lonind)
+		diff = saved_col-backgroundEnsemble
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
 		for name, cols in zip(self.columns.keys(),self.columns.values()):
