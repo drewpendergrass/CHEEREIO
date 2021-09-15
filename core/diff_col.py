@@ -20,7 +20,7 @@ dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 control_conc = data['CONTROL_VECTOR_CONC']
 control_emis = list(data['CONTROL_VECTOR_EMIS'].keys())
 
-wrapper = lu.GT_Container(timestamp,testbool)
+wrapper = lu.GT_Container(timestamp,testbool,constructStateVecs=True)
 
 print(f'AUTOTESTING CONTROL VECTOR SPECIES AT {(latind,lonind)}')
 for species in control_conc:

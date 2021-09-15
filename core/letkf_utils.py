@@ -289,7 +289,7 @@ class GC_Translator(object):
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
-	def __init__(self,timestamp,testing=False):
+	def __init__(self,timestamp,testing=False,constructStateVecs=False):
 		self.testing = testing
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
@@ -307,7 +307,7 @@ class GT_Container(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
-				self.gt[ens] = GC_Translator(directory, timestamp, False,self.testing)
+				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 	#Gets saved column and compares to the original files
