@@ -392,6 +392,7 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{Partition}:${Partition}:g" \
        -e "s:{Memory}:${Memory}:g" \
        -e "s:{WallTime}:${WallTime}:g" \
+       -e "s:{TESTBOOL}:false:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
 if [ SIMULATE_NATURE ]; then
@@ -755,6 +756,8 @@ fi
 #Modify HEMCO_Config so that GEOS-Chem will read in assimilated scaling factors.
 cd ${ASSIM_PATH}/core
 bash prepare_template_hemco_config.sh
+printf "${thinline}"
+
 
 printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."
 printf "\n     Modify all configuration files BEFORE creating spinup or ensemble run directories."
@@ -928,8 +931,8 @@ if "$SetupEnsembleRuns"; then
 
     #Create initial scaling factors
     cd core
-    python initialize_scaling_factors.py "${START_DATE}"
-
+    python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}"
+    python prep_par.py PRODUCTION
     source deactivate #Exit Conda environment
 
     #Store current time.

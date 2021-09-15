@@ -9,7 +9,7 @@
 	"REGION" : "",
 	"BUFFER" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "Global_Coarse_Test",
+	"RUN_NAME" : "ASSIM_MATH_TESTS",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
@@ -20,8 +20,9 @@
 	"DO_SPINUP" : "false",
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
-	"START_DATE" : "20190101",
-	"END_DATE" : "20190108",
+	"START_DATE" : "20181231",
+	"ASSIM_DATE" : "20190101",
+	"END_DATE" : "20190101",
 	"nEnsemble" : "2",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
@@ -30,8 +31,8 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "15000",
-	"WallTime" : "1-00\\:00",
+	"Memory" : "2000",
+	"WallTime" : "0-00\\:30",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
 	"comment006" : "******************************************************************************",
@@ -356,13 +357,19 @@
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
 		"0.20",
-		"0.30"
+		"0.30",
+		"0.10"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
-		"SumOperator"
+		"SumOperator",
+		"SurfaceOperator"
 	],
-	"NATURE_OPERATOR": "SumNatureHelper",
+	"NATURE_H_FUNCTIONS" : [
+		"column_sum",
+		"column_sum",
+		"surface_obs"
+	],
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "24"
 }
