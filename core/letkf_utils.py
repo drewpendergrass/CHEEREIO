@@ -314,10 +314,10 @@ class GT_Container(object):
 	def constructColStatevec(self,latind,lonind):
 		col1vec = self.gt[1].getColumnIndicesFromFullStateVector(latind,lonind)
 		backgroundEnsemble = np.zeros((len(col1vec),len(self.ensemble_numbers)))
-		backgroundEnsemble[:,1] = col1vec
+		backgroundEnsemble[:,0] = col1vec
 		for i in self.ensemble_numbers:
 			if i!=1:
-				backgroundEnsemble[:,i] = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
+				backgroundEnsemble[:,i-1] = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
 		return backgroundEnsemble
 	def diffColumns(self,latind,lonind):
 		filenames = list(self.columns.keys())
