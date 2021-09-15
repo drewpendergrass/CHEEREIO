@@ -23,7 +23,7 @@
 	"START_DATE" : "20181231",
 	"ASSIM_DATE" : "20190101",
 	"END_DATE" : "20190101",
-	"nEnsemble" : "2",
+	"nEnsemble" : "16",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
 	"comment003" : "***************************************************************************",
@@ -356,9 +356,9 @@
 	"NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER" : "5.0",
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
-		"0.20",
-		"0.30",
-		"0.10"
+		"0.10",
+		"0.15",
+		"0.03"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
@@ -370,7 +370,7 @@
 		"column_sum",
 		"surface_obs"
 	],
-	"INFLATION_FACTOR": "0.05",
+	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "24"
 }
 
