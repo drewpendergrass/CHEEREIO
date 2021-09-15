@@ -339,7 +339,7 @@ class GT_Container(object):
 			print(f' ')
 			print(f'{species} in ensemble member {i+1} had background concentration of {backgroundEnsemble[:,i]}')
 			print(f'{species} in ensemble member {i+1} had analysis concentration of {saved_col[:,i]}')
-			print(f'This represents a difference of {diff[:,i]}')
+			print(f'This represents a percent difference of {100*(diff[:,i]/backgroundEnsemble[:,i])}%')
 			print(f' ')
 	def compareSpeciesEmis(self,species,latind,lonind):
 		colind = self.gt[1].getSpeciesEmisIndicesInColumn(species)
@@ -352,7 +352,7 @@ class GT_Container(object):
 			print(f' ')
 			print(f'{species} in ensemble member {i+1} had background emissions scaling of {backgroundEnsemble[i]}')
 			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {saved_col[i]}')
-			print(f'This represents a difference of {diff[i]}')
+			print(f'This represents a percent difference of {100*(diff[i]/backgroundEnsemble[i])}%')
 			print(f' ')
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
