@@ -13,7 +13,7 @@ else:
 	testbool = False
 
 data = tx.getSpeciesConfig(testing=testbool)
-if len(sys.argv=5):
+if len(sys.argv)==5:
 	latind = int(sys.argv[3])
 	lonind = int(sys.argv[4])
 	customind = True 
