@@ -81,12 +81,12 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 	if num == 0:
 		continue
 	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
-		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts.
+		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
 		if testbool:
 			offset = 1
 			scale = 0
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
-			scaling_factors *= num/meanval
+			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 		name = f'{emis_name}_SCALEFACTOR'

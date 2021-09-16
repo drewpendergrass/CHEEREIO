@@ -7,6 +7,7 @@ import sys
 print('Begin restart adjustment.')
 path_to_ensemble = str(sys.argv[1]) #Emsemble directory; "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/Korea_NO2_test/ensemble_runs/"
 timestamp = str(sys.argv[2]) #Restart timestamp; "20190101_0000"
+biasshift = float(sys.argv[3]) #How much to change the bias.
 
 subdirs = glob(f"{path_to_ensemble}/*/")
 subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -18,7 +19,7 @@ for ens, directory in zip(subdir_numbers,subdirs):
 	if ens!=0:
 		print(f'Perturbing directory #{ens}.')
 		gt = lu.GC_Translator(directory, timestamp, False, True)
-		gt.randomizeRestart(perturbation=0,bias=(ens/meanval)-1)
+		gt.randomizeRestart(perturbation=0,bias=(ens/meanval)-1+biasshift)
 		gt.saveRestart()
 
 print('Restart adjustment complete.')
