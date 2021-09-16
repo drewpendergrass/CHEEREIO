@@ -459,7 +459,7 @@ class Assimilator(object):
 			if i!=firstens:
 				statevecs[:,i-1] = self.gt[i].getStateVector(latind,lonind)
 		if self.testing:
-			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevec_mat)}.')
+			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevecs)}.')
 		return statevecs
 	def ensMeanAndPert(self,latval,lonval):
 		if self.testing:
