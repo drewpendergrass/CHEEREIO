@@ -451,17 +451,16 @@ class Assimilator(object):
 	def combineEnsemble(self,latind=None,lonind=None):
 		if self.testing:
 			print(f'combineEnsemble called in Assimilator for lat/lon inds {(latind,lonind)}')
-		statevecs = []
 		firstens = self.ensemble_numbers[0]
 		firstvec = self.gt[firstens].getStateVector(latind,lonind)
 		statevecs = np.zeros((len(firstvec),len(self.ensemble_numbers)))
 		statevecs[:,firstens-1] = firstvec
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				statevecs[:,i-1] = self.gt[i].getStateVector(latind,lonind))
+				statevecs[:,i-1] = self.gt[i].getStateVector(latind,lonind)
 		if self.testing:
 			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevec_mat)}.')
-		return statevec_mat
+		return statevecs
 	def ensMeanAndPert(self,latval,lonval):
 		if self.testing:
 			print(f'ensMeanAndPert called in Assimilator for lat/lon inds {(latval,lonval)}')
@@ -493,9 +492,16 @@ class Assimilator(object):
 		if self.testing:
 			print(f'combineEnsembleForSpecies called in Assimilator for species {species}')
 		conc3D = []
+		firstens = self.ensemble_numbers[0]
+		first3D = self.gt[firstens].getSpecies3Dconc(species)
+		shape4D = np.zeros(4)
+		shape4D[0:3] = np.shape(first3D)
+		shape4D[3]=len(self.ensemble_numbers)
+		conc4D = np.zeros(shape4D)
+		conc4D[:,:,:,firstens-1] = first3D
 		for i in self.ensemble_numbers:
-			conc3D.append(self.gt[i].getSpecies3Dconc(species))
-		conc4D = np.stack(conc3D,axis = -1) #Combine along fourth axis
+			if i!=firstens:
+				conc4D[:,:,:,firstens-1] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
 	def ensMeanAndPertForSpecies(self, species):
 		if self.testing:
