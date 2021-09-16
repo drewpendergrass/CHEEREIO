@@ -18,7 +18,7 @@ for ens, directory in zip(subdir_numbers,subdirs):
 	if ens!=0:
 		print(f'Perturbing directory #{ens}.')
 		gt = lu.GC_Translator(directory, timestamp, False, True)
-		gt.randomizeRestart(perturbation=0,bias=(ens/meanval))
+		gt.randomizeRestart(perturbation=0,bias=(ens/meanval)-1)
 		gt.saveRestart()
 
 print('Restart adjustment complete.')
