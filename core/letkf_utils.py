@@ -452,9 +452,13 @@ class Assimilator(object):
 		if self.testing:
 			print(f'combineEnsemble called in Assimilator for lat/lon inds {(latind,lonind)}')
 		statevecs = []
-		for num in self.ensemble_numbers:
-			statevecs.append(self.gt[num].getStateVector(latind,lonind))
-		statevec_mat = np.stack(statevecs,axis = -1) #Combine along second axis
+		firstens = self.ensemble_numbers[0]
+		firstvec = self.gt[firstens].getStateVector(latind,lonind)
+		statevecs = np.zeros((len(firstvec),len(self.ensemble_numbers)))
+		statevecs[:,firstens-1] = firstvec
+		for i in self.ensemble_numbers:
+			if i!=firstens:
+				statevecs[:,i-1] = self.gt[i].getStateVector(latind,lonind))
 		if self.testing:
 			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevec_mat)}.')
 		return statevec_mat
