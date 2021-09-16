@@ -111,7 +111,7 @@ class GC_Translator(object):
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.getSpecies3Dconc(spec_conc).flatten())
 		#If no scaling factor files, append 1s because this is a nature directory
-		if len(self.emis_sf_filenames==0):
+		if len(self.emis_sf_filenames)==0:
 			lenones = len(self.getLat())*len(self.getLon())*len(species_config['CONTROL_VECTOR_EMIS'])
 			statevec_components.append(np.ones(lenones))
 		else:
