@@ -16,7 +16,7 @@ Please note that CHEEREIO is not fully operational and cannot yet be used for sc
 
 ### For localization implementation:
 
-1. Fix bugs with indexing.
+1. Understand why update is so small (order of magnitude issue in math?).
 2. Verify that weeklong run functions correctly. 
 
 ### After localization implementation:
