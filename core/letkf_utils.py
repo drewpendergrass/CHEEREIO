@@ -497,6 +497,7 @@ class Assimilator(object):
 		shape4D = np.zeros(4)
 		shape4D[0:3] = np.shape(first3D)
 		shape4D[3]=len(self.ensemble_numbers)
+		shape4D = shape4D.astype(int)
 		conc4D = np.zeros(shape4D)
 		conc4D[:,:,:,firstens-1] = first3D
 		for i in self.ensemble_numbers:
