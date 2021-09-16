@@ -360,7 +360,8 @@ class GT_Container(object):
 		saved_col = saved_col[colind,:] #Now will just be a vector of length NumEnsemble
 		backgroundEnsemble = backgroundEnsemble[colind,:]
 		diff = diff[colind,:]
-		naturecol = self.nature.statevec[colind]
+		col1indvec = self.nature.getColumnIndicesFromFullStateVector(latind,lonind)
+		naturecol = self.nature.statevec[col1indvec][colind]
 		print(f'*********************************** {species} EMISSIONS SCALING AT INDEX {(latind,lonind)} ************************************')
 		for i in range(len(saved_col)):
 			print(f' ')
