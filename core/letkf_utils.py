@@ -304,19 +304,23 @@ class GT_Container(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.gt = {}
+		self.nature = None
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens!=0:
+			if ens==0:
+				self.nature = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
+			else:
 				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 	#Gets saved column and compares to the original files
 	def constructColStatevec(self,latind,lonind):
-		col1indvec = self.gt[1].getColumnIndicesFromFullStateVector(latind,lonind)
+		firstens = self.ensemble_numbers[0]
+		col1indvec = self.gt[firstens].getColumnIndicesFromFullStateVector(latind,lonind)
 		backgroundEnsemble = np.zeros((len(col1indvec),len(self.ensemble_numbers)))
-		backgroundEnsemble[:,0] = self.gt[1].statevec[col1indvec]
+		backgroundEnsemble[:,firstens-1] = self.gt[firstens].statevec[col1indvec]
 		for i in self.ensemble_numbers:
-			if i!=1:
+			if i!=firstens:
 				colinds = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
 				backgroundEnsemble[:,i-1] = self.gt[i].statevec[colinds]
 		return backgroundEnsemble
@@ -329,29 +333,33 @@ class GT_Container(object):
 		diff = saved_col-backgroundEnsemble
 		return [saved_col,backgroundEnsemble,diff]
 	def compareSpeciesConc(self,species,latind,lonind):
-		colind = self.gt[1].getSpeciesConcIndicesInColumn(species)
+		firstens = self.ensemble_numbers[0]
+		colind = self.gt[firstens].getSpeciesConcIndicesInColumn(species)
 		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
 		saved_col = saved_col[colind,:]
 		backgroundEnsemble = backgroundEnsemble[colind,:]
 		diff = diff[colind,:]
+		naturecol = self.nature.statevec[colind]
 		print(f'*********************************** {species} CONCENTRATION COLUMN AT INDEX {(latind,lonind)} ************************************')
 		for i in range(np.shape(saved_col)[1]):
 			print(f' ')
-			print(f'{species} in ensemble member {i+1} had background concentration of {backgroundEnsemble[:,i]}')
-			print(f'{species} in ensemble member {i+1} had analysis concentration of {saved_col[:,i]}')
+			print(f'{species} in ensemble member {i+1} had background concentration of {100*(backgroundEnsemble[:,i]/naturecol)}% nature')
+			print(f'{species} in ensemble member {i+1} had analysis concentration of {100*(saved_col[:,i]/naturecol)}% nature')
 			print(f'This represents a percent difference of {100*(diff[:,i]/backgroundEnsemble[:,i])}%')
 			print(f' ')
 	def compareSpeciesEmis(self,species,latind,lonind):
-		colind = self.gt[1].getSpeciesEmisIndicesInColumn(species)
+		firstens = self.ensemble_numbers[0]
+		colind = self.gt[firstens].getSpeciesEmisIndicesInColumn(species)
 		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
 		saved_col = saved_col[colind,:] #Now will just be a vector of length NumEnsemble
 		backgroundEnsemble = backgroundEnsemble[colind,:]
 		diff = diff[colind,:]
+		naturecol = self.nature.statevec[colind]
 		print(f'*********************************** {species} EMISSIONS SCALING AT INDEX {(latind,lonind)} ************************************')
 		for i in range(len(saved_col)):
 			print(f' ')
-			print(f'{species} in ensemble member {i+1} had background emissions scaling of {backgroundEnsemble[i]}')
-			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {saved_col[i]}')
+			print(f'{species} in ensemble member {i+1} had background emissions scaling of {100*(backgroundEnsemble[i]/naturecol)}% nature')
+			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {100*(saved_col[i]/naturecol)}% nature')
 			print(f'This represents a percent difference of {100*(diff[i]/backgroundEnsemble[i])}%')
 			print(f' ')
 	def reconstructAnalysisEnsemble(self):

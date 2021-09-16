@@ -105,9 +105,9 @@ class ObservationInfo(object):
 			print(f'getIndsOfInterest called within ObservationInfo for species {species} and lat/lon inds {(latind,lonind)}.')
 		data = tx.getSpeciesConfig(self.testing)
 		loc_rad = float(data['LOCALIZATION_RADIUS_km'])
-		gridlat,gridlon = tx.getLatLonVals(data,self.testing)
-		latval = gridlat[latind]
-		lonval = gridlon[lonind]
+		origlat,origlon = tx.getLatLonVals(data,self.testing)
+		latval = origlat[latind]
+		lonval = origlon[lonind]
 		if species:
 			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats[species],self.lons[species])])
 		else:
