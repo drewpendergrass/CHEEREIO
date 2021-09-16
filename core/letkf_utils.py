@@ -344,7 +344,8 @@ class GT_Container(object):
 		saved_col = saved_col[colind,:]
 		backgroundEnsemble = backgroundEnsemble[colind,:]
 		diff = diff[colind,:]
-		naturecol = self.nature.statevec[colind]
+		col1indvec = self.nature.getColumnIndicesFromFullStateVector(latind,lonind)
+		naturecol = self.nature.statevec[col1indvec][colind]
 		print(f'*********************************** {species} CONCENTRATION COLUMN AT INDEX {(latind,lonind)} ************************************')
 		for i in range(np.shape(saved_col)[1]):
 			print(f' ')
