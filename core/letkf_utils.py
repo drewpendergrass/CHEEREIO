@@ -478,7 +478,6 @@ class Assimilator(object):
 		obsdiffs = []
 		for obskey,species in zip(list(self.observed_species.keys()),list(self.observed_species.values())):
 			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(obskey,species,latval,lonval)
-			obsmean = obsmean.squeeze()
 			obsmeans.append(obsmean)
 			obsperts.append(obspert)
 			obsdiffs.append(self.obsDiffForSpecies(obskey,obsmean,latval,lonval))
