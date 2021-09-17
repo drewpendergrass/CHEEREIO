@@ -158,7 +158,7 @@ class ObsOperator(object):
 				obsEns[:,i],_,_ = self.H(conc4D[:,:,:,i],None,None)
 		obsMean = np.mean(obsEns,axis = 1)
 		obsPert = np.zeros(np.shape(obsEns))
-		for j in range(np.shape(obsEns)):
+		for j in range(np.shape(obsEns)[1]):
 			obsPert[:,j] = obsEns[:,j]-obsMean
 		return [obsMean,obsPert]
 	def obsDiff(self,vals,latval=None,lonval=None):
