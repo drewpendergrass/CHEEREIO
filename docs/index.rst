@@ -18,6 +18,8 @@ The GEOS-Chem CHEmistry and Emissions REanalysis Interface with Observations (CH
 
 This manual assumes that you are familiar with the basics of setting up and running the GEOS-Chem chemical transport model. For more information, please see the `GEOS-Chem Wiki <http://wiki.seas.harvard.edu/geos-chem/index.php/Main_Page>`__.
 
+I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at pendergrass [AT] g [DOT] harvard [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. Bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
+
 .. toctree::
    :maxdepth: 3   
    :caption: Basics of CHEEREIO
