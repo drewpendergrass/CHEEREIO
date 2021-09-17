@@ -466,7 +466,9 @@ class Assimilator(object):
 			print(f'ensMeanAndPert called in Assimilator for lat/lon inds {(latval,lonval)}')
 		statevecs = self.combineEnsemble(latval,lonval)
 		state_mean = np.expand_dims(np.mean(statevecs,axis = 1),axis=1) #calculate ensemble mean
-		bigX = np.transpose(np.transpose(statevecs)-np.transpose(state_mean))
+		bigX = np.zeros(np.shape(statevecs))
+		for i in range(np.shape(bigX)[1]):
+			bigX[:,i] = statevecs[:,i]-state_mean[:,0]
 		if self.testing:
 			print(f'Ensemble mean at {(latval,lonval)} has dimensions {np.shape(state_mean)} and bigX at at {(latval,lonval)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
@@ -558,13 +560,14 @@ class Assimilator(object):
 			print(f'WbarAnalysis made in Assimilator. It has dimension {np.shape(self.WbarAnalysis)} and value {self.WbarAnalysis}')
 	def adjWAnalysis(self):
 		k = len(self.ensemble_numbers)
-		wbartiled = np.transpose(np.tile(self.WbarAnalysis,(k,1)))
-		self.WAnalysis+=wbartiled
+		for i in range(k):
+			self.WAnalysis[:,i]+=self.WbarAnalysis
 		if self.testing:
 			print(f'WAnalysis adjusted in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeAnalysisCombinedEnsemble(self):
-		analysis_pert = self.Xpert_background @ self.WAnalysis
-		self.analysisEnsemble = np.transpose(np.transpose(analysis_pert)+np.transpose(self.xbar_background))
+		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
+		for i in range(np.shape(self.analysisEnsemble)[1]):
+			self.analysisEnsemble[:,i] = (self.Xpert_background @ self.WAnalysis[:,i])+self.xbar_background
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
 	def saveColumn(self,latval,lonval):
