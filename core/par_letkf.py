@@ -1,4 +1,3 @@
-import observation_operators as obs
 import letkf_utils as lu
 import sys
 import time
