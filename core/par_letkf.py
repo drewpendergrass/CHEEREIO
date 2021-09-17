@@ -35,6 +35,17 @@ print('-------------------END LETKF-------------------')
 # corenum = 1
 # testing = True
 # assimilator = lu.Assimilator(timestamp,ensnum,corenum,testing)
+
+# assimilator.prepareMeansAndPerts(23,0)
+# assimilator.makeR(23,0)
+# assimilator.makeC()
+# assimilator.makePtildeAnalysis()
+# assimilator.makeWAnalysis()
+# assimilator.makeWbarAnalysis()
+# assimilator.adjWAnalysis()
+# assimilator.makeAnalysisCombinedEnsemble()
+
+
 # assimilator.prepareMeansAndPerts(23,0)
 # assimilator.ybar_background-assimilator.Ypert_background[:,0]
 # latinds,loninds = tx.getIndsOfInterest(23,0,testing=True)
