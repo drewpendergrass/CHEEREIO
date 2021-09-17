@@ -1,5 +1,9 @@
+.. _Deploying the Ensemble:
+
 Deploying the ensemble
 ==========
+
+.. _Configuration:
 
 The Ensemble configuration file
 -------------
