@@ -568,7 +568,7 @@ class Assimilator(object):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
 		k = len(self.ensemble_numbers)
 		for i in range(k):
-			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
+			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background[:,0]
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
 	def saveColumn(self,latval,lonval):
