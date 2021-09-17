@@ -566,8 +566,9 @@ class Assimilator(object):
 			print(f'WAnalysis adjusted in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeAnalysisCombinedEnsemble(self):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
-		for i in range(np.shape(self.analysisEnsemble)[1]):
-			self.analysisEnsemble[:,i] = (self.Xpert_background @ self.WAnalysis[:,i])+self.xbar_background
+		k = len(self.ensemble_numbers)
+		for i in range(k):
+			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
 	def saveColumn(self,latval,lonval):
