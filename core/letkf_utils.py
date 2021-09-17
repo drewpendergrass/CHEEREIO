@@ -501,7 +501,7 @@ class Assimilator(object):
 		conc4D[:,:,:,firstens-1] = first3D
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				conc4D[:,:,:,firstens-1] = self.gt[i].getSpecies3Dconc(species)
+				conc4D[:,:,:,i-1] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
 	def ensMeanAndPertForSpecies(self, species):
 		if self.testing:
