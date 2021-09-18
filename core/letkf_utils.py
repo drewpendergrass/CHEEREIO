@@ -525,10 +525,13 @@ class Assimilator(object):
 			print(f'ydiff for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ydiff)}.')
 			print(f'xbar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.xbar_background)}.')
 			print(f'Xpert_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.Xpert_background)}.')
-	def makeR(self,latval=None,lonval=None):
+	def makeR(self,latind=None,lonind=None):
 		if self.testing:
-			print(f'makeR called in Assimilator for lat/lon inds {(latval,lonval)}')
-		self.R = self.NatureHelperInstance.makeR(latval,lonval)
+			print(f"Making R for lat/lon inds {(latind,lonind)}.")
+		errmats = []
+		for species in self.observed_species:
+			errmats.append(self.ObsOp[species].obsinfo.getObsErr(latval,lonval))
+		self.R = block_diag(*errmats)
 		if self.testing:
 			print(f'R for {(latval,lonval)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):

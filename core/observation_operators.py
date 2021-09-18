@@ -213,14 +213,6 @@ class NatureHelper(object):
 		nature_err_covariance = self.getNatureErr(species)
 		nature_lats,nature_lons = self.getNatureLatLon(species)
 		return ObsOperatorClass(nature_vals,nature_err_covariance,nature_lats,nature_lons,self.testing)
-	def makeR(self,latind=None,lonind=None):
-		if self.testing:
-			print(f"Making R for lat/lon inds {(latind,lonind)}.")
-		errmats = []
-		for species in self.species_to_assimilate:
-			errmats.append(self.getNatureErr(species,latind,lonind))
-		R = block_diag(*errmats)
-		return R
 
 def makeLatLonGrid(latvals,lonvals):
 	latval_grid = np.transpose(np.tile(latvals,(len(lonvals),1)))
