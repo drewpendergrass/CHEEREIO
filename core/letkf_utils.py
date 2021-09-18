@@ -530,10 +530,10 @@ class Assimilator(object):
 			print(f"Making R for lat/lon inds {(latind,lonind)}.")
 		errmats = []
 		for species in self.observed_species:
-			errmats.append(self.ObsOp[species].obsinfo.getObsErr(latval,lonval))
+			errmats.append(self.ObsOp[species].obsinfo.getObsErr(latind,lonind))
 		self.R = block_diag(*errmats)
 		if self.testing:
-			print(f'R for {(latval,lonval)} has dimension {np.shape(self.R)} and value {self.R}')
+			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
 		self.C = np.transpose(self.Ypert_background) @ la.inv(self.R)
 		if self.testing:
