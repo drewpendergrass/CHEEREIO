@@ -505,13 +505,6 @@ class Assimilator(object):
 			if i!=firstens:
 				conc4D[:,:,:,i-1] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
-	def ensMeanAndPertForSpecies(self, species):
-		if self.testing:
-			print(f'ensMeanAndPertForSpecies called in Assimilator for species {species}')
-		conc4D = self.conc4D_byspecies[species]
-		ens_mean = np.mean(conc4D,axis = 3) #calculate ensemble mean
-		bigX = conc4D-ens_mean
-		return [ens_mean,bigX]
 	def ensObsMeanAndPertForSpecies(self, observation_key,species,latval,lonval):
 		if self.testing:
 			print(f'ensObsMeanAndPertForSpecies called for keys {observation_key} -> {species} in Assimilator for lat/lon inds {(latval,lonval)}')
