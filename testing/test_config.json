@@ -63,7 +63,7 @@
 	},
 	"OBSERVED_SPECIES" : {
 		"NO_SATELLITE": "NO",
-		"NO2_SATELLITE": "NO2",
+		"NO2_SATELLITE": "NO2"
 	},
 	"comment009" : "**********************************************************************************",
 	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
@@ -74,15 +74,15 @@
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
 		"0.10",
-		"0.15",
+		"0.15"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
-		"SumOperator",
+		"SumOperator"
 	],
 	"NATURE_H_FUNCTIONS" : [
 		"column_sum",
-		"column_sum",
+		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "24",
