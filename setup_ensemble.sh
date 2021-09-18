@@ -48,6 +48,13 @@ Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" ens_config.json)"
 
+printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
+printf "  / __|  | || |   | __|   | __|   | _ \   | __|   |_ _|   / _ \  \n"
+printf " | (__   | __ |   | _|    | _|    |   /   | _|     | |   | (_) | \n"
+printf "  \___|  |_||_|   |___|   |___|   |_|_\   |___|   |___|   \___/  \n"
+printf '_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| \n'
+printf '"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-` \n'
+printf " \n"
 
 # Path to find non-emissions input data; will use if no default found
 if [[ -f ${HOME}/.geoschem/config ]]; then
