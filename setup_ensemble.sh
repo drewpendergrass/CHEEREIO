@@ -48,6 +48,7 @@ Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" ens_config.json)"
 
+printf " \n"
 printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
 printf "  / __|  | || |   | __|   | __|   | _ \   | __|   |_ _|   / _ \  \n"
 printf " | (__   | __ |   | _|    | _|    |   /   | _|     | |   | (_) | \n"
