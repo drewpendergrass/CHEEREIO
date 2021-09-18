@@ -531,7 +531,7 @@ class Assimilator(object):
 		errmats = []
 		for species in self.observed_species:
 			errmats.append(self.ObsOp[species].obsinfo.getObsErr(latind,lonind))
-		self.R = block_diag(*errmats)
+		self.R = la.block_diag(*errmats)
 		if self.testing:
 			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
