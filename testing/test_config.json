@@ -64,7 +64,6 @@
 	"OBSERVED_SPECIES" : {
 		"NO_SATELLITE": "NO",
 		"NO2_SATELLITE": "NO2",
-		"NO2_SURFACE":"NO2"
 	},
 	"comment009" : "**********************************************************************************",
 	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
@@ -76,17 +75,14 @@
 	"OBS_ERROR_MATRICES": [
 		"0.10",
 		"0.15",
-		"0.03"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
 		"SumOperator",
-		"SurfaceOperator"
 	],
 	"NATURE_H_FUNCTIONS" : [
 		"column_sum",
 		"column_sum",
-		"surface_obs"
 	],
 	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "24",
