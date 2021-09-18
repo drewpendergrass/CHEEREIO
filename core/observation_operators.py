@@ -162,7 +162,7 @@ class ObsOperator(object):
 			obsPert[:,j] = obsEns[:,j]-obsMean
 		return [obsMean,obsPert]
 	def obsDiff(self,vals,latval=None,lonval=None):
-		return vals-self.obsinfo.getObsVal(latval,lonval)
+		return self.obsinfo.getObsVal(latval,lonval)-vals
 
 
 #If we are doing an experiment where we model 'nature', this class wraps around
