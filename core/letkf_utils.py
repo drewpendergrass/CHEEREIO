@@ -465,10 +465,10 @@ class Assimilator(object):
 		if self.testing:
 			print(f'ensMeanAndPert called in Assimilator for lat/lon inds {(latval,lonval)}')
 		statevecs = self.combineEnsemble(latval,lonval)
-		state_mean = np.expand_dims(np.mean(statevecs,axis = 1),axis=1) #calculate ensemble mean
+		state_mean = np.mean(statevecs,axis = 1) #calculate ensemble mean
 		bigX = np.zeros(np.shape(statevecs))
 		for i in range(np.shape(bigX)[1]):
-			bigX[:,i] = statevecs[:,i]-state_mean[:,0]
+			bigX[:,i] = statevecs[:,i]-state_mean
 		if self.testing:
 			print(f'Ensemble mean at {(latval,lonval)} has dimensions {np.shape(state_mean)} and bigX at at {(latval,lonval)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
@@ -561,7 +561,7 @@ class Assimilator(object):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
 		k = len(self.ensemble_numbers)
 		for i in range(k):
-			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background[:,0]
+			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
 	def saveColumn(self,latval,lonval):
