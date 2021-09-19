@@ -90,7 +90,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   #CD to core
   cd {ASSIM}/core
   #Use GNU parallel to submit parallel sruns
-  parallel -j ${SLURM_CPUS_PER_TASK} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
+  parallel -j {NumCores} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
     #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
