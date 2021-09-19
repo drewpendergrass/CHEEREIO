@@ -35,6 +35,7 @@ Partition="$(jq -r ".Partition" test_config.json)"
 Memory="$(jq -r ".Memory" test_config.json)"
 WallTime="$(jq -r ".WallTime" test_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" test_config.json)"
+MaxPar="$(jq -r ".MaxPar" test_config.json)"
 
 # Ensemble settings
 nEnsemble=$(jq -r ".nEnsemble" test_config.json)
@@ -61,6 +62,7 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{Memory}:${Memory}:g" \
        -e "s:{WallTime}:${WallTime}:g" \
        -e "s:{TESTBOOL}:true:g" \
+       -e "s:{MaxPar}:${MaxPar}:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
 if [ SIMULATE_NATURE ]; then
