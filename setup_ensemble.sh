@@ -405,7 +405,7 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{MaxPar}:${MaxPar}:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
-if [ SIMULATE_NATURE ]; then
+if [ "${SIMULATE_NATURE}" = true ]; then
   sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
 else
   sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
@@ -864,7 +864,7 @@ if "$SetupEnsembleRuns"; then
     printf "${thickline}CHEERIO ENSEMBLE RUN DIRECTORY CREATION${thickline}"
     
     # Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
-    if [ $SIMULATE_NATURE ]; then
+    if [ "${SIMULATE_NATURE}" = true ]; then
       x=0
     else
       x=1
