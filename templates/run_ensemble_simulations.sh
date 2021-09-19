@@ -17,7 +17,7 @@ module load parallel
 TESTING={TESTBOOL}
 ENSDIR=$(pwd -P)
 
-if [ TESTING ]; then
+if [ ${TESTING} ]; then
   MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/testing/test_config.json)"
   RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/testing/test_config.json)"
 else
