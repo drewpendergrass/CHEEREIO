@@ -16,5 +16,5 @@ numcols = len(columns)
 num_cells = len(latgrid)*len(longrid)
 
 if numcols==num_cells:
-	with open(f"{path_to_scratch}/ALL_COLUMNS_FOUND", "w") as j:
+	with open(f"{path_to_scratch}/ALL_COLUMNS_FOUND", "w") as f:
 		f.write("All columns found.\n") #If so, save flag file to ensemble folder
