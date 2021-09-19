@@ -295,7 +295,7 @@ class GC_Translator(object):
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
-	def __init__(self,timestamp,testing=False,constructStateVecs=False):
+	def __init__(self,timestamp,testing=False,constructStateVecs=True):
 		self.testing = testing
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
