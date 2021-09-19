@@ -11,7 +11,7 @@ else:
 	latgrid,longrid = tx.getLatLonVals(data,False)
 
 path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
-columns = glob(f"{path_to_sim}/*.npy")
+columns = glob(f"{path_to_scratch}/*.npy")
 numcols = len(columns)
 num_cells = len(latgrid)*len(longrid)
 
