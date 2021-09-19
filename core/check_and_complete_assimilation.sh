@@ -5,7 +5,7 @@
 if [ ${1} ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
 	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
-	CONDA_ENV=$(jq -r ".CondaEnv" ../testing/test_config.json
+	CONDA_ENV=$(jq -r ".CondaEnv" ../testing/test_config.json)
 	TESTSTR='TESTING'
 else
 	MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
