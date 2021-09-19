@@ -13,6 +13,8 @@ else
 	TESTSTR="False"
 fi
 
+printf "Run name is ${RUN_NAME} and teststr is ${TESTSTR}"
+
 end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
