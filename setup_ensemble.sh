@@ -365,6 +365,12 @@ SIMULATE_NATURE=$(jq -r ".SIMULATE_NATURE" ens_config.json) #if true, we make a 
 # Names of emissions species that we are assimilating, loaded from configuration file
 EMIS_TO_ASSIM=( $(jq -r ".CONTROL_VECTOR_EMIS[]" ens_config.json) )
 
+GCC_RUN_FILES="${ASSIM_PATH}/GCClassic/src/GEOS-Chem/run/GCClassic" #Called srcrundir in createRunDir.sh
+gcdir="${ASSIM_PATH}/GCClassic/src/GEOS-Chem"
+wrapperdir="${ASSIM_PATH}/GCClassic"
+
+# Load file with utility functions to setup configuration files
+. ${gcdir}/run/shared/setupConfigFiles.sh
 
 # Define separator lines
 thickline="\n===========================================================\n"
@@ -376,12 +382,6 @@ thinline="\n-----------------------------------------------------------\n"
 if "$SetupTemplateRundir"; then
 
 # Copy run directory files directly from GEOS-Chem repository
-GCC_RUN_FILES="${ASSIM_PATH}/GCClassic/src/GEOS-Chem/run/GCClassic" #Called srcrundir in createRunDir.sh
-gcdir="${ASSIM_PATH}/GCClassic/src/GEOS-Chem"
-wrapperdir="${ASSIM_PATH}/GCClassic"
-
-# Load file with utility functions to setup configuration files
-. ${gcdir}/run/shared/setupConfigFiles.sh
 
 printf "${thickline}CHEERIO TEMPLATE RUN DIRECTORY CREATION${thickline}"
 
