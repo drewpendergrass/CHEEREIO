@@ -22,7 +22,7 @@
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
 	"END_DATE" : "20190108",
-	"nEnsemble" : "2",
+	"nEnsemble" : "16",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
 	"comment003" : "***************************************************************************",
@@ -30,10 +30,11 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "15000",
+	"Memory" : "24000",
 	"WallTime" : "1-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
+	"MaxPar" : "4",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
@@ -356,13 +357,19 @@
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
 		"0.20",
-		"0.30"
+		"0.30",
+		"0.05"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
-		"SumOperator"
+		"SumOperator",
+		"SurfaceOperator"
 	],
-	"NATURE_OPERATOR": "SumNatureHelper",
+	"NATURE_H_FUNCTIONS" : [
+		"column_sum",
+		"column_sum",
+		"surface_obs"
+	],
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "24"
 }
