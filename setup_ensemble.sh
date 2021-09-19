@@ -47,7 +47,7 @@ Partition="$(jq -r ".Partition" ens_config.json)"
 Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" ens_config.json)"
-MaxPar="$(jq -r ".MaxPar" test_config.json)"
+MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
 printf " \n"
 printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
