@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Figure out timestamp for assimilation
-if [ "${1}" = "true" ]; then
+if [ "${1}" = true ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
 	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
 	CONDA_ENV=$(jq -r ".CondaEnv" ../testing/test_config.json)
@@ -21,8 +21,10 @@ source activate ${CONDA_ENV} #Activate conda environment.
 #if testing, output to console as well as file
 if [ "${1}" = true ]; then
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
+	printf "Per par assim we are testing"
 else
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
+	printf "Per par assim we are production"
 fi
 py_exit_status=$?
 source deactivate #Exit Conda environment
