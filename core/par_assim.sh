@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#Assimilation script. Currently not parallelized to test flow.
-
 #Figure out timestamp for assimilation
 if [ "${1}" = true ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
@@ -21,7 +19,7 @@ end_timestamp="${end_timestamp// /_}" #Replace space with underscore
     
 source activate ${CONDA_ENV} #Activate conda environment.
 #if testing, output to console as well as file
-if [ ${1} ]; then
+if [ "${1}" = true ]; then
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
 else
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
