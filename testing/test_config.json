@@ -31,7 +31,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "2000",
+	"Memory" : "16000",
 	"WallTime" : "0-00\\:30",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
