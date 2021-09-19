@@ -937,7 +937,7 @@ if "$SetupEnsembleRuns"; then
     done
 
     cd ${ASSIM_PATH}
-    conda activate $(jq -r ".CondaEnv" ens_config.json) #Activate conda environment.
+    source activate $(jq -r ".CondaEnv" ens_config.json) #Activate conda environment.
 
     #Create initial scaling factors
     cd core
