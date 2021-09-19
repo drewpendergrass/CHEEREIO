@@ -16,9 +16,9 @@
 # Turn on/off different steps. This will allow you to come back to this
 # script and set up different stages later.
 SetupTemplateRundir=true
-CompileTemplateRundir=true
+CompileTemplateRundir=false
 SetupSpinupRun=false
-SetupEnsembleRuns=true
+SetupEnsembleRuns=false
 
 # Path to assimilation setup
 ASSIM_PATH="$(jq -r ".ASSIM_PATH" ens_config.json)"
