@@ -8,9 +8,11 @@ timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM
 
 cmdarg = str(sys.argv[2])
 if cmdarg=="TESTING":
-	data = tx.getSpeciesConfig(testing=True)
+	testing=True
 else:
-	data = tx.getSpeciesConfig(testing=False)
+	testing=False
+
+data = tx.getSpeciesConfig(testing=testing)
 
 dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
