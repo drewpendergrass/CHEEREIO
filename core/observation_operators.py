@@ -33,7 +33,7 @@ class ObservationInfo(object):
 			if type(nature_err_covariances) is np.ndarray:
 				cov = []
 				for i, nval in enumerate(nature_vals):
-					cov.append(np.diag(nval*nature_err_covariances[i]))
+					cov.append(np.diag((nval*nature_err_covariances[i])**2))
 					self.errs = dict(zip(species_to_assimilate.keys(), cov))
 			else:
 				raise NotImplementedError('Requires a list of error percentages')
@@ -53,7 +53,7 @@ class ObservationInfo(object):
 				else:
 					self.errs = nature_err_covariances
 			else:
-				self.errs = np.diag(nature_vals*nature_err_covariances)
+				self.errs = np.diag((nature_vals*nature_err_covariances)**2)
 		if self.testing:
 			print(f'ObservationInfo values have shape {np.shape(self.values)} and value {self.values}')
 			print(f'ObservationInfo lats have shape {np.shape(self.lats)} and value {self.lats}')
