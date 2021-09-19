@@ -13,8 +13,6 @@ else
 	TESTSTR="False"
 fi
 
-printf "Run name is ${RUN_NAME} and teststr is ${TESTSTR}\n"
-
 end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
@@ -23,12 +21,8 @@ source activate ${CONDA_ENV} #Activate conda environment.
 #if testing, output to console as well as file
 if [ "${1}" = true ]; then
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
-	printf "Per par assim we are testing\n"
-	printf "Call is par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR}\n"
 else
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
-	printf "Per par assim we are production\n"
-	printf "Call is par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR}\n"
 fi
 py_exit_status=$?
 source deactivate #Exit Conda environment
