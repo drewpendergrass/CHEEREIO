@@ -267,7 +267,8 @@ class GC_Translator(object):
 	def reconstructArrays(self,analysis_vector):
 		species_config = tx.getSpeciesConfig(self.testing)
 		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
-		emis_shape = np.shape(self.getEmisSF(species_config['CONTROL_VECTOR_EMIS'].keys()[0]))
+		emislist=list(species_config['CONTROL_VECTOR_EMIS'].keys())
+		emis_shape = np.shape(self.getEmisSF(emislist[0]))
 		counter =  0
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			if spec_conc in species_config['CONTROL_VECTOR_CONC']: #Only overwrite if in the control vector; otherwise just increment.
