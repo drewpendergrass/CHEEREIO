@@ -3,7 +3,7 @@
 #Assimilation script. Currently not parallelized to test flow.
 
 #Figure out timestamp for assimilation
-if [ ${1} ]; then
+if [ "${1}" = true ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
 	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
 	CONDA_ENV=$(jq -r ".CondaEnv" ../testing/test_config.json)

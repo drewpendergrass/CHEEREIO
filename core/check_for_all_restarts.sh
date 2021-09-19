@@ -13,7 +13,7 @@ end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 rst_filename="GEOSChem.Restart.${end_timestamp}z.nc4"
  
 # Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
-if [ $SIMULATE_NATURE ]; then
+if [ "${SIMULATE_NATURE}" = true ]; then
     x=0
     bonus=1
 else

@@ -17,7 +17,7 @@ module load parallel
 TESTING={TESTBOOL}
 ENSDIR=$(pwd -P)
 
-if [ ${TESTING} ]; then
+if [ "${TESTING}" = true ]; then
   MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/testing/test_config.json)"
   RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/testing/test_config.json)"
 else
@@ -52,7 +52,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   # Run GEOS_Chem.  The "time" command will return CPU and wall times.
   # Stdout and stderr will be directed to the "GC.log" log file
   # If just testing assimilation, skip all this
-  if [ ! ${TESTING} ]; then
+  if [ "${TESTING}" = false ]; then
     srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
     wait
     taillog="$(tail -n 1 GC.log)"

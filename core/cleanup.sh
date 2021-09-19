@@ -2,7 +2,7 @@
 
 #Clean up scratch directory and advance timestep for entire ensemble.
 
-if [ ${1} ]; then
+if [ "${1}" = true ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
 	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
 else
@@ -11,7 +11,7 @@ else
 fi
 
 bash update_current_time.sh ${1} #Advance timestep forward
-if [ ! ${1} ]; then
+if [ "${1}" = false ]; then
 	bash update_input_geos.sh #Overwrite the input.geos files.
 fi
 
