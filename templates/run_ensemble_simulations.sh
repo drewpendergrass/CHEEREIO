@@ -9,6 +9,10 @@
 #SBATCH -o logs/ensemble_slurm_%j.out    # File to which STDOUT will be written, %j inserts jobid       
 #SBATCH -e logs/ensemble_slurm_%j.err    # File to which STDERR will be written, %j inserts jobid
 
+
+#Modules loaded:
+module load parallel
+
 ### Run directory
 TESTING={TESTBOOL}
 ENSDIR=$(pwd -P)
