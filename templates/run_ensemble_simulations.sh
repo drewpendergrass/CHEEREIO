@@ -10,8 +10,8 @@
 #SBATCH -e logs/ensemble_slurm_%j.err    # File to which STDERR will be written, %j inserts jobid
 
 
-#Modules loaded:
-module load parallel
+#Source clean environment with compatible netcdf and compiler environments and packages like GNU parallel:
+source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 
 ### Run directory
 TESTING={TESTBOOL}
