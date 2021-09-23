@@ -6,6 +6,22 @@ What CHEEREIO is
 
 The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a package that wraps the `GEOS-Chem <https://github.com/geoschem>`__ chemical transport model source code. After a simple modification of a single configuration file (``ens_config.json``), CHEEREIO automatically produces and compiles a template GEOS-Chem run directory, which it then copies into an ensemble. Each ensemble member comes with a randomized set of gridded emissions scaling factors for species specified by the user. As the ensemble of runs progresses, CHEEREIO will periodically pause the ensemble, compare with a set of observations (i.e. satellite, surface, and/or aircraft), and update relevant emissions scaling factors and chemical concentrations to best match reality given the uncertainties of measurements and model. CHEEREIO calculates this update via the 4D Asynchronous Localized Ensemble Transform Kalman Filter (4D-LETKF) as described in `Hunt. et. al., [2007] <https://doi.org/10.1016/j.physd.2006.11.008>`__. Because this approach is model agnostic (specifically, it does not rely on the adjoint), CHEEREIO supports emissions updates and chemical concentration corrections for arbitrary configurations of the GEOS-Chem model. However, the current CHEEREIO codebase assumes that GEOS-Chem code is version 13.0.0 or later.
 
+An overview of the CHEEREIO workflow
+-----------------------------
+
+The CHEEREIO workflow is described in detail in this documentation, but here is an overview divided into two main parts: installation time and run time.
+
+**Installation time.** First, the user creates a template run directory by following a procedure related to the GEOS-Chem version 13. Any modifications to the base run directory should happen at this point. Note that this run directory has a few slightly different features from the standard run directory to allow CHEEREIO to hook in and modify files on the fly. Users should carefully read the documentation before changing something they find odd in the template run directory. Next, the template run directory is compiled. Then a spinup directory can be generated and run if the user wants to do spinup within the CHEEREIO environment. Alternatively, the user can simply supply an already spun-up restart file. Finally, the ensemble is installed; many copies of the template run directory are made and will be run in parallel. The default ensemble size is 32 but the user is free to run ensembles of any size. All files are installed in a user-specified CHEEREIO ensemble directory which is distinct from the directory that stores the core CHEEREIO scripts.
+
+**Run time.** The user navigates to the ensemble_runs folder in the CHEEREIO ensemble directory and executes the ``run_ens.sh`` script. This allocates a job for each of the ensemble members and starts GEOS-Chem in each. After one assimilation period completes, then GEOS-Chem halts and the CHEEREIO assimilation routine is called. Each column is assimilated in parallel, with intermediate outputs stored in the scratch folder. After each column is complete, CHEEREIO gathers the data from scratch and overwrites the GEOS-Chem restarts and scaling factors in each ensemble run directory folder. From here, GEOS-Chem is called and runs for another assimilation period. Rinse and repeat until the period of interest has been processed.
+
+The below image summarizes this workflow.
+
+.. image:: cheereio_workflow.png
+  :width: 600
+  :alt: Figure demonstrating how CHEEREIO installation and runtime works. 
+
+
 How CHEEREIO works
 -----------------------------
 
