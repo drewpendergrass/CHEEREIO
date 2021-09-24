@@ -12,4 +12,4 @@ end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 cd ../core
 source activate ${CONDA_ENV} #Activate conda environment.
 python -u diff_col.py ${end_timestamp} ${TESTSTR} | tee ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/diffcol_onecol_test.out
-source deactivate
+conda deactivate
