@@ -48,7 +48,7 @@ def calcDist_km(lat1,lon1,lat2,lon2,testing=False):
 def makeDistTensor(testing=False):
 	data = getSpeciesConfig(testing)
 	lat,lon = getLatLonVals(data=data)
-	dist_tensor = np.zeros(len(lat),len(lon),len(lat),len(lon))
+	dist_tensor = np.zeros((len(lat),len(lon),len(lat),len(lon)))
 	for i in range(len(lat)):
 		lat1 = lat[i]
 		for j in range(len(lon)):
