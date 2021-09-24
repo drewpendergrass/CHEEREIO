@@ -25,7 +25,7 @@ else
 	python -u par_letkf.py ${end_timestamp} ${2} ${3} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${2}_${3}.out
 fi
 py_exit_status=$?
-source deactivate #Exit Conda environment
+conda deactivate #Exit Conda environment
 
 #If python does not exit with exit code one, make file that will break loop
 if [ $py_exit_status != 0 ]; then

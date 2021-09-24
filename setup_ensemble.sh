@@ -943,7 +943,7 @@ if "$SetupEnsembleRuns"; then
     cd core
     python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}"
     python prep_par.py PRODUCTION
-    source deactivate #Exit Conda environment
+    conda deactivate #Exit Conda environment
 
     #Store current time.
     printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
