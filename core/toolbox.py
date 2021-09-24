@@ -1,4 +1,5 @@
 import json
+import geopy.distance as gd
 import numpy as np
 
 def getSpeciesConfig(testing=False):
@@ -27,16 +28,10 @@ def getLatLonVals(data=None,testing=False):
 
 #Inputs are in degrees
 def calcDist_km(lat1,lon1,lat2,lon2):
-	R = 6371 # Radius of the earth in km
-	dLat = deg2rad(lat2-lat1)
-	dLon = deg2rad(lon2-lon1)
-	a = (np.sin(dLat/2)**2) + (np.cos(deg2rad(lat1)) * np.cos(deg2rad(lat2)) * (np.sin(dLon/2)**2))
-	c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1-a));
-	d = c*R
+	coords_1 = (lat1,lon1)
+	coords_2 = (lat2,lon2)
+	d = gd.distance(coords_1, coords_2).km
 	return d
-
-def deg2rad(deg):
-	return deg * (np.pi/180)
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
