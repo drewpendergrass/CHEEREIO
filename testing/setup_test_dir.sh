@@ -212,11 +212,11 @@ fi
     python initialize_scaling_factors.py "TESTING" "${START_DATE}"
     python randomize_restarts.py "${MY_PATH}/${RUN_NAME}/ensemble_runs" "${ASSIM_DATE}_0000" ${testbias}
     python prep_par.py TESTING
-    conda deactivate #Exit Conda environment
-
     #Store current time.
     printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
     python advance_timestep.py "TESTING" #Update input.geos to first assimilation period.
+    conda deactivate #Exit Conda environment
+
 
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
