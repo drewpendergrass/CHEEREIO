@@ -19,6 +19,7 @@ subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 
 if 0 in subdir_numbers:
 	subdir_numbers.remove(0)
+	subdirs.remove(f"{path_to_sim}ensemble_runs/{data['RUN_NAME']}_0000/")
 
 rst_dataset = xr.open_dataset(data['RESTART_FILE']) 
 lat = np.array(rst_dataset['lat'])
@@ -54,7 +55,6 @@ ncore = int(data['NumCores'])
 
 dict_to_save = {}
 for i in range(len(subdir_numbers)):
-	num = subdir_numbers[i]
 	latlist = split_lat_inds[i]
 	lonlist = split_lon_inds[i]
 	#Split further by cores
@@ -68,7 +68,7 @@ for i in range(len(subdir_numbers)):
 		startpoint = int(subarray_endpoints[j])
 		endpoint = int(subarray_endpoints[j+1])
 		subdict[j+1] = {'lat':latlist[startpoint:endpoint].tolist(),'lon':lonlist[startpoint:endpoint].tolist()}
-	dict_to_save[num] = subdict
+	dict_to_save[i+1] = subdict
 
 out_file = open(f"{path_to_sim}scratch/latlon_par.json", "w")
 json.dump(dict_to_save, out_file, indent = 6)
