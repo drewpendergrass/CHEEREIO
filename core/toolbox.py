@@ -38,11 +38,9 @@ def calcDist_km(lat1,lon1,lat2,lon2,testing=False):
 	data = getSpeciesConfig(testing)
 	lat,lon = getLatLonVals(data=data)
 	dist_tensor = np.load(f"{data['MY_PATH']}/{data['RUN_NAME']}/dist_tensor.npy")
-	lat1ind = np.where(lat==lat1)[0]
-	lat2ind = np.where(lat==lat2)[0]
-	lon1ind = np.where(lon==lon1)[0]
-	lon2ind = np.where(lon==lon2)[0]
-	return dist_tensor[lat1ind,lon1ind,lat2ind,lon2ind]
+	latinds = [np.where(lat==lat1)[0],np.where(lat==lat2)[0]]
+	loninds = [np.where(lon==lon1)[0],np.where(lon==lon2)[0]]
+	return dist_tensor[min(latinds),min(loninds),max(latinds),max(loninds)]
 
 
 def makeDistTensor(testing=False):
@@ -53,9 +51,9 @@ def makeDistTensor(testing=False):
 		lat1 = lat[i]
 		for j in range(len(lon)):
 			lon1 = lon[j]
-			for k in range(len(lat)):
+			for k in range(i,len(lat)):
 				lat2 = lat[k]
-				for l in range(len(lon)):
+				for l in range(j,len(lon)):
 					lon2 = lon[l]
 					dist_tensor[i,j,k,l] = calcDist_km_fromscratch(lat1,lon1,lat2,lon2)
 	np.save(f"{data['MY_PATH']}/{data['RUN_NAME']}/dist_tensor.npy",dist_tensor)
