@@ -3,7 +3,9 @@
 #This script updates input_geos in each ensemble member 
 #based on the time stored in the scratch folder.
 
+source activate $(jq -r ".CondaEnv" ../ens_config.json)
 python advance_timestep.py "PRODUCTION"
+conda deactivate
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
