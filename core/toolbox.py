@@ -27,11 +27,38 @@ def getLatLonVals(data=None,testing=False):
 	return [ll_data['lat'],ll_data['lon']]
 
 #Inputs are in degrees
-def calcDist_km(lat1,lon1,lat2,lon2):
+def calcDist_km_fromscratch(lat1,lon1,lat2,lon2):
 	coords_1 = (lat1,lon1)
 	coords_2 = (lat2,lon2)
 	d = gd.distance(coords_1, coords_2).km
 	return d
+
+#Inputs are in degrees
+def calcDist_km(lat1,lon1,lat2,lon2,testing=False):
+	data = getSpeciesConfig(testing)
+	lat,lon = getLatLonVals(data=data)
+	dist_tensor = np.load(f"{data['MY_PATH']}/{data['RUN_NAME']}/dist_tensor.npy")
+	lat1ind = np.where(lat==lat1)[0]
+	lat2ind = np.where(lat==lat2)[0]
+	lon1ind = np.where(lon==lon1)[0]
+	lon2ind = np.where(lon==lon2)[0]
+	return dist_tensor[lat1ind,lon1ind,lat2ind,lon2ind]
+
+
+def makeDistTensor(testing=False):
+	data = getSpeciesConfig(testing)
+	lat,lon = getLatLonVals(data=data)
+	dist_tensor = np.zeros(len(lat),len(lon),len(lat),len(lon))
+	for i in range(len(lat)):
+		lat1 = lat[i]
+		for j in range(len(lon)):
+			lon1 = lon[j]
+			for k in range(len(lat)):
+				lat2 = lat[k]
+				for l in range(len(lon)):
+					lon2 = lon[l]
+					dist_tensor[i,j,k,l] = calcDist_km_fromscratch(lat1,lon1,lat2,lon2)
+	np.save(f"{data['MY_PATH']}/{data['RUN_NAME']}/dist_tensor.npy",dist_tensor)
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
@@ -43,7 +70,7 @@ def getIndsOfInterest(latind,lonind,negate=False,testing=False):
 	loc_rad = float(data['LOCALIZATION_RADIUS_km'])
 	distgrid = np.zeros((len(lat),len(lon)))
 	for i in range(len(lon)):
-		dists_col = np.array([calcDist_km(latval,lonval,a,lon[i]) for a in lat])
+		dists_col = np.array([calcDist_km(latval,lonval,a,lon[i],testing) for a in lat])
 		distgrid[:,i] = dists_col
 	if negate:
 		valid_inds = np.where(distgrid>loc_rad)
