@@ -3,7 +3,7 @@
 #This script updates CURRENT_DATE_TIME in the scratch folder
 #based on the end of the current input.geos file.
 
-if [ ${1} ]; then
+if [ "${1}" = true ]; then
 	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
 	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
 else
