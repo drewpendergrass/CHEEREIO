@@ -109,9 +109,9 @@ class ObservationInfo(object):
 		latval = origlat[latind]
 		lonval = origlon[lonind]
 		if species:
-			distvec = np.array([tx.calcDist_km(latval,lonval,a,b,self.testing) for a,b in zip(self.lats[species],self.lons[species])])
+			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats[species],self.lons[species])])
 		else:
-			distvec = np.array([tx.calcDist_km(latval,lonval,a,b,self.testing) for a,b in zip(self.lats,self.lons)])
+			distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.lats,self.lons)])
 		return np.where(distvec<=loc_rad)[0]
 	def getObsLatLon(self,latind=None,lonind=None,species=None):
 		if self.testing:
