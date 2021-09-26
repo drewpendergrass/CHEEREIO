@@ -27,11 +27,14 @@ def getLETKFConfig(testing=False):
 #emissions scaling factor netCDFs. After initialization it contains the necessary data
 #and can output it in useful ways to other functions in the LETKF procedure.
 class GC_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,testing=False):
+	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,testing=False,saving=False):
 		#self.latinds,self.loninds = tx.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
-		self.restart_ds = xr.load_dataset(self.filename)
+		if saving: #If overwriting netcdf use load, otherwise save RAM and use open
+			self.restart_ds = xr.load_dataset(self.filename)
+		else:
+			self.restart_ds = xr.open_dataset(self.filename)
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
 		self.testing=testing
 		if self.testing:
@@ -40,7 +43,10 @@ class GC_Translator(object):
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
-			self.emis_ds_list[name] = xr.load_dataset(file)
+			if saving:
+				self.emis_ds_list[name] = xr.load_dataset(file)
+			else:
+				self.emis_ds_list[name] = xr.open_dataset(file)
 			if self.testing:
 				print(f"GC_translator number {self.num} has loaded scaling factors for {name}")
 		if computeStateVec:
@@ -314,9 +320,9 @@ class GT_Container(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
+				self.nature = GC_Translator(directory, timestamp, constructStateVecs,self.testing,saving=True)
 			else:
-				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
+				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs,self.testing,saving=True)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 	#Gets saved column and compares to the original files
