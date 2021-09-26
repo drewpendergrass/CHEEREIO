@@ -9,6 +9,10 @@ pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 controlvec = data['CONTROL_VECTOR_CONC']
 statevec = data['STATE_VECTOR_CONC']
+emisvec = data['CONTROL_VECTOR_EMIS']
+
+pt.combineScaleFactors(ens_dir,pp_dir)
+
 
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
