@@ -43,7 +43,7 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,fullpath_output_name = Non
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm')
+def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm'):
 	if unit=='ppm':
 		multiplier = 1e6
 	elif unit=='ppb':
