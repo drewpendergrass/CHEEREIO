@@ -22,8 +22,8 @@ def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 	return([subdirs,dirnames,subdir_numbers])
 
 def combineScaleFactors(ensemble_dir,output_dir):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir)
-	path_to_sfs = glob(f'{subdirs[1]}*_SCALEFACTOR.nc')
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
+	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
 	sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
 	files_split_by_sf = []
