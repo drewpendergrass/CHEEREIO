@@ -21,6 +21,21 @@ def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 		subdirs = [d+'OutputDir' for d in subdirs]
 	return([subdirs,dirnames,subdir_numbers])
 
+def combineScaleFactors(ensemble_dir,output_dir):
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir)
+	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc').sort()
+	sf_names = [pts.split('/'[-1]) for pts in path_to_sfs]
+	files_split_by_sf = []
+	for name in sf_names:
+		pathstocombine = [path+name for path in subdirs]
+		ds_files = []
+		for path in pathstocombine:
+			ds_files.append(xr.open_dataset(path))
+		ds = xr.concat(ds_files,'Ensemble')
+		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
+		ds.to_netcdf(output_dir+name)
+
+
 def makeDatasetForDirectory(hist_dir,species_names,fullpath_output_name = None):
 	specconc_list = glob(f'{hist_dir}/GEOSChem.SpeciesConc*.nc4')
 	specconc_list.sort()
