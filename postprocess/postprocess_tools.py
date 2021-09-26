@@ -130,7 +130,7 @@ def emisPlot(time,ensmean,enssd,name,outfile=None):
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
 	plt.xlabel('Time')
-	plt.ylabel(f'{species_name} ({unit})')
+	plt.ylabel(f'{name}')
 	if outfile:
 		plt.savefig(outfile)
 
