@@ -34,8 +34,7 @@ def combineScaleFactors(ensemble_dir,output_dir):
 			ds_files.append(xr.open_dataset(path))
 		ds = xr.concat(ds_files,'Ensemble')
 		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
-		ds.to_netcdf(output_dir+name)
-
+		ds.to_netcdf(output_dir+'/'+name)
 
 def makeDatasetForDirectory(hist_dir,species_names,fullpath_output_name = None):
 	specconc_list = glob(f'{hist_dir}/GEOSChem.SpeciesConc*.nc4')
@@ -125,3 +124,21 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,naterr=None,outfile=
 	if outfile:
 		plt.savefig(outfile)
 
+def emisPlot(time,ensmean,enssd,name,outfile=None):
+	plt.figure(figsize=(10,9))
+	plt.plot(time,ensmean,color='b')
+	plt.plot(time,ensmean+enssd,':',color='b')
+	plt.plot(time,ensmean-enssd,':',color='b')
+	plt.xlabel('Time')
+	plt.ylabel(f'{species_name} ({unit})')
+	if outfile:
+		plt.savefig(outfile)
+
+def plotEmissionsCell(ds_file,latind,lonind,outfile=None):
+	ds = xr.open_dataset(ds_file)
+	time = np.array(ds['time'])
+	da = np.array(ds['Scalar'])
+	ens = da[:,:,latind,lonind]
+	ensmean = np.mean(ens,axis=0)
+	enssd = np.std(ens,axis=0)
+	emisPlot(time,ensmean,enssd,ds_file.split('/')[-1].split('_')[0:-2],outfile)

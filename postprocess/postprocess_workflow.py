@@ -1,6 +1,7 @@
 import json
 import xarray as xr
 import postprocess_tools as pt
+from glob import glob
 
 with open('../ens_config.json') as f:
 	data = json.load(f)
@@ -12,7 +13,9 @@ statevec = data['STATE_VECTOR_CONC']
 emisvec = data['CONTROL_VECTOR_EMIS']
 
 pt.combineScaleFactors(ens_dir,pp_dir)
-
+scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
+for scalefactor in scalefactor_files:
+	pt.plotEmissionsCell(scalefactor,30,59,outfile=f'{pp_dir}/wuhan_cell_emis_{scalefactor}.png')
 
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
