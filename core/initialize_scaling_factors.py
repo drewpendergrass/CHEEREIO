@@ -8,10 +8,15 @@ import sys
 teststr = str(sys.argv[1])
 if teststr=="TESTING":
 	testbool = True
+	spc_config = tx.getSpeciesConfig(testing=True)
+elif teststr=="TESTPROD":
+	testbool = True
+	spc_config = tx.getSpeciesConfig(testing=False) #Production run, but do deterministic scalings.
 else:
 	testbool = False
+	spc_config = tx.getSpeciesConfig(testing=False)
 
-spc_config = tx.getSpeciesConfig(testing=testbool)
+
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")

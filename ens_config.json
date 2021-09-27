@@ -9,7 +9,7 @@
 	"REGION" : "",
 	"BUFFER" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "Global_Coarse_Test",
+	"RUN_NAME" : "Global_Coarse_Test_DETSCALE",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
@@ -21,7 +21,8 @@
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
-	"END_DATE" : "20190108",
+	"ASSIM_START_DATE" : "20190201",
+	"END_DATE" : "20190208",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
@@ -356,9 +357,9 @@
 	"NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER" : "5.0",
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
-		"0.20",
-		"0.30",
-		"0.05"
+		"0.10",
+		"0.15",
+		"0.03"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
@@ -370,8 +371,9 @@
 		"column_sum",
 		"surface_obs"
 	],
-	"INFLATION_FACTOR": "0.05",
-	"ASSIM_TIME": "24"
+	"INFLATION_FACTOR": "0.02",
+	"ASSIM_TIME": "24",
+	"TESTBIAS": "0.5"
 }
 
 
