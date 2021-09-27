@@ -21,7 +21,8 @@
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
-	"END_DATE" : "20190108",
+	"ASSIM_START_DATE" : "20190201",
+	"END_DATE" : "20190208",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "true",
@@ -371,7 +372,8 @@
 		"surface_obs"
 	],
 	"INFLATION_FACTOR": "0.05",
-	"ASSIM_TIME": "24"
+	"ASSIM_TIME": "24",
+	"TESTBIAS": "0.5"
 }
 
 

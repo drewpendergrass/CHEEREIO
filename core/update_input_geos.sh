@@ -4,7 +4,7 @@
 #based on the time stored in the scratch folder.
 
 source activate $(jq -r ".CondaEnv" ../ens_config.json)
-python advance_timestep.py "PRODUCTION"
+python advance_timestep.py "PRODUCTION" "${1}"
 conda deactivate
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"

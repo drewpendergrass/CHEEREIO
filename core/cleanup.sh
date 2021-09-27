@@ -12,7 +12,7 @@ fi
 
 bash update_current_time.sh ${1} #Advance timestep forward
 if [ "${1}" = false ]; then
-	bash update_input_geos.sh #Overwrite the input.geos files.
+	bash update_input_geos.sh "ASSIM" #Overwrite the input.geos files.
 fi
 
 #Remove signal files

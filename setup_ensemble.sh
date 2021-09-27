@@ -941,13 +941,13 @@ if "$SetupEnsembleRuns"; then
 
     #Create initial scaling factors
     cd core
-    python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}"
+    python initialize_scaling_factors.py "TESTPROD" "${START_DATE}" #CHANGE BACK TO PRODUCTION 
     python prep_par.py PRODUCTION
     conda deactivate #Exit Conda environment
 
     #Store current time.
     printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
-    bash update_input_geos.sh #Update input.geos to first assimilation period.
+    bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
 
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
