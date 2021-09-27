@@ -357,9 +357,9 @@
 	"NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER" : "5.0",
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
-		"0.20",
-		"0.30",
-		"0.05"
+		"0.10",
+		"0.15",
+		"0.03"
 	],
 	"OBS_OPERATORS": [
 		"SumOperator",
@@ -371,7 +371,7 @@
 		"column_sum",
 		"surface_obs"
 	],
-	"INFLATION_FACTOR": "0.05",
+	"INFLATION_FACTOR": "0.02",
 	"ASSIM_TIME": "24",
 	"TESTBIAS": "0.5"
 }
