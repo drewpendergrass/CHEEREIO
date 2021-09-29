@@ -85,7 +85,7 @@ def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='
 	enssd = np.std(ens,axis=0)
 	tsPlot(time,ensmean-ensmean,enssd,species_name,unit,outfile=outfile)
 
-def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includesNature=False,nature_error=None,natureErrType='relative'):
+def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includesNature=False):
 	if unit=='ppm':
 		multiplier = 1e6
 	elif unit=='ppb':
@@ -94,44 +94,23 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includ
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = np.array(ds[f'SpeciesConc_{species_name}'])
+	da = ds[f'SpeciesConc_{species_name}'].isel(lat=latind,lon=lonind)
 	time = np.array(ds['time'])
 	if includesNature:
-		nature = da[0,:,latind,lonind]*multiplier
-		if natureErrType=="relative":
-			naterr = nature*nature_error
-		elif natureErrType=="absolute":
-			naterr = np.repeat(nature_error*multiplier,len(nature))
-		else:
-			raise ValueError('Nature error must be relative or absolute.')
-		ens = da[1::,:,latind,lonind]*multiplier
-		ensmean = np.mean(ens,axis=0)
-		enssd = np.std(ens,axis=0)
-		tsPlot(time,ensmean,enssd,species_name,unit,nature,naterr,outfile=outfile)
+		ens = da[1::,:]*multiplier
 	else:
-		ens = da[:,:,latind,lonind]*multiplier
-		ensmean = np.mean(ens,axis=0)
-		enssd = np.std(ens,axis=0)
-		tsPlot(time,ensmean,enssd,species_name,unit,outfile=outfile)
+		ens = da*multiplier
+	ensmean = ens.mean(axis=0)
+	enssd = ens.std(axis=0)
+	tsPlot(time,ensmean,enssd,species_name,unit,outfile=outfile)
 
-def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,naterr=None,outfile=None):
+def tsPlot(time,ensmean,enssd,species_name,unit,outfile=None):
 	plt.figure(figsize=(10,9))
-	if nature:
-		plt.plot(time,nature,color='g',label='Nature run')
-		plt.plot(time,nature+naterr,':',color='g')
-		plt.plot(time,nature-naterr,':',color='g')
-		plt.plot(time,ensmean,color='b',label='Ensemble runs')
-		plt.plot(time,ensmean+enssd,':',color='b')
-		plt.plot(time,ensmean-enssd,':',color='b')
-		plt.xlabel('Time')
-		plt.ylabel(f'{species_name} ({unit})')
-		plt.legend()
-	else:
-		plt.plot(time,ensmean,color='b')
-		plt.plot(time,ensmean+enssd,':',color='b')
-		plt.plot(time,ensmean-enssd,':',color='b')
-		plt.xlabel('Time')
-		plt.ylabel(f'{species_name} ({unit})')
+	plt.plot(time,ensmean,color='b')
+	plt.plot(time,ensmean+enssd,':',color='b')
+	plt.plot(time,ensmean-enssd,':',color='b')
+	plt.xlabel('Time')
+	plt.ylabel(f'{species_name} ({unit})')
 	if outfile:
 		plt.savefig(outfile)
 
