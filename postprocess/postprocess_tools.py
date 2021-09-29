@@ -2,6 +2,7 @@ import numpy as np
 import xarray as xr
 from glob import glob
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 	subdirs = glob(f"{ensemble_dir}/*/")
@@ -21,6 +22,15 @@ def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 		subdirs = [d+'OutputDir' for d in subdirs]
 	return([subdirs,dirnames,subdir_numbers])
 
+def globSubDir(hist_dir,timeperiod=None,hourlysub = 6):
+	specconc_list = glob(f'{hist_dir}/GEOSChem.SpeciesConc*.nc4')
+	specconc_list.sort()
+	ts = [datetime.strptime(spc.split('.')[-2][0:13], "%Y%m%d_%H%M") for spc in specconc_list]
+	if timeperiod:
+		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<=timeperiod[1])]
+	specconc_list = [spc for spc,t in zip(specconc_list,ts) if t.hour % hourlysub == 0]
+	return specconc_list
+
 def combineScaleFactors(ensemble_dir,output_dir):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
@@ -36,22 +46,23 @@ def combineScaleFactors(ensemble_dir,output_dir):
 		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 		ds.to_netcdf(output_dir+'/'+name)
 
-def makeDatasetForDirectory(hist_dir,species_names,fullpath_output_name = None):
-	specconc_list = glob(f'{hist_dir}/GEOSChem.SpeciesConc*.nc4')
-	specconc_list.sort()
+def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
+	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
 	concstrings = [f'SpeciesConc_{name}' for name in species_names]
 	ds = xr.open_mfdataset(specconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
 	ds = ds[concstrings]
+	if subset_rule=='SURFACE':
+		ds = ds.isel(lev=0)
 	if fullpath_output_name:
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeDatasetForEnsemble(ensemble_dir,species_names,fullpath_output_name = None):
+def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE',fullpath_output_name = None):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,includeOutputDir=True)
 	array_list = []
 	for subdir in subdirs:
 		print(f'Processing {subdir}')
-		array_list.append(makeDatasetForDirectory(subdir,species_names))
+		array_list.append(makeDatasetForDirectory(subdir,species_names,timeperiod,hourlysub,subset_rule))
 	ds = xr.concat(array_list,'Ensemble')
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	if fullpath_output_name:
@@ -69,7 +80,7 @@ def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='
 		raise ValueError('Unit not recognized.')
 	da = np.array(ds[f'SpeciesConc_{species_name}'])
 	time = np.array(ds['time'])
-	ens = da[:,:,0,latind,lonind]*multiplier
+	ens = da[:,:,latind,lonind]*multiplier
 	ensmean = np.mean(ens,axis=0)
 	enssd = np.std(ens,axis=0)
 	tsPlot(time,ensmean-ensmean,enssd,species_name,unit,outfile=outfile)
@@ -86,19 +97,19 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includ
 	da = np.array(ds[f'SpeciesConc_{species_name}'])
 	time = np.array(ds['time'])
 	if includesNature:
-		nature = da[0,:,0,latind,lonind]*multiplier
+		nature = da[0,:,latind,lonind]*multiplier
 		if natureErrType=="relative":
 			naterr = nature*nature_error
 		elif natureErrType=="absolute":
 			naterr = np.repeat(nature_error*multiplier,len(nature))
 		else:
 			raise ValueError('Nature error must be relative or absolute.')
-		ens = da[1::,:,0,latind,lonind]*multiplier
+		ens = da[1::,:,latind,lonind]*multiplier
 		ensmean = np.mean(ens,axis=0)
 		enssd = np.std(ens,axis=0)
 		tsPlot(time,ensmean,enssd,species_name,unit,nature,naterr,outfile=outfile)
 	else:
-		ens = da[:,:,0,latind,lonind]*multiplier
+		ens = da[:,:,latind,lonind]*multiplier
 		ensmean = np.mean(ens,axis=0)
 		enssd = np.std(ens,axis=0)
 		tsPlot(time,ensmean,enssd,species_name,unit,outfile=outfile)
