@@ -4,8 +4,8 @@ import re
 
 class HEMCO_Translator():
 	#Constructor. If foldername is none, open template HEMCO_Config. Otherwise open ensemble member
-	def __init__(self,foldername=None):
-		self.spc_config = tx.getSpeciesConfig()
+	def __init__(self,foldername=None,testing=False):
+		self.spc_config = tx.getSpeciesConfig(testing)
 		if foldername:
 			self.foldername = foldername
 		else:
