@@ -111,7 +111,7 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 	plt.plot(time,ensmean,color='b',label='Ensemble mean')
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
-	if nature:
+	if nature is not None:
 		plt.plot(time,nature,color='g',label='Nature')
 		plt.legend()
 	plt.xlabel('Time')
