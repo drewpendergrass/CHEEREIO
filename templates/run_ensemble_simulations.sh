@@ -12,6 +12,7 @@
 
 #Source clean environment with compatible netcdf and compiler environments and packages like GNU parallel:
 source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
+eval "$(conda shell.bash hook)"
 
 ### Run directory
 TESTING={TESTBOOL}

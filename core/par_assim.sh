@@ -1,4 +1,5 @@
 #!/bin/bash
+eval "$(conda shell.bash hook)"
 
 #Figure out timestamp for assimilation
 if [ "${1}" = true ]; then
