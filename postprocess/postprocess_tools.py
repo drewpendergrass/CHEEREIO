@@ -98,17 +98,22 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includ
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
+		nature=da[0,:]*multiplier
 	else:
 		ens = da*multiplier
+		nature=None
 	ensmean = ens.mean(axis=0)
 	enssd = ens.std(axis=0)
-	tsPlot(time,ensmean,enssd,species_name,unit,outfile=outfile)
+	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlot(time,ensmean,enssd,species_name,unit,outfile=None):
+def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 	plt.figure(figsize=(10,9))
-	plt.plot(time,ensmean,color='b')
+	plt.plot(time,ensmean,color='b',label='Ensemble mean')
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
+	if nature:
+		plt.plot(time,nature,color='g',label='Nature')
+		plt.legend()
 	plt.xlabel('Time')
 	plt.ylabel(f'{species_name} ({unit})')
 	if outfile:
