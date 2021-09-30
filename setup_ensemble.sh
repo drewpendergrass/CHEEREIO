@@ -20,6 +20,8 @@ CompileTemplateRundir=false
 SetupSpinupRun=false
 SetupEnsembleRuns=false
 
+eval "$(conda shell.bash hook)"
+
 # Path to assimilation setup
 ASSIM_PATH="$(jq -r ".ASSIM_PATH" ens_config.json)"
 
