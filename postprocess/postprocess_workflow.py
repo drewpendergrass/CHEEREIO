@@ -28,9 +28,9 @@ for scalefactor in scalefactor_files:
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 except FileNotFoundError:
-	ds = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
-
-controlvec = ['NO','NO2']
+	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
+	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
+	
 for spec in controlvec:
 	#pt.plotSurfaceCellEnsMeanNorm(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}_zeromean.png',unit='ppm')
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',unit='ppm',includesNature=True)
