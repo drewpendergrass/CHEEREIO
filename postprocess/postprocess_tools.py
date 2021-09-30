@@ -27,7 +27,7 @@ def globSubDir(hist_dir,timeperiod=None,hourlysub = 6):
 	specconc_list.sort()
 	ts = [datetime.strptime(spc.split('.')[-2][0:13], "%Y%m%d_%H%M") for spc in specconc_list]
 	if timeperiod:
-		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<=timeperiod[1])]
+		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
 	specconc_list = [spc for spc,t in zip(specconc_list,ts) if t.hour % hourlysub == 0]
 	return specconc_list
 

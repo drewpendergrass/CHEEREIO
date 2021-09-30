@@ -17,6 +17,7 @@ endtime=datetime.strptime(data['END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
 delta = timedelta(hours=int(ASSIM_TIME))
 starttime = ASSIM_START_DATE-delta
+endtime = ASSIM_START_DATE+delta
 timeperiod = (starttime,endtime)
 
 pt.combineScaleFactors(ens_dir,pp_dir)
@@ -28,9 +29,10 @@ for scalefactor in scalefactor_files:
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 except FileNotFoundError:
-	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
+	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,hourlysub=1,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
-	
+
 for spec in controlvec:
 	#pt.plotSurfaceCellEnsMeanNorm(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}_zeromean.png',unit='ppm')
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',unit='ppm',includesNature=True)
+
