@@ -5,8 +5,8 @@
 #SBATCH -p huce_intel       # Partition to submit to
 #SBATCH --mem=40000         # Memory pool for all cores (see also --mem-per-cpu)
 #SBATCH --array=0-127
-#SBATCH -o ~/cheerio_out/parassim_test_%j.out    # File to which STDOUT will be written, %j inserts jobid       
-#SBATCH -e ~/cheerio_out/parassim_test_%j.err    # File to which STDERR will be written, %j inserts jobid
+#SBATCH -o /n/home12/drewpendergrass/cheerio_out/parassim_test_%j.out    # File to which STDOUT will be written, %j inserts jobid       
+#SBATCH -e /n/home12/drewpendergrass/cheerio_out/parassim_test_%j.err    # File to which STDERR will be written, %j inserts jobid
 
 source ../environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 eval "$(conda shell.bash hook)"
@@ -18,6 +18,6 @@ ensnum=$(( index / 8 ))
 corenum=$(( index % 8 + 1 ))
 
 source activate cheerio
-cd ../core
+cd /n/home12/drewpendergrass/CHEEREIO/core
 python -u par_letkf.py ${end_timestamp} ${ensnum} ${corenum} "False" >> ~/cheerio_out/letkf_${ensnum}_${corenum}.out
 conda deactivate
