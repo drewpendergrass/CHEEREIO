@@ -4,6 +4,7 @@ from glob import glob
 import observation_operators as obs
 import scipy.linalg as la
 import toolbox as tx 
+from datetime import date
 
 def getLETKFConfig(testing=False):
 	data = tx.getSpeciesConfig(testing)
