@@ -86,7 +86,7 @@ def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='
 	enssd = np.std(ens,axis=0)
 	tsPlot(time,ensmean-ensmean,enssd,species_name,unit,outfile=outfile)
 
-def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppm',includesNature=False):
+def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
 	if unit=='ppm':
 		multiplier = 1e6
 	elif unit=='ppb':
