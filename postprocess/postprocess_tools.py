@@ -142,6 +142,7 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
 	plt.ylabel(f'{species_name} ({unit})')
+	plt.gcf().autofmt_xdate()
 	plt.gcf().tight_layout()
 	if outfile:
 		plt.savefig(outfile)
@@ -158,6 +159,7 @@ def emisPlot(time,ensmean,enssd,name,outfile=None):
 	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
 	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
 	plt.ylabel(f'{name}')
+	plt.gcf().autofmt_xdate()
 	plt.gcf().tight_layout()
 	if outfile:
 		plt.savefig(outfile)
