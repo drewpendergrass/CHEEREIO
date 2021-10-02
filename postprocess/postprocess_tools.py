@@ -54,6 +54,8 @@ def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6
 	ds = ds[concstrings]
 	if subset_rule=='SURFACE':
 		ds = ds.isel(lev=0)
+	elif subset_rule=='850':
+		ds = ds.isel(lev=10) #850 hPa pressure level
 	if fullpath_output_name:
 		ds.to_netcdf(fullpath_output_name)
 	return ds

@@ -3,6 +3,7 @@ import xarray as xr
 import postprocess_tools as pt
 from glob import glob
 from datetime import datetime,timedelta
+import sys 
 
 with open('../ens_config.json') as f:
 	data = json.load(f)
@@ -31,7 +32,17 @@ except FileNotFoundError:
 	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 
+if "calc850" in sys.argv:
+	print('Calculating/loading 850hPa pressure level')
+	try:
+		ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
+	except FileNotFoundError:
+		_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,subset_rule="850",fullpath_output_name=f'{pp_dir}/controlvar_pp_850hPa.nc')
+		ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
+
 for spec in controlvec:
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',includesNature=True)
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=True)
+	if "calc850" in sys.argv:
+		 pt.plotSurfaceMean(ds850,spec,outfile=f'{pp_dir}/mean850hPa_ts_{spec}.png',includesNature=True)
 
