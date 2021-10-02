@@ -16,8 +16,7 @@ ASSIM_START_DATE=datetime.strptime(data['ASSIM_START_DATE'], "%Y%m%d")
 endtime=datetime.strptime(data['END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
 delta = timedelta(hours=int(ASSIM_TIME))
-starttime = ASSIM_START_DATE-delta
-endtime = ASSIM_START_DATE+2*delta
+starttime = ASSIM_START_DATE-(2*delta)
 timeperiod = (starttime,endtime)
 
 pt.combineScaleFactors(ens_dir,pp_dir)
@@ -29,7 +28,7 @@ for scalefactor in scalefactor_files:
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 except FileNotFoundError:
-	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,hourlysub=1,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
+	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 
 for spec in controlvec:
