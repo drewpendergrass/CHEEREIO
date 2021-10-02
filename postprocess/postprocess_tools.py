@@ -139,8 +139,8 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 		plt.plot(time,nature,color='g',label='Nature')
 		plt.legend()
 	plt.xlabel('Time')
-	plt.gca().set_major_formatter(mdates.DateFormatter('%m-%d'))
-	plt.gca().set_major_locator(mdates.DayLocator(interval=1))
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
 	plt.ylabel(f'{species_name} ({unit})')
 	plt.gcf().tight_layout()
 	if outfile:
@@ -155,8 +155,8 @@ def emisPlot(time,ensmean,enssd,name,outfile=None):
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
 	plt.xlabel('Time')
-	plt.gca().set_major_formatter(mdates.DateFormatter('%m-%d'))
-	plt.gca().set_major_locator(mdates.DayLocator(interval=1))
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=1))
 	plt.ylabel(f'{name}')
 	plt.gcf().tight_layout()
 	if outfile:
