@@ -129,7 +129,8 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppm',includesNature=False
 
 
 def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
-	plt.figure(figsize=(10,9))
+	plt.rcParams.update({'font.size': 16})
+	plt.figure(figsize=(5,4))
 	plt.plot(time,ensmean,color='b',label='Ensemble mean')
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
@@ -142,7 +143,8 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 		plt.savefig(outfile)
 
 def emisPlot(time,ensmean,enssd,name,outfile=None):
-	plt.figure(figsize=(10,9))
+	plt.rcParams.update({'font.size': 16})
+	plt.figure(figsize=(5,4))
 	plt.plot(time,ensmean,color='b')
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
