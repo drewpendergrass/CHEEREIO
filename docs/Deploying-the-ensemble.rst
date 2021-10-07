@@ -64,23 +64,71 @@ Values need not be strings; some of the CHEEREIO settings are supplied in the fo
 
 **Important**: There is one subtlety in this particular configuration file: colons in the ``WallTime`` and ``SpinupWallTime`` entries must be escaped with two backslashes (``\\``). The first backslash escapes the second backslash in JSON; the second backslash escapes the colon in the SED unix utility which is used in the CHEEREIO installation process. For example, to allow a one day eight hour simulation, you would write ``"WallTime" : "1-08\\:00",``.
 
-More details on the JSON format are available on the JSON `website <https://www.json.org>`__.
+More details on the JSON format are available on the JSON `website <https://www.json.org>`__. The rest of this section will cover the various parts of the ``ens_config.json`` file and the settings they control.
 
 Basic GEOS-Chem and ensemble settings
 ~~~~~~~~~~~~~
 
+The first section of the ``ens_config.json`` file (i.e. between the first two comments) mostly controls settings analagous to those set during normal GEOS-Chem run directory creation. However, there are a few unique options in this setting particular to CHEEREIO. We'll consider these one-by-one.
+
+* RES: The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode\_MetCode (e.g. AS\_MERRA2, EU\_GEOSFP).
+* met_name: GEOSFP",
+* LEVS: 47",
+* NEST: F",
+* REGION: ",
+* BUFFER: ",
+* ASSIM_PATH: /n/home12/drewpendergrass/CHEEREIO",
+* RUN_NAME: SHORT_FULL_TEST",
+* MY_PATH: /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
+* DATA_PATH: /n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
+* RESTART_FILE: /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
+* BC_FILES: ",
+* sim_name: fullchem",
+* chemgrid: trop+strat",
+* sim_extra_option: none",
+* DO_SPINUP: false",
+* SPINUP_START: ",
+* SPINUP_END: ",
+* START_DATE: 20190101",
+* ASSIM_START_DATE: 20190108",
+* END_DATE: 20190115",
+* nEnsemble: 16",
+* pPERT: 0.5",
+* SIMULATE_NATURE: true",
 
 Cluster settings
 ~~~~~~~~~~~~~
 
+* NumCores: 8",
+* Partition: huce_intel",
+* Memory: 40000",
+* WallTime: 1-08\\:00",
+* SpinupWallTime: ",
+* CondaEnv: cheerio",
+* MaxPar: 3",
 
 Species in state/control/observation vectors
 ~~~~~~~~~~~~~
+
+* STATE_VECTOR_CONC" : [
+* CONTROL_VECTOR_CONC" : [
+* CONTROL_VECTOR_EMIS" : {
+* OBSERVED_SPECIES" : {
 
 
 Miscellaneous LETKF settings
 ~~~~~~~~~~~~~
 
+* LOCALIZATION_RADIUS_km: 1000",
+* ALLOW_ADAPTIVE_LOCALIZATION": "false",
+* NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER: 5.0",
+* ENABLE_4D_LETKF: false",
+* OBS_ERROR_MATRICES": [
+* OBS_OPERATORS": [
+* NATURE_H_FUNCTIONS" : [
+* INFLATION_FACTOR": "0.02",
+* ASSIM_TIME": "24",
+* TESTBIAS": "0.5"
 
 The Setup Ensemble script
 -------------
