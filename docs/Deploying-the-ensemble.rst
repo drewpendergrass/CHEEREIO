@@ -71,30 +71,29 @@ Basic GEOS-Chem and ensemble settings
 
 The first section of the ``ens_config.json`` file (i.e. between the first two comments) mostly controls settings analagous to those set during normal GEOS-Chem run directory creation. However, there are a few unique options in this setting particular to CHEEREIO. We'll consider these one-by-one.
 
-* RES: The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode\_MetCode (e.g. AS\_MERRA2, EU\_GEOSFP).
-* met_name: GEOSFP",
-* LEVS: 47",
-* NEST: F",
-* REGION: ",
-* BUFFER: ",
-* ASSIM_PATH: /n/home12/drewpendergrass/CHEEREIO",
-* RUN_NAME: SHORT_FULL_TEST",
-* MY_PATH: /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
-* DATA_PATH: /n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
-* RESTART_FILE: /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
-* BC_FILES: ",
-* sim_name: fullchem",
-* chemgrid: trop+strat",
-* sim_extra_option: none",
-* DO_SPINUP: false",
-* SPINUP_START: ",
-* SPINUP_END: ",
-* START_DATE: 20190101",
-* ASSIM_START_DATE: 20190108",
-* END_DATE: 20190115",
-* nEnsemble: 16",
-* pPERT: 0.5",
-* SIMULATE_NATURE: true",
+* RES: The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user.
+* met_name: Meteorology (chosen from MERRA2, GEOSFP, or ModelE2.1).
+* LEVS: Number of levels (47 or 72).
+* NEST: Is this a nested grid simulation? "T" or "F".
+* REGION: Two letter region code for nested grid, or empty string ("") if not.
+* ASSIM_PATH: **Full** path to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.**
+* RUN_NAME: The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on .
+* MY_PATH: Path to the directory where ensembles will be created. A folder with name ``RUN_NAME`` will be created inside.
+* DATA_PATH: Path to where external GEOS-Chem data is located. This can be an empty string if GEOS-Chem has already been configured on your machine (it is automatically overwritten).
+* RESTART_FILE: Full path to the restart file for the simulation.
+* BC_FILES: Full path to the boundary condition files for the simulation if a nested grid (empty string otherwise).
+* sim_name: Simulation type. Valid options are "fullchem", "aerosol", "CH4", "CO2", "Hg", "POPs", "tagCH4", "tagCO", "tagO3", and "TransportTracers".
+* chemgrid: Options are "trop+strat" and "trop_only".
+* sim_extra_option: Options are "none", "benchmark", "complexSOA", "complexSOA_SVPOA", "marinePOA", "aciduptake", "TOMAS15", "TOMAS40", "APM", "RRTMG", "BaP", "PHE", and "PYR". Depending on the simulation type only some will be available. Consult the GEOS-Chem documation for more information.
+* DO_SPINUP: Would you like CHEEREIO to set up a spinup directory for you? "true" or "false". The ensemble will automatically start from the end restart file produced by this run.
+* SPINUP_START: Start date for spinup (YYYYMMDD). Empty string if no spinup.
+* SPINUP_END: End date for spinup (YYYYMMDD).
+* START_DATE: Start date for ensemble run (YYYYMMDD).
+* ASSIM_START_DATE: Date where assimilation begins (YYYYMMDD). It's usually good to give a few days of spinup to create variations between ensemble members, since emissions drive the difference.
+* END_DATE: End date for ensemble run (YYYYMMDD).
+* nEnsemble: Number of ensemble members. 32 is usually a good number.
+* pPERT: Range of initial emissions perturbation. For example, if "0.5" selected then scaling factors will initially range between 0.5 and 1.5 sampled from a uniform distribution.
+* SIMULATE_NATURE: End users should almost always set this to "false", as this is used for testing. "true" or "false", should CHEEREIO generate an additional run directory for a run to be treated as nature (observation operators applied to create simulated observations).  
 
 Cluster settings
 ~~~~~~~~~~~~~
