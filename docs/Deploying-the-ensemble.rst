@@ -111,8 +111,8 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 Species in state/control/observation vectors
 ~~~~~~~~~~~~~
 
-* STATE_VECTOR_CONC" : [
-* CONTROL_VECTOR_CONC" : [
+* STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise.
+* CONTROL_VECTOR_CONC: A subset of the state vector concentration species that will be updated by assimilation. Although an update for all members of the state vector will be calculated, only these species will have that update saved. This allows a wide range of species to be considered in the update calculation process but only a smaller, more tightly coupled subset of species to actually be changed and passed to GEOS-Chem. The goal is to tamp down on noise. 
 * CONTROL_VECTOR_EMIS" : {
 * OBSERVED_SPECIES" : {
 
