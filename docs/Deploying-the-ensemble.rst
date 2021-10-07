@@ -22,6 +22,7 @@ JSON formatting
 JSON stores data in a form very similar to a Python dictionary. To have a basic idea of what CHEEREIO expects, let's take a look at the first ten lines from an example ``ens_config.json`` file:
 
 ::
+
 	{
 		"comment000" : "***************************************************************************",
 		"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
@@ -45,6 +46,7 @@ JSON does not support comments. The first three key-value pairs were chosen to a
 Values need not be strings; some of the CHEEREIO settings are supplied in the form of arrays or sub-dictionaries. Two examples from ``ens_config.json`` are shown below (and will be discussed in greater detail later):
 
 ::
+
 	"CONTROL_VECTOR_CONC" : [
 		"NO",
 		"NO2",
