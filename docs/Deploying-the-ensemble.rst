@@ -76,7 +76,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 * LEVS: Number of levels (47 or 72).
 * NEST: Is this a nested grid simulation? "T" or "F".
 * REGION: Two letter region code for nested grid, or empty string ("") if not.
-* ASSIM_PATH: **Full** path to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.**
+* ASSIM_PATH: **Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.**
 * RUN_NAME: The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on .
 * MY_PATH: Path to the directory where ensembles will be created. A folder with name ``RUN_NAME`` will be created inside.
 * DATA_PATH: Path to where external GEOS-Chem data is located. This can be an empty string if GEOS-Chem has already been configured on your machine (it is automatically overwritten).
@@ -91,20 +91,22 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 * START_DATE: Start date for ensemble run (YYYYMMDD).
 * ASSIM_START_DATE: Date where assimilation begins (YYYYMMDD). It's usually good to give a few days of spinup to create variations between ensemble members, since emissions drive the difference.
 * END_DATE: End date for ensemble run (YYYYMMDD).
-* nEnsemble: Number of ensemble members. 32 is usually a good number.
+* nEnsemble: Number of ensemble members. 32 is usually a good number. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
 * pPERT: Range of initial emissions perturbation. For example, if "0.5" selected then scaling factors will initially range between 0.5 and 1.5 sampled from a uniform distribution.
 * SIMULATE_NATURE: End users should almost always set this to "false", as this is used for testing. "true" or "false", should CHEEREIO generate an additional run directory for a run to be treated as nature (observation operators applied to create simulated observations).  
 
 Cluster settings
 ~~~~~~~~~~~~~
 
-* NumCores: 8",
-* Partition: huce_intel",
-* Memory: 40000",
-* WallTime: 1-08\\:00",
-* SpinupWallTime: ",
-* CondaEnv: cheerio",
-* MaxPar: 3",
+The next section of the ``ens_config.json`` file controls settings that will be used when submitting jobs to the scheduler. These settings overwrite the template batch submission scripts included with CHEEREIO.
+
+* NumCores: Number of cores used in each of the ensemble runs. CHEEREIO also will use these cores to parallelize assimilation computation columnwise.
+* Partition: Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice.
+* Memory: Memory in megabytes used by each ensemble member. CHEEREIO is quite memory intensive because it loads in restarts and history files for many ensemble members, so expect to use more than in standard GEOS-Chem runs.
+* WallTime: Time allowed for the overall assimilation process (runs and assimilation) to occur in format D-HH\\:MM. Assimilation adds substantial overhead so expect it to be slow.
+* SpinupWallTime: Wall time for the spinup simulation, if you're using one. Empty string otherwise.
+* CondaEnv: The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the YAML file that ships with CHEEREIO.
+* MaxPar: Maximum number of columns to assimilate in parallel using CHEEREIO, maxing out at NumCores. Setting this number smaller than NumCores saves on memory but adds to the assimilation time. 
 
 Species in state/control/observation vectors
 ~~~~~~~~~~~~~
@@ -130,6 +132,16 @@ Miscellaneous LETKF settings
 * TESTBIAS": "0.5"
 
 The Setup Ensemble script
+-------------
+
+TKTKTK
+
+The Template Run Directory
+-------------
+
+TKTKTK
+
+The Spinup Run Directory
 -------------
 
 TKTKTK
