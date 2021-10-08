@@ -25,6 +25,8 @@ Although the user will not ever execute the ``run_ensemble_simulations.sh`` scri
 SBATCH header
 ~~~~~~~~~~~~~
 
+The first part of the ``run_ensemble_simulations.sh`` script should be familiar to anyone who has worked with the SLURM job scheduler. Entries in curly braces are replaced with user settings from ``ens_config.json`` at Template Run Directory creation time. In short, this part of the script tells the scheduler about the resources required by a single ensemble member, what partition the job should use, and names two files to store shell-level output.  
+
 .. code-block:: bash
 
 	#!/bin/bash
@@ -41,11 +43,17 @@ SBATCH header
 One-time initializations
 ~~~~~~~~~~~~~
 
+Before GEOS-Chem is run or assimilation can be calculated, a few global settings have to be handled for the ensemble member. First, the software environment must be configured correctly because CHEEREIO requires many modules that can conflict with one another. This is accomplished with the following lines, which (1) purge and load appropriate modules, and (2) configures Anaconda for the subshell that is running the job.
+
 .. code-block:: bash
 
 	#Source clean environment with compatible netcdf and compiler environments and packages like GNU parallel:
 	source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 	eval "$(conda shell.bash hook)"
+
+Next, a few global variables are set. The end user will likely not ever make use of CHEEREIO's testing suite, so the variable ``TESTING`` is set to false automatically. A few key directories are stored in the variables ``$ENSDIR`` (the Ensemble Runs directory), ``$MY_PATH`` (path to the directory containing all CHEEREIO ensembles), and ``$RUN_NAME`` (the name of this ensemble). The latter two are grabbed from the ``ens_config.json`` file using the ``jq`` command, which allows shell scripts to access data stored in JSON format on the disk. The variable ``$x`` includes the ensemble member ID (ranging from 1 to the total number of ensemble members).  
+
+.. code-block:: bash
 
 	### Run directory
 	TESTING={TESTBOOL}
@@ -72,6 +80,10 @@ One-time initializations
 	else
 	  xstr="${x}"
 	fi
+
+After all these variables are set, then CHEEREIO navigates to the particular ensemble run directory it has been assigned and exports the proper number of OpenMP threads so that GEOS-Chem can exploit parallelization.
+
+.. code-block:: bash
 
 	### Run GEOS-Chem in the directory corresponding to the cluster Id
 	cd  {RunName}_${xstr}
