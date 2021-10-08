@@ -134,7 +134,7 @@ Miscellaneous LETKF settings
 The Setup Ensemble script
 -------------
 
-The ``setup_ensemble.sh`` script manages the creation of the CHEEREIO template directory, spinup directory (if enabled), scratch directory, and ensemble runs directory (which contains a run directory for each ensemble member). More details on these folders are available in :ref:`_Guide to the Ensemble Directory`. Because all the relevant settings are included in ``ens_config.json``, running this script should be relatively easy. ``setup_ensemble.sh`` contains routines from normal GEOS-Chem run directory creation, plus CHEEREIO-specific routines to modify HEMCO_Config, input.geos, and so on.
+The ``setup_ensemble.sh`` script manages the creation of the CHEEREIO template directory, spinup directory (if enabled), scratch directory, and ensemble runs directory (which contains a run directory for each ensemble member). More details on these folders are available in :ref:`Guide to the Ensemble Directory`. Because all the relevant settings are included in ``ens_config.json``, running this script should be relatively easy. ``setup_ensemble.sh`` contains routines from normal GEOS-Chem run directory creation, plus CHEEREIO-specific routines to modify HEMCO_Config, input.geos, and so on.
 
 Here is the recommended use of ``setup_ensemble.sh``:
 
