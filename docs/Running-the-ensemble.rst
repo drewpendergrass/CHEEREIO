@@ -175,10 +175,12 @@ With all GEOS-Chem runs completed successfully, we can now begin the assimilatio
 	    parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
 	  fi
 
-
+The GNU parallel line works as follows. Up to ``MaxPar`` jobs in a single ensemble member will run the command ``bash par_assim.sh ${TESTING} ${x} {1}`` simultaneously. The ``par_assim.sh`` takes three command line inputs: a boolean signal for whether or not we are in testing mode; and ensemble ID number; and a core ID number. The first two inputs are supplied by global settings, while the third is supplied by a special GNU Parallel substitution line. Each core will then compute the LETKF data assimilation for each of its assigned columns and save them in ``.npy`` format to the scratch directory.
 
 While loop part 3: Clean-up and ensemble completion 
 ~~~~~~~~~~~~~
+
+Once this parallelized assimilation is complete, a fair amount of clean up must be done before the entire while loop can repeat. Before CHEEREIO can update the NetCDFs containing restarts and scaling factors in each ensemble member run directory, we have to wait for all columns to be saved to the Scratch directory. The loop thus hangs until a file labeled ``ASSIMILATION_COMPLETE`` appears in the Scratch directory. While we hang, the script ``check_and_complete_assimilation.sh`` is run every second by ensemble member 1. If the number of ``*.npy`` files in scratch matches the expected number of columns, then ensemble member 1 will load all the columns in and update the relevant NetCDFs (and create the ``ASSIMILATION_COMPLETE`` file).
 
 .. code-block:: bash
 
@@ -190,6 +192,11 @@ While loop part 3: Clean-up and ensemble completion
 	    fi
 	    sleep 1
 	  done
+
+Next, we do our usual check for the ``KILL_ENS`` file, which will be generated if any of the CHEEREIO Python scripts fail. If everything works correctly, then ensemble member 1 runs the script ``cleanup.sh``. This clean-up script deletes flag files and column files particular to this assimilation run from the Scratch folder, updates internal state files with the new correct dates, and prepares the ``input.geos`` file in each ensemble member run directory so that we can correctly run GEOS-Chem for the next assimilation period.
+
+.. code-block:: bash
+
 	  #If there is a problem, the KILL_ENS file will be produced. Break then
 	  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
 	    break
@@ -207,6 +214,10 @@ While loop part 3: Clean-up and ensemble completion
 	  cd ${ENSDIR}/{RunName}_${xstr}
 	  #Everything cleaned up; we can head back to the beginning.
 	done
+
+If, after clean-up completes, our current date now exceeds the ensemble end time stored in the ``ens_config.json`` file, then the file ``ENSEMBLE_COMPLETE`` will appear in the Scratch directory and the while loop will terminate. However, the loop will also terminate if the ``KILL_ENS`` file is created due to a script failure. CHEEREIO picks the exit code for the job accordingly.
+
+.. code-block:: bash
 
 	#If there is a problem, the KILL_ENS file will be produced. Exit with code 1 in that case
 	if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
