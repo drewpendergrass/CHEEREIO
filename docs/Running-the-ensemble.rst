@@ -16,6 +16,8 @@ Monitoring the run progress
 
 TKTKTK
 
+.. _Run Ensemble Simulations:
+
 About the Run Ensemble Simulations script
 -------------
 
