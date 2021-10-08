@@ -20,6 +20,11 @@ Information about the ensemble state is continuously recorded during run time, a
 About the Run Ensemble Simulations script
 -------------
 
+Although the user will not ever execute the ``run_ensemble_simulations.sh`` script manually, it is very useful in terms of debugging to understand how the script works. We'll walk through it step-by-step.
+
+SBATCH header
+~~~~~~~~~~~~~
+
 .. code-block:: bash
 
 	#!/bin/bash
@@ -33,6 +38,10 @@ About the Run Ensemble Simulations script
 	#SBATCH -o logs/ensemble_slurm_%j.out    # File to which STDOUT will be written, %j inserts jobid       
 	#SBATCH -e logs/ensemble_slurm_%j.err    # File to which STDERR will be written, %j inserts jobid
 
+One-time initializations
+~~~~~~~~~~~~~
+
+.. code-block:: bash
 
 	#Source clean environment with compatible netcdf and compiler environments and packages like GNU parallel:
 	source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
@@ -70,6 +79,11 @@ About the Run Ensemble Simulations script
 	# Set the proper # of threads for OpenMP
 	# SLURM_CPUS_PER_TASK ensures this matches the number you set with NumCores in the ens_config file
 	export OMP_NUM_THREADS={NumCores}
+
+While loop part 1: Run GEOS-Chem
+~~~~~~~~~~~~~
+
+.. code-block:: bash
 
 	#Run GC; hang until assimilation complete (later also will do assimilation).
 	#This will loop until a file appears in scratch signalling assimilation is complete.
@@ -112,12 +126,24 @@ About the Run Ensemble Simulations script
 	      echo "Done" > ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE
 	    fi
 	  fi
+
+While loop part 2: Execute parallelized assimilation
+~~~~~~~~~~~~~
+
+.. code-block:: bash
+
 	  #CD to core
 	  cd {ASSIM}/core
 	  #Use GNU parallel to submit parallel sruns, except nature
 	  if [ $x -ne 0 ]; then
 	    parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
 	  fi
+
+While loop part 3: Clean-up and ensemble completion 
+~~~~~~~~~~~~~
+
+.. code-block:: bash
+
 	  #Hang until assimilation completes or cleanup completes (in case things go too quickly)
 	  until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
 	    #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
