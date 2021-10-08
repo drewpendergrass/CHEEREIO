@@ -127,7 +127,7 @@ Miscellaneous LETKF settings
 * OBS_ERROR_MATRICES: array of relative errors (0.1 means 10% relative error) representing uncertainty in observations. Order is the same as OBSERVED_SPECIES.
 * OBS_OPERATORS: array of Python classes linking observations to the concentration files, written in the ``core/observation_operators.py`` file. Order is the same as OBSERVED_SPECIES.
 * NATURE_H_FUNCTIONS: array of Python function names to be applied to the 3D concentrations, written in the ``core/observation_operators.py`` file. Order is the same as OBSERVED_SPECIES.
-* INFLATION_FACTOR": :math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
+* INFLATION_FACTOR: :math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
 * ASSIM_TIME: Time in hours of assimilation window. 24 is a good choice for full chemistry.
 * TESTBIAS: Used only for testing and not referenced during normal use. Sets the bias of the initial scaling factors in test simulations.
 
