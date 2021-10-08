@@ -33,6 +33,8 @@ Although the user should never modify anything in the scratch directory, it may 
 
 The only reason to ever view the scratch directory is in the event of ensemble failure. In this case, the ``KILL_ENS`` file may contain a short error message that can help the user identify the most relevant log file for debugging.
 
+.. _Ensemble Runs:
+
 The Ensemble Runs Directory
 -------------
 
@@ -46,6 +48,6 @@ The Ensemble Runs directory is created in two stages: run scripts are created wh
    * ``ensemble_slurm_JOBNUMBER.out`` files. One such file is present for each ensemble member. These contain regular output returned to the program on the shell-level. These won't have much in them and are rarely worth looking at.
    * ``letkf_ENSNUMBER_CORENUMBER.out`` files. One file is present for each core within each ensemble member. They contain real-time information about what this particular core is doing at assimilation time (including overall time taken to load files and compute assimilated columns).
    * The ``letkf_master.out`` file. Only one of these files is created by ensemble member 1, which is by default the "job manager" (coordinates ensemble members, does file clean-up and NetCDF updates, etc.). Like the other LETKF log files, this contains real-time information about the combination of assimilated columns and the updates of NetCDF files.
- 
+
  * The ensemble run directory folder, each with name ``SimulationName_FourDigitEnsembleMemberID``. These are standard GEOS-Chem run directories, copied from the Template Run Directory. The only difference between these ensemble members and other run directories are that these lack individual run scripts. In addition, ``HEMCO_Config.rc`` is linked to NetCDF files containing gridded scaling factors which are updated at assimilation time. Unique instances of these scaling factors are present in each of these folders and have names of form ``*_SCALEFACTOR.nc``.
 
