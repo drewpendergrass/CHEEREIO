@@ -113,23 +113,23 @@ Species in state/control/observation vectors
 
 * STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array.
 * CONTROL_VECTOR_CONC: A subset of the state vector concentration species that will be updated by assimilation. Although an update for all members of the state vector will be calculated, only these species will have that update saved. This allows a wide range of species to be considered in the update calculation process but only a smaller, more tightly coupled subset of species to actually be changed and passed to GEOS-Chem. The goal is to tamp down on noise. 
-* CONTROL_VECTOR_EMIS: A dictionary linking a label for emissions scalings to the species emitted. For example, you could write ``"NO_AGR" : "NO"`` to reference agricultural NO emissions. CHEEREIO automatically will update ``HEMCO_Config.rc`` accordingly, but cannot distinguish between different emissions of the same species on its own; the user has to manually edit ``HEMCO_Config.rc`` to correct this if distinguishing between different sources of the same species. More on this in the `Template Run <template>`__ section.
+* CONTROL_VECTOR_EMIS: A dictionary linking a label for emissions scalings to the species emitted. For example, you could write ``"NO_AGR" : "NO"`` to reference agricultural NO emissions. CHEEREIO automatically will update ``HEMCO_Config.rc`` accordingly, but cannot distinguish between different emissions of the same species on its own; the user has to manually edit ``HEMCO_Config.rc`` to correct this if distinguishing between different sources of the same species. More on this in the :ref:`Template Run`.
 * OBSERVED_SPECIES: A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. Unlike elsewhere, here the order matters. Later in the configuration file, arrays of observation operators and errors will be associated with these species according to the order they are stored. More in the next section. 
 
 
 Miscellaneous LETKF settings
 ~~~~~~~~~~~~~
 
-* LOCALIZATION_RADIUS_km: 1000",
-* ALLOW_ADAPTIVE_LOCALIZATION": "false",
-* NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER: 5.0",
-* ENABLE_4D_LETKF: false",
-* OBS_ERROR_MATRICES": [
-* OBS_OPERATORS": [
-* NATURE_H_FUNCTIONS" : [
-* INFLATION_FACTOR": "0.02",
-* ASSIM_TIME": "24",
-* TESTBIAS": "0.5"
+* LOCALIZATION_RADIUS_km: CHEEREIO only considers data and observations within this radius (in kilometers). 
+* ALLOW_ADAPTIVE_LOCALIZATION: There are some papers that change localization radius based on local conditions. This isn't currently supported in CHEEREIO, but it might be added at a later date.
+* NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER: See above.
+* ENABLE_4D_LETKF: Not yet implemented, but will be shortly in the future. "true" or "false", should assimilation make use of history files to calculate the update based on observations that are not synchronous with assimilation time (e.g. incorporate observations throughout the assimilation window). This does not require the adjoint.
+* OBS_ERROR_MATRICES: array of relative errors (0.1 means 10% relative error) representing uncertainty in observations. Order is the same as OBSERVED_SPECIES.
+* OBS_OPERATORS: array of Python classes linking observations to the concentration files, written in the ``core/observation_operators.py`` file. Order is the same as OBSERVED_SPECIES.
+* NATURE_H_FUNCTIONS: array of Python function names to be applied to the 3D concentrations, written in the ``core/observation_operators.py`` file. Order is the same as OBSERVED_SPECIES.
+* INFLATION_FACTOR": :math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
+* ASSIM_TIME: Time in hours of assimilation window. 24 is a good choice for full chemistry.
+* TESTBIAS: Used only for testing and not referenced during normal use. Sets the bias of the initial scaling factors in test simulations.
 
 The Setup Ensemble script
 -------------
