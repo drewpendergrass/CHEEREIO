@@ -95,17 +95,29 @@ After all these variables are set, then CHEEREIO navigates to the particular ens
 While loop part 1: Run GEOS-Chem
 ~~~~~~~~~~~~~
 
+With global settings taken care of, we can now proceed to the while loop that repeatedly runs GEOS-Chem and assimilation routines until the entire ensemble is completed. The whole process starts off with the following while statement:
+
 .. code-block:: bash
 
 	#Run GC; hang until assimilation complete (later also will do assimilation).
 	#This will loop until a file appears in scratch signalling assimilation is complete.
 	while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
+
+This means that the while loop will continue until a file named ``ENSEMBLE_COMPLETE`` appears in the Scratch folder. The first thing that happens in the while loop is that GEOS-Chem is submitted. Again, since ``$TESTING`` will always be ``false`` for end users, we can consider only this part of the code block.
+
+.. code-block:: bash
+
 	  # Run GEOS_Chem.  The "time" command will return CPU and wall times.
 	  # Stdout and stderr will be directed to the "GC.log" log file
 	  # If just testing assimilation, skip all this
 	  if [ "${TESTING}" = false ]; then
 	    srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
 	    wait
+
+This runs GEOS-Chem for one assimilation period (often just 24 hours). The ``wait`` command means that the job will hang until the ``srun`` job managing GEOS-Chem is complete. When ``srun`` terminates, CHEEREIO looks at the last line of the ``GC.log`` file and checks if it indicates that GEOS-Chem terminated successfully.
+
+.. code-block:: bash
+
 	    taillog="$(tail -n 1 GC.log)"
 	    #Check if GC finished.
 	    if [[ ${taillog:0:1} != "*" ]]; then
@@ -115,6 +127,11 @@ While loop part 1: Run GEOS-Chem
 	    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
 	      break
 	    fi
+
+If GEOS-Chem fails, then the file ``KILL_ENS`` is created and stored in the Scratch directory. Other ensemble members will detect this file and terminate themselves as well, because the ensemble can only continue if all GEOS-Chem runs terminate successfully. However, if everything works, the ensemble member 1 takes on the role as the "job coordinator." This ensemble member checks every second if a restart with the appropriate time stamp is present in each ensemble run directory. If everything is present, then a file labeled ``ALL_RUNS_COMPLETE`` is created and stored in the Scratch directory and we can continue to the assimilation phase (as it breaks the until loop). The rest of the ensemble members just check for the ``KILL_ENS`` file repeatedly and terminate themselves if necessary.
+
+.. code-block:: bash
+
 	    #Ensemble member 1 handles checking. CD to core.
 	    if [ $x -eq 1 ]; then
 	      cd {ASSIM}/core
@@ -132,6 +149,11 @@ While loop part 1: Run GEOS-Chem
 	      fi
 	      sleep 1
 	    done
+
+If testing mode is active, GEOS-Chem is not run and we proceed to assimilation immediately. Again, this is not relevant to the end-user.
+
+.. code-block:: bash
+
 	  else
 	    #Create done signal
 	    if [ $x -eq 1 ]; then
@@ -142,6 +164,8 @@ While loop part 1: Run GEOS-Chem
 While loop part 2: Execute parallelized assimilation
 ~~~~~~~~~~~~~
 
+With all GEOS-Chem runs completed successfully, we can now begin the assimilation process. All ensemble members navigate to the CHEEREIO code directory in order to submit the ``par_assim.sh`` script via GNU Parallel.
+
 .. code-block:: bash
 
 	  #CD to core
@@ -150,6 +174,8 @@ While loop part 2: Execute parallelized assimilation
 	  if [ $x -ne 0 ]; then
 	    parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
 	  fi
+
+
 
 While loop part 3: Clean-up and ensemble completion 
 ~~~~~~~~~~~~~
