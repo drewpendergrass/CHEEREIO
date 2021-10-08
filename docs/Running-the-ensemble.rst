@@ -20,7 +20,7 @@ Information about the ensemble state is continuously recorded during run time, a
 About the Run Ensemble Simulations script
 -------------
 
-.. code-block:: console
+.. code-block:: bash
 
 	#!/bin/bash
 
