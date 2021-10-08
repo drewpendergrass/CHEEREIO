@@ -22,10 +22,16 @@ The Spinup Run Directory
 The Spinup Run directory, if it is enabled, functions like a normal GEOS-Chem run directory. Created by the ``setup_ensemble.sh``, it comes with a run script and with all the configuration files set according to your specifications in ``ens_config.json``. When the Spinup Run terminates, the restart file generated will automatically be used to initialize the ensemble run directories. No copying on the user's part is necessary.
 
 
-The scratch directory
+The Scratch Directory
 -------------
 
-TKTKTK
+Although the user should never modify anything in the scratch directory, it may still be useful to know how CHEEREIO makes use of this folder throughout run time. There are three main types of file in the scratch directory:
+
+* Column files (``.npy``): Column files contain assimilated columns which will eventually be combined and used to update ensemble restarts and scaling factors. Each core on each run instance calculates some number of columns at assimilation time and saves them to the scratch directory, until finally all are computed and can be used to adjust the ensemble. 
+* Internal state files: these files track things like the current date, lat/lon coordinates, and columns assigned to each core in the ensemble parallelization routine.
+* Flag files: these files are used to couple the many jobs that are running simultaneously during a CHEEREIO assimilation routine. They track ensemble members as they finish GEOS-Chem, as columns are being saved, and as assimilation and clean up processes complete. If an ensemble member fails, it can generate a kill file that terminates the entire ensemble, saving computational resources.
+
+The only reason to ever view the scratch directory is in the event of ensemble failure. In this case, the ``KILL_ENS`` file may contain a short error message that can help the user identify the most relevant log file for debugging.
 
 The Ensemble Runs Directory
 -------------
