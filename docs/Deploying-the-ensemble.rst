@@ -111,10 +111,10 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 Species in state/control/observation vectors
 ~~~~~~~~~~~~~
 
-* STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise.
+* STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array.
 * CONTROL_VECTOR_CONC: A subset of the state vector concentration species that will be updated by assimilation. Although an update for all members of the state vector will be calculated, only these species will have that update saved. This allows a wide range of species to be considered in the update calculation process but only a smaller, more tightly coupled subset of species to actually be changed and passed to GEOS-Chem. The goal is to tamp down on noise. 
-* CONTROL_VECTOR_EMIS" : {
-* OBSERVED_SPECIES" : {
+* CONTROL_VECTOR_EMIS: A dictionary linking a label for emissions scalings to the species emitted. For example, you could write ``"NO_AGR" : "NO"`` to reference agricultural NO emissions. CHEEREIO automatically will update ``HEMCO_Config.rc`` accordingly, but cannot distinguish between different emissions of the same species on its own; the user has to manually edit ``HEMCO_Config.rc`` to correct this if distinguishing between different sources of the same species. More on this in the `Template Run <template>`__ section.
+* OBSERVED_SPECIES: A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. Unlike elsewhere, here the order matters. Later in the configuration file, arrays of observation operators and errors will be associated with these species according to the order they are stored. More in the next section. 
 
 
 Miscellaneous LETKF settings
@@ -135,6 +135,8 @@ The Setup Ensemble script
 -------------
 
 TKTKTK
+
+.. _Template:
 
 The Template Run Directory
 -------------
