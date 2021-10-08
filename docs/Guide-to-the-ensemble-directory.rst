@@ -1,17 +1,27 @@
+.. _Guide to the Ensemble Directory:
+
 The structure of the ensemble directory
 ==========
 
-The template_run folder
+.. _Template:
+
+The Template Run Directory
 -------------
 
 TKTKTK
 
-The scratch folder
+The Spinup Run Directory
 -------------
 
 TKTKTK
 
-The ensemble_runs folder
+
+The scratch directory
+-------------
+
+TKTKTK
+
+The Ensemble Runs Directory
 -------------
 
 TKTKTK
