@@ -10,6 +10,8 @@ trop_dat = trans.getTROPOMI('CH4',timeperiod)
 hist_trans = lu.HIST_Translator('/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/test_4x5/','20190102_0000')
 gc = hist_trans.combineHist('CH4',True)
 
+i,j,t = tt.nearest_loc(gc,trop_dat)
+
 # sourcedir = trans.spc_config['TROPOMI_dirs']['CH4']
 # obs_list = glob(f'{sourcedir}/S5P_*.nc')
 # obs_list.sort()
