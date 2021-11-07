@@ -334,14 +334,14 @@ class HIST_Translator(object):
 		dataset=[]
 		if useLevelEdge:
 			specconc_list,le_list=self.globSubDir(self.timeperiod,useLevelEdge)
-			for specfile,lefile in zip(specconc_list,le_list)
+			for specfile,lefile in zip(specconc_list,le_list):
 				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
 				lev_val = xr.load_dataset(lefile)[f'Met_PEDGE']
 				data_val = xr.merge([hist_val, lev_val])
 				dataset.append(data_val)
 		else:
 			specconc_list=self.globSubDir(self.timeperiod,useLevelEdge)
-			for specfile in zip(specconc_list)
+			for specfile in specconc_list:
 				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
 				dataset.append(hist_val)
 		dataset = xr.merge(dataset)
