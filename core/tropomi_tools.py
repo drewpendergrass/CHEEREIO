@@ -4,6 +4,7 @@ from glob import glob
 import pickle
 import os.path
 import xarray as xr
+import numpy as np
 
 def read_tropomi(filename, species):
 	"""
