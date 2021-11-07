@@ -29,27 +29,28 @@ def read_tropomi(filename, species):
 							- Vertical pressure profile
 	"""
 
-	# Initialize dictionary for TROPOMI data
+	# Initialize list for TROPOMI data
 	met = {}
 	
 	# Store species, QA, lat, lon, time, averaging kernel
 	data = xr.open_dataset(filename, group='PRODUCT')
+	qa = data['qa_value'].values[0,:,:] #time,scanline,groundpixel
+	sl,gp=np.where(qa>0.5)
+	met['qa_value'] = qa[sl,gp]
 	if species=='NO2':
 		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,:,:]
 	elif species=='CH4':
-		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,:,:]
+		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
 	else:
 		raise ValueError('Species not supported')
 
-	met['qa_value'] = data['qa_value'].values[0,:,:]
-	met['longitude'] = data['longitude'].values[0,:,:]
-	met['latitude'] = data['latitude'].values[0,:,:]
-	met['utctime'] = data['time_utc'].values[0,:]
+	
+	met['longitude'] = data['longitude'].values[0,sl,gp] #time,scanline,groundpixel
+	met['latitude'] = data['latitude'].values[0,sl,gp] #time,scanline,groundpixel
+	met['utctime'] = data['time_utc'].values[0,sl] #time, scanline
 
 	if species=='NO2':
 		met['column_AK'] = data['averaging_kernel'].values[0,:,:,::-1]
-
-	if species=='NO2':
 		a = data['tm5_constant_a'].values[:,:]
 		b = data['tm5_constant_b'].values[:,:]
 	
@@ -57,22 +58,22 @@ def read_tropomi(filename, species):
 
 	if species=='CH4':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
-		met['column_AK'] = data['column_averaging_kernel'].values[0,:,:,::-1]
+		met['column_AK'] = data['column_averaging_kernel'].values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 		data.close()
 
 	# Store methane prior profile, dry air subcolumns
 	data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 	if species=='CH4':
-		pressure_interval = data['pressure_interval'].values[0,:,:]/100
+		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
 
-	surface_pressure = data['surface_pressure'].values[0,:,:]/100				# Pa -> hPa
+	surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
 	data.close()
 
 	# Store lat, lon bounds for pixels
-	data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
-	met['longitude_bounds'] = data['longitude_bounds'].values[0,:,:,:]
-	met['latitude_bounds'] = data['latitude_bounds'].values[0,:,:,:]
-	data.close()
+	# data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
+	# met['longitude_bounds'] = data['longitude_bounds'].values[0,:,:,:]
+	# met['latitude_bounds'] = data['latitude_bounds'].values[0,:,:,:]
+	# data.close()
 
 	if species=='NO2':
 		#Pressure levels (hpa) with dimension level, latind, lonind,edge (bottom/top)
@@ -81,13 +82,10 @@ def read_tropomi(filename, species):
 			for j in range(np.shape(surface_pressure)[1]):
 				pressures[:,i,j,:]=a+(b*surface_pressure[i,j])
 	elif species=='CH4':
-		N1 = met[species].shape[0]
-		N2 = met[species].shape[1]
-		pressures = np.zeros([N1,N2,13],dtype=np.float)
+		pressures = np.zeros([len(sl),13],dtype=np.float)
 		pressures.fill(np.nan)
 		for i in range(13):
-			pressures[:,:,i]=surface_pressure-(i*pressure_interval)
-
+			pressures[:,i]=surface_pressure-(i*pressure_interval)
 		met['pressures'] = pressures
 	
 	return met
@@ -126,7 +124,10 @@ class TROPOMI_Translator(object):
 		return obs_list
 	def getTROPOMI(self,species,timeperiod):
 		obs_list = self.globObs(species,timeperiod)
-		trop_obs = {}
+		trop_obs = []
 		for obs in obs_list:
-			trop_obs[obs]=read_tropomi(obs,species)
-		return trop_obs
+			trop_obs.append(read_tropomi(obs,species))
+		met = {}
+		for key in list(trop_obs[0].keys()):
+			met[key] = np.concatenate([metval[key] for metval in trop_obs])
+		return met
