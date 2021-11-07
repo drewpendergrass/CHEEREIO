@@ -113,7 +113,7 @@ class TROPOMI_Translator(object):
 		obs_dates = TROPOMI_date_dict[species]
 		obs_list = glob(f'{sourcedir}/S5P_*.nc')
 		obs_list.sort()
-		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obsdates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[2])]
+		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[2])]
 		return obs_list
 	def getTROPOMI(self,species,timeperiod):
 		obs_list = self.globObs(species,timeperiod)
