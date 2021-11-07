@@ -44,13 +44,20 @@ def read_tropomi(filename, species):
 	met['longitude'] = data['longitude'].values[0,:,:]
 	met['latitude'] = data['latitude'].values[0,:,:]
 	met['utctime'] = data['time_utc'].values[0,:]
-	met['column_AK'] = data['averaging_kernel'].values[0,:,:,::-1]
+
+	if species=='NO2':
+		met['column_AK'] = data['averaging_kernel'].values[0,:,:,::-1]
 
 	if species=='NO2':
 		a = data['tm5_constant_a'].values[:,:]
 		b = data['tm5_constant_b'].values[:,:]
 	
 	data.close()
+
+	if species=='CH4':
+		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
+		met['column_AK'] = data['column_averaging_kernel'].values[0,:,:,::-1]
+		data.close()
 
 	# Store methane prior profile, dry air subcolumns
 	data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
