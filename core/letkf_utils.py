@@ -308,7 +308,7 @@ class GC_Translator(object):
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,testing=False):
+	def __init__(self, path_to_rundir,timestamp,fortesting=False):
 		self.testing = testing
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		self.hist_dir = f'{path_to_rundir}OutputDir'
@@ -316,25 +316,37 @@ class HIST_Translator(object):
 		ASSIM_TIME = self.spc_config['ASSIM_TIME']
 		delta = timedelta(hours=int(ASSIM_TIME))
 		starttime = endtime-delta
-		timeperiod = (starttime,endtime)
-		histfiles=self.globSubDir(timeperiod)
-		self.histdict = {}
-		self.times = []
-		for file in histfiles:
-			file_ts = file.split('.')[-2][0:13]
-			hist_ds = xr.load_dataset(file)
-			self.histdict[file_ts]=hist_ds
-			self.times.append(file_ts)
-		self.times = self.times.sort()
-	def globSubDir(self,timeperiod):
+		self.timeperiod = (starttime,endtime)
+	def globSubDir(self,timeperiod,useLevelEdge = False):
 		specconc_list = glob(f'{self.hist_dir}/GEOSChem.SpeciesConc*.nc4')
 		specconc_list.sort()
 		ts = [datetime.strptime(spc.split('.')[-2][0:13], "%Y%m%d_%H%M") for spc in specconc_list]
 		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
-		return specconc_list
-	def get3DConc(self,timestamp,species):
-		da = np.array(self.histdict[timestamp][f'SpeciesConc_{species}']).squeeze()
-		return da
+		if useLevelEdge:
+			le_list = glob(f'{self.hist_dir}/GEOSChem.LevelEdgeDiags*.nc4')
+			le_list.sort()
+			le_ts = [datetime.strptime(le.split('.')[-2][0:13], "%Y%m%d_%H%M") for le in le_list]
+			le_list = [le for le,t in zip(le_list,le_ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
+			return [specconc_list,le_list]
+		else:
+			return specconc_list
+	def combineHist(self,species,useLevelEdge=False):
+		dataset=[]
+		if useLevelEdge:
+			specconc_list,le_list=self.globSubDir(self.timeperiod,useLevelEdge)
+			for specfile,lefile in zip(specconc_list,le_list)
+				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
+				lev_val = xr.load_dataset(lefile)[f'Met_PEDGE']
+				data_val = xr.merge([hist_val, lev_val])
+				dataset.append(data_val)
+		else:
+			specconc_list=self.globSubDir(self.timeperiod,useLevelEdge)
+			for specfile in zip(specconc_list)
+				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
+				dataset.append(hist_val)
+		dataset = xr.merge(dataset)
+		return dateaset
+
 
 class HIST_Ens(object):
 	def __init__(self,timestamp,ObsOp,testing=False):
