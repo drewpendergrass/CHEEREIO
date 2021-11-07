@@ -64,6 +64,8 @@ def read_tropomi(filename, species):
 	# Store methane prior profile, dry air subcolumns
 	data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 	if species=='CH4':
+		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1]
+		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1]
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
 
 	surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
@@ -106,6 +108,62 @@ def nearest_loc(GC,TROPOMI):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
+def getGCCols(GC,TROPOMI,species):
+	i,j,t = nearest_loc(GC,TROPOMI)
+	return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
+
+def GC_to_sat_levels(GC_CH4, GC_edges, sat_edges):
+	'''
+	The provided edges for GEOS-Chem and the satellite should
+	have dimension number of observations x number of edges
+	'''
+	# We want to account for the case when the GEOS-Chem surface
+	# is above the satellite surface (altitude wise) or the GEOS-Chem
+	# top is below the satellite top.. We do this by adjusting the
+	# GEOS-Chem surface pressure up to the TROPOMI surface pressure
+	idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
+	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
+	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
+	GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
+	# Define vectors that give the "low" and "high" pressure
+	# values for each GEOS-Chem and satellite layer.
+	GC_lo = GC_edges[:, 1:][:, :, None]
+	GC_hi = GC_edges[:, :-1][:, :, None]
+	sat_lo = sat_edges[:, 1:][:, None, :]
+	sat_hi = sat_edges[:, :-1][:, None, :]
+	# Get the indices where the GC-to-satellite mapping, which is
+	# a nobs x ngc x nsat matrix, is non-zero
+	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+	# Find the fraction of each GC level that contributes to each
+	# TROPOMI level. We should first divide (to normalize) and then
+	# multiply (to apply the map to the column) by the GC pressure
+	# difference, but we exclude this (since it's the same as x1).
+	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+	GC_to_sat[~idx] = 0
+	# Now map the GC CH4 to the satellite levels
+	GC_on_sat = (GC_to_sat*GC_CH4[:, :, None]).sum(axis=1)
+	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
+	return GC_on_sat
+
+def apply_avker(sat_avker, sat_prior, sat_pressure_weight, GC_CH4, filt=None):
+	'''
+	Apply the averaging kernel
+	Inputs:
+		sat_avker			The averaging kernel for the satellite
+		sat_prior			The satellite prior profile in ppb
+		sat_pressure_weight  The relative pressure weights for each level
+		GC_CH4			   The GC methane on the satellite levels
+		filt				 A filter, optional
+	'''
+	if filt is None:
+		filt = np.ones(sat_avker.shape[1])
+	else:
+		filt = filt.astype(int)
+	GC_col = (filt*sat_pressure_weight
+			  *(sat_prior + sat_avker*(GC_CH4 - sat_prior)))
+	GC_col = GC_col.sum(axis=1)
+	return GC_col 
+
 class TROPOMI_Translator(object):
 	def __init__(self,testing=False):
 		self.testing = testing
@@ -147,3 +205,15 @@ class TROPOMI_Translator(object):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
+	def gcCompare(self,species,timeperiod,GC):
+		TROPOMI = self.getTROPOMI(species,timeperiod)
+		if species=='CH4':
+			GC*=1e9 #scale to ppb
+		TROP_CH4 = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
+		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1]).values[:, None])
+		GC_CH4,GC_P = getGCCols(GC,TROPOMI,species)
+		GC_on_sat = GC_to_sat_levels(GC_CH4, GC_P, TROPOMI['pressures'])
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_CH4, TROP_PW, GC_on_sat)
+		return [GC_on_sat,TROPOMI[species]]
+
+
