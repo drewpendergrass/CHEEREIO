@@ -4,7 +4,7 @@ from glob import glob
 import observation_operators as obs
 import scipy.linalg as la
 import toolbox as tx 
-from datetime import date
+from datetime import date,datetime,timedelta
 
 def getLETKFConfig(testing=False):
 	data = tx.getSpeciesConfig(testing)
@@ -305,6 +305,102 @@ class GC_Translator(object):
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name].to_netcdf(file)
+
+#A class that takes history files and connects them with the main state vector and observation matrices
+class HIST_Translator(object):
+	def __init__(self, path_to_rundir,timestamp,testing=False):
+		self.testing = testing
+		self.spc_config = tx.getSpeciesConfig(self.testing)
+		self.hist_dir = f'{path_to_rundir}OutputDir'
+		endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
+		ASSIM_TIME = self.spc_config['ASSIM_TIME']
+		delta = timedelta(hours=int(ASSIM_TIME))
+		starttime = endtime-delta
+		timeperiod = (starttime,endtime)
+		histfiles=self.globSubDir(timeperiod)
+		self.histdict = {}
+		self.times = []
+		for file in histfiles:
+			file_ts = file.split('.')[-2][0:13]
+			hist_ds = xr.load_dataset(file)
+			self.histdict[file_ts]=hist_ds
+			self.times.append(file_ts)
+		self.times = self.times.sort()
+	def globSubDir(self,timeperiod):
+		specconc_list = glob(f'{self.hist_dir}/GEOSChem.SpeciesConc*.nc4')
+		specconc_list.sort()
+		ts = [datetime.strptime(spc.split('.')[-2][0:13], "%Y%m%d_%H%M") for spc in specconc_list]
+		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
+		return specconc_list
+	def get3DConc(self,timestamp,species):
+		da = np.array(self.histdict[timestamp][f'SpeciesConc_{species}']).squeeze()
+		return da
+
+class HIST_Ens(object):
+	def __init__(self,timestamp,ObsOp,testing=False):
+		self.testing = testing
+		spc_config = tx.getSpeciesConfig(self.testing)
+		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
+		subdirs = glob(f"{path_to_ensemble}/*/")
+		subdirs.remove(f"{path_to_ensemble}/logs/")
+		dirnames = [d.split('/')[-2] for d in subdirs]
+		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
+		ensemble_numbers = []
+		self.ht = {}
+		self.nature = None
+		self.observed_species = spc_config['OBSERVED_SPECIES']
+		self.ObsOp = ObsOp
+		for ens, directory in zip(subdir_numbers,subdirs):
+			if ens==0:
+				self.nature = HIST_Translator(directory, timestamp,self.testing)
+			else:
+				self.ht[ens] = HIST_Translator(directory, timestamp,self.testing)
+				ensemble_numbers.append(ens)
+		self.ensemble_numbers=np.array(ensemble_numbers)
+	def combineEnsForSpecTime(self,species,timestamp):
+		conc3D = []
+		firstens = self.ensemble_numbers[0]
+		first3D = self.ht[firstens].get3DConc(timestamp,species)
+		shape4D = np.zeros(4)
+		shape4D[0:3] = np.shape(first3D)
+		shape4D[3]=len(self.ensemble_numbers)
+		shape4D = shape4D.astype(int)
+		conc4D = np.zeros(shape4D)
+		conc4D[:,:,:,firstens-1] = first3D
+		for i in self.ensemble_numbers:
+			if i!=firstens:
+				conc4D[:,:,:,i-1] = self.ht[i].get3DConc(species)
+		return conc4D
+	def ensObsMeanAndPertForSpecTime(self, observation_key,species,timestamp,latval,lonval):
+		spec_4D = self.combineEnsForSpecTime(species,timestamp)
+		return self.ObsOp[observation_key].obsMeanAndPert(spec_4D,latval,lonval)
+	def ensObsMeanPertDiffForTime(self,timestamp,latval,lonval):
+		obsmeans = []
+		obsperts = []
+		obsdiffs = []
+		for obskey,species in zip(list(self.observed_species.keys()),list(self.observed_species.values())):
+			obsmean,obspert  = self.ensObsMeanAndPertForSpecTime(obskey,species,timestamp,latval,lonval)
+			obsmeans.append(obsmean)
+			obsperts.append(obspert)
+			obsdiffs.append(self.obsDiffForSpecies(obskey,obsmean,latval,lonval))
+		full_obsmeans = np.concatenate(obsmeans)
+		full_obsperts = np.concatenate(obsperts,axis = 0)
+		full_obsdiffs = np.concatenate(obsdiffs)
+		return [full_obsmeans,full_obsperts,full_obsdiffs]
+	def ensObsMeanPertDiff(self,latval,lonval):
+		times = self.ht[self.ensemble_numbers[0]].times
+		obsmeans = []
+		obsperts = []
+		obsdiffs = []
+		for time in times:
+			obsmean,obspert,obsdiff = self.ensObsMeanPertDiffForTime(time,latval,lonval)
+			obsmeans.append(obsmean)
+			obsperts.append(obspert)
+			obsdiffs.append(obsdiff)
+		full_obsmeans = np.concatenate(obsmeans)
+		full_obsperts = np.concatenate(obsperts,axis = 0)
+		full_obsdiffs = np.concatenate(obsdiffs)
+		return [full_obsmeans,full_obsperts,full_obsdiffs]
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):

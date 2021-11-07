@@ -10,21 +10,17 @@ The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is
 4. **Easy to link observations**: Object-oriented observation operator implementation allows the user to rapidly add new kinds of data with minimal programming required.
 5. **Quick to run**: Wall runtime should be no more than 2x longer than vanilla GEOS-Chem (4D-Var limit) assuming resources are available.
 
-Please note that CHEEREIO is not fully operational and cannot yet be used for science.
+CHEEREIO is currently fully tested and operational for 3D LETKF data assimilation. Development of 4D assimilation and additional tools for observation operator creation are ongoing.
 
 ## To-do list
 
-### For localization implementation:
+### Ongoing 4D-LETKF development:
 
-1. Understand why update is so small (order of magnitude issue in math?).
-2. Verify that weeklong run functions correctly. 
-
-### After localization implementation:
-
-1. Add ability to modify HISTORY RC and read in history information for either 4D-LETKF or assimilating derived quantities like AOD.
-2. Implement adaptive localization
-3. Make sure things work for interesting specialty simulations.
-4. Science evaluation for NOx emissions update
+1. Add ability to read in history information for either 4D-LETKF or assimilating derived quantities like AOD.
+2. Implement adaptive localization (optional, low priority)
+3. Easier observation operator capabilities (possible pre-processing folder addition)
+4. Science evaluation for NOx emissions update with real data
+5. GMD paper.
 
 ### For usability:
 

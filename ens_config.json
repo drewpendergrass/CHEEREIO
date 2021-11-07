@@ -7,7 +7,6 @@
 	"LEVS" : "47",
 	"NEST" : "F",
 	"REGION" : "",
-	"BUFFER" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
 	"RUN_NAME" : "SHORT_FULL_TEST",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
@@ -352,6 +351,9 @@
 	"comment009" : "**********************************************************************************",
 	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
 	"comment011" : "**********************************************************************************",
+	"TROPOMI_dirs" : {
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4"
+	},
 	"LOCALIZATION_RADIUS_km" : "1000",
 	"ALLOW_ADAPTIVE_LOCALIZATION": "false",
 	"NUM_OBS_TO_NUM_ENS_ADAPTIVE_MULTIPLIER" : "5.0",
