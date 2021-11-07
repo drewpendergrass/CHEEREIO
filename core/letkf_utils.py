@@ -308,7 +308,7 @@ class GC_Translator(object):
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,fortesting=False):
+	def __init__(self, path_to_rundir,timestamp,testing=False):
 		self.testing = testing
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		self.hist_dir = f'{path_to_rundir}OutputDir'
