@@ -345,7 +345,7 @@ class HIST_Translator(object):
 				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
 				dataset.append(hist_val)
 		dataset = xr.merge(dataset)
-		return dateaset
+		return dataset
 
 
 class HIST_Ens(object):
