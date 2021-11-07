@@ -90,6 +90,22 @@ def read_tropomi(filename, species):
 	
 	return met
 
+def nearest_loc(GC,TROPOMI):
+	# Find the grid box and time indices corresponding to TROPOMI obs
+	# i index
+	iGC = np.abs(GC.lon.values.reshape((-1, 1))
+				 - TROPOMI['longitude'].reshape((1, -1)))
+	iGC = iGC.argmin(axis=0)
+	# j index
+	jGC = np.abs(GC.lat.values.reshape((-1, 1))
+				 - TROPOMI['latitude'].reshape((1, -1)))
+	jGC = jGC.argmin(axis=0)
+	# Time index
+	tGC = np.abs(GC.time.values.reshape((-1, 1))
+				 - TROPOMI['utctime'].astype('datetime64').reshape((1, -1)))
+	tGC = tGC.argmin(axis=0)
+	return iGC, jGC, tGC
+
 class TROPOMI_Translator(object):
 	def __init__(self,testing=False):
 		self.testing = testing
