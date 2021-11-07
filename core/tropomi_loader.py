@@ -3,7 +3,7 @@ import letkf_utils as lu
 from datetime import datetime
 
 trans = tt.TROPOMI_Translator()
-timeperiod = [datetime.strptime('2019-01-01 00:00', '%Y-%m-%d %H:%M'), datetime.strptime('2019-01-07 23:59', '%Y-%m-%d %H:%M')]
+timeperiod = [datetime.strptime('2019-01-01 00:00', '%Y-%m-%d %H:%M'), datetime.strptime('2019-01-02 23:59', '%Y-%m-%d %H:%M')]
 
 trop_dat = trans.getTROPOMI('CH4',timeperiod)
 
