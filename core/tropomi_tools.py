@@ -3,6 +3,7 @@ import toolbox as tx
 from glob import glob
 import pickle
 import os.path
+import xarray as xr
 
 def read_tropomi(filename, species):
 	"""
