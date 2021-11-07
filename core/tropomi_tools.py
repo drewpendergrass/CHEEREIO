@@ -97,12 +97,12 @@ class TROPOMI_Translator(object):
 			TROPOMI_date_dict[key] = {}
 			TROPOMI_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-6], "%Y%m%dT%H%M%S") for obs in obs_list]
 			TROPOMI_date_dict[key]['end'] = [datetime.strptime(obs.split('_')[-5], "%Y%m%dT%H%M%S") for obs in obs_list]
-		with open(f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch/tropomi_dates.pickle", 'wb') as handle:
+		with open(f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch/tropomi_dates.pickle", 'wb') as handle:
 			pickle.dump(TROPOMI_date_dict, handle)
 	#Timeperiod is two datetime objects
 	def globObs(self,species,timeperiod):
 		sourcedir = self.spc_config['TROPOMI_dirs'][species]
-		with open(f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch/tropomi_dates.pickle", 'rb') as handle:
+		with open(f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch/tropomi_dates.pickle", 'rb') as handle:
 			TROPOMI_date_dict = pickle.load(handle)
 		obs_dates = TROPOMI_date_dict[species]
 		obs_list = glob(f'{sourcedir}/S5P_*.nc')
