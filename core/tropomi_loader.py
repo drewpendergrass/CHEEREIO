@@ -5,10 +5,16 @@ from datetime import datetime
 trans = tt.TROPOMI_Translator()
 timeperiod = [datetime.strptime('2019-01-01 00:00', '%Y-%m-%d %H:%M'), datetime.strptime('2019-01-02 23:59', '%Y-%m-%d %H:%M')]
 
-trop_dat = trans.getTROPOMI('CH4',timeperiod)
-
 hist_trans = lu.HIST_Translator('/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/test_4x5/','20190102_0000')
 gc = hist_trans.combineHist('CH4',True)
+
+trop_dat = trans.getTROPOMI('CH4',timeperiod)
+
+gc_cols,trop_cols = trans.gcCompare('CH4',timeperiod,trop_dat,gc)
+
+
+
+
 
 i,j,t = tt.nearest_loc(gc,trop_dat)
 
