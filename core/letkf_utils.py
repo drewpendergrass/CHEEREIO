@@ -386,6 +386,15 @@ class HIST_Ens(object):
 		self.bigYDict = {}
 		for spec in self.satSpecies:
 			self.bigYDict[spec] = self.getColsforSpecies(spec)
+	#This is just a filler.
+	def makeRforSpecies(self,species,latind,lonind):
+		inds = self.getIndsOfInterest(species,latind,lonind)
+		return np.diag(np.repeat(15,len(inds)))
+	def makeR(self,latind,lonind):
+		errmats = []
+		for spec in self.satSpecies:
+			errmats.append(self.makeRforSpecies(spec,latind,lonind))
+		return la.block_diag(*errmats)
 	def getColsforSpecies(self,species):
 		col3D = []
 		firstens = self.ensemble_numbers[0]
@@ -567,9 +576,11 @@ class Assimilator(object):
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		if self.testing:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
-		if self.nature is None: #For the time being, we must have a nature run.
+		if self.nature is None:
+			self.full4D = True #Implement me
 			self.histens = HIST_Ens(timestamp,True,self.testing)
 		else:
+			self.full4D = False
 			error_multipliers_or_matrices, self.ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
 			self.NatureHelperInstance = obs.NatureHelper(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
 			self.makeObsOps()
@@ -657,7 +668,10 @@ class Assimilator(object):
 	def prepareMeansAndPerts(self,latval,lonval):
 		if self.testing:
 			print(f'prepareMeansAndPerts called in Assimilator for lat/lon inds {(latval,lonval)}')
-		self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
+		if self.full4D:
+			self.ybar_background, self.Ypert_background, self.ydiff = self.histens.getLocObsMeanPertDiff(latval,lonval)
+		else:
+			self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
 		if self.testing:
 			print(f'ybar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ybar_background)}.')
@@ -668,10 +682,13 @@ class Assimilator(object):
 	def makeR(self,latind=None,lonind=None):
 		if self.testing:
 			print(f"Making R for lat/lon inds {(latind,lonind)}.")
-		errmats = []
-		for species in self.observed_species:
-			errmats.append(self.ObsOp[species].obsinfo.getObsErr(latind,lonind))
-		self.R = la.block_diag(*errmats)
+		if self.full4D:
+			self.R = self.histens.makeR(latind,lonind)
+		else:
+			errmats = []
+			for species in self.observed_species:
+				errmats.append(self.ObsOp[species].obsinfo.getObsErr(latind,lonind))
+			self.R = la.block_diag(*errmats)
 		if self.testing:
 			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
@@ -718,11 +735,14 @@ class Assimilator(object):
 			if self.testing:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.prepareMeansAndPerts(latval,lonval)
-			self.makeR(latval,lonval)
-			self.makeC()
-			self.makePtildeAnalysis()
-			self.makeWAnalysis()
-			self.makeWbarAnalysis()
-			self.adjWAnalysis()
-			self.makeAnalysisCombinedEnsemble()
+			if len(self.ybar_background)==0:
+				self.analysisEnsemble = self.Xpert_background+self.xbar_background
+			else:
+				self.makeR(latval,lonval)
+				self.makeC()
+				self.makePtildeAnalysis()
+				self.makeWAnalysis()
+				self.makeWbarAnalysis()
+				self.adjWAnalysis()
+				self.makeAnalysisCombinedEnsemble()
 			self.saveColumn(latval,lonval)

@@ -4,7 +4,7 @@ from datetime import datetime
 
 timeperiod = [datetime.strptime('2019-01-01 00:00', '%Y-%m-%d %H:%M'), datetime.strptime('2019-01-02 23:59', '%Y-%m-%d %H:%M')]
 
-histens = lu.HIST_Translator('20190102_0000',True)
+histens = lu.HIST_Ens('20190102_0000',True)
 histens.getLocObsMeanPertDiff(0,0)
 
 trans = tt.TROPOMI_Translator()
