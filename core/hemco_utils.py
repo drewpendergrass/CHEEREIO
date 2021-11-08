@@ -71,12 +71,13 @@ class HEMCO_Translator():
 					self.switchnames.append(switchname)
 					self.switchcategories.append(emisregion)
 					self.switchboolvals.append(boolval)
-		paranoxind = self.switchnames.index('ParaNOx')
-		#Paranox also has a not.Paranox we have to worry about
-		paranoxbool = self.switchboolvals[paranoxind]
-		self.switchnames.append('.not.ParaNOx')
-		self.switchcategories.append(3)
-		self.switchboolvals.append(not paranoxbool)
+		if self.spc_config['sim_name']=='fullchem':
+			paranoxind = self.switchnames.index('ParaNOx')
+			#Paranox also has a not.Paranox we have to worry about
+			paranoxbool = self.switchboolvals[paranoxind]
+			self.switchnames.append('.not.ParaNOx')
+			self.switchcategories.append(3)
+			self.switchboolvals.append(not paranoxbool)
 	def getHEMCOLines(self):
 		switchopenparen = [f'((({name}' for name,boolean,category in zip(self.switchnames,self.switchboolvals,self.switchcategories) if boolean and ((category==1) or (category==3) or (name=='GC_BCs'))]
 		switchcloseparen = [f'))){name}' for name,boolean,category in zip(self.switchnames,self.switchboolvals,self.switchcategories) if boolean and ((category==1) or (category==3) or (name=='GC_BCs'))]
