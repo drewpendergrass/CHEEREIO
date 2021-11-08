@@ -15,10 +15,10 @@
 
 # Turn on/off different steps. This will allow you to come back to this
 # script and set up different stages later.
-SetupTemplateRundir=true
-CompileTemplateRundir=true
+SetupTemplateRundir=false
+CompileTemplateRundir=false
 SetupSpinupRun=false
-SetupEnsembleRuns=false
+SetupEnsembleRuns=true
 
 eval "$(conda shell.bash hook)"
 
