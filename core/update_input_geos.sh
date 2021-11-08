@@ -18,7 +18,7 @@ counter=1
 while IFS=' ' read -r date time
 do 
     # Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
-    if [ $SIMULATE_NATURE ]; then
+    if [ "$SIMULATE_NATURE" = true ]; then
            x=0
     else
            x=1
