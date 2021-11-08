@@ -737,7 +737,9 @@ class Assimilator(object):
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)==0:
-				self.analysisEnsemble = self.Xpert_background+self.xbar_background
+				self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
+				for i in self.ensemble_numbers:
+					self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background	
 			else:
 				self.makeR(latval,lonval)
 				self.makeC()
