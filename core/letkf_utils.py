@@ -362,7 +362,7 @@ class HIST_Ens(object):
 		starttime = endtime-delta
 		self.timeperiod = (starttime,endtime)
 		self.ht = {}
-		self.observed_species = spc_config['OBSERVED_SPECIES']
+		self.observed_species = self.spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
 				self.ht[ens] = HIST_Translator(directory, self.timeperiod,self.testing)
