@@ -390,7 +390,6 @@ class HIST_Ens(object):
 		col3D = []
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
-		print(f'Hist4D is {hist4D}')
 		firstcol,satcol,satlat,satlon = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
