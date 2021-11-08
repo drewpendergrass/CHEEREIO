@@ -196,7 +196,7 @@ class TROPOMI_Translator(object):
 		obs_list.sort()
 		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getTROPOMI(self,species,timeperiod):
+	def getSatellite(self,species,timeperiod):
 		obs_list = self.globObs(species,timeperiod)
 		trop_obs = []
 		for obs in obs_list:

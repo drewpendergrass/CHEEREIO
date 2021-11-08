@@ -309,15 +309,11 @@ class GC_Translator(object):
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,testing=False):
+	def __init__(self, path_to_rundir,timeperiod,testing=False):
 		self.testing = testing
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		self.hist_dir = f'{path_to_rundir}OutputDir'
-		endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
-		ASSIM_TIME = self.spc_config['ASSIM_TIME']
-		delta = timedelta(hours=int(ASSIM_TIME))
-		starttime = endtime-delta
-		self.timeperiod = (starttime,endtime)
+		self.timeperiod = timeperiod
 	def globSubDir(self,timeperiod,useLevelEdge = False):
 		specconc_list = glob(f'{self.hist_dir}/GEOSChem.SpeciesConc*.nc4')
 		specconc_list.sort()
@@ -348,61 +344,86 @@ class HIST_Translator(object):
 		dataset = xr.merge(dataset)
 		return dataset
 
-
+#4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,species,testing=False):
+	def __init__(self,timestamp,useLevelEdge=False,testing=False):
 		self.testing = testing
-		spc_config = tx.getSpeciesConfig(self.testing)
-		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
+		self.useLevelEdge = useLevelEdge
+		self.spc_config = tx.getSpeciesConfig(self.testing)
+		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
 		dirnames = [d.split('/')[-2] for d in subdirs]
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
+		endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
+		ASSIM_TIME = self.spc_config['ASSIM_TIME']
+		delta = timedelta(hours=int(ASSIM_TIME))
+		starttime = endtime-delta
+		self.timeperiod = (starttime,endtime)
 		self.ht = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
-				self.ht[ens] = HIST_Translator(directory, timestamp,self.testing)
+				self.ht[ens] = HIST_Translator(directory, self.timeperiod,self.testing)
 				ensemble_numbers.append(ens)
-		self.ensemble_numbers=np.array(ensemble_numbers) 
-	def combineEnsForSpecTime(self,species,timestamp):
-		conc3D = []
+		self.ensemble_numbers=np.array(ensemble_numbers)
+		self.makeBigY()
+	def makeSatTrans(self):
+		self.SAT_TRANSLATOR = {}
+		self.satSpecies = []
+		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.values()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
+			if (bool4D and boolTROPOMI):
+				self.SAT_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.testing)
+				self.satSpecies.append(spec)
+	def getSatData(self):
+		self.SAT_DATA = {}
+		for spec in list(self.SAT_TRANSLATOR.keys()):
+			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod)
+	def makeBigY(self):
+		self.makeSatTrans()
+		self.getSatData()
+		self.bigYDict = {}
+		for spec in self.satSpecies:
+			self.bigYDict[spec] = self.getColsforSpecies(spec)
+	def getColsforSpecies(self,species):
+		col3D = []
 		firstens = self.ensemble_numbers[0]
-		first3D = self.ht[firstens].get3DConc(timestamp,species)
-		shape4D = np.zeros(4)
-		shape4D[0:3] = np.shape(first3D)
-		shape4D[3]=len(self.ensemble_numbers)
-		shape4D = shape4D.astype(int)
-		conc4D = np.zeros(shape4D)
-		conc4D[:,:,:,firstens-1] = first3D
+		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
+		firstcol,satcol,satlat,satlon = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+		shape2D = np.zeros(2)
+		shape2D[0] = len(firstcol)
+		shape2D[1]=len(self.ensemble_numbers)
+		shape2D = shape2D.astype(int)
+		conc2D = np.zeros(conc2D)
+		conc2D[:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				conc4D[:,:,:,i-1] = self.ht[i].get3DConc(species)
-		return conc4D
-	def ensObsMeanAndPertForSpecTime(self, observation_key,species,timestamp,latval,lonval):
-		spec_4D = self.combineEnsForSpecTime(species,timestamp)
-		return self.ObsOp[observation_key].obsMeanAndPert(spec_4D,latval,lonval)
-	def ensObsMeanPertDiffForTime(self,timestamp,latval,lonval):
+				hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
+				col,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				conc2D[:,i-1] = col
+		return [conc2D,satcol,satlat,satlon]
+	def getIndsOfInterest(self,species,latind,lonind):
+		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
+		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)
+		latval = origlat[latind]
+		lonval = origlon[lonind]
+		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
+		return np.where(distvec<=loc_rad)[0]
+	def getLocObsMeanPertDiff(self,latind,lonind):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
-		for obskey,species in zip(list(self.observed_species.keys()),list(self.observed_species.values())):
-			obsmean,obspert  = self.ensObsMeanAndPertForSpecTime(obskey,species,timestamp,latval,lonval)
-			obsmeans.append(obsmean)
-			obsperts.append(obspert)
-			obsdiffs.append(self.obsDiffForSpecies(obskey,obsmean,latval,lonval))
-		full_obsmeans = np.concatenate(obsmeans)
-		full_obsperts = np.concatenate(obsperts,axis = 0)
-		full_obsdiffs = np.concatenate(obsdiffs)
-		return [full_obsmeans,full_obsperts,full_obsdiffs]
-	def ensObsMeanPertDiff(self,latval,lonval):
-		times = self.ht[self.ensemble_numbers[0]].times
-		obsmeans = []
-		obsperts = []
-		obsdiffs = []
-		for time in times:
-			obsmean,obspert,obsdiff = self.ensObsMeanPertDiffForTime(time,latval,lonval)
+		for spec in self.satSpecies:
+			ind = self.getIndsOfInterest(spec,latind,lonind)
+			gccol,satcol,_,_ = self.bigYDict[spec]
+			gccol = gccol[ind,:]
+			satcol = satcol[ind]
+			obsmean = np.mean(gccol,axis=1)
+			obspert = np.zeros(np.shape(gccol))
+			for i in range(np.shape(gccol)[1]):
+				obspert[:,i]=gccol[:,i]-obsmean
+			obsdiff = satcol-obsmean
 			obsmeans.append(obsmean)
 			obsperts.append(obspert)
 			obsdiffs.append(obsdiff)
