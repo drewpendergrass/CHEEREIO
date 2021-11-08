@@ -346,7 +346,7 @@ class HIST_Translator(object):
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,species,useLevelEdge=False,testing=False):
+	def __init__(self,timestamp,useLevelEdge=False,testing=False):
 		self.testing = testing
 		self.useLevelEdge = useLevelEdge
 		self.spc_config = tx.getSpeciesConfig(self.testing)
