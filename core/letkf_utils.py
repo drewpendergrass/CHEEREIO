@@ -2,6 +2,7 @@ import numpy as np
 import xarray as xr
 from glob import glob
 import observation_operators as obs
+import tropomi_tools as tt
 import scipy.linalg as la
 import toolbox as tx 
 from datetime import date,datetime,timedelta
@@ -349,7 +350,7 @@ class HIST_Translator(object):
 
 
 class HIST_Ens(object):
-	def __init__(self,timestamp,ObsOp,testing=False):
+	def __init__(self,timestamp,species,testing=False):
 		self.testing = testing
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
@@ -359,16 +360,12 @@ class HIST_Ens(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.ht = {}
-		self.nature = None
 		self.observed_species = spc_config['OBSERVED_SPECIES']
-		self.ObsOp = ObsOp
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens==0:
-				self.nature = HIST_Translator(directory, timestamp,self.testing)
-			else:
+			if ens!=0:
 				self.ht[ens] = HIST_Translator(directory, timestamp,self.testing)
 				ensemble_numbers.append(ens)
-		self.ensemble_numbers=np.array(ensemble_numbers)
+		self.ensemble_numbers=np.array(ensemble_numbers) 
 	def combineEnsForSpecTime(self,species,timestamp):
 		conc3D = []
 		firstens = self.ensemble_numbers[0]

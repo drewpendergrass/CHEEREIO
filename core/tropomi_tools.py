@@ -213,6 +213,6 @@ class TROPOMI_Translator(object):
 			GC_CH4*=1e9 #scale to ppb
 		GC_on_sat = GC_to_sat_levels(GC_CH4, GC_P, TROPOMI['pressures'])
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_CH4, TROP_PW, GC_on_sat)
-		return [GC_on_sat,TROPOMI[species]]
+		return [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude']]
 
 
