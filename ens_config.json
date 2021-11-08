@@ -65,13 +65,13 @@
 	"LOCALIZATION_RADIUS_km" : "1000",
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [
-		"0.10",
+		"0.10"
 	],
 	"OBS_OPERATORS": [
-		"SumOperator",
+		"SumOperator"
 	],
 	"NATURE_H_FUNCTIONS" : [
-		"column_sum",
+		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
 	"ASSIM_TIME": "24",
