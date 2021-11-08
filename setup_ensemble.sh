@@ -943,7 +943,7 @@ if "$SetupEnsembleRuns"; then
 
     #Create initial scaling factors
     cd core
-    python initialize_scaling_factors.py "TESTPROD" "${START_DATE}" #CHANGE BACK TO PRODUCTION 
+    python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
     python prep_par.py PRODUCTION
     conda deactivate #Exit Conda environment
 
