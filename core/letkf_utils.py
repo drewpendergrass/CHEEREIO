@@ -563,12 +563,13 @@ class Assimilator(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.nature = None
+		self.forceOverrideNature=True #Set to true to ignore existing nature directory. Only for testing
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		if self.testing:
 			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens==0:
+			if (ens==0) and (not self.forceOverrideNature):
 				self.nature = GC_Translator(directory, timestamp, False,self.testing)
 			else: 
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
