@@ -373,17 +373,13 @@ class HIST_Ens(object):
 		self.SAT_TRANSLATOR = {}
 		self.satSpecies = []
 		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.values()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
-			print(f'Species {spec}, 4dbool {bool4D}, tropbool {boolTROPOMI}')
 			if (bool4D and boolTROPOMI):
 				self.SAT_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.testing)
 				self.satSpecies.append(spec)
-				print(self.SAT_TRANSLATOR)
-				print(self.satSpecies)
 	def getSatData(self):
 		self.SAT_DATA = {}
 		for spec in self.satSpecies:
 			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod)
-			print(f'Sat Data for {spec} is {self.SAT_DATA[spec]}')
 	def makeBigY(self):
 		self.makeSatTrans()
 		self.getSatData()
@@ -394,13 +390,12 @@ class HIST_Ens(object):
 		col3D = []
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
-		print(f'Hist4D is {hist4D}')
 		firstcol,satcol,satlat,satlon = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
 		shape2D = shape2D.astype(int)
-		conc2D = np.zeros(conc2D)
+		conc2D = np.zeros(shape2D)
 		conc2D[:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
