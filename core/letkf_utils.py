@@ -738,7 +738,8 @@ class Assimilator(object):
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)==0:
 				self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
-				for i in self.ensemble_numbers:
+				k = len(self.ensemble_numbers)
+				for i in range(k):
 					self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background	
 			else:
 				self.makeR(latval,lonval)
