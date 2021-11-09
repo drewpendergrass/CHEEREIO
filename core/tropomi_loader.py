@@ -16,11 +16,24 @@ trop_dat = trans.getSatellite('CH4',timeperiod)
 
 gc_cols,trop_cols = trans.gcCompare('CH4',timeperiod,trop_dat,gc)
 
+import letkf_utils as lu
+assimilator = lu.Assimilator('20190110_0000',4,4)
 
+latval = assimilator.latinds[0]
+lonval = assimilator.loninds[0]
+assimilator.prepareMeansAndPerts(latval,lonval)
+assimilator.makeR(latval,lonval)
+assimilator.makeC()
+assimilator.makePtildeAnalysis()
+assimilator.makeWAnalysis()
+assimilator.makeWbarAnalysis()
+assimilator.adjWAnalysis()
+assimilator.makeAnalysisCombinedEnsemble()
+assimilator.saveColumn(latval,lonval)
 
-
-
-i,j,t = tt.nearest_loc(gc,trop_dat)
+assimilator.analysisEnsemble = np.zeros(np.shape(assimilator.Xpert_background))
+for i in assimilator.ensemble_numbers:
+	assimilator.analysisEnsemble[:,i] = assimilator.Xpert_background[:,i]+assimilator.xbar_background	
 
 # sourcedir = trans.spc_config['TROPOMI_dirs']['CH4']
 # obs_list = glob(f'{sourcedir}/S5P_*.nc')
