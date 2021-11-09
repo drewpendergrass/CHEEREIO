@@ -579,6 +579,7 @@ class Assimilator(object):
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		if self.nature is None:
 			self.full4D = True #Implement me
+			self.inflation = float(spc_config['INFLATION_FACTOR'])
 			self.histens = HIST_Ens(timestamp,True,self.testing)
 		else:
 			self.full4D = False
