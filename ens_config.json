@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_TEST",
+	"RUN_NAME" : "METHANE_TEST_WEEKLY_ASSIM",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
@@ -21,7 +21,7 @@
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190108",
-	"END_DATE" : "20190115",
+	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
 	"SIMULATE_NATURE" : "false",
@@ -30,11 +30,11 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "40000",
-	"WallTime" : "1-08\\:00",
+	"Memory" : "20000",
+	"WallTime" : "3-08\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
-	"MaxPar" : "3",
+	"MaxPar" : "8",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
@@ -74,7 +74,7 @@
 		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "24",
+	"ASSIM_TIME": "168",
 	"TESTBIAS": "0.5"
 }
 
