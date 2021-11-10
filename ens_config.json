@@ -11,7 +11,7 @@
 	"RUN_NAME" : "METHANE_TEST_3DAY_ASSIM",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180901_0000z.nc4",
+	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
