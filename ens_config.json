@@ -20,7 +20,7 @@
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
-	"ASSIM_START_DATE" : "20190109",
+	"ASSIM_START_DATE" : "20190110",
 	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
@@ -34,7 +34,7 @@
 	"WallTime" : "7-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
-	"MaxPar" : "8",
+	"MaxPar" : "4",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
@@ -74,7 +74,7 @@
 		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "48",
+	"ASSIM_TIME": "72",
 	"TESTBIAS": "0.5"
 }
 
