@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_TEST_WEEKLY_ASSIM",
+	"RUN_NAME" : "METHANE_TEST_3DAY_ASSIM",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180901_0000z.nc4",
@@ -19,8 +19,8 @@
 	"DO_SPINUP" : "false",
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
-	"START_DATE" : "20180901",
-	"ASSIM_START_DATE" : "20190108",
+	"START_DATE" : "20190101",
+	"ASSIM_START_DATE" : "20190110",
 	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
@@ -31,7 +31,7 @@
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
 	"Memory" : "20000",
-	"WallTime" : "3-08\\:00",
+	"WallTime" : "7-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
 	"MaxPar" : "8",
@@ -74,7 +74,7 @@
 		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "168",
+	"ASSIM_TIME": "72",
 	"TESTBIAS": "0.5"
 }
 
