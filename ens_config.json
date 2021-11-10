@@ -20,7 +20,7 @@
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
-	"ASSIM_START_DATE" : "20190110",
+	"ASSIM_START_DATE" : "20190109",
 	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
@@ -30,7 +30,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "20000",
+	"Memory" : "40000",
 	"WallTime" : "7-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
@@ -74,7 +74,7 @@
 		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "72",
+	"ASSIM_TIME": "48",
 	"TESTBIAS": "0.5"
 }
 
