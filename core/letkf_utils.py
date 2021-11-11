@@ -368,6 +368,7 @@ class HIST_Ens(object):
 				self.ht[ens] = HIST_Translator(directory, self.timeperiod,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
+		self.maxobs=int(self.spc_config['MAXNUMOBS'])
 		self.makeBigY()
 	def makeSatTrans(self):
 		self.SAT_TRANSLATOR = {}
@@ -418,7 +419,10 @@ class HIST_Ens(object):
 		latval = origlat[latind]
 		lonval = origlon[lonind]
 		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
-		return np.where(distvec<=loc_rad)[0]
+		inds = np.where(distvec<=loc_rad)[0]
+		if len(inds) > self.maxobs:
+			inds = inds[0:maxobs]
+		return inds
 	def getLocObsMeanPertDiff(self,latind,lonind):
 		obsmeans = []
 		obsperts = []

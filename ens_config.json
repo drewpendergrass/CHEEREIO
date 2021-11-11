@@ -75,6 +75,7 @@
 	],
 	"INFLATION_FACTOR": "0.02",
 	"ASSIM_TIME": "24",
+	"MAXNUMOBS" : "2500",
 	"TESTBIAS": "0.5"
 }
 
