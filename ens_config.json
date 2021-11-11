@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_TEST_3DAY_ASSIM",
+	"RUN_NAME" : "METHANE_TEST_2DAY_ASSIM",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
@@ -20,7 +20,7 @@
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
 	"START_DATE" : "20190101",
-	"ASSIM_START_DATE" : "20190110",
+	"ASSIM_START_DATE" : "20190109",
 	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "0.5",
@@ -74,7 +74,7 @@
 		"column_sum"
 	],
 	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "72",
+	"ASSIM_TIME": "48",
 	"TESTBIAS": "0.5"
 }
 
