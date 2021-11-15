@@ -772,7 +772,7 @@ printf "${thinline}"
 
 #Update HISTORY.rc
 source activate $(jq -r ".CondaEnv" ../ens_config.json) 
-python update_history.py
+python update_history.py "TEMPLATEDIR"
 conda deactivate
 printf "${thinline}"
 
