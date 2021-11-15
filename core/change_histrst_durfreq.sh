@@ -45,4 +45,7 @@ while [ $x -le $nEnsemble ];do
   ### Copy and point to the necessary data
   cp -r ../template_run/HISTORY.rc  ${name}
 
+  ### Increment
+  x=$[$x+1]
+
 done
