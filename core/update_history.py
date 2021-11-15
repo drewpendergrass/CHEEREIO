@@ -102,7 +102,7 @@ class HISTORY_Translator():
 				f.write(line)
 		print('HISTORY.rc saved successfully. Please double check that all the collections match what you want to save!')
 
-firststr = str(sys.argv[1])
+settingsstr = str(sys.argv[1])
 trans = HISTORY_Translator()
 
 if settingsstr=="TEMPLATEDIR":
