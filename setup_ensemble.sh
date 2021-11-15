@@ -770,6 +770,13 @@ cd ${ASSIM_PATH}/core
 bash prepare_template_hemco_config.sh
 printf "${thinline}"
 
+#Update HISTORY.rc
+source activate $(jq -r ".CondaEnv" ../ens_config.json) 
+python update_history.py "TEMPLATEDIR"
+conda deactivate
+printf "${thinline}"
+
+
 
 printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."
 printf "\n     Modify all configuration files BEFORE creating spinup or ensemble run directories."
@@ -944,7 +951,7 @@ if "$SetupEnsembleRuns"; then
     #Create initial scaling factors
     cd core
     python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
-    python prep_par.py PRODUCTION
+    python prep_par.py "PRODUCTION"
     conda deactivate #Exit Conda environment
 
     #Store current time.
