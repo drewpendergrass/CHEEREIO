@@ -53,9 +53,9 @@ class HISTORY_Translator():
 		timestr = self.calcDurFreq(isFirst)
 		for num,line in enumerate(self.lines):
 			if line.startswith('  Restart.frequency'):
-				self.lines[num] = f'  Restart.frequency:          {timestr},\n'
+				self.lines[num] = f'  Restart.frequency:          {timestr}\n'
 			if line.startswith('  Restart.duration'):
-				self.lines[num] = f'  Restart.duration:           {timestr},\n'
+				self.lines[num] = f'  Restart.duration:           {timestr}\n'
 				break
 	def findSpecConcLines(self):
 		counting = False
@@ -84,7 +84,7 @@ class HISTORY_Translator():
 			startstring = "  SpeciesConc.fields:         "
 		else:
 			startstring = "                              "
-		secondstring = "SpeciesConc_"
+		secondstring = "'SpeciesConc_"
 		endwhitespacecount=18-len(species)
 		finalstring = "',\n"
 		return startstring+secondstring+species+(' '*endwhitespacecount)+finalstring
