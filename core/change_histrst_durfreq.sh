@@ -16,14 +16,14 @@ SIMULATE_NATURE=$(jq -r ".SIMULATE_NATURE" ../ens_config.json)
 
 cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
 
-# Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
+# Initialize (x=0 is nature run (if used); x=1 is ensemble member 1; etc.)
 if [ "${SIMULATE_NATURE}" = true ]; then
   x=0
 else
   x=1
 fi
 
-# Create run directory for each cluster so we can apply perturbation to each
+# Copy HISTORY.rc into each run directory
 while [ $x -le $nEnsemble ];do
 
 
