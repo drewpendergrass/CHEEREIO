@@ -176,3 +176,4 @@ def plotEmissionsCell(ds_file,latind,lonind,outfile=None):
 	ensmean = np.mean(ens,axis=0)
 	enssd = np.std(ens,axis=0)
 	emisPlot(time,ensmean,enssd,'_'.join(ds_file.split('/')[-1].split('_')[0:-1]),outfile)
+
