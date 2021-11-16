@@ -80,12 +80,10 @@ elif (gridlabel == 'NA_GEOSFP'): #NA NESTED GRID FOR GEOS-FP
 else:
 	raise ValueError('Scaling factor initialization utility does not recognize grid specification.')
 
-perturbation = float(spc_config["pPERT"]) #perturbation, between 0 and 1 exclusive. 0 is 0% perturbation and 1 is between +/- 100%
-#                                          chosen from a uniform distribution
-if (perturbation <= 0) | (perturbation >= 1):
-	raise ValueError('Perturbation must be between 0 and 1 exclusive.')
-offset = 1-perturbation
-scale = perturbation*2
+perturbation = float(spc_config["pPERT"]) #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
+
+if (perturbation <= 1):
+	raise ValueError('Perturbation must be at least 1.')
 
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
@@ -98,9 +96,10 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
-			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
+			scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
+			scaling_factors = perturbation**scaling_factor_exp
 		if maskboolval=='True':
-			scaling_factors[0,mask[0],mask[1]] = 1
+			scaling_factors[0,mask[1],mask[0]] = 1
 		name = f'{emis_name}_SCALEFACTOR'
 		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{stringnum}"
 		endtime = spc_config['END_DATE']
