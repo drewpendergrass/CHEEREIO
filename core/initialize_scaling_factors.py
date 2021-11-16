@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import xarray as xr
 from datetime import date
 import toolbox as tx
@@ -29,6 +30,7 @@ maxdir = max(subdir_nums)
 meanval = (maxdir+1)/2
 
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
+mask_ocean_bool = spc_config['MaskOceanScaleFactor']
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
@@ -42,6 +44,9 @@ else:
 if gridlabel == '4.0x5.0':
 	lon = np.arange(-180.0,176.0, 5.0)
 	lat = np.concatenate([[-89.0],np.arange(-86.0,87.0, 4.0), [89.0]])
+	mask = pd.read_csv('../templates/landmask_4x5_gcgrid.csv',header=None)
+	mask = np.array(np.transpose(mask))
+	mask = np.where(mask==0)
 elif gridlabel == '2.0x2.5':
 	lon = np.arange(-180.0,178.0, 2.5)
 	lat = np.concatenate([[-89.5],np.arange(-88.0,89.0, 2.0), [89.5]])
@@ -85,7 +90,7 @@ scale = perturbation*2
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
 		continue
-	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
+	for emis_name,maskboolval in zip(emis_scaling_factors,mask_ocean_bool): #Loop through the species we want scaling factors for
 		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
 		if testbool:
 			offset = 1
@@ -94,6 +99,8 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
+		if maskboolval=='True':
+			scaling_factors[0,mask[0],mask[1]] = 1
 		name = f'{emis_name}_SCALEFACTOR'
 		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{stringnum}"
 		endtime = spc_config['END_DATE']
