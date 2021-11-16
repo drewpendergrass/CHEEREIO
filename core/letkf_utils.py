@@ -421,7 +421,7 @@ class HIST_Ens(object):
 		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
 		inds = np.where(distvec<=loc_rad)[0]
 		if len(inds) > self.maxobs:
-			inds = inds[0:self.maxobs]
+			inds = np.random.choice(inds, self.maxobs,replace=False) #Randomly subset down to appropriate number of observations
 		return inds
 	def getLocObsMeanPertDiff(self,latind,lonind):
 		obsmeans = []
