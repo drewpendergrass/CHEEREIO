@@ -795,7 +795,12 @@ printf "${thinline}"
 
 #Update HISTORY.rc
 source activate $(jq -r ".CondaEnv" ../ens_config.json) 
-python update_history.py "TEMPLATEDIR"
+if [ "${DO_ENS_SPINUP}" = true ]; then
+  python update_history.py "SPINUP"
+else
+  python update_history.py "TEMPLATEDIR"
+fi
+
 conda deactivate
 printf "${thinline}"
 
