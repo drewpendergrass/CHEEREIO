@@ -50,6 +50,9 @@ if gridlabel == '4.0x5.0':
 elif gridlabel == '2.0x2.5':
 	lon = np.arange(-180.0,178.0, 2.5)
 	lat = np.concatenate([[-89.5],np.arange(-88.0,89.0, 2.0), [89.5]])
+	mask = pd.read_csv('../templates/landmask_2x2p5_gcgrid.csv',header=None)
+	mask = np.array(np.transpose(mask))
+	mask = np.where(mask==0)
 elif gridlabel == '1x1':
 	lon = np.arange(-179.5,180.0, 1.0)
 	lat = np.arange(-89.5,90, 1.0)
