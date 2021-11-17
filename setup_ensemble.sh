@@ -943,10 +943,14 @@ if "$SetupEnsembleRuns"; then
   fi
 
   # Link to restart file
-  if "$DO_SPINUP"; then
+  if [ "$DO_SPINUP" = true ] ; then
       ln -s ../../spinup_run/GEOSChem.Restart.${SPINUP_END}_0000z.nc4 GEOSChem.Restart.${START_DATE}_0000z.nc4
   else
-      ln -s $RESTART_FILE GEOSChem.Restart.${START_DATE}_0000z.nc4
+      if [ "${DO_ENS_SPINUP}" = true ]; then
+        ln -s $RESTART_FILE GEOSChem.Restart.${ENS_SPINUP_START}_0000z.nc4
+      else 
+        ln -s $RESTART_FILE GEOSChem.Restart.${START_DATE}_0000z.nc4
+      fi
   fi
 
   printf "\nRun files copied and linked for ${name}.\n"
