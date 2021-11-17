@@ -14,6 +14,7 @@ ens_dir = f"{parent_dir}/ensemble_runs"
 ASSIM_TIME = spc_config['ASSIM_TIME']
 ENS_END_DATE = spc_config['END_DATE']
 ASSIM_START_DATE = spc_config['ASSIM_START_DATE']
+ENS_SPINUP_END = spc_config['ENS_SPINUP_END']
 ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
 
 with open(f"{parent_dir}/scratch/CURRENT_DATE_TIME") as f:
