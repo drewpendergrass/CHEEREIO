@@ -52,6 +52,8 @@ Partition="$(jq -r ".Partition" ens_config.json)"
 Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" ens_config.json)"
+EnsSpinupMemory="$(jq -r ".EnsSpinupMemory" ens_config.json)"
+EnsSpinupWallTime="$(jq -r ".EnsSpinupWallTime" ens_config.json)"
 MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
 printf " \n"
@@ -423,8 +425,8 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
   sed -i -e "s:{RunName}:${RUN_NAME}:g" \
          -e "s:{NumCores}:${NumCores}:g" \
          -e "s:{Partition}:${Partition}:g" \
-         -e "s:{Memory}:${Memory}:g" \
-         -e "s:{WallTime}:${WallTime}:g" \
+         -e "s:{Memory}:${EnsSpinupMemory}:g" \
+         -e "s:{WallTime}:${EnsSpinupWallTime}:g" \
          -e "s:{TESTBOOL}:false:g" \
          -e "s:{MaxPar}:${MaxPar}:g" \
          -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_spinup_simulations.sh
