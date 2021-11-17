@@ -20,7 +20,7 @@ class HISTORY_Translator():
 			self.lines = f.readlines()
 		self.linenums = np.arange(0,len(self.lines))
 	def calcDurFreq(self,isFirst):
-		if isFirst:
+		if isFirst=="First":
 			ASSIM_START_DATE = self.spc_config['ASSIM_START_DATE']
 			assim_start_year = int(ASSIM_START_DATE[0:4])
 			assim_start_month = int(ASSIM_START_DATE[4:6])
@@ -41,6 +41,8 @@ class HISTORY_Translator():
 				monthstr = str(monthdiff).zfill(2)
 				daystr = str(daydiff).zfill(2)
 				timestr = f'{yearstr}{monthstr}{daystr} 000000'
+		elif isFirst=="Spinup":
+			timestr="'End'"
 		else:
 			ASSIM_TIME = int(self.spc_config['ASSIM_TIME'])
 			assim_days = int(np.floor(ASSIM_TIME/24))
@@ -107,10 +109,15 @@ trans = HISTORY_Translator()
 
 if settingsstr=="TEMPLATEDIR":
 	trans.prepLevelEdgeDiags()
-	trans.updateRestartDurationFrequency(isFirst=True)
+	trans.updateRestartDurationFrequency(isFirst="First")
+	trans.findSpecConcLines()
+	trans.customizeSpecConc()
+elif settingsstr=="SPINUP":
+	trans.prepLevelEdgeDiags()
+	trans.updateRestartDurationFrequency(isFirst="Spinup")
 	trans.findSpecConcLines()
 	trans.customizeSpecConc()
 elif settingsstr=="UPDATEDURFREQ":
-	trans.updateRestartDurationFrequency(isFirst=False)
+	trans.updateRestartDurationFrequency(isFirst="Midrun")
 
 trans.writeHistoryConfig()
