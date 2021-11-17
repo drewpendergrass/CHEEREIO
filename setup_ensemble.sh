@@ -35,6 +35,9 @@ MY_PATH="$(jq -r ".MY_PATH" ens_config.json)"
 DO_SPINUP=$(jq -r ".DO_SPINUP" ens_config.json)
 SPINUP_START=$(jq -r ".SPINUP_START" ens_config.json)
 SPINUP_END=$(jq -r ".SPINUP_END" ens_config.json)
+DO_ENS_SPINUP=$(jq -r ".DO_ENS_SPINUP" ens_config.json)
+ENS_SPINUP_START=$(jq -r ".ENS_SPINUP_START" ens_config.json)
+ENS_SPINUP_END=$(jq -r ".ENS_SPINUP_END" ens_config.json)
 
 # Start and end date for the production simulations
 START_DATE=$(jq -r ".START_DATE" ens_config.json)
@@ -411,6 +414,26 @@ if [ "${SIMULATE_NATURE}" = true ]; then
   sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
 else
   sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
+fi
+
+if [ "${DO_ENS_SPINUP}" = true ]; then
+  cp ${ASSIM_PATH}/templates/run_ensemble_spinup_simulations.sh ensemble_runs/
+  cp ${ASSIM_PATH}/templates/run_ensspin.sh ensemble_runs/
+
+  sed -i -e "s:{RunName}:${RUN_NAME}:g" \
+         -e "s:{NumCores}:${NumCores}:g" \
+         -e "s:{Partition}:${Partition}:g" \
+         -e "s:{Memory}:${Memory}:g" \
+         -e "s:{WallTime}:${WallTime}:g" \
+         -e "s:{TESTBOOL}:false:g" \
+         -e "s:{MaxPar}:${MaxPar}:g" \
+         -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_spinup_simulations.sh
+
+  if [ "${SIMULATE_NATURE}" = true ]; then
+    sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ensspin.sh
+  else
+    sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ensspin.sh
+  fi
 fi
 
 mkdir -p ${RUN_TEMPLATE}
@@ -955,8 +978,13 @@ if "$SetupEnsembleRuns"; then
     conda deactivate #Exit Conda environment
 
     #Store current time.
-    printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
-    bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
+    if [ "${DO_ENS_SPINUP}" = true ]; then
+      printf "${ENS_SPINUP_START} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
+      bash update_input_geos.sh "SPINUP" #Update input.geos to first assimilation period.
+    else 
+      printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
+      bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
+    fi
 
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
