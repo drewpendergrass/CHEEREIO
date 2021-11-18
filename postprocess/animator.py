@@ -25,6 +25,8 @@ elif func=='max':
 	ensmean = np.max(da,axis=0)
 elif func=='min':
 	ensmean = np.min(da,axis=0)
+elif func=='range':
+    ensmean = np.max(da,axis=0)-np.min(da,axis=0)
 
 def animate(i):
     daystring = timestr[i]
