@@ -203,7 +203,10 @@ class HEMCO_Translator():
 			specieskeyval+=1 #Increment
 	def addScalingFactorFile(self):
 		#Get range of years from settings.
-		yearrange = f'{int(np.floor(int(self.spc_config["START_DATE"])/10000))}-{int(np.floor(int(self.spc_config["END_DATE"])/10000))}'
+		if self.spc_config["DO_ENS_SPINUP"]=="true":
+			yearrange = f'{int(np.floor(int(self.spc_config["ENS_SPINUP_START"])/10000))}-{int(np.floor(int(self.spc_config["END_DATE"])/10000))}'
+		else:
+			yearrange = f'{int(np.floor(int(self.spc_config["START_DATE"])/10000))}-{int(np.floor(int(self.spc_config["END_DATE"])/10000))}'
 		for species in list(self.species_scalid.keys()):
 			print(f'Linking scaling factor files for {species} in HEMCO_Config.')
 			scalid = self.species_scalid[species]
