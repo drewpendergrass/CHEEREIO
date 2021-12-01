@@ -1,3 +1,7 @@
+#Some of this code is adapted from the excellent work done by Hannah Nesser, Melissa Sulprizio, Daniel Varon, Lu Shen
+#and other contributors to the integrated methane inversion workflow. I am indebted to them and to Elise Penn and Alba Lorente for 
+#explaining much of TROPOMI.
+
 from datetime import datetime
 import toolbox as tx
 from glob import glob
@@ -35,10 +39,15 @@ def read_tropomi(filename, species):
 	# Store species, QA, lat, lon, time, averaging kernel
 	data = xr.open_dataset(filename, group='PRODUCT')
 	qa = data['qa_value'].values[0,:,:] #time,scanline,groundpixel
-	sl,gp=np.where(qa>0.5)
+	if species=='NO2':
+		sl,gp=np.where(qa>0.75)
+	elif species=="CH4":
+		sl,gp=np.where(qa>0.5)
+	else:
+		raise ValueError('Species not supported')
 	met['qa_value'] = qa[sl,gp]
 	if species=='NO2':
-		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,:,:]
+		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,sl,gp]
 	elif species=='CH4':
 		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
 	else:
@@ -50,10 +59,10 @@ def read_tropomi(filename, species):
 	met['utctime'] = data['time_utc'].values[0,sl] #time, scanline
 
 	if species=='NO2':
-		met['column_AK'] = data['averaging_kernel'].values[0,:,:,::-1]
-		a = data['tm5_constant_a'].values[:,:]
-		b = data['tm5_constant_b'].values[:,:]
-	
+		met['column_AK'] = data['averaging_kernel'].values[0,sl,gp,::-1]
+		a = np.concatenate([data['tm5_constant_a'].values[:,0],data['tm5_constant_a'].values[-1,1]]) #layer, vertices (bottom/top)
+		b = np.concatenate([data['tm5_constant_b'].values[:,0],data['tm5_constant_b'].values[-1,1]])
+
 	data.close()
 
 	if species=='CH4':
@@ -61,9 +70,9 @@ def read_tropomi(filename, species):
 		met['column_AK'] = data['column_averaging_kernel'].values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 		data.close()
 
-	# Store methane prior profile, dry air subcolumns
-	data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+	# Store methane prior profile, dry air subcolumns. Not needed for NO2
 	if species=='CH4':
+		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1]
 		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1]
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
@@ -78,17 +87,18 @@ def read_tropomi(filename, species):
 	# data.close()
 
 	if species=='NO2':
-		#Pressure levels (hpa) with dimension level, latind, lonind,edge (bottom/top)
-		pressures = np.zeros((np.shape(b)[0],np.shape(surface_pressure)[0],np.shape(surface_pressure)[1],np.shape(b)[1]))
-		for i in range(np.shape(surface_pressure)[0]):
-			for j in range(np.shape(surface_pressure)[1]):
-				pressures[:,i,j,:]=a+(b*surface_pressure[i,j])
+		#Pressure levels (hpa) with dimension len(sl),levels
+		pressures = np.zeros((len(sl).len(b)),dtype=np.float)
+		pressures.fill(np.nan)
+		for i in range(len(surface_pressure)):
+			pressures[i,:]=a+(b*surface_pressure[i])
 	elif species=='CH4':
 		pressures = np.zeros([len(sl),13],dtype=np.float)
 		pressures.fill(np.nan)
 		for i in range(13):
 			pressures[:,i]=surface_pressure-(i*pressure_interval)
-		met['pressures'] = pressures
+	
+	met['pressures'] = pressures
 	
 	return met
 
@@ -175,7 +185,7 @@ class TROPOMI_Translator(object):
 		TROPOMI_date_dict = {}
 		for key in list(sourcedirs.keys()):
 			sourcedir = sourcedirs[key]
-			obs_list = glob(f'{sourcedir}/S5P_*.nc')
+			obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 			obs_list.sort()
 			TROPOMI_date_dict[key] = {}
 			TROPOMI_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-6], "%Y%m%dT%H%M%S") for obs in obs_list]
@@ -192,7 +202,7 @@ class TROPOMI_Translator(object):
 		else:
 			TROPOMI_date_dict = self.initialReadDate()
 		obs_dates = TROPOMI_date_dict[species]
-		obs_list = glob(f'{sourcedir}/S5P_*.nc')
+		obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 		obs_list.sort()
 		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
