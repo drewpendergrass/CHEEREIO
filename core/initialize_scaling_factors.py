@@ -31,6 +31,8 @@ meanval = (maxdir+1)/2
 
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 mask_ocean_bool = spc_config['MaskOceanScaleFactor']
+mask_arctic_bool = spc_config['MaskArcticCircleScaleFactor']
+mask_antarctic_bool = spc_config['Mask60SScaleFactor']
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
@@ -91,7 +93,7 @@ if (perturbation <= 1):
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
 		continue
-	for emis_name,maskboolval in zip(emis_scaling_factors,mask_ocean_bool): #Loop through the species we want scaling factors for
+	for emis_name,maskoceanboolval,maskarcticboolval,maskantarcticboolval in zip(emis_scaling_factors,mask_ocean_bool,mask_arctic_bool,mask_antarctic_bool): #Loop through the species we want scaling factors for
 		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
 		if testbool:
 			offset = 1
@@ -101,8 +103,14 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		else:
 			scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
 			scaling_factors = perturbation**scaling_factor_exp
-		if maskboolval=='True':
+		if maskoceanboolval=='True':
 			scaling_factors[0,mask[1],mask[0]] = 1
+		if maskarcticboolval=='True':
+			latwhere = np.where(lat>66.55)[0]
+			scaling_factors[0,latwhere,:] = 1
+		if maskantarcticboolval=='True':
+			latwhere = np.where(lat<=-60)[0]
+			scaling_factors[0,latwhere,:] = 1
 		name = f'{emis_name}_SCALEFACTOR'
 		outdir = f"{parent_dir}/{spc_config['RUN_NAME']}_{stringnum}"
 		endtime = spc_config['END_DATE']

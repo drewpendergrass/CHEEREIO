@@ -90,7 +90,10 @@ class GC_Translator(object):
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
 		tstr = f'{self.timestamp[0:4]}-{self.timestamp[4:6]}-{self.timestamp[6:8]}T{self.timestamp[9:11]}:{self.timestamp[11:13]}:00.000000000'
 		new_last_time = np.datetime64(tstr)
-		START_DATE = tx.getSpeciesConfig(self.testing)['START_DATE']
+		if tx.getSpeciesConfig(self.testing)['DO_ENS_SPINUP']=='true':
+			START_DATE = tx.getSpeciesConfig(self.testing)['ENS_SPINUP_START']
+		else:
+			START_DATE = tx.getSpeciesConfig(self.testing)['START_DATE']
 		orig_timestamp = f'{START_DATE[0:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}' #Start date from  JSON
 		END_DATE = tx.getSpeciesConfig(self.testing)['END_DATE']
 		end_timestamp = f'{END_DATE[0:4]}-{END_DATE[4:6]}-{END_DATE[6:8]}'

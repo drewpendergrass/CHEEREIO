@@ -984,7 +984,11 @@ if "$SetupEnsembleRuns"; then
 
     #Create initial scaling factors
     cd core
-    python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
+    if [ "${DO_ENS_SPINUP}" = true ]; then
+      python initialize_scaling_factors.py "PRODUCTION" "${ENS_SPINUP_START}" 
+    else
+      python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
+    fi
     python prep_par.py "PRODUCTION"
     conda deactivate #Exit Conda environment
 
