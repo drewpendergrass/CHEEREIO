@@ -3,28 +3,28 @@
 	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
 	"comment002" : "***************************************************************************",
 	"RES" : "4.0x5.0",
-	"met_name" : "GEOSFP",
+	"met_name" : "MERRA2",
 	"LEVS" : "47",
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "NOx_run",
+	"RUN_NAME" : "METHANERUN_v3",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
+	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180901_0000z.nc4",
 	"BC_FILES" : "",
-	"sim_name" : "fullchem",
+	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
 	"sim_extra_option" : "none",
 	"DO_SPINUP" : "false",
 	"SPINUP_START" : "",
 	"SPINUP_END" : "",
-	"DO_ENS_SPINUP" : "false",
+	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_START" : "20180901",
 	"ENS_SPINUP_END" : "20190101",
 	"START_DATE" : "20190101",
-	"ASSIM_START_DATE" : "20190115",
+	"ASSIM_START_DATE" : "20190102",
 	"END_DATE" : "20190130",
 	"nEnsemble" : "16",
 	"pPERT" : "4",
@@ -45,30 +45,16 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
-		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5",
-		"O3"
+		"CH4"
 	],
 	"CONTROL_VECTOR_CONC" : [
-		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5"
+		"CH4"
 	],
 	"CONTROL_VECTOR_EMIS" : {
-		"NO":"NO",
-		"NO2":"NO2"
+		"CH4":"CH4"
 	},
 	"OBSERVED_SPECIES" : {
-		"NO2_TROPOMI": "NO2"
+		"CH4_TROPOMI": "CH4"
 	},
 	"OBS_4D" : [
 		"True"
@@ -78,24 +64,22 @@
 	],
 	"SaveLevelEdgeDiags" : "True",
 	"HistorySpecConcToSave" : [
-		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5",
-		"O3"
+		"CH4"
 	],
 	"MaskOceanScaleFactor" : [
-		"False",
-		"False"
+		"True"
+	],
+	"Mask60SScaleFactor" : [
+		"True"
+	],
+	"MaskArcticCircleScaleFactor" : [
+		"True"
 	],
 	"comment009" : "**********************************************************************************",
 	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
 	"comment011" : "**********************************************************************************",
 	"TROPOMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
