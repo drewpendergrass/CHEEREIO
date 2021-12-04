@@ -32,6 +32,15 @@ def globSubDir(hist_dir,timeperiod=None,hourlysub = 6):
 	specconc_list = [spc for spc,t in zip(specconc_list,ts) if t.hour % hourlysub == 0]
 	return specconc_list
 
+def globSubDirLevelEdge(hist_dir,timeperiod=None,hourlysub = 6):
+	edgeconc_list = glob(f'{hist_dir}/GEOSChem.LevelEdgeDiags*.nc4')
+	edgeconc_list.sort()
+	ts = [datetime.strptime(edge.split('.')[-2][0:13], "%Y%m%d_%H%M") for edge in edgeconc_list]
+	if timeperiod:
+		edgeconc_list = [edge for edge,t in zip(edgeconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
+	edgeconc_list = [edge for edge,t in zip(edgeconc_list,ts) if t.hour % hourlysub == 0]
+	return edgeconc_list
+
 def combineScaleFactors(ensemble_dir,output_dir):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
@@ -56,6 +65,8 @@ def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6
 		ds = ds.isel(lev=0)
 	elif subset_rule=='850':
 		ds = ds.isel(lev=10) #850 hPa pressure level
+	elif subset_rule=='ALL':
+		pass
 	if fullpath_output_name:
 		ds.to_netcdf(fullpath_output_name)
 	return ds
@@ -66,6 +77,27 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 	for subdir in subdirs:
 		print(f'Processing {subdir}')
 		array_list.append(makeDatasetForDirectory(subdir,species_names,timeperiod,hourlysub,subset_rule))
+	ds = xr.concat(array_list,'Ensemble')
+	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
+	if fullpath_output_name:
+		ds.to_netcdf(fullpath_output_name)
+	return ds
+
+def makeDatasetForDirectoryLevelEdge(hist_dir,timeperiod=None,hourlysub = 6, fullpath_output_name = None, average_levels = True):
+	edgeconc_list = globSubDirLevelEdge(hist_dir,timeperiod,hourlysub)
+	concstring = 'Met_PEDGE'
+	ds = xr.open_mfdataset(edgeconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
+	ds = ds[concstring]
+	if fullpath_output_name:
+		ds.to_netcdf(fullpath_output_name)
+	return ds
+
+def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,fullpath_output_name = None):
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,includeOutputDir=True)
+	array_list = []
+	for subdir in subdirs:
+		print(f'Processing {subdir}')
+		array_list.append(makeDatasetForDirectoryLevelEdge(subdir,timeperiod,hourlysub))
 	ds = xr.concat(array_list,'Ensemble')
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	if fullpath_output_name:
