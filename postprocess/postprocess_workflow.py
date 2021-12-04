@@ -10,6 +10,7 @@ with open('../ens_config.json') as f:
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
+savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
 statevec = data['STATE_VECTOR_CONC']
 emisvec = data['CONTROL_VECTOR_EMIS']
@@ -31,6 +32,20 @@ try:
 except FileNotFoundError:
 	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
+
+if "calccol" in sys.argv:
+	try:
+		ds_level = xr.open_dataset(f'{pp_dir}/leveledge_pp.nc')
+		ds_all = xr.open_dataset(f'{pp_dir}/controlvar_pp_all.nc')
+	except FileNotFoundError:
+		_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,subset_rule = 'ALL',fullpath_output_name=f'{pp_dir}/controlvar_pp_all.nc')
+		subdirs,_,_ = pt.globDirs(ens_dir,includeOutputDir=True)
+		_ = pt.makeDatasetForDirectoryLevelEdge(subdirs[0],timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp_all.nc')
+		ds_level = xr.open_dataset(f'{pp_dir}/leveledge_pp.nc')
+		ds_all = xr.open_dataset(f'{pp_dir}/controlvar_pp_all.nc')
+	pressure_edges = ds_level[Met_PEDGE].values
+	pressure_weights = (pressure_edges[:,1:,:,:]+pressure_edges[:,:-1,:,:])/2
+	
 
 if "calc850" in sys.argv:
 	print('Calculating/loading 850hPa pressure level')
