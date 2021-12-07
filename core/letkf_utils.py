@@ -455,7 +455,7 @@ class GT_Container(object):
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
-		npy_column_files = glob(f'{self.path_to_scratch}/*.npy')
+		npy_column_files = glob(f'{self.path_to_scratch}/**/*.npy',recursive=True)
 		npy_col_names = [file.split('/')[-1] for file in npy_column_files]
 		npy_columns = [np.load(file) for file in npy_column_files]
 		self.columns = dict(zip(npy_col_names,npy_columns))
@@ -736,7 +736,7 @@ class Assimilator(object):
 	def saveColumn(self,latval,lonval):
 		colinds = self.gt[1].getColumnIndicesFromLocalizedStateVector(latval,lonval)
 		analysisSubset = self.analysisEnsemble[colinds,:]
-		np.save(f'{self.path_to_scratch}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
+		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
 	def LETKF(self):
 		if self.testing:
 			print(f"LETKF called! Beginning loop.")
