@@ -4,6 +4,8 @@ import postprocess_tools as pt
 from glob import glob
 from datetime import datetime,timedelta
 import sys 
+import pickle
+import pandas as pd
 
 with open('../ens_config.json') as f:
 	data = json.load(f)
@@ -58,7 +60,14 @@ if "calc850" in sys.argv:
 		_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,subset_rule="850",fullpath_output_name=f'{pp_dir}/controlvar_pp_850hPa.nc')
 		ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
 
+if "plotsatellite" in sys.argv:
+	with open(f"{pp_dir}/bigY.pkl",'rb') as f:
+		bigy=pickle.load(f)
+
 for spec in controlvec:
+	if "plotsatellite" in sys.argv:
+		df = bigy['spec']
+		pt.tsPlotSatCompare(df,spec,outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png')
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',includesNature=True)
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=True)
 	if "calc850" in sys.argv:

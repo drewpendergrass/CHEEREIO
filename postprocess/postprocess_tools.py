@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 from datetime import datetime
 import sys
 import pickle
+import pandas as pd
 sys.path.append('../core')
 import letkf_utils as lu 
 import tropomi_tools as tt 
@@ -111,11 +112,25 @@ def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,f
 
 def makeYWholePeriod(timestamp,hourlysub=6,fullpath_output_name = None):
 	hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub,testing=False)
+	bigy = hist.bigYDict 
+	for spec in list(bigy.keys()):
+		t = [datetime.strptime(tt,"%Y-%m-%dT%H:%M:%S.%fZ") for tt in bigy[spec][4]]
+		t = np.array(t,dtype='datetime64[us]')
+		colnum = np.shape(bigy[spec][0])[1]
+		colnames = []
+		for i in range(colnum):
+			colnames.append(f"Ens{str(i+1).zfill(3)}")
+		df = pd.DataFrame(bigy[spec][0], columns = colnames)
+		df['Satellite'] = bigy[spec][1]
+		df['Latitude'] = bigy[spec][2]
+		df['Longitude'] = bigy[spec][3]
+		df['Time'] = t
+		bigy[spec] = df
 	if fullpath_output_name:
 		f = open(fullpath_output_name,"wb")
-		pickle.dump(hist.bigYDict,f)
+		pickle.dump(bigy,f)
 		f.close()
-	return hist.bigYDict
+	return bigy
 
 
 def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm'):
@@ -176,10 +191,13 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotSatCompare(bigy,species,unit='ppb',satellite_name='TROPOMI',outfile=None):
-	conc2D,satcol,satlat,satlon,sattime = bigy[species]
-	ensmean = np.mean(conc2D,axis=0)
-	enssd = np.std(conc2D,axis=0)
+def tsPlotSatCompare(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
+	df = df.groupby(pd.Grouper(key='Time',freq=freq)).mean()
+	conc2D=np.array(df.iloc[:,0:numens])
+	satcol=np.array(df['Satellite'])
+	sattime=np.array(df['Time'])
+	ensmean = np.mean(conc2D,axis=1)
+	enssd = np.std(conc2D,axis=1)
 	plt.rcParams.update({'font.size': 16})
 	plt.figure(figsize=(6,4))
 	plt.plot(sattime,ensmean,color='b',label='Ensemble mean')
