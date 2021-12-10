@@ -3,7 +3,8 @@ import json
 import numpy as np
 import xarray as xr
 from glob import glob
-import sys 
+import sys
+import pathlib
 
 cmdarg = str(sys.argv[1])
 if cmdarg=="TESTING":
@@ -63,10 +64,13 @@ for i in range(len(subdir_numbers)):
 	subcolumn_count_array = np.repeat(min_subcells,ncore)
 	subcolumn_count_array[0:remainder_subcells] = min_subcells+1
 	subarray_endpoints = np.insert(np.cumsum(subcolumn_count_array),0,0)
+	subdirstring = str(i+1).zfill(3)
 	subdict = {}
 	for j in range(ncore):
 		startpoint = int(subarray_endpoints[j])
 		endpoint = int(subarray_endpoints[j+1])
+		corestring = str(j+1).zfill(3)
+		pathlib.Path(f"{path_to_sim}scratch/{subdirstring}/{corestring}").mkdir(parents=True, exist_ok=True) 
 		subdict[j+1] = {'lat':latlist[startpoint:endpoint].tolist(),'lon':lonlist[startpoint:endpoint].tolist()}
 	dict_to_save[i+1] = subdict
 
