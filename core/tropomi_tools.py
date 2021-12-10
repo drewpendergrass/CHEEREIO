@@ -205,7 +205,7 @@ class TROPOMI_Translator(object):
 		obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 		obs_list.sort()
 		if interval:
-			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % self.interval == 0) or (t1.hour % self.interval == (self.interval-1)))]
+			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % interval == 0) or (t1.hour % interval == (interval-1)))]
 		else:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
