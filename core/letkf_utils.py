@@ -312,16 +312,20 @@ class GC_Translator(object):
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
-	def __init__(self, path_to_rundir,timeperiod,testing=False):
+	def __init__(self, path_to_rundir,timeperiod,interval=None,testing=False):
 		self.testing = testing
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
+		self.interval = interval
 	def globSubDir(self,timeperiod,useLevelEdge = False):
 		specconc_list = glob(f'{self.hist_dir}/GEOSChem.SpeciesConc*.nc4')
 		specconc_list.sort()
 		ts = [datetime.strptime(spc.split('.')[-2][0:13], "%Y%m%d_%H%M") for spc in specconc_list]
-		specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
+		if self.interval:
+			specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1]) and (t.hour % self.interval == 0)]
+		else:
+			specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
 		if useLevelEdge:
 			le_list = glob(f'{self.hist_dir}/GEOSChem.LevelEdgeDiags*.nc4')
 			le_list.sort()
@@ -349,7 +353,7 @@ class HIST_Translator(object):
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,testing=False):
+	def __init__(self,timestamp,useLevelEdge=False,fullperiod=False,interval=None,testing=False):
 		self.testing = testing
 		self.useLevelEdge = useLevelEdge
 		self.spc_config = tx.getSpeciesConfig(self.testing)
@@ -360,15 +364,22 @@ class HIST_Ens(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
-		ASSIM_TIME = self.spc_config['ASSIM_TIME']
-		delta = timedelta(hours=int(ASSIM_TIME))
-		starttime = endtime-delta
+		if fullperiod:
+			START_DATE = self.spc_config['START_DATE']
+			starttime = datetime.strptime(f'{START_DATE}_0000', "%Y%m%d_%H%M")
+		else:
+			ASSIM_TIME = self.spc_config['ASSIM_TIME']
+			delta = timedelta(hours=int(ASSIM_TIME))
+			starttime = endtime-delta
 		self.timeperiod = (starttime,endtime)
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
-				self.ht[ens] = HIST_Translator(directory, self.timeperiod,self.testing)
+				if fullperiod:
+					self.ht[ens] = HIST_Translator(directory, self.timeperiod,interval,testing=self.testing)
+				else:
+					self.ht[ens] = HIST_Translator(directory, self.timeperiod,testing=self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.maxobs=int(self.spc_config['MAXNUMOBS'])
@@ -587,7 +598,7 @@ class Assimilator(object):
 		if self.nature is None:
 			self.full4D = True #Implement me
 			self.inflation = float(spc_config['INFLATION_FACTOR'])
-			self.histens = HIST_Ens(timestamp,True,self.testing)
+			self.histens = HIST_Ens(timestamp,True,testing=self.testing)
 		else:
 			self.full4D = False
 			error_multipliers_or_matrices, self.ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)

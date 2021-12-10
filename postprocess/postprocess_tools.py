@@ -4,6 +4,11 @@ from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
+import sys
+import pickle
+sys.path.append('../core')
+import letkf_utils as lu 
+import tropomi_tools as tt 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 	subdirs = glob(f"{ensemble_dir}/*/")
@@ -103,6 +108,15 @@ def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,f
 	if fullpath_output_name:
 		ds.to_netcdf(fullpath_output_name)
 	return ds
+
+def makeYWholePeriod(timestamp,hourlysub=6,fullpath_output_name = None):
+	hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub,testing=False)
+	if fullpath_output_name:
+		f = open(fullpath_output_name,"wb")
+		pickle.dump(hist.bigYDict,f)
+		f.close()
+	return hist.bigYDict
+
 
 def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm'):
 	if unit=='ppm':

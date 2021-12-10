@@ -33,6 +33,9 @@ except FileNotFoundError:
 	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 
+if data['POSTPROCESS_HIST']=="true":
+	pt.makeYWholePeriod(timestamp=f"{data['END_DATE']}_0000",fullpath_output_name=f"{pp_dir}/bigY.pkl'")
+
 if "calccol" in sys.argv:
 	try:
 		ds_level = xr.open_dataset(f'{pp_dir}/leveledge_pp.nc')
