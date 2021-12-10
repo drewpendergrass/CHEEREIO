@@ -383,6 +383,7 @@ class HIST_Ens(object):
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.maxobs=int(self.spc_config['MAXNUMOBS'])
+		self.interval=interval
 		self.makeBigY()
 	def makeSatTrans(self):
 		self.SAT_TRANSLATOR = {}
