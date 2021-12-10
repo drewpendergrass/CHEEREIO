@@ -34,7 +34,7 @@ except FileNotFoundError:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 
 if data['POSTPROCESS_HIST']=="true":
-	pt.makeYWholePeriod(timestamp=f"{data['END_DATE']}_0000",fullpath_output_name=f"{pp_dir}/bigY.pkl'")
+	bigy = pt.makeYWholePeriod(timestamp=f"{data['END_DATE']}_0000",fullpath_output_name=f"{pp_dir}/bigY.pkl'")
 
 if "calccol" in sys.argv:
 	try:
