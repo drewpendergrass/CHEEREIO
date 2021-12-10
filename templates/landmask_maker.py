@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 
-world=gpd.read_file('~/ne_10m_land.shp')
+world=gpd.read_file('/n/home12/drewpendergrass/ne_10m_land.shp')
 geom=world.geometry[0]
 
 gridlabels = ['4.0x5.0','2.0x2.5','1x1','0.5x0.625','0.25x0.3125']
@@ -61,4 +61,4 @@ for i in range(2,5):
 	  res = geom.contains(this_point)
 	  mask.append(res)
 	mask = np.array(mask).reshape(lon2d.shape)
-	np.savetxt(f"~/landmask_{labname}_gcgrid.csv",mask,delimiter=',')
+	np.savetxt(f"/n/home12/drewpendergrass/landmask_{labname}_gcgrid.csv",mask,delimiter=',')
