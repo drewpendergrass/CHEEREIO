@@ -84,7 +84,6 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
-	"POSTPROCESS_HIST" : "true",
 	"LOCALIZATION_RADIUS_km" : "1000",
 	"ENABLE_4D_LETKF" : "false",
 	"OBS_ERROR_MATRICES": [

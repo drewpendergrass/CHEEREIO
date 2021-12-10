@@ -394,7 +394,7 @@ class HIST_Ens(object):
 	def getSatData(self):
 		self.SAT_DATA = {}
 		for spec in self.satSpecies:
-			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod)
+			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod,self.interval)
 	def makeBigY(self):
 		self.makeSatTrans()
 		self.getSatData()
@@ -414,7 +414,7 @@ class HIST_Ens(object):
 		col3D = []
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
-		firstcol,satcol,satlat,satlon = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+		firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -424,9 +424,9 @@ class HIST_Ens(object):
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
-				col,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 				conc2D[:,i-1] = col
-		return [conc2D,satcol,satlat,satlon]
+		return [conc2D,satcol,satlat,satlon,sattime]
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)
@@ -443,7 +443,7 @@ class HIST_Ens(object):
 		obsdiffs = []
 		for spec in self.satSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
-			gccol,satcol,_,_ = self.bigYDict[spec]
+			gccol,satcol,_,_,_ = self.bigYDict[spec]
 			gccol = gccol[ind,:]
 			satcol = satcol[ind]
 			obsmean = np.mean(gccol,axis=1)

@@ -194,7 +194,7 @@ class TROPOMI_Translator(object):
 			pickle.dump(TROPOMI_date_dict, handle)
 		return TROPOMI_date_dict
 	#Timeperiod is two datetime objects
-	def globObs(self,species,timeperiod):
+	def globObs(self,species,timeperiod, interval=None):
 		sourcedir = self.spc_config['TROPOMI_dirs'][species]
 		if os.path.exists(f"{self.scratch}/tropomi_dates.pickle"):
 			with open(f"{self.scratch}/tropomi_dates.pickle", 'rb') as handle:
@@ -204,10 +204,13 @@ class TROPOMI_Translator(object):
 		obs_dates = TROPOMI_date_dict[species]
 		obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 		obs_list.sort()
-		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
+		if interval:
+			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % self.interval == 0) or (t1.hour % self.interval == (self.interval-1)))]
+		else:
+			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getSatellite(self,species,timeperiod):
-		obs_list = self.globObs(species,timeperiod)
+	def getSatellite(self,species,timeperiod, interval=None):
+		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
 		for obs in obs_list:
 			trop_obs.append(read_tropomi(obs,species))
@@ -223,6 +226,6 @@ class TROPOMI_Translator(object):
 			GC_CH4*=1e9 #scale to ppb
 		GC_on_sat = GC_to_sat_levels(GC_CH4, GC_P, TROPOMI['pressures'])
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_CH4, TROP_PW, GC_on_sat)
-		return [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude']]
+		return [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
 
 

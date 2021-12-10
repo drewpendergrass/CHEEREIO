@@ -176,6 +176,29 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
+def tsPlotSatCompare(bigy,species,unit='ppb',satellite_name='TROPOMI',outfile=None):
+	conc2D,satcol,satlat,satlon,sattime = bigy[species]
+	ensmean = np.mean(conc2D,axis=0)
+	enssd = np.std(conc2D,axis=0)
+	plt.rcParams.update({'font.size': 16})
+	plt.figure(figsize=(6,4))
+	plt.plot(sattime,ensmean,color='b',label='Ensemble mean')
+	plt.plot(sattime,ensmean+enssd,':',color='b')
+	plt.plot(sattime,ensmean-enssd,':',color='b')
+	plt.plot(sattime,satcol,color='g',label=satellite_name)
+	plt.legend()
+	plt.xlabel('Time')
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
+	plt.ylabel(f'{species} ({unit})')
+	plt.gcf().autofmt_xdate()
+	plt.gcf().tight_layout()
+	if outfile:
+		plt.savefig(outfile)
+	else:
+		plt.show()
+
+
 
 def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 	plt.rcParams.update({'font.size': 16})
