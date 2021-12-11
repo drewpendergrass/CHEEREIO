@@ -424,7 +424,7 @@ class HIST_Ens(object):
 		conc2D[:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
+				hist4D = self.ht[i].combineHist(species,self.useLevelEdge)
 				col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 				conc2D[:,i-1] = col
 		return [conc2D,satcol,satlat,satlon,sattime]
