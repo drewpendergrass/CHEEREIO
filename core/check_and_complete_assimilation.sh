@@ -22,7 +22,7 @@ source activate ${CONDA_ENV} #Activate conda environment.
 python check_for_all_columns.py ${TESTSTR}
 
 if [ -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_COLUMNS_FOUND ]; then
-	python combine_columns_and_update.py ${end_timestamp} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_master.out
+	python -u combine_columns_and_update.py ${end_timestamp} ${TESTSTR} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_master.out
 	echo 'Done' > ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
 fi
 
