@@ -9,7 +9,7 @@ geom=world.geometry[0]
 gridlabels = ['4.0x5.0','2.0x2.5','1x1','0.5x0.625','0.25x0.3125']
 gridlabels_name = ['4x5','2x2p5','1x1','0p5x0p625','0p25x0p3125']
 
-for i in range(2,5):
+for i in range(3,5):
 	gridlabel=gridlabels[i]
 	labname=gridlabels_name[i]
 	#Create traditional GEOS-Chem longitude and latitude centers, as specified by the settings in ens_config.json
