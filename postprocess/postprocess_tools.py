@@ -193,7 +193,8 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 
 def tsPlotSatCompare(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
 	df = df.groupby(pd.Grouper(key='Time',freq=freq)).mean()
-	conc2D=np.array(df.iloc[:,0:numens])
+	df.reset_index(inplace=True)
+	conc2D=np.array(df.iloc[:,1:(numens+1)])
 	satcol=np.array(df['Satellite'])
 	sattime=np.array(df['Time'])
 	ensmean = np.mean(conc2D,axis=1)
