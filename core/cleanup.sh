@@ -21,4 +21,4 @@ rm ${MY_PATH}/${RUN_NAME}/scratch/ALL_COLUMNS_FOUND
 rm ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
 
 #Remove columns
-rm -rf ${MY_PATH}/${RUN_NAME}/scratch/*.npy
+find ${MY_PATH}/${RUN_NAME}/scratch/ -name "*.npy" -type f -delete
