@@ -34,7 +34,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "48000",
+	"Memory" : "32000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "3-00\\:00",
 	"EnsSpinupWallTime" : "0-08\\:00",
