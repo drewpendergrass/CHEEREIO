@@ -12,6 +12,7 @@ variable=str(sys.argv[2])
 func=str(sys.argv[3])
 #if doing all, leave off ending; will append _FUNCTION.mp4
 file_out=str(sys.argv[4])
+anim_fps=int(sys.argv[5])
 ds = xr.open_dataset(file_in)
 time = np.array(ds['time'])
 timestr = [str(t)[0:16] for t in time]
@@ -66,7 +67,7 @@ for i in range(length):
     #save as GIF
 
     Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=1, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+    writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
     if looping:
         anim.save(f'{file_out}_{func}.mp4', writer=writer)
     else:

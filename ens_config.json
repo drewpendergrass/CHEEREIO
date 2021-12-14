@@ -99,7 +99,8 @@
 	"INFLATION_FACTOR": "0.02",
 	"ASSIM_TIME": "24",
 	"MAXNUMOBS" : "3000",
-	"TESTBIAS": "0.5"
+	"TESTBIAS": "0.5",
+	"animation_fps":"12"
 }
 
 
