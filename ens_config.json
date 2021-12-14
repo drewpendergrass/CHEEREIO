@@ -40,6 +40,7 @@
 	"EnsSpinupWallTime" : "0-08\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
+	"AnimationEnv" : "geoplt_2",
 	"MaxPar" : "8",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
