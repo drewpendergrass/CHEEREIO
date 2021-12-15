@@ -29,6 +29,7 @@
 	"nEnsemble" : "16",
 	"pPERT" : "4",
 	"SIMULATE_NATURE" : "false",
+	"SaveLevelEdgeDiags" : "True",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
@@ -54,6 +55,12 @@
 	"CONTROL_VECTOR_EMIS" : {
 		"CH4":"CH4"
 	},
+	"HistorySpecConcToSave" : [
+		"CH4"
+	],
+	"comment009" : "******************************************************************************",
+	"comment010" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
+	"comment011" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
 		"CH4_TROPOMI": "CH4"
 	},
@@ -63,43 +70,55 @@
 	"OBS_TYPE_TROPOMI" : [
 		"True"
 	],
-	"SaveLevelEdgeDiags" : "True",
-	"HistorySpecConcToSave" : [
-		"CH4"
-	],
-	"MaskOceanScaleFactor" : [
-		"True"
-	],
-	"Mask60SScaleFactor" : [
-		"True"
-	],
-	"MaskArcticCircleScaleFactor" : [
-		"True"
-	],
-	"comment009" : "**********************************************************************************",
-	"comment010" : "************************BEGIN MISCELLANEOUS LETKF SETTINGS************************",
-	"comment011" : "**********************************************************************************",
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
-	"LOCALIZATION_RADIUS_km" : "1000",
-	"ENABLE_4D_LETKF" : "false",
+	"comment012" : "******************************************************************************",
+	"comment013" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
+	"comment014" : "******************************************************************************",
+	"MaskOceanScaleFactor" : [
+		"True"
+	],
+	"Mask60NScaleFactor" : [
+		"True"
+	],
+	"Mask60SScaleFactor" : [
+		"True"
+	],
+	"MinimumScalingFactorAllowed" : [
+		"0.1"
+	],
+	"MaximumScalingFactorAllowed" : [
+		"nan"
+	],
+	"InflateScalingsToXOfPreviousStandardDeviation" : [
+		"0.3"
+	],
+	"comment015" : "******************************************************************************",
+	"comment016" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
+	"comment017" : "******************************************************************************",
 	"OBS_ERROR_MATRICES": [
 		"0.10"
 	],
+	"INFLATION_FACTOR": "0.06",
+	"ASSIM_TIME": "24",
+	"MAXNUMOBS" : "3000",
+	"LOCALIZATION_RADIUS_km" : "1000",
+	"AveragePriorAndPosterior" : "True",
+	"PriorWeightinPriorPosteriorAverage" : "0.5",
+	"comment018" : "**********************************************************************************",
+	"comment019" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
+	"comment020" : "**********************************************************************************",
+	"TESTBIAS": "0.5",
 	"OBS_OPERATORS": [
 		"SumOperator"
 	],
 	"NATURE_H_FUNCTIONS" : [
 		"column_sum"
 	],
-	"INFLATION_FACTOR": "0.02",
-	"ASSIM_TIME": "24",
-	"MAXNUMOBS" : "3000",
-	"TESTBIAS": "0.5",
 	"animation_fps":"12"
 }
 
