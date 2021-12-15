@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANERUN_v5",
+	"RUN_NAME" : "METHANERUN_v6",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -26,7 +26,7 @@
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190102",
 	"END_DATE" : "20190130",
-	"nEnsemble" : "16",
+	"nEnsemble" : "24",
 	"pPERT" : "4",
 	"SIMULATE_NATURE" : "false",
 	"SaveLevelEdgeDiags" : "True",
@@ -35,7 +35,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "32000",
+	"Memory" : "35000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "3-00\\:00",
 	"EnsSpinupWallTime" : "0-08\\:00",
@@ -71,7 +71,7 @@
 		"True"
 	],
 	"TROPOMI_dirs" : {
-		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4/2019/01"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
