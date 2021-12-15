@@ -10,7 +10,7 @@ The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is
 4. **Easy to link observations**: Object-oriented observation operator implementation allows the user to rapidly add new kinds of data with minimal programming required.
 5. **Quick to run**: Wall runtime should be no more than 2x longer than vanilla GEOS-Chem (4D-Var limit) assuming resources are available.
 
-CHEEREIO is currently fully tested and operational for 3D LETKF data assimilation. Development of 4D assimilation and additional tools for observation operator creation are currently being tested for TROPOMI CH4 and in development for TROPOMI/OMI NO2. I am adding new satellite data as rapidly as possible.
+CHEEREIO is currently fully tested and operational for 3D LETKF data assimilation. Development of 4D assimilation and additional tools for observation operator creation are currently being tested for TROPOMI CH4 and in development for TROPOMI/OMI NO2. I am adding new satellite data as rapidly as possible. After some validation runs to confirm the workflow's scientific value, I will attempt to reduce memory and I/O time complexity by switching from GNU parallel parallelization to MPI via the ray package (allowing the sharing of large matrices in memory and removing the need to write columns to file).
 
 ## Documentation
 Detailed documentation is available on [ReadTheDocs](https://cheereio.readthedocs.io), including installation instructions. If you encounter any problems not covered by the documentation, please open an [issue](https://github.com/drewpendergrass/CHEEREIO/issues) on GitHub.
