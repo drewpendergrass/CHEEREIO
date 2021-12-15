@@ -31,7 +31,7 @@ meanval = (maxdir+1)/2
 
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 mask_ocean_bool = spc_config['MaskOceanScaleFactor']
-mask_arctic_bool = spc_config['MaskArcticCircleScaleFactor']
+mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
@@ -138,7 +138,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		if maskoceanboolval=='True':
 			scaling_factors[0,mask[1],mask[0]] = 1
 		if maskarcticboolval=='True':
-			latwhere = np.where(lat>66.55)[0]
+			latwhere = np.where(lat>=60)[0]
 			scaling_factors[0,latwhere,:] = 1
 		if maskantarcticboolval=='True':
 			latwhere = np.where(lat<=-60)[0]
