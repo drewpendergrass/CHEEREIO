@@ -582,6 +582,13 @@ class Assimilator(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.nature = None
+		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
+		self.MinimumScalingFactorAllowed = [float(s) for s in spc_config["MinimumScalingFactorAllowed"]]
+		self.MaximumScalingFactorAllowed = [float(s) for s in spc_config["MaximumScalingFactorAllowed"]]
+		self.InflateScalingsToXOfPreviousStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfPreviousStandardDeviation"]]
+		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=[float(s) for s in spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]]
+		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
+		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.forceOverrideNature=True #Set to true to ignore existing nature directory. Only for testing
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
@@ -745,9 +752,56 @@ class Assimilator(object):
 			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
-	def saveColumn(self,latval,lonval):
+	def getAnalysisAndBackgroundColumn(self,latval,lonval,doBackground=True):
 		colinds = self.gt[1].getColumnIndicesFromLocalizedStateVector(latval,lonval)
 		analysisSubset = self.analysisEnsemble[colinds,:]
+		if doBackground:
+			backgroundSubset = np.zeros(np.shape(self.Xpert_background[colinds,:]))
+			k = len(self.ensemble_numbers)
+			for i in range(k):
+				backgroundSubset[:,i] = self.Xpert_background[colinds,i]+self.xbar_background[colinds]
+			return [analysisSubset,backgroundSubset]
+		else:
+			return analysisSubset
+	def applyAnalysisCorrections(self,analysisSubset,backgroundSubset):
+		#Get scalefactors off the end of statevector
+		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:]
+		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
+		#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
+		for i in range(len(self.InflateScalingsToXOfPreviousStandardDeviation)):
+			inflator = self.InflateScalingsToXOfPreviousStandardDeviation[i]
+			if ~np.isnan(inflator):
+				analysis_std = np.std(analysisScalefactor[i,:])
+				background_std = np.std(backgroundScalefactor[i,:])
+				if (analysis_std/background_std) < inflator:
+					new_std = inflator*background_std
+					analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)
+		#Set min/max scale factor:
+		for i in range(len(self.MinimumScalingFactorAllowed)):
+			if ~np.isnan(self.MinimumScalingFactorAllowed[i]):
+				minOverwrite = np.where(analysisScalefactor[i,:]<self.MinimumScalingFactorAllowed[i])[0]
+				analysisScalefactor[i,minOverwrite] = self.MinimumScalingFactorAllowed[i]
+			if ~np.isnan(self.MaximumScalingFactorAllowed[i]):
+				maxOverwrite = np.where(analysisScalefactor[i,:]>self.MaximumScalingFactorAllowed[i])[0]
+				analysisScalefactor[i,maxOverwrite] = self.MaximumScalingFactorAllowed[i]
+		#Apply maximum relative change per assimilation period:
+		for i in range(len(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod)):
+			maxchange=self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[i]
+			if ~np.isnan(maxchange):
+				relativechanges=(analysisScalefactor[i,:]-backgroundScalefactor[i,:])/backgroundScalefactor[i,:]
+				relOverwrite = np.where(np.abs(relativechanges)>maxchange)[0]
+				analysisScalefactor[i,relOverwrite] = (np.sign(relativechanges[relOverwrite])*maxchange)*backgroundScalefactor[i,relOverwrite]
+		#Done with the scalings
+		analysisSubset[(-1*self.emcount)::,:] = analysisScalefactor
+		#Now average with prior
+		if self.AveragePriorAndPosterior:
+			priorweight = self.PriorWeightinPriorPosteriorAverage
+			if (priorweight<0) or (priorweight>1):
+				raise ValueError('Invalid prior weight; must be between 0 and 1.') 
+			posteriorweight = 1-priorweight
+			analysisSubset = (backgroundSubset*priorweight)+(analysisSubset*posteriorweight)
+		return analysisSubset
+	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
 	def LETKF(self):
 		if self.testing:
@@ -760,7 +814,8 @@ class Assimilator(object):
 				self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
 				k = len(self.ensemble_numbers)
 				for i in range(k):
-					self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background	
+					self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background
+				analysisSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=False)	
 			else:
 				self.makeR(latval,lonval)
 				self.makeC()
@@ -769,4 +824,6 @@ class Assimilator(object):
 				self.makeWbarAnalysis()
 				self.adjWAnalysis()
 				self.makeAnalysisCombinedEnsemble()
-			self.saveColumn(latval,lonval)
+				analysisSubset,backgroundSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True)
+				analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset)
+			self.saveColumn(latval,lonval,analysisSubset)

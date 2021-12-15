@@ -89,13 +89,16 @@
 		"True"
 	],
 	"MinimumScalingFactorAllowed" : [
-		"0.1"
+		"0.05"
 	],
 	"MaximumScalingFactorAllowed" : [
-		"nan"
+		"20"
 	],
 	"InflateScalingsToXOfPreviousStandardDeviation" : [
 		"0.3"
+	],
+	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : [
+		"0.5"
 	],
 	"comment015" : "******************************************************************************",
 	"comment016" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
