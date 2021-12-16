@@ -60,7 +60,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
     wait
     taillog="$(tail -n 1 GC.log)"
     #Check if GC finished.
-    if [[ ${taillog:0:1} != "*" ]]; then
+    if [[ "${taillog:0:1}" != "*" ]]; then
       #This file's presence breaks loop loop
       printf "GEOS-Chem did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
     fi
