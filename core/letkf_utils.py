@@ -773,9 +773,11 @@ class Assimilator(object):
 			if ~np.isnan(inflator):
 				analysis_std = np.std(analysisScalefactor[i,:])
 				background_std = np.std(backgroundScalefactor[i,:])
-				if (analysis_std/background_std) < inflator:
-					new_std = inflator*background_std
-					analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)
+				ratio=analysis_std/background_std
+				if ~np.isnan(ratio): #Sometimes background standard deviation is approximately 0.
+					if ratio < inflator:
+						new_std = inflator*background_std
+						analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)
 		#Set min/max scale factor:
 		for i in range(len(self.MinimumScalingFactorAllowed)):
 			if ~np.isnan(self.MinimumScalingFactorAllowed[i]):
