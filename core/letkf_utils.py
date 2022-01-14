@@ -415,7 +415,10 @@ class HIST_Ens(object):
 		col3D = []
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
-		firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+		if self.spc_config['AV_TO_GC_GRID']=="True":
+			firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+		else: 
+			firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -778,6 +781,13 @@ class Assimilator(object):
 					if ratio < inflator:
 						new_std = inflator*background_std
 						analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)
+		#Apply maximum relative change per assimilation period:
+		for i in range(len(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod)):
+			maxchange=self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[i]
+			if ~np.isnan(maxchange):
+				relativechanges=(analysisScalefactor[i,:]-backgroundScalefactor[i,:])/backgroundScalefactor[i,:]
+				relOverwrite = np.where(np.abs(relativechanges)>maxchange)[0]
+				analysisScalefactor[i,relOverwrite] = (1+(np.sign(relativechanges[relOverwrite])*maxchange))*backgroundScalefactor[i,relOverwrite]
 		#Set min/max scale factor:
 		for i in range(len(self.MinimumScalingFactorAllowed)):
 			if ~np.isnan(self.MinimumScalingFactorAllowed[i]):
@@ -786,13 +796,6 @@ class Assimilator(object):
 			if ~np.isnan(self.MaximumScalingFactorAllowed[i]):
 				maxOverwrite = np.where(analysisScalefactor[i,:]>self.MaximumScalingFactorAllowed[i])[0]
 				analysisScalefactor[i,maxOverwrite] = self.MaximumScalingFactorAllowed[i]
-		#Apply maximum relative change per assimilation period:
-		for i in range(len(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod)):
-			maxchange=self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[i]
-			if ~np.isnan(maxchange):
-				relativechanges=(analysisScalefactor[i,:]-backgroundScalefactor[i,:])/backgroundScalefactor[i,:]
-				relOverwrite = np.where(np.abs(relativechanges)>maxchange)[0]
-				analysisScalefactor[i,relOverwrite] = (np.sign(relativechanges[relOverwrite])*maxchange)*backgroundScalefactor[i,relOverwrite]
 		#Done with the scalings
 		analysisSubset[(-1*self.emcount)::,:] = analysisScalefactor
 		#Now average with prior

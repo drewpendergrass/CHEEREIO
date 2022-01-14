@@ -109,6 +109,7 @@
 	"INFLATION_FACTOR": "0.06",
 	"ASSIM_TIME": "24",
 	"MAXNUMOBS" : "3000",
+	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "1000",
 	"AveragePriorAndPosterior" : "True",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
