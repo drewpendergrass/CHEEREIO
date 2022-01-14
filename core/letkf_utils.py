@@ -428,7 +428,10 @@ class HIST_Ens(object):
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D = self.ht[i].combineHist(species,self.useLevelEdge)
-				col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				if self.spc_config['AV_TO_GC_GRID']=="True":
+					col,_,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				else:
+					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 				conc2D[:,i-1] = col
 		return [conc2D,satcol,satlat,satlon,sattime]
 	def getIndsOfInterest(self,species,latind,lonind):
