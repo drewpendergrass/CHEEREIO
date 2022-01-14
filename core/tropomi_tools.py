@@ -248,8 +248,9 @@ class TROPOMI_Translator(object):
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_CH4, TROP_PW, GC_on_sat)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(indlab,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
-			return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+			toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 		else:
-			return [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
+			toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
+		return toreturn
 
 
