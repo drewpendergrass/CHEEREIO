@@ -192,7 +192,7 @@ def averageByGC(index,GConsat,satvals,satlat,satlon,sattime):
 		satlon_av[count] = np.mean(satlon[indmatch])
 		sattime_av[count] = np.mean(sattime[indmatch])
 		num_av[count] = len(indmatch)
-    return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
 class TROPOMI_Translator(object):
 	def __init__(self,testing=False):
