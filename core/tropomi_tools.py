@@ -190,7 +190,7 @@ def averageByGC(index,GConsat,satvals,satlat,satlon,sattime):
 		sat_av[count] = np.mean(satvals[indmatch])
 		satlat_av[count] = np.mean(satlat[indmatch])
 		satlon_av[count] = np.mean(satlon[indmatch])
-		sattime_av[count] = np.mean(sattime[indmatch])
+		sattime_av[count] = np.mean(sattime[indmatch].astype('datetime64'))
 		num_av[count] = len(indmatch)
 	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
