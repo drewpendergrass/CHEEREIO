@@ -72,15 +72,19 @@ def read_tropomi(filename, species):
 		met['column_AK'] = data['column_averaging_kernel'].values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 		data.close()
 
-	# Store methane prior profile, dry air subcolumns. Not needed for NO2
+	# Store methane prior profile, dry air subcolumns. Not needed for NO2, though surface pressure is
 	if species=='CH4':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1]
 		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1]
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
+		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
+		data.close()
+	elif species=='CH4':
+		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
+		data.close()
 
-	surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
-	data.close()
 
 	# Store lat, lon bounds for pixels
 	# data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
@@ -125,7 +129,7 @@ def getGCCols(GC,TROPOMI,species):
 	indlab = (i*100000000)+(j*10000)+t
 	return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],indlab]
 
-def GC_to_sat_levels(GC_CH4, GC_edges, sat_edges):
+def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
@@ -154,26 +158,29 @@ def GC_to_sat_levels(GC_CH4, GC_edges, sat_edges):
 	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
 	GC_to_sat[~idx] = 0
 	# Now map the GC CH4 to the satellite levels
-	GC_on_sat = (GC_to_sat*GC_CH4[:, :, None]).sum(axis=1)
+	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
-def apply_avker(sat_avker, sat_prior, sat_pressure_weight, GC_CH4, filt=None):
+def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=None):
 	'''
 	Apply the averaging kernel
 	Inputs:
 		sat_avker			The averaging kernel for the satellite
-		sat_prior			The satellite prior profile in ppb
+		sat_prior			The satellite prior profile in ppb, optional (used for CH4)
 		sat_pressure_weight  The relative pressure weights for each level
-		GC_CH4			   The GC methane on the satellite levels
+		GC_SPC			   The GC species on the satellite levels
 		filt				 A filter, optional
 	'''
 	if filt is None:
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
-	GC_col = (filt*sat_pressure_weight
-			  *(sat_prior + sat_avker*(GC_CH4 - sat_prior)))
+	if sat_prior is None:
+		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
+	else:
+		GC_col = (filt*sat_pressure_weight
+				  *(sat_prior + sat_avker*(GC_SPC - sat_prior)))
 	GC_col = GC_col.sum(axis=1)
 	return GC_col 
 
@@ -246,13 +253,16 @@ class TROPOMI_Translator(object):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
 	def gcCompare(self,species,timeperiod,TROPOMI,GC):
-		TROP_CH4 = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
-		GC_CH4,GC_P,indlab = getGCCols(GC,TROPOMI,species)
 		if species=='CH4':
-			GC_CH4*=1e9 #scale to ppb
-		GC_on_sat = GC_to_sat_levels(GC_CH4, GC_P, TROPOMI['pressures'])
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_CH4, TROP_PW, GC_on_sat)
+			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
+		elif species=='NO2':
+			TROP_PRIOR=None
+		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
+		GC_SPC,GC_P,indlab = getGCCols(GC,TROPOMI,species)
+		if species=='CH4':
+			GC_SPC*=1e9 #scale to ppb
+		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(indlab,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 			toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
