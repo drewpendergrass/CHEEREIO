@@ -62,8 +62,8 @@ def read_tropomi(filename, species):
 
 	if species=='NO2':
 		met['column_AK'] = data['averaging_kernel'].values[0,sl,gp,::-1]
-		a = np.concatenate([data['tm5_constant_a'].values[:,0],data['tm5_constant_a'].values[-1,1]]) #layer, vertices (bottom/top)
-		b = np.concatenate([data['tm5_constant_b'].values[:,0],data['tm5_constant_b'].values[-1,1]])
+		a = np.append([data['tm5_constant_a'].values[:,0],data['tm5_constant_a'].values[-1,1]]) #layer, vertices (bottom/top)
+		b = np.append([data['tm5_constant_b'].values[:,0],data['tm5_constant_b'].values[-1,1]])
 
 	data.close()
 
