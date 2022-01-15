@@ -33,6 +33,8 @@ def read_tropomi(filename, species):
 							- Vertical pressure profile
 	"""
 
+	if filename=="testNO2":
+		filename = "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019/01/S5P_OFFL_L2__NO2____20190130T160807_20190130T174937_06729_01_010202_20190205T180152.nc"
 	# Initialize list for TROPOMI data
 	met = {}
 	
