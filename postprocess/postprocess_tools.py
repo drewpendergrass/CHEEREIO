@@ -117,6 +117,8 @@ def makeYEachAssimPeriod(timestamp_list, use_numav = True, fullpath_output_name 
 		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,testing=False)
 		bigy = hist.bigYDict 
 		for spec in list(bigy.keys()):
+			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec][4]]
+			t = np.array(t,dtype='datetime64[us]')
 			colnum = np.shape(bigy[spec][0])[1]
 			colnames = []
 			for i in range(colnum):
@@ -126,9 +128,10 @@ def makeYEachAssimPeriod(timestamp_list, use_numav = True, fullpath_output_name 
 			df['Latitude'] = bigy[spec][2]
 			df['Longitude'] = bigy[spec][3]
 			if use_numav:
-				df['Num_Averaged'] = bigy[spec][4]
+				df['Num_Averaged'] = bigy[spec][5]
 			else:
 				df['Num_Averaged'] = None
+			df['time'] = t
 			bigy[spec] = df
 		masterY[timestamp] = bigy
 	if fullpath_output_name:

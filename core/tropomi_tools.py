@@ -213,11 +213,14 @@ def averageByGCTROPOMIlocs(index,GConsat,satvals,satlat,satlon,sattime):
 
 #No index, puts loc at GC grid values
 def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
-	index = (iGC*100000000)+(jGC*10000)+tGC
+	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
-	lonvals = GC.lon.values[iGC[np.floor(unique_inds/100000000).astype(int)]]
-	latvals = GC.lat.values[jGC[(np.floor(unique_inds/10000).astype(int) % 10000)]]
-	timevals = GC.time.values[tGC[(unique_inds % 10000).astype(int)]]
+	i_unique = np.floor(unique_inds/100000000).astype(int)-1
+	j_unique = (np.floor(unique_inds/10000).astype(int) % 10000)-1
+	t_unique = (unique_inds % 10000).astype(int)-1
+	lonvals = GC.lon.values[i_unique]
+	latvals = GC.lat.values[j_unique]
+	timevals = GC.time.values[t_unique]
 	av_len = len(unique_inds)
 	gc_av = np.zeros(av_len)
 	sat_av = np.zeros(av_len)
