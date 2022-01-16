@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 import sys 
 import pickle
 import pandas as pd
+import numpy as np
 
 with open('../ens_config.json') as f:
 	data = json.load(f)
