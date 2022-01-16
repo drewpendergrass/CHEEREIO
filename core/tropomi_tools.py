@@ -127,7 +127,7 @@ def nearest_loc(GC,TROPOMI):
 def getGCCols(GC,TROPOMI,species,returninds=False):
 	i,j,t = nearest_loc(GC,TROPOMI)
 	if returninds:
-		[GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],i,j,t]
+		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],i,j,t]
 	else:
 		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 
