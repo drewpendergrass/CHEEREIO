@@ -71,7 +71,7 @@ if "calc850" in sys.argv:
 
 for spec in controlvec:
 	if "histprocess" in sys.argv:
-		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='mol/mol',satellite_name='TROPOMI',outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png'):
+		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='mol/mol',satellite_name='TROPOMI',outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png')
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',includesNature=True)
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=True)
 	if "calc850" in sys.argv:
