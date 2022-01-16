@@ -110,7 +110,38 @@ def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,f
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYWholePeriod(timestamp,hourlysub=6,fullpath_output_name = None):
+def makeYEachAssimPeriod(timestamp_list, use_numav = True, fullpath_output_name = None):
+	masterY = {}
+	for timestamp in timestamp_list:
+		print(f'Processing the Y dictionary for time {timestamp}')
+		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,testing=False)
+		bigy = hist.bigYDict 
+		for spec in list(bigy.keys()):
+			t = [datetime.strptime(tt,"%Y-%m-%dT%H:%M:%S.%fZ") for tt in bigy[spec][4]]
+			t = np.array(t,dtype='datetime64[us]')
+			colnum = np.shape(bigy[spec][0])[1]
+			colnames = []
+			for i in range(colnum):
+				colnames.append(f"Ens{str(i+1).zfill(3)}")
+			df = pd.DataFrame(bigy[spec][0], columns = colnames)
+			df['Satellite'] = bigy[spec][1]
+			df['Latitude'] = bigy[spec][2]
+			df['Longitude'] = bigy[spec][3]
+			if use_numav:
+				df['Num_Averaged'] = bigy[spec][4]
+			else:
+				df['Num_Averaged'] = None
+			df['Time'] = t
+			bigy[spec] = df
+		masterY[timestamp] = bigy
+	if fullpath_output_name:
+		f = open(fullpath_output_name,"wb")
+		pickle.dump(masterY,f)
+		f.close()
+	return masterY
+
+
+def makeYWholePeriod(timestamp,hourlysub=6,use_numav = False, fullpath_output_name = None):
 	hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub,testing=False)
 	bigy = hist.bigYDict 
 	for spec in list(bigy.keys()):
@@ -124,6 +155,10 @@ def makeYWholePeriod(timestamp,hourlysub=6,fullpath_output_name = None):
 		df['Satellite'] = bigy[spec][1]
 		df['Latitude'] = bigy[spec][2]
 		df['Longitude'] = bigy[spec][3]
+		if use_numav:
+			df['Num_Averaged'] = bigy[spec][4]
+		else:
+			df['Num_Averaged'] = np.ones(len(bigy[spec][3]))
 		df['Time'] = t
 		bigy[spec] = df
 	if fullpath_output_name:
@@ -191,7 +226,45 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotSatCompare(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
+def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',outfile=None):
+	ensmeans = []
+	ensstds = []
+	satmeans = []
+	datestrs = list(bigY.keys())
+	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M' for dateval in datestrs)]
+	for date in datestrs:
+		conc2D=np.array(bigY[date][species].iloc[:,1:(numens+1)])
+		assimperiodensmean = np.mean(conc2D,axis=0) #One average for each ensemble member
+		ensmean = np.mean(assimperiodensmean) #Ensemble mean for total average
+		enssd = np.std(assimperiodensmean)
+		satcol=np.array(bigY[date][species]['Satellite'])
+		satmean = np.mean(satcol)
+		ensmeans.append(ensmean)
+		ensstds.append(enssd)
+		satmeans.append(satmean)
+	ensmeans = np.array(ensmeans)
+	ensstds = np.array(ensstds)
+	satmeans = np.array(satmeans)
+	plt.rcParams.update({'font.size': 16})
+	plt.figure(figsize=(6,4))
+	plt.plot(datevals,ensmeans,color='b',label='Ensemble mean')
+	plt.plot(datevals,ensmeans+ensstds,':',color='b')
+	plt.plot(datevals,ensmeans-ensstds,':',color='b')
+	plt.plot(datevals,satmeans,color='g',label=satellite_name)
+	plt.legend()
+	plt.xlabel('Time')
+	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=int(np.floor(len(datevals)/5))))
+	plt.ylabel(f'{species} ({unit})')
+	plt.gcf().autofmt_xdate()
+	plt.gcf().tight_layout()
+	if outfile:
+		plt.savefig(outfile)
+	else:
+		plt.show()
+
+
+def tsPlotSatCompareFullRange(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
 	df = df.groupby(pd.Grouper(key='Time',freq=freq)).mean()
 	df.reset_index(inplace=True)
 	conc2D=np.array(df.iloc[:,1:(numens+1)])

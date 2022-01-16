@@ -433,7 +433,10 @@ class HIST_Ens(object):
 				else:
 					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 				conc2D[:,i-1] = col
-		return [conc2D,satcol,satlat,satlon,sattime]
+		if self.spc_config['AV_TO_GC_GRID']=="True":
+			return [conc2D,satcol,satlat,satlon,sattime,numav]
+		else:
+			return [conc2D,satcol,satlat,satlon,sattime]
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)
@@ -450,7 +453,10 @@ class HIST_Ens(object):
 		obsdiffs = []
 		for spec in self.satSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
-			gccol,satcol,_,_,_ = self.bigYDict[spec]
+			if self.spc_config['AV_TO_GC_GRID']=="True":
+				gccol,satcol,_,_,_,_ = self.bigYDict[spec]
+			else:
+				gccol,satcol,_,_,_ = self.bigYDict[spec]
 			gccol = gccol[ind,:]
 			satcol = satcol[ind]
 			obsmean = np.mean(gccol,axis=1)

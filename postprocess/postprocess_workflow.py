@@ -23,6 +23,7 @@ ASSIM_TIME=data['ASSIM_TIME']
 delta = timedelta(hours=int(ASSIM_TIME))
 starttime = ASSIM_START_DATE-(2*delta)
 timeperiod = (starttime,endtime)
+avtogcgrid = data['AV_TO_GC_GRID']=="True"
 
 pt.combineScaleFactors(ens_dir,pp_dir)
 scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
@@ -37,11 +38,13 @@ except FileNotFoundError:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 
 if "histprocess" in sys.argv:
+	daterange = np.arange(ASSIM_START_DATE,endtime+timedelta(hours=1),delta).astype(datetime)
+	dates_string_array = [dateval.strftime("%Y%m%d_%H%M") for dateval in daterange]
 	try:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
-		bigy = pt.makeYWholePeriod(timestamp=f"{data['END_DATE']}_0000",fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(dates_string_array,use_numav=avtogcgrid,fullpath_output_name=f"{pp_dir}/bigY.pkl")
 
 if "calccol" in sys.argv:
 	try:
@@ -68,8 +71,7 @@ if "calc850" in sys.argv:
 
 for spec in controlvec:
 	if "histprocess" in sys.argv:
-		df = bigy[spec]
-		pt.tsPlotSatCompare(df,spec,nEnsemble,outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png')
+		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='mol/mol',satellite_name='TROPOMI',outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png'):
 	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',includesNature=True)
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=True)
 	if "calc850" in sys.argv:

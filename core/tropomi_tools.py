@@ -124,10 +124,12 @@ def nearest_loc(GC,TROPOMI):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,TROPOMI,species):
+def getGCCols(GC,TROPOMI,species,returninds=False):
 	i,j,t = nearest_loc(GC,TROPOMI)
-	indlab = (i*100000000)+(j*10000)+t
-	return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],indlab]
+	if returninds:
+		[GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],i,j,t]
+	else:
+		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
@@ -184,7 +186,8 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=Non
 	GC_col = GC_col.sum(axis=1)
 	return GC_col 
 
-def averageByGC(index,GConsat,satvals,satlat,satlon,sattime):
+#Takes index in form index = (iGC*100000000)+(jGC*10000)+tGC
+def averageByGCTROPOMIlocs(index,GConsat,satvals,satlat,satlon,sattime):
 	unique_inds = np.unique(index)
 	av_len = len(unique_inds)
 	gc_av = np.zeros(av_len)
@@ -205,6 +208,30 @@ def averageByGC(index,GConsat,satvals,satlat,satlon,sattime):
 		epoch_sec = (dt - epoch) / delta_sec
 		epoch_sec_mean = np.mean(epoch_sec)
 		sattime_av[count] = epoch + np.timedelta64(int(epoch_sec_mean), 's')
+		num_av[count] = len(indmatch)
+	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+
+#No index, puts loc at GC grid values
+def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
+	index = (iGC*100000000)+(jGC*10000)+tGC
+	unique_inds = np.unique(index)
+	lonvals = GC.lon.values[iGC[np.floor(unique_inds/100000000).astype(int)]]
+	latvals = GC.lat.values[jGC[(np.floor(unique_inds/10000).astype(int) % 10000)]]
+	timevals = GC.time.values[tGC[(unique_inds % 10000).astype(int)]]
+	av_len = len(unique_inds)
+	gc_av = np.zeros(av_len)
+	sat_av = np.zeros(av_len)
+	satlat_av = np.zeros(av_len)
+	satlon_av = np.zeros(av_len)
+	sattime_av = np.zeros(av_len)
+	num_av = np.zeros(av_len)
+	for count,ind in enumerate(unique_inds):
+		indmatch = np.where(index==ind)[0]
+		gc_av[count] = np.mean(GConsat[indmatch])
+		sat_av[count] = np.mean(satvals[indmatch])
+		satlat_av[count] = lonvals[count]
+		satlon_av[count] = latvals[count]
+		sattime_av[count] = timevals[count]
 		num_av[count] = len(indmatch)
 	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
@@ -258,13 +285,13 @@ class TROPOMI_Translator(object):
 		elif species=='NO2':
 			TROP_PRIOR=None
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
-		GC_SPC,GC_P,indlab = getGCCols(GC,TROPOMI,species)
+		GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True)
 		if species=='CH4':
-			GC_SPC*=1e9 #scale to ppb
+			GC_SPC*=1e9 #scale to mol/mol
 		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
-			gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(indlab,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
+			gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC_SPC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 			toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 		else:
 			toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
