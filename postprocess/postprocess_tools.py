@@ -231,7 +231,7 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 	ensstds = []
 	satmeans = []
 	datestrs = list(bigY.keys())
-	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M' for dateval in datestrs)]
+	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in datestrs]
 	for date in datestrs:
 		conc2D=np.array(bigY[date][species].iloc[:,1:(numens+1)])
 		assimperiodensmean = np.mean(conc2D,axis=0) #One average for each ensemble member
