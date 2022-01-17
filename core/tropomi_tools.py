@@ -232,8 +232,8 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
 		indmatch = np.where(index==ind)[0]
 		gc_av[count] = np.mean(GConsat[indmatch])
 		sat_av[count] = np.mean(satvals[indmatch])
-		satlat_av[count] = lonvals[count]
-		satlon_av[count] = latvals[count]
+		satlat_av[count] = latvals[count]
+		satlon_av[count] = lonvals[count]
 		sattime_av[count] = timevals[count]
 		num_av[count] = len(indmatch)
 	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
