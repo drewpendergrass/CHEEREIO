@@ -32,7 +32,7 @@
 		"LevelEdgeDiags"
 	],
 	"HISTORY_freq" : "00000000 040000",
-	"HISTORY_dur" : "000000001 000000",
+	"HISTORY_dur" : "00000001 000000",
 	"SPINUP_HISTORY_freq" : "00000100 000000",
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"nEnsemble" : "24",
