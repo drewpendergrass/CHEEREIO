@@ -16,6 +16,10 @@ eval "$(conda shell.bash hook)"
 # SLURM_CPUS_PER_TASK ensures this matches the number you set with -c above
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
+MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
+RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
+START_DATE="$(jq -r ".START_DATE" {ASSIM}/ens_config.json)"
+
 ### Get current task ID
 x=${SLURM_ARRAY_TASK_ID}
 
@@ -44,12 +48,14 @@ wait
 nEnsemble="$(jq -r ".nEnsemble" {ASSIM}/ens_config.json)"
 
 if [ $x = $nEnsemble ]; then
-	MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
-  	RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
-  	START_DATE="$(jq -r ".START_DATE" {ASSIM}/ens_config.json)"
-  	cd {ASSIM}/core
+  until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE ]; do
+    sleep 1
+    bash check_for_all_ensemble_spinup_restarts.sh
+  done
+  cd {ASSIM}/core
 	printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
 	bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
+  bash change_histcollections_durfreq.sh #update history collections.
 fi
 
 # Exit normally

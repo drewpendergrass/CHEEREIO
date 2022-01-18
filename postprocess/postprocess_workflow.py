@@ -22,7 +22,7 @@ ASSIM_START_DATE=datetime.strptime(data['ASSIM_START_DATE'], "%Y%m%d")
 endtime=datetime.strptime(data['END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
 delta = timedelta(hours=int(ASSIM_TIME))
-starttime = ASSIM_START_DATE-(2*delta)
+starttime = ASSIM_START_DATE
 timeperiod = (starttime,endtime)
 avtogcgrid = data['AV_TO_GC_GRID']=="True"
 

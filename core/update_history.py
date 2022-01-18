@@ -59,6 +59,21 @@ class HISTORY_Translator():
 			if line.startswith('  Restart.duration'):
 				self.lines[num] = f'  Restart.duration:           {timestr}\n'
 				break
+	def updateHistoryCollectionsDurationFrequency(self,isSpinup):
+		if isSpinup:
+			freqstr = self.spc_config['SPINUP_HISTORY_freq']
+			durstr = self.spc_config['SPINUP_HISTORY_dur']
+		else:
+			freqstr = self.spc_config['HISTORY_freq']
+			durstr = self.spc_config['HISTORY_dur']
+		for num,line in enumerate(self.lines):
+			for collection in self.spc_config["HISTORY_collections_to_customize"]
+				if line.startswith(f'  {collection}.frequency'):
+					whitespace = " "*(17-len(collection))
+					self.lines[num] = f'  {collection}.frequency:{whitespace}{freqstr}\n'
+				if line.startswith(f'  {collection}.duration'):
+					whitespace = " "*(18-len(collection))
+					self.lines[num] = f'  {collection}.duration:{whitespace}{durstr}\n'
 	def findSpecConcLines(self):
 		counting = False
 		startstop = []
@@ -112,11 +127,15 @@ if settingsstr=="TEMPLATEDIR":
 	trans.updateRestartDurationFrequency(isFirst="First")
 	trans.findSpecConcLines()
 	trans.customizeSpecConc()
+	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="SPINUP":
 	trans.prepLevelEdgeDiags()
 	trans.updateRestartDurationFrequency(isFirst="Spinup")
 	trans.findSpecConcLines()
 	trans.customizeSpecConc()
+	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
+elif settingstr=="PREPMAIN":
+	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="UPDATEDURFREQ":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
 
