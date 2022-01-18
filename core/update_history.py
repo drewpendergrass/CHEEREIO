@@ -134,7 +134,7 @@ elif settingsstr=="SPINUP":
 	trans.findSpecConcLines()
 	trans.customizeSpecConc()
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
-elif settingstr=="PREPMAIN":
+elif settingsstr=="PREPMAIN":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="UPDATEDURFREQ":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
