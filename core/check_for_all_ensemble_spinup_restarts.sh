@@ -45,4 +45,4 @@ if [ $counter -eq $numtocheck ]; then
 	printf "\nAll ensemble folders contain file ${rst_filename}.\n"
 	printf "Ensemble spinup complete.\n"
 	printf "done" > ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE
-
+fi
