@@ -67,7 +67,7 @@ class HISTORY_Translator():
 			freqstr = self.spc_config['HISTORY_freq']
 			durstr = self.spc_config['HISTORY_dur']
 		for num,line in enumerate(self.lines):
-			for collection in self.spc_config["HISTORY_collections_to_customize"]
+			for collection in self.spc_config["HISTORY_collections_to_customize"]:
 				if line.startswith(f'  {collection}.frequency'):
 					whitespace = " "*(17-len(collection))
 					self.lines[num] = f'  {collection}.frequency:{whitespace}{freqstr}\n'
