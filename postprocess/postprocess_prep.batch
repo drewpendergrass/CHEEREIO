@@ -7,7 +7,9 @@
 #SBATCH -o prep_%j.out    # File to which STDOUT will be written, %j inserts jobid       
 #SBATCH -e prep_%j.err    # File to which STDERR will be written, %j inserts jobid
 
+source ../environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 eval "$(conda shell.bash hook)"
+
 conda activate $(jq -r ".CondaEnv" ../ens_config.json) 
 python -u postprocess_workflow.py "histprocess" >> postprocess_prep_out.txt
 conda deactivate 
