@@ -7,11 +7,9 @@ from mpl_toolkits.basemap import Basemap
 import pickle
 import json
 
-#with open('../ens_config.json') as f:
-with open('/n/home12/drewpendergrass/CHEEREIO/ens_config.json') as f:
+with open('../ens_config.json') as f:
 	data = json.load(f)
 
-data['RUN_NAME'] = 'METHANERUN_v8'
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
 anim_fps = int(data['animation_fps'])

@@ -9,7 +9,12 @@
 
 eval "$(conda shell.bash hook)"
 conda activate $(jq -r ".CondaEnv" ../ens_config.json) 
-conda activate cheerio
 python -u postprocess_workflow.py "histprocess" >> postprocess_prep_out.txt
 conda deactivate 
 bash make_animations.sh
+conda activate $(jq -r ".CondaEnv" ../ens_config.json)
+python counts_prep.py
+conda deactivate 
+conda activate $(jq -r ".AnimationEnv" ../ens_config.json)
+python counts_animator.py
+conda deactivate
