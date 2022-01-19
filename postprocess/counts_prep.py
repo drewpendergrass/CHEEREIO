@@ -20,8 +20,8 @@ gclon = np.array(ll_data['lon'])
 dates = list(bigy.keys())
 specieslist = list(bigy[dates[0]].keys())
 
-total_satellite_obs = np.zeros([len(dates),len(specieslist),len(gclon),len(gclat)])
-total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclon),len(gclat)])
+total_satellite_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
 
 for ind1, date in enumerate(dates):
 	daydict = bigy[date]
@@ -38,11 +38,11 @@ for ind1, date in enumerate(dates):
 		uniqueind,countind = np.unique(pairedind,return_counts=True)
 		uniquelonind = (uniqueind % 10000)-1
 		uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
-		total_averaged_obs[ind1,ind2,uniquelonind,uniquelatind]=countind
+		total_averaged_obs[ind1,ind2,uniquelatind,uniquelonind]=countind
 		for lonindval,latindval in zip(uniquelonind,uniquelatind):
 			dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
 			totalcount = np.sum(countdict[dictind])
-			total_satellite_obs[ind1,ind2,lonindval,latindval]=totalcount
+			total_satellite_obs[ind1,ind2,latindval,lonindval]=totalcount
 
 
 arraysbase = [total_satellite_obs,total_averaged_obs,dates,specieslist]

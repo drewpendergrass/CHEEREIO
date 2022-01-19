@@ -45,7 +45,7 @@ for arrayval,filenamebase in zip(arraysbase,filenamesbase):
 		m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 		m.drawcountries(color='lightgray')
 		m.drawcoastlines(color='lightgray')
-		mesh = m.pcolormesh(gclon, gclat, np.transpose(arrayval[0,ind,:,:]),latlon=True,cmap=plt.cm.jet)
+		mesh = m.pcolormesh(gclon, gclat, arrayval[0,ind,:,:],latlon=True,cmap=plt.cm.jet)
 		plt.clim(np.min(arrayval[:,ind,:,:]), np.max(arrayval[:,ind,:,:]))
 		plt.colorbar(label="Count");
 		anim = animation.FuncAnimation(fig, animate,len(dates), blit=False)
