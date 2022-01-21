@@ -595,6 +595,7 @@ class Assimilator(object):
 		ensemble_numbers = []
 		self.nature = None
 		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
+		self.MINNUMOBS = int(spc_config['MINNUMOBS'])
 		self.MinimumScalingFactorAllowed = [float(s) for s in spc_config["MinimumScalingFactorAllowed"]]
 		self.MaximumScalingFactorAllowed = [float(s) for s in spc_config["MaximumScalingFactorAllowed"]]
 		self.InflateScalingsToXOfPreviousStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfPreviousStandardDeviation"]]
@@ -824,7 +825,7 @@ class Assimilator(object):
 			if self.testing:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.prepareMeansAndPerts(latval,lonval)
-			if len(self.ybar_background)==0:
+			if len(self.ybar_background)<self.MINNUMOBS:
 				self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
 				k = len(self.ensemble_numbers)
 				for i in range(k):
