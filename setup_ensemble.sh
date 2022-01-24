@@ -502,7 +502,14 @@ cd $RUN_TEMPLATE
 mkdir -p OutputDir
 mkdir -p Restarts
 
-if [[ ${USE_CUSTOM_CH4} = "False" ]]; then
+if [[ ${USE_CUSTOM_CH4} = "True" ]]; then
+      # Specify meteorology
+  if [[ ${met_name} = "ModelE2.1" ]]; then
+      sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gcap2" HEMCO_Config.rc
+  else
+      sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gmao"  HEMCO_Config.rc
+  fi
+else
     # Specify meteorology
   if [[ ${met_name} = "ModelE2.1" ]]; then
       sed_ie "/### BEGIN SECTION SETTINGS/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/header.gcap2"                    HEMCO_Config.rc
