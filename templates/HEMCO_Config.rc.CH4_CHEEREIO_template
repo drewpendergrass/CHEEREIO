@@ -691,23 +691,6 @@ Warnings:                    1
 * XLAI72 $ROOT/Yuan_XLAI/v2019-03/Yuan_proc_MODIS_XLAI.025x025.$YYYY.nc XLAI72 2005-2016/1-12/1-31/0 I xy cm2/cm2 * - 1 1
 )))YUAN_MODIS_LAI
 
-#==============================================================================
-# --- Clusters for analytical inversion ---
-#==============================================================================
-# Cluster file used by J.D. Maasakkers et al. (2019)
-#* CH4_CLUSTERS /n/seasasfs02/CH4_inversion/InputData/ClusterFiles/JDMaasakkers_Clusters/Clusters_45_July.nc Clusters 2009/1/1/0 C xy 1 * - 1 1 
-
-# Cluster files used Y. Zhang et al. (2020)
-#* CH4_CLUSTERS         /n/seasasfs02/CH4_inversion/InputData/ClusterFiles/YZhang_Clusters/Clusters_nonwetlands.nc Clusters 2009/1/1/0 C xy 1 * - 1 1 
-#* CH4_WETLAND_CLUSTERS /n/seasasfs02/CH4_inversion/InputData/ClusterFiles/YZhang_Clusters/Clusters_wetlands.nc Clusters 2009/1/1/0 C xy 1 * - 1 1
-
-#==============================================================================
-# --- Scale factors for posterior run ---
-#==============================================================================
-#* EMIS_SF    /n/seasasfs02/CH4_inversion/InputData/Posterior/YZhang_SFs/Post_SF_Nonwetland.nc SF_Nonwetland 2000/1/1/0         C xy 1 * - 1 1
-#* WETLAND_SF /n/seasasfs02/CH4_inversion/InputData/Posterior/YZhang_SFs/Post_SF_Wetland.nc    SF_Wetland    2010-2017/1-12/1/0 E xy 1 * - 1 1
-#* OH_SF      /n/seasasfs02/CH4_inversion/InputData/Posterior/YZhang_SFs/Post_SF_OH.nc         SF_OH         2010-2017/1/1/0    E xy 1 * - 1 1
-
 ### END SECTION BASE EMISSIONS ###
 
 ###############################################################################
