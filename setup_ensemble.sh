@@ -528,6 +528,7 @@ sed_ie "s|{NESTED_SIM}|${nested_sim}|"    input.geos
 sed_ie "s|{BUFFER_ZONE}|${buffer_zone}|"  input.geos
 if [[ ${USE_CUSTOM_CH4} = "True" ]]; then
   sed_ie "s|{CH4_HEMCO_ROOT}|${CH4_HEMCO_ROOT}|"   HEMCO_Config.rc
+  sed_ie "s|{DATA_ROOT}|${GC_DATA_ROOT}|"   HEMCO_Config.rc
 else
   sed_ie "s|{DATA_ROOT}|${GC_DATA_ROOT}|"   HEMCO_Config.rc
 fi
