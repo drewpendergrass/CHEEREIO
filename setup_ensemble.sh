@@ -84,6 +84,9 @@ else
     export GC_DATA_ROOT=${DATA_PATH}
 fi
 
+CH4_HEMCO_ROOT="$(jq -r ".CH4_HEMCO_ROOT" ens_config.json)"
+USE_CUSTOM_CH4="$(jq -r ".USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" ens_config.json)"
+
 # Path to initial restart file
 RESTART_FILE="$(jq -r ".RESTART_FILE" ens_config.json)"
 
@@ -447,7 +450,11 @@ cp ${GCC_RUN_FILES}/README ${RUN_TEMPLATE}
 cp ${GCC_RUN_FILES}/gitignore ${RUN_TEMPLATE}/.gitignore
 cp ${GCC_RUN_FILES}/input.geos.templates/input.geos.${sim_name} ${RUN_TEMPLATE}/input.geos
 cp ${GCC_RUN_FILES}/HISTORY.rc.templates/HISTORY.rc.${sim_name} ${RUN_TEMPLATE}/HISTORY.rc
-cp ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/HEMCO_Config.rc.${sim_name} ${RUN_TEMPLATE}/HEMCO_Config.rc
+if [[ ${USE_CUSTOM_CH4} = "True" ]]; then
+  cp ${ASSIM_PATH}/templates/HEMCO_Config.rc.CH4_CHEEREIO_template ${RUN_TEMPLATE}/HEMCO_Config.rc
+else
+  cp ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/HEMCO_Config.rc.${sim_name} ${RUN_TEMPLATE}/HEMCO_Config.rc
+fi
 # Some simulations (like tagO3) do not have a HEMCO_Diagn.rc file,
 # so skip copying it unless the file exists (bmy, 12/11/20)
 if [[ -f ${GCC_RUN_FILES}/HEMCO_Diagn.rc.templates/HEMCO_Diagn.rc.${sim_name} ]]; then
