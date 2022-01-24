@@ -502,14 +502,17 @@ cd $RUN_TEMPLATE
 mkdir -p OutputDir
 mkdir -p Restarts
 
-# Specify meteorology
-if [[ ${met_name} = "ModelE2.1" ]]; then
-    sed_ie "/### BEGIN SECTION SETTINGS/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/header.gcap2"                    HEMCO_Config.rc
-    sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gcap2" HEMCO_Config.rc
-else
-    sed_ie "/### BEGIN SECTION SETTINGS/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/header.gmao"                     HEMCO_Config.rc
-    sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gmao"  HEMCO_Config.rc
+if [[ ${USE_CUSTOM_CH4} = "False" ]]; then
+    # Specify meteorology
+  if [[ ${met_name} = "ModelE2.1" ]]; then
+      sed_ie "/### BEGIN SECTION SETTINGS/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/header.gcap2"                    HEMCO_Config.rc
+      sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gcap2" HEMCO_Config.rc
+  else
+      sed_ie "/### BEGIN SECTION SETTINGS/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/header.gmao"                     HEMCO_Config.rc
+      sed_ie "/# --- Meteorology fields for FlexGrid ---/r ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/met_fields.gmao"  HEMCO_Config.rc
+  fi
 fi
+ 
 
 # Replace token strings in certain files
 sed_ie "s|{DATA_ROOT}|${GC_DATA_ROOT}|"   input.geos
@@ -523,7 +526,11 @@ sed_ie "s|{HALF_POLAR}|${half_polar}|"    input.geos
 sed_ie "s|{CENTER_180}|${center_180}|"    input.geos
 sed_ie "s|{NESTED_SIM}|${nested_sim}|"    input.geos
 sed_ie "s|{BUFFER_ZONE}|${buffer_zone}|"  input.geos
-sed_ie "s|{DATA_ROOT}|${GC_DATA_ROOT}|"   HEMCO_Config.rc
+if [[ ${USE_CUSTOM_CH4} = "True" ]]; then
+  sed_ie "s|{CH4_HEMCO_ROOT}|${CH4_HEMCO_ROOT}|"   HEMCO_Config.rc
+else
+  sed_ie "s|{DATA_ROOT}|${GC_DATA_ROOT}|"   HEMCO_Config.rc
+fi
 sed_ie "s|{GRID_DIR}|${grid_dir}|"        HEMCO_Config.rc
 sed_ie "s|{MET_DIR}|${met_dir}|"          HEMCO_Config.rc
 sed_ie "s|{NATIVE_RES}|${met_native}|"    HEMCO_Config.rc
