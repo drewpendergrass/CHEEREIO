@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANERUN_LONG",
+	"RUN_NAME" : "METHANERUN_LONG_v2",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -116,7 +116,7 @@
 	"OBS_ERROR_MATRICES": [
 		"0.10"
 	],
-	"INFLATION_FACTOR": "0.06",
+	"INFLATION_FACTOR": "0.08",
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "5",
