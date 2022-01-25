@@ -12,7 +12,7 @@
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
-	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "True",
+	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180901_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
