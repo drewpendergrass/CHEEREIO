@@ -242,11 +242,11 @@ Warnings:                    1
 # --- MIX v1.1 (Asia) ---
 #==============================================================================
 (((MIX
-0 MIX_CH4_IND $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_INDUSTRY    2008/1-12/1/0 C xy kg/m2/s CH4 1006 1 40
-0 MIX_CH4_POW $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_POWER       2008/1-12/1/0 C xy kg/m2/s CH4 1006 1 40
-0 MIX_CH4_RES $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_RESIDENTIAL 2008/1-12/1/0 C xy kg/m2/s CH4 1006 1 40
-0 MIX_CH4_TRA $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_TRANSPORT   2008/1-12/1/0 C xy kg/m2/s CH4 1006 1 40
-0 MIX_CH4_AGR $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_AGRICULTURE 2008/1-12/1/0 C xy kg/m2/s CH4 1006 1 40
+0 MIX_CH4_IND $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_INDUSTRY    2008/1-12/1/0 C xy kg/m2/s CH4 1006 8 40
+0 MIX_CH4_POW $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_POWER       2008/1-12/1/0 C xy kg/m2/s CH4 1006 8 40
+0 MIX_CH4_RES $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_RESIDENTIAL 2008/1-12/1/0 C xy kg/m2/s CH4 1006 8 40
+0 MIX_CH4_TRA $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_TRANSPORT   2008/1-12/1/0 C xy kg/m2/s CH4 1006 8 40
+0 MIX_CH4_AGR $ROOT/MIX/v2015-03/MIX_Asia_CH4.generic.025x025.nc   CH4_AGRICULTURE 2008/1-12/1/0 C xy kg/m2/s CH4 1006 8 40
 )))MIX
 
 #==============================================================================
