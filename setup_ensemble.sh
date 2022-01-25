@@ -36,6 +36,7 @@ DO_SPINUP=$(jq -r ".DO_SPINUP" ens_config.json)
 SPINUP_START=$(jq -r ".SPINUP_START" ens_config.json)
 SPINUP_END=$(jq -r ".SPINUP_END" ens_config.json)
 DO_ENS_SPINUP=$(jq -r ".DO_ENS_SPINUP" ens_config.json)
+ENS_SPINUP_FROM_BC_RESTART=$(jq -r ".ENS_SPINUP_FROM_BC_RESTART" ens_config.json)
 ENS_SPINUP_START=$(jq -r ".ENS_SPINUP_START" ens_config.json)
 ENS_SPINUP_END=$(jq -r ".ENS_SPINUP_END" ens_config.json)
 
@@ -969,6 +970,9 @@ if "$SetupEnsembleRuns"; then
     #Use HEMCO_Config with updated scaling factors
     rm HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc
     sed_ie "s|template_run|ensemble_runs/${name}|"  HEMCO_Config.rc #Replace template_run with this folder in HEMCO_Config
+    if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
+        sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc
+    fi
   fi
 
   # Link to restart file

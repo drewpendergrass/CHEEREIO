@@ -10,7 +10,7 @@ import os.path
 import xarray as xr
 import numpy as np
 
-def read_tropomi(filename, species):
+def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_albedo = None, filter_winter_lat = None):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -35,6 +35,8 @@ def read_tropomi(filename, species):
 
 	if filename=="testNO2":
 		filename = "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019/01/S5P_OFFL_L2__NO2____20190130T160807_20190130T174937_06729_01_010202_20190205T180152.nc"
+	if filename=="testCH4":
+		filename = "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4/2019/01/S5P_OFFL_L2__CH4____20190131T223511_20190201T001641_06747_01_010202_20190207T000450.nc"
 	# Initialize list for TROPOMI data
 	met = {}
 	
@@ -70,6 +72,9 @@ def read_tropomi(filename, species):
 	if species=='CH4':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
 		met['column_AK'] = data['column_averaging_kernel'].values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
+		met['albedo_swir'] = data['surface_albedo_SWIR'].values[0,sl,gp]
+		met['albedo_nir'] = data['surface_albedo_NIR'].values[0,sl,gp]
+		met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
 		data.close()
 
 	# Store methane prior profile, dry air subcolumns. Not needed for NO2, though surface pressure is
@@ -106,7 +111,37 @@ def read_tropomi(filename, species):
 	
 	met['pressures'] = pressures
 	
+	met = apply_filters(met,filter_blended_albedo,filter_swir_albedo,filter_winter_lat)
+
 	return met
+
+def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo = None, filter_winter_lat = None):
+	to_keep = []
+	if filter_blended_albedo:
+		to_keep.append(np.where(TROPOMI['blended_albedo']<filter_blended_albedo)[0])
+	if filter_swir_albedo:
+		to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo)[0])
+	if filter_winter_lat:
+		months = TROPOMI['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
+		nh_winter = np.array([1,2,3,11,12])
+		sh_winter = np.array([5,6,7,8,9])
+		to_keep.append(np.where( ~( ( (TROPOMI['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
+	if len(to_keep)==0:
+		return TROPOMI
+	else:
+		if len(to_keep)==1:
+			to_keep = to_keep[0]
+		elif len(to_keep)==2:
+			to_keep = np.intersect1d(to_keep[0],to_keep[1])
+		else:
+			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),to_keep[2])
+		keys = list(TROPOMI.keys())
+		for key in keys:
+			if len(np.shape(TROPOMI[key])) == 1:
+				TROPOMI[key] = TROPOMI[key][to_keep]
+			else:
+				TROPOMI[key] = TROPOMI[key][to_keep,:]
+		return TROPOMI
 
 def nearest_loc(GC,TROPOMI):
 	# Find the grid box and time indices corresponding to TROPOMI obs
@@ -276,8 +311,11 @@ class TROPOMI_Translator(object):
 	def getSatellite(self,species,timeperiod, interval=None):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
+		filter_blended_albedo = float(self.spc_config['filter_blended_albedo'])
+		filter_swir_albedo = float(self.spc_config['filter_swir_albedo'])
+		filter_winter_lat = float(self.spc_config['filter_winter_lat'])
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species))
+			trop_obs.append(read_tropomi(obs,species,filter_blended_albedo,filter_swir_albedo,filter_winter_lat))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])

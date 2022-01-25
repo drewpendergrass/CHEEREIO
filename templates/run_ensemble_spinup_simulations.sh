@@ -56,6 +56,8 @@ if [ $x = $nEnsemble ]; then
 	printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
 	bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
   bash change_histcollections_durfreq.sh #update history collections.
+  cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
+  sed -i -e "s|SpeciesBC_?ALL?|SpeciesRst_?ALL?|g" {RunName}_*/HEMCO_Config.rc #Sometimes we spin up from BCs; this fixes.
 fi
 
 # Exit normally
