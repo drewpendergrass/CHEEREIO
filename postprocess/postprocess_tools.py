@@ -3,6 +3,7 @@ import xarray as xr
 from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import NullFormatter
 from datetime import datetime
 import sys
 import pickle
@@ -253,8 +254,10 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 	plt.plot(datevals,satmeans,color='g',label=satellite_name)
 	plt.legend()
 	plt.xlabel('Time')
-	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
-	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=int(np.floor(len(datevals)/5))))
+	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+	plt.gca().xaxis.set_minor_locator(mdates.MonthLocator(bymonthday=15))
+	plt.gca().xaxis.set_major_formatter(NullFormatter())
+	plt.gca().xaxis.set_minor_formatter(mdates.DateFormatter('%b'))
 	plt.ylabel(f'{species} ({unit})')
 	plt.gcf().autofmt_xdate()
 	plt.gcf().tight_layout()
