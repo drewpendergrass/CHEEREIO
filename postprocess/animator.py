@@ -20,6 +20,18 @@ lat = np.array(ds['lat'])
 lon = np.array(ds['lon'])
 da = np.array(ds[variable])
 
+conus_lon_lim = [-130,-65]
+conus_lat_lim = [20,50]
+europe_lon_lim = [-10,40]
+europe_lat_lim = [40,65]
+india_lon_lim = [65,95]
+india_lat_lim = [5,30]
+australia_lon_lim = [110,155]
+australia_lat_lim = [-40,-10]
+
+conus_lon_ind = np.where((lon>=conus_lon_lim[0]) & (lon<=conus_lon_lim[1]))[0]
+conus_lat_ind = np.where((lat>=conus_lat_lim[0]) & (lat<=conus_lat_lim[1]))[0]
+
 if func == 'all':
     looping = True
     funcs = ['mean','sd','max','min','range']
@@ -52,6 +64,7 @@ for i in range(length):
         mesh.set_array(temp.ravel())
         return mesh
 
+    #####GLOBAL#########
     # call the animator.  blit=True means only re-draw the parts that have changed.
     fig = plt.figure(figsize=(10, 8))
     m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
@@ -72,5 +85,38 @@ for i in range(length):
         anim.save(f'{file_out}_{func}.mp4', writer=writer)
     else:
         anim.save(file_out, writer=writer)
+
+    #####CONUS+#########
+    def animate_conus(i):
+        daystring = timestr[i]
+        titlestring = f'{variable} for {daystring}'
+        plt.title(titlestring)
+        temp = ensmean[i,conus_lon_ind,conus_lat_ind]
+        temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
+        #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
+        mesh.set_array(temp.ravel())
+        return mesh
+
+    # call the animator.  blit=True means only re-draw the parts that have changed.
+    fig = plt.figure(figsize=(10, 8))
+    m = Basemap(projection='cyl', resolution='l',llcrnrlat=20, urcrnrlat=50,llcrnrlon=-130, urcrnrlon=-65)
+    m.drawcountries(color='lightgray')
+    m.drawcoastlines(color='lightgray')
+    mesh = m.pcolormesh(lon[conus_lon_ind], lat[conus_lat_ind], ensmean[0,conus_lon_ind,conus_lat_ind],latlon=True,cmap=plt.cm.jet)
+    plt.clim(np.min(ensmean[:,conus_lon_ind,conus_lat_ind]), np.max(ensmean[:,conus_lon_ind,conus_lat_ind]))
+    plt.colorbar(label=variable);
+    anim = animation.FuncAnimation(fig, animate_conus,len(time), blit=False)
+    #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
+    #plt.show()
+
+    #save as GIF
+
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+    if looping:
+        anim.save(f'{file_out}_{func}_CONUS.mp4', writer=writer)
+    else:
+        anim.save(file_out, writer=writer)
+
 
 
