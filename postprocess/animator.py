@@ -28,9 +28,35 @@ india_lon_lim = [65,95]
 india_lat_lim = [5,30]
 australia_lon_lim = [110,155]
 australia_lat_lim = [-40,-10]
+eastchina_lon_lim = [110,135]
+eastchina_lat_lim = [20,45]
+southernafrica_lon_lim = [10,50]
+southernafrica_lat_lim = [-35,-10]
+southamerica_lon_lim = [-85,-30]
+southamerica_lat_lim = [-50,15]
+
+latlims = [conus_lat_lim,europe_lat_lim,india_lat_lim,australia_lat_lim,eastchina_lat_lim,southernafrica_lat_lim,southamerica_lat_lim]
+lonlims = [conus_lon_lim,europe_lon_lim,india_lon_lim,australia_lon_lim,eastchina_lon_lim,southernafrica_lon_lim,southamerica_lon_lim]
 
 conus_lon_ind = np.where((lon>=conus_lon_lim[0]) & (lon<=conus_lon_lim[1]))[0]
 conus_lat_ind = np.where((lat>=conus_lat_lim[0]) & (lat<=conus_lat_lim[1]))[0]
+europe_lon_ind = np.where((lon>=europe_lon_lim[0]) & (lon<=europe_lon_lim[1]))[0]
+europe_lat_ind = np.where((lat>=europe_lat_lim[0]) & (lat<=europe_lat_lim[1]))[0]
+india_lon_ind = np.where((lon>=india_lon_lim[0]) & (lon<=india_lon_lim[1]))[0]
+india_lat_ind = np.where((lat>=india_lat_lim[0]) & (lat<=india_lat_lim[1]))[0]
+australia_lon_ind = np.where((lon>=australia_lon_lim[0]) & (lon<=australia_lon_lim[1]))[0]
+australia_lat_ind = np.where((lat>=australia_lat_lim[0]) & (lat<=australia_lat_lim[1]))[0]
+eastchina_lon_ind = np.where((lon>=eastchina_lon_lim[0]) & (lon<=eastchina_lon_lim[1]))[0]
+eastchina_lat_ind = np.where((lat>=eastchina_lat_lim[0]) & (lat<=eastchina_lat_lim[1]))[0]
+southernafrica_lon_ind = np.where((lon>=southernafrica_lon_lim[0]) & (lon<=southernafrica_lon_lim[1]))[0]
+southernafrica_lat_ind = np.where((lat>=southernafrica_lat_lim[0]) & (lat<=southernafrica_lat_lim[1]))[0]
+southamerica_lon_ind = np.where((lon>=southamerica_lon_lim[0]) & (lon<=southamerica_lon_lim[1]))[0]
+southamerica_lat_ind = np.where((lat>=southamerica_lat_lim[0]) & (lat<=southamerica_lat_lim[1]))[0]
+
+latinds = [conus_lat_ind,europe_lat_ind,india_lat_ind,australia_lat_ind,eastchina_lat_ind,southernafrica_lat_ind,southamerica_lat_ind]
+loninds = [conus_lon_ind,europe_lon_ind,india_lon_ind,australia_lon_ind,eastchina_lon_ind,southernafrica_lon_ind,southamerica_lon_ind]
+
+regionnames = ['CONUS','Europe','India','Australia','EastChina','SouthernAfrica','SouthAmerica']
 
 if func == 'all':
     looping = True
@@ -86,37 +112,38 @@ for i in range(length):
     else:
         anim.save(file_out, writer=writer)
 
-    #####CONUS+#########
-    def animate_conus(i):
-        daystring = timestr[i]
-        titlestring = f'{variable} for {daystring}'
-        plt.title(titlestring)
-        temp = ensmean[i,conus_lon_ind,conus_lat_ind]
-        temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-        #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-        mesh.set_array(temp.ravel())
-        return mesh
+    #####Regions#########
+    for latlim,lonlim,latind,lonind,rname in zip(latlims,lonlims,latinds,loninds,regionnames):
+        def animate_region(i):
+            daystring = timestr[i]
+            titlestring = f'{variable} for {daystring}'
+            plt.title(titlestring)
+            temp = ensmean[i,lonind,latind]
+            temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
+            #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
+            mesh.set_array(temp.ravel())
+            return mesh
 
-    # call the animator.  blit=True means only re-draw the parts that have changed.
-    fig = plt.figure(figsize=(10, 8))
-    m = Basemap(projection='cyl', resolution='l',llcrnrlat=20, urcrnrlat=50,llcrnrlon=-130, urcrnrlon=-65)
-    m.drawcountries(color='lightgray')
-    m.drawcoastlines(color='lightgray')
-    mesh = m.pcolormesh(lon[conus_lon_ind], lat[conus_lat_ind], ensmean[0,conus_lon_ind,conus_lat_ind],latlon=True,cmap=plt.cm.jet)
-    plt.clim(np.min(ensmean[:,conus_lon_ind,conus_lat_ind]), np.max(ensmean[:,conus_lon_ind,conus_lat_ind]))
-    plt.colorbar(label=variable);
-    anim = animation.FuncAnimation(fig, animate_conus,len(time), blit=False)
-    #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
-    #plt.show()
+        # call the animator.  blit=True means only re-draw the parts that have changed.
+        fig = plt.figure(figsize=(10, 8))
+        m = Basemap(projection='cyl', resolution='l',llcrnrlat=latlim[0], urcrnrlat=latlim[1],llcrnrlon=lonlim[0], urcrnrlon=lonlim[1])
+        m.drawcountries(color='lightgray')
+        m.drawcoastlines(color='lightgray')
+        mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,lonind,latind],latlon=True,cmap=plt.cm.jet)
+        plt.clim(np.min(ensmean[:,lonind,conus_lat_ind]), np.max(ensmean[:,lonind,latind]))
+        plt.colorbar(label=variable);
+        anim = animation.FuncAnimation(fig, animate_conus,len(time), blit=False)
+        #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
+        #plt.show()
 
-    #save as GIF
+        #save as GIF
 
-    Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
-    if looping:
-        anim.save(f'{file_out}_{func}_CONUS.mp4', writer=writer)
-    else:
-        anim.save(file_out, writer=writer)
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+        if looping:
+            anim.save(f'{file_out}_{func}_{rname}.mp4', writer=writer)
+        else:
+            anim.save(file_out, writer=writer)
 
 
 
