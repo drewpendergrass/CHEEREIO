@@ -12,7 +12,7 @@ with open('../ens_config.json') as f:
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
-anim_fps = int(data['animation_fps'])
+anim_fps = int(data['animation_fps_scalingfactor'])
 
 with open(f'{pp_dir}/count_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
