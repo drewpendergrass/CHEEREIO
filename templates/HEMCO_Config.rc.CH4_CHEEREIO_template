@@ -203,7 +203,7 @@ Warnings:                    1
 0 MEX_COAL_COAST             $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_coal_2015.nc          emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 1010 3 100
 0 MEX_LIVESTOCK_A_COAST      $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_livestock_A_2015.nc   emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 1010 4 1
 0 MEX_LIVESTOCK_B_COAST      $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_livestock_B_2015.nc   emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 10/1010 4 1
-0 MEX_LANDFILLS_COAST        $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_landfill_2015.nc      emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 1010 5 1
+0 MEX_LANDFILLS_COAST        $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_landfill_2015.nc      emis_ch4            2015/1/1/0 C xy molec/cm2/s CH4 1010 5 1
 0 MEX_WASTEWATER_COAST       $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_waste_2015.nc         emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 1010 6 1
 0 MEX_RICE_COAST             $ROOT/CH4/v2020-09/Mexico/MEX_Tia2020_rice_2015.nc          emis_ch4              2015/1/1/0 C xy molec/cm2/s CH4 11/1010 7 1
 )))Mex
