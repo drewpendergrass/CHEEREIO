@@ -10,7 +10,7 @@ import os.path
 import xarray as xr
 import numpy as np
 
-def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_albedo = None, filter_winter_lat = None):
+def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_albedo_low = None,filter_swir_albedo_high = None, filter_winter_lat = None):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -111,16 +111,18 @@ def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_alb
 	
 	met['pressures'] = pressures
 	
-	met = apply_filters(met,filter_blended_albedo,filter_swir_albedo,filter_winter_lat)
+	met = apply_filters(met,filter_blended_albedo,filter_swir_albedo_low,filter_swir_albedo_high,filter_winter_lat)
 
 	return met
 
-def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo = None, filter_winter_lat = None):
+def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo_low = None, filter_swir_albedo_high = None, filter_winter_lat = None):
 	to_keep = []
 	if filter_blended_albedo:
 		to_keep.append(np.where(TROPOMI['blended_albedo']<filter_blended_albedo)[0])
-	if filter_swir_albedo:
-		to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo)[0])
+	if filter_swir_albedo_low:
+		to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo_low)[0])
+	if filter_swir_albedo_high:
+		to_keep.append(np.where(TROPOMI['albedo_swir']<filter_swir_albedo_high)[0])
 	if filter_winter_lat:
 		months = TROPOMI['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
 		nh_winter = np.array([1,2,3,11,12])
@@ -133,8 +135,10 @@ def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo = No
 			to_keep = to_keep[0]
 		elif len(to_keep)==2:
 			to_keep = np.intersect1d(to_keep[0],to_keep[1])
-		else:
+		elif len(to_keep)==3:
 			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),to_keep[2])
+		else:
+			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3]))
 		keys = list(TROPOMI.keys())
 		for key in keys:
 			if len(np.shape(TROPOMI[key])) == 1:
@@ -323,10 +327,11 @@ class TROPOMI_Translator(object):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
 		filter_blended_albedo = float(self.spc_config['filter_blended_albedo'])
-		filter_swir_albedo = float(self.spc_config['filter_swir_albedo'])
+		filter_swir_albedo_low = float(self.spc_config['filter_swir_albedo_low'])
+		filter_swir_albedo_high = float(self.spc_config['filter_swir_albedo_high'])
 		filter_winter_lat = float(self.spc_config['filter_winter_lat'])
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species,filter_blended_albedo,filter_swir_albedo,filter_winter_lat))
+			trop_obs.append(read_tropomi(obs,species,filter_blended_albedo,filter_swir_albedo_low,filter_swir_albedo_high,filter_winter_lat))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])

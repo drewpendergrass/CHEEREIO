@@ -87,8 +87,9 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
-	"filter_blended_albedo" : "0.65",
-	"filter_swir_albedo" : "0.05",
+	"filter_blended_albedo" : "0.75",
+	"filter_swir_albedo_low" : "0.05",
+	"filter_swir_albedo_high" : "0.4",
 	"filter_winter_lat" : "50",
 	"comment012" : "******************************************************************************",
 	"comment013" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
