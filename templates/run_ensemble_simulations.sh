@@ -95,7 +95,11 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   cd {ASSIM}/core
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
-    parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{MaxPar}}
+    if [ {MaxPar} -eq 1 ]; then
+      bash par_assim.sh ${TESTING} ${x} 1
+    else
+      parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{MaxPar}}
+    fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
