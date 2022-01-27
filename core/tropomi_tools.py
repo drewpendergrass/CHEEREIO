@@ -263,7 +263,7 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_s
 	satlon_av = np.zeros(av_len)
 	sattime_av = np.zeros(av_len)
 	num_av = np.zeros(av_len)
-	if albedo_swir:
+	if albedo_swir is not None:
 		swir_av = np.zeros(av_len)
 		nir_av = np.zeros(av_len)
 		blended_av = np.zeros(av_len)
@@ -275,11 +275,11 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_s
 		satlon_av[count] = lonvals[count]
 		sattime_av[count] = timevals[count]
 		num_av[count] = len(indmatch)
-		if albedo_swir:
+		if albedo_swir is not None:
 			swir_av[count] = np.mean(albedo_swir[indmatch])
 			nir_av[count] = np.mean(albedo_nir[indmatch])
 			blended_av[count] = np.mean(blended_albedo[indmatch])
-	if albedo_swir:
+	if albedo_swir is not None:
 		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
 	else:
 		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
