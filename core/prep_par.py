@@ -52,7 +52,7 @@ for i in range(len(array_endpoints)-1):
 	split_lat_inds.append(lat_full_list[startpoint:endpoint])
 	split_lon_inds.append(lon_full_list[startpoint:endpoint])
 
-ncore = int(data['NumCores'])
+ncore = int(data['MaxPar'])
 
 dict_to_save = {}
 for i in range(len(subdir_numbers)):
