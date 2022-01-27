@@ -355,8 +355,3 @@ class TROPOMI_Translator(object):
 			else:
 				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
 		return toreturn
-
-
-		met['albedo_swir'] = data['surface_albedo_SWIR'].values[0,sl,gp]
-		met['albedo_nir'] = data['surface_albedo_NIR'].values[0,sl,gp]
-		met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
