@@ -247,7 +247,7 @@ def averageByGCTROPOMIlocs(index,GConsat,satvals,satlat,satlon,sattime):
 	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
 #No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
+def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_swir=None,albedo_nir=None,blended_albedo=None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -263,6 +263,10 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
 	satlon_av = np.zeros(av_len)
 	sattime_av = np.zeros(av_len)
 	num_av = np.zeros(av_len)
+	if albedo_swir:
+		swir_av = np.zeros(av_len)
+		nir_av = np.zeros(av_len)
+		blended_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
 		indmatch = np.where(index==ind)[0]
 		gc_av[count] = np.mean(GConsat[indmatch])
@@ -271,7 +275,14 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime):
 		satlon_av[count] = lonvals[count]
 		sattime_av[count] = timevals[count]
 		num_av[count] = len(indmatch)
-	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+		if albedo_swir:
+			swir_av[count] = np.mean(albedo_swir[indmatch])
+			nir_av[count] = np.mean(albedo_nir[indmatch])
+			blended_av[count] = np.mean(blended_albedo[indmatch])
+	if albedo_swir:
+		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
+	else:
+		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
 class TROPOMI_Translator(object):
 	def __init__(self,testing=False):
@@ -320,7 +331,7 @@ class TROPOMI_Translator(object):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,timeperiod,TROPOMI,GC):
+	def gcCompare(self,species,timeperiod,TROPOMI,GC,saveAlbedo=False):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 		elif species=='NO2':
@@ -332,10 +343,20 @@ class TROPOMI_Translator(object):
 		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
-			gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
-			toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+			if saveAlbedo:
+				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])
+				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
+			else:
+				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
+				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 		else:
-			toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
+			if saveAlbedo:
+				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo']]
+			else:
+				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
 		return toreturn
 
 
+		met['albedo_swir'] = data['surface_albedo_SWIR'].values[0,sl,gp]
+		met['albedo_nir'] = data['surface_albedo_NIR'].values[0,sl,gp]
+		met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)

@@ -111,11 +111,11 @@ def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,f
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(timestamp_list, use_numav = True, fullpath_output_name = None):
+def makeYEachAssimPeriod(timestamp_list, use_numav = True, use_albedo=True, fullpath_output_name = None):
 	masterY = {}
 	for timestamp in timestamp_list:
 		print(f'Processing the Y dictionary for time {timestamp}')
-		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,testing=False)
+		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,testing=False,saveAlbedo=use_albedo)
 		bigy = hist.bigYDict 
 		for spec in list(bigy.keys()):
 			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec][4]]
@@ -130,8 +130,16 @@ def makeYEachAssimPeriod(timestamp_list, use_numav = True, fullpath_output_name 
 			df['Longitude'] = bigy[spec][3]
 			if use_numav:
 				df['Num_Averaged'] = bigy[spec][5]
+				if use_albedo:
+					df['Albedo_SWIR'] = bigy[spec][6]
+					df['Albedo_NIR'] = bigy[spec][7]
+					df['Blended_Albedo'] = bigy[spec][8]
 			else:
 				df['Num_Averaged'] = None
+				if use_albedo:
+					df['Albedo_SWIR'] = bigy[spec][5]
+					df['Albedo_NIR'] = bigy[spec][6]
+					df['Blended_Albedo'] = bigy[spec][7]
 			df['time'] = t
 			bigy[spec] = df
 		masterY[timestamp] = bigy

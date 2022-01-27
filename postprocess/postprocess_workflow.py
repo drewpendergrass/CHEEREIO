@@ -15,6 +15,7 @@ pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
+postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
 emisvec = data['CONTROL_VECTOR_EMIS']
@@ -46,7 +47,7 @@ if "histprocess" in sys.argv:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
-		bigy = pt.makeYEachAssimPeriod(dates_string_array,use_numav=avtogcgrid,fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(dates_string_array,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,fullpath_output_name=f"{pp_dir}/bigY.pkl")
 
 if "calccol" in sys.argv:
 	try:

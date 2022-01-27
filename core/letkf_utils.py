@@ -353,8 +353,9 @@ class HIST_Translator(object):
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,fullperiod=False,interval=None,testing=False):
+	def __init__(self,timestamp,useLevelEdge=False,fullperiod=False,interval=None,testing=False,saveAlbedo=False):
 		self.testing = testing
+		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
@@ -416,9 +417,15 @@ class HIST_Ens(object):
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
-			firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
-		else: 
-			firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+			if self.saveAlbedo:
+				firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,saveAlbedo=True)
+			else:
+				firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+		else:
+			if self.saveAlbedo:
+				firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,saveAlbedo=True)
+			else:
+				firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -434,9 +441,15 @@ class HIST_Ens(object):
 					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
 				conc2D[:,i-1] = col
 		if self.spc_config['AV_TO_GC_GRID']=="True":
-			return [conc2D,satcol,satlat,satlon,sattime,numav]
+			if self.saveAlbedo:
+				return [conc2D,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av]
+			else:
+				return [conc2D,satcol,satlat,satlon,sattime,numav]
 		else:
-			return [conc2D,satcol,satlat,satlon,sattime]
+			if self.saveAlbedo:
+				return [conc2D,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av]
+			else:
+				return [conc2D,satcol,satlat,satlon,sattime]
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)
