@@ -118,7 +118,7 @@ for i in range(length):
             daystring = timestr[i]
             titlestring = f'{variable} for {daystring}'
             plt.title(titlestring)
-            temp = ensmean[i,lonind,latind]
+            temp = ensmean[i,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]
             temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
             #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
             mesh.set_array(temp.ravel())
@@ -129,10 +129,10 @@ for i in range(length):
         m = Basemap(projection='cyl', resolution='l',llcrnrlat=latlim[0], urcrnrlat=latlim[1],llcrnrlon=lonlim[0], urcrnrlon=lonlim[1])
         m.drawcountries(color='lightgray')
         m.drawcoastlines(color='lightgray')
-        mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,lonind,latind],latlon=True,cmap=plt.cm.jet)
-        plt.clim(np.min(ensmean[:,lonind,conus_lat_ind]), np.max(ensmean[:,lonind,latind]))
+        mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)],latlon=True,cmap=plt.cm.jet)
+        plt.clim(np.min(ensmean[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]), np.max(ensmean[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]))
         plt.colorbar(label=variable);
-        anim = animation.FuncAnimation(fig, animate_conus,len(time), blit=False)
+        anim = animation.FuncAnimation(fig, animate_region,len(time), blit=False)
         #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
         #plt.show()
 
