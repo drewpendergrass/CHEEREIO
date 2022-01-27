@@ -23,11 +23,11 @@
 	"SPINUP_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "true",
-	"ENS_SPINUP_START" : "20180101",
-	"ENS_SPINUP_END" : "20180501",
-	"START_DATE" : "20180501",
-	"ASSIM_START_DATE" : "20180508",
-	"END_DATE" : "20181201",
+	"ENS_SPINUP_START" : "20180901",
+	"ENS_SPINUP_END" : "20190101",
+	"START_DATE" : "20190201",
+	"ASSIM_START_DATE" : "20190108",
+	"END_DATE" : "20190315",
 	"HISTORY_collections_to_customize" : [
 		"SpeciesConc",
 		"CH4",
@@ -138,7 +138,9 @@
 	"NATURE_H_FUNCTIONS" : [
 		"column_sum"
 	],
-	"animation_fps":"12"
+	"animation_fps_scalingfactor":"2",
+	"animation_fps_concentrations":"18",
+	"postprocess_save_albedo":"True"
 }
 
 
