@@ -48,26 +48,22 @@ subquarter = False
 if gridlabel == '4.0x5.0':
 	lon = np.arange(-180.0,176.0, 5.0)
 	lat = np.concatenate([[-89.0],np.arange(-86.0,87.0, 4.0), [89.0]])
-	mask = pd.read_csv('../templates/landmask_4x5_gcgrid.csv',header=None)
-	mask = np.array(np.transpose(mask))
+	mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif gridlabel == '2.0x2.5':
 	lon = np.arange(-180.0,178.0, 2.5)
 	lat = np.concatenate([[-89.5],np.arange(-88.0,89.0, 2.0), [89.5]])
-	mask = pd.read_csv('../templates/landmask_2x2p5_gcgrid.csv',header=None)
-	mask = np.array(np.transpose(mask))
+	mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif gridlabel == '1x1':
 	lon = np.arange(-179.5,180.0, 1.0)
 	lat = np.arange(-89.5,90, 1.0)
-	mask = pd.read_csv('../templates/landmask_1x1_gcgrid.csv',header=None)
-	mask = np.array(np.transpose(mask))
+	mask = np.transpose(np.genfromtxt('../templates/landmask_1x1_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif (gridlabel == '0.5x0.625') | (gridlabel == 'MERRA2'): #MERRA2 NATIVE GRID
 	lon = -180.0 + (0.625*np.arange(0.0,576.0,1.0))
 	lat = -90.0 + (0.5*np.arange(0.0,361.0,1.0))
-	mask = pd.read_csv('../templates/landmask_0p5x0p625_gcgrid.csv',header=None)
-	mask = np.array(np.transpose(mask))
+	mask = np.transpose(np.genfromtxt('../templates/landmask_0p5x0p625_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif (gridlabel == 'AS_MERRA2'): #ASIA NESTED GRID FOR MERRA2
 	lon = np.arange(60.0,150.01, 0.625)
@@ -84,8 +80,7 @@ elif (gridlabel == 'NA_MERRA2'): #NORTH AMERICA NESTED GRID FOR MERRA2
 elif (gridlabel == '0.25x0.3125') | (gridlabel == 'GEOSFP'):
 	lon = -180.0 + (0.3125*np.arange(0.0,1152.0,1.0))
 	lat = -90.0 + (0.25*np.arange(0.0,721.0,1.0))
-	mask = pd.read_csv('../templates/landmask_0p25x0p3125_gcgrid.csv',header=None)
-	mask = np.array(np.transpose(mask))
+	mask = np.transpose(np.genfromtxt('../templates/landmask_0p25x0p3125_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif (gridlabel == 'CH_GEOSFP'): #CHINA NESTED GRID FOR GEOS-FP
 	lon = np.arange(70.0,140.01, 0.3125)
@@ -106,14 +101,13 @@ if subhalf or subquarter:
 	if subhalf:
 		fulllon = -180.0 + (0.625*np.arange(0.0,576.0,1.0))
 		fulllat = -90.0 + (0.5*np.arange(0.0,361.0,1.0))
-		mask = pd.read_csv('../templates/landmask_0p5x0p625_gcgrid.csv',header=None)
+		mask = np.transpose(np.genfromtxt('../templates/landmask_0p5x0p625_gcgrid.csv',delimiter=','))
 	elif subquarter:
 		fulllon = -180.0 + (0.3125*np.arange(0.0,1152.0,1.0))
 		fulllat = -90.0 + (0.25*np.arange(0.0,721.0,1.0))
-		mask = pd.read_csv('../templates/landmask_0p25x0p3125_gcgrid.csv',header=None)
+		mask = np.transpose(np.genfromtxt('../templates/landmask_0p25x0p3125_gcgrid.csv',delimiter=','))
 	lonok = np.where((fulllon>=np.min(lon)) & (fulllon<=np.max(lon)))[0]
 	latok = np.where((fulllat>=np.min(lat)) & (fulllat<=np.max(lat)))[0]
-	mask = np.array(np.transpose(mask))
 	mask = mask[lonok,latok]
 	mask = np.where(mask==0)
 
