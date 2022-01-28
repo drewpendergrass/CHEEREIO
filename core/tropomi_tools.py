@@ -10,7 +10,7 @@ import os.path
 import xarray as xr
 import numpy as np
 
-def read_tropomi(filename, species, filterinfo):
+def read_tropomi(filename, species, filterinfo=None):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -113,7 +113,8 @@ def read_tropomi(filename, species, filterinfo):
 	
 	met['pressures'] = pressures
 	
-	met = apply_filters(met,filterinfo)
+	if filterinfo:
+		met = apply_filters(met,filterinfo)
 
 	return met
 
@@ -343,12 +344,13 @@ class TROPOMI_Translator(object):
 	def getSatellite(self,species,timeperiod, interval=None):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
-		filter_blended_albedo = float(self.spc_config['filter_blended_albedo'])
-		filter_swir_albedo_low = float(self.spc_config['filter_swir_albedo_low'])
-		filter_swir_albedo_high = float(self.spc_config['filter_swir_albedo_high'])
-		filter_winter_lat = float(self.spc_config['filter_winter_lat'])
+		if species=='CH4':
+			if self.spc_config['TROPOMI_CH4_FILTERS']=="True":
+				filterinfo = ["TROPOMI_CH4",float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+			else:
+				filterinfo = None
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species,filter_blended_albedo,filter_swir_albedo_low,filter_swir_albedo_high,filter_winter_lat))
+			trop_obs.append(read_tropomi(obs,species,filterinfo))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
