@@ -10,7 +10,7 @@ import os.path
 import xarray as xr
 import numpy as np
 
-def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_albedo_low = None,filter_swir_albedo_high = None, filter_winter_lat = None):
+def read_tropomi(filename, species, filterinfo):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -75,6 +75,7 @@ def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_alb
 		met['albedo_swir'] = data['surface_albedo_SWIR'].values[0,sl,gp]
 		met['albedo_nir'] = data['surface_albedo_NIR'].values[0,sl,gp]
 		met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
+		met['swir_aot'] = data['aerosol_optical_thickness_SWIR'].values[0,sl,gp]
 		data.close()
 
 	# Store methane prior profile, dry air subcolumns. Not needed for NO2, though surface pressure is
@@ -87,6 +88,7 @@ def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_alb
 		data.close()
 	elif species=='CH4':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+		met['surface_elevation_sd'] = data['surface_altitude_precision'].values[0,sl,gp]
 		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
 		data.close()
 
@@ -111,23 +113,34 @@ def read_tropomi(filename, species,filter_blended_albedo = None, filter_swir_alb
 	
 	met['pressures'] = pressures
 	
-	met = apply_filters(met,filter_blended_albedo,filter_swir_albedo_low,filter_swir_albedo_high,filter_winter_lat)
+	met = apply_filters(met,filterinfo)
 
 	return met
 
-def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo_low = None, filter_swir_albedo_high = None, filter_winter_lat = None):
+def apply_filters(TROPOMI,filterinfo):
 	to_keep = []
-	if filter_blended_albedo:
-		to_keep.append(np.where(TROPOMI['blended_albedo']<filter_blended_albedo)[0])
-	if filter_swir_albedo_low:
-		to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo_low)[0])
-	if filter_swir_albedo_high:
-		to_keep.append(np.where(TROPOMI['albedo_swir']<filter_swir_albedo_high)[0])
-	if filter_winter_lat:
-		months = TROPOMI['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
-		nh_winter = np.array([1,2,3,11,12])
-		sh_winter = np.array([5,6,7,8,9])
-		to_keep.append(np.where( ~( ( (TROPOMI['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
+	if filterinfo[0] == "TROPOMI_CH4":
+		filter_blended_albedo = filterinfo[1]
+		filter_swir_albedo_low = filterinfo[2]
+		filter_swir_albedo_high = filterinfo[3]
+		filter_winter_lat = filterinfo[4]
+		filter_roughness = filterinfo[5]
+		filter_swir_aot = filterinfo[6]
+		if ~np.isnan(filter_blended_albedo):
+			to_keep.append(np.where(TROPOMI['blended_albedo']<filter_blended_albedo)[0])
+		if ~np.isnan(filter_swir_albedo_low):
+			to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo_low)[0])
+		if ~np.isnan(filter_swir_albedo_high):
+			to_keep.append(np.where(TROPOMI['albedo_swir']<filter_swir_albedo_high)[0])
+		if ~np.isnan(filter_winter_lat):
+			months = TROPOMI['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
+			nh_winter = np.array([1,2,3,11,12])
+			sh_winter = np.array([5,6,7,8,9])
+			to_keep.append(np.where( ~( ( (TROPOMI['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
+		if ~np.isnan(filter_roughness):
+			to_keep.append(np.where(met['surface_elevation_sd']<filter_roughness)[0])
+		if ~np.isnan(filter_swir_aot):
+			to_keep.append(np.where(TROPOMI['swir_aot']<filter_swir_aot)[0])
 	if len(to_keep)==0:
 		return TROPOMI
 	else:
@@ -137,8 +150,12 @@ def apply_filters(TROPOMI, filter_blended_albedo = None, filter_swir_albedo_low 
 			to_keep = np.intersect1d(to_keep[0],to_keep[1])
 		elif len(to_keep)==3:
 			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),to_keep[2])
-		else:
+		elif len(to_keep)==4:
 			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3]))
+		elif len(to_keep)==5:
+			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),to_keep[4])
+		elif len(to_keep)==6:
+			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),np.intersect1d(to_keep[4],to_keep[5]))
 		keys = list(TROPOMI.keys())
 		for key in keys:
 			if len(np.shape(TROPOMI[key])) == 1:
