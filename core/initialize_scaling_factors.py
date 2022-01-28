@@ -31,6 +31,7 @@ meanval = (maxdir+1)/2
 
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 mask_ocean_bool = spc_config['MaskOceanScaleFactor']
+mask_coast_bool = spc_config['MaskCoastsGT25pctOcean']
 mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
 
@@ -48,12 +49,18 @@ subquarter = False
 if gridlabel == '4.0x5.0':
 	lon = np.arange(-180.0,176.0, 5.0)
 	lat = np.concatenate([[-89.0],np.arange(-86.0,87.0, 4.0), [89.0]])
-	mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid.csv',delimiter=','))
+	if mask_coast_bool=="True":
+		mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid_landfraction_gt_75pct.csv',delimiter=','))
+	else:
+		mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif gridlabel == '2.0x2.5':
 	lon = np.arange(-180.0,178.0, 2.5)
 	lat = np.concatenate([[-89.5],np.arange(-88.0,89.0, 2.0), [89.5]])
-	mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid.csv',delimiter=','))
+	if mask_coast_bool=="True":
+		mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid_landfraction_gt_75pct.csv',delimiter=','))
+	else:
+		mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid.csv',delimiter=','))
 	mask = np.where(mask==0)
 elif gridlabel == '1x1':
 	lon = np.arange(-179.5,180.0, 1.0)
