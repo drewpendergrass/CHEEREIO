@@ -183,8 +183,14 @@ class HEMCO_Translator():
 		specieskeyval = 700
 		for species,specname in zip(species_to_add,specnames):
 			print(f'Appending scaling factor IDs for {specname} in HEMCO_Config.')
-			linenums_to_modify = self.speciesloc[species]
-			for num in linenums_to_modify:
+			if type(species) is list: #Combine these species into one list of line nums to change
+				linenums_to_modify_base = []
+				for subspec in species:
+					linenums_to_modify_base + self.speciesloc[subspec]
+				linenums_to_modify_base = list(set(linenums_to_modify_base)) #Remove duplicates
+			else:
+				linenums_to_modify = self.speciesloc[species]
+			for num in linenums_to_modify: #Go through these line nums and add new scale id
 				line = self.lines[num]
 				scalid = line.split()[9]
 				notwhitespaceloc = [m.start() for m in re.finditer(r'\S+', line)]
