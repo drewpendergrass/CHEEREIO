@@ -188,12 +188,15 @@ class HEMCO_Translator():
 				for subspec in species:
 					if subspec in self.speciesloc.keys():
 						linenums_to_modify = linenums_to_modify + self.speciesloc[subspec]
+					else:
+						print(f'Warning: did not detect species {subspec} in active HEMCO inventories.')
 				linenums_to_modify = list(set(linenums_to_modify)) #Remove duplicates
 			else:
 				if species in self.speciesloc.keys():
 					linenums_to_modify = self.speciesloc[species]
 				else:
 					linenums_to_modify = []
+					print(f'Warning: did not detect species {species} in active HEMCO inventories.')
 			for num in linenums_to_modify: #Go through these line nums and add new scale id
 				line = self.lines[num]
 				scalid = line.split()[9]
