@@ -139,7 +139,7 @@ def apply_filters(TROPOMI,filterinfo):
 			sh_winter = np.array([5,6,7,8,9])
 			to_keep.append(np.where( ~( ( (TROPOMI['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
 		if ~np.isnan(filter_roughness):
-			to_keep.append(np.where(met['surface_elevation_sd']<filter_roughness)[0])
+			to_keep.append(np.where(TROPOMI['surface_elevation_sd']<filter_roughness)[0])
 		if ~np.isnan(filter_swir_aot):
 			to_keep.append(np.where(TROPOMI['swir_aot']<filter_swir_aot)[0])
 	if len(to_keep)==0:
