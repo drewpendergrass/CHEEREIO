@@ -47,7 +47,7 @@ cd  {RunName}_${xstr}
 
 # Set the proper # of threads for OpenMP
 # SLURM_CPUS_PER_TASK ensures this matches the number you set with NumCores in the ens_config file
-export OMP_NUM_THREADS={NumCores}
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 #Run GC; hang until assimilation complete (later also will do assimilation).
 #This will loop until a file appears in scratch signalling assimilation is complete.
