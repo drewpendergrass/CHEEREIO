@@ -7,7 +7,7 @@
 	"LEVS" : "47",
 	"NEST" : "F",
 	"REGION" : "",
-	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
+	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO_no2",
 	"RUN_NAME" : "NOx_GLOBAL",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
