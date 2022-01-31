@@ -83,12 +83,12 @@ def read_tropomi(filename, species, filterinfo=None):
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1]
 		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1]
+		met['surface_elevation_sd'] = data['surface_altitude_precision'].values[0,sl,gp]
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
 		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
 		data.close()
-	elif species=='CH4':
+	elif species=='NO2':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
-		met['surface_elevation_sd'] = data['surface_altitude_precision'].values[0,sl,gp]
 		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
 		data.close()
 
