@@ -89,7 +89,7 @@ def read_tropomi(filename, species, filterinfo=None):
 		data.close()
 	elif species=='NO2':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
-		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
+		surface_pressure = data['surface_pressure'].values[0,sl,gp] #time,scanline,groundpixel				# Leave Pa
 		data.close()
 
 
@@ -101,10 +101,10 @@ def read_tropomi(filename, species, filterinfo=None):
 
 	if species=='NO2':
 		#Pressure levels (hpa) with dimension len(sl),levels
-		pressures = np.zeros((len(sl),len(b)),dtype=np.float)
+		pressures = np.zeros((len(sl),len(b)),dtype=float)
 		pressures.fill(np.nan)
 		for i in range(len(surface_pressure)):
-			pressures[i,:]=a+(b*surface_pressure[i])
+			pressures[i,:]=(a+(b*surface_pressure[i]))/100 #Pa -> hPa
 	elif species=='CH4':
 		pressures = np.zeros([len(sl),13],dtype=np.float)
 		pressures.fill(np.nan)
