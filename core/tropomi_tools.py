@@ -101,7 +101,7 @@ def read_tropomi(filename, species, filterinfo=None):
 
 	if species=='NO2':
 		#Pressure levels (hpa) with dimension len(sl),levels
-		pressures = np.zeros((len(sl).len(b)),dtype=np.float)
+		pressures = np.zeros((len(sl),len(b)),dtype=np.float)
 		pressures.fill(np.nan)
 		for i in range(len(surface_pressure)):
 			pressures[i,:]=a+(b*surface_pressure[i])
