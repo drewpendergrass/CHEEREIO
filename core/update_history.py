@@ -109,9 +109,9 @@ class HISTORY_Translator():
 		print('Overwriting default SpeciesConc collection in HISTORY.rc.')
 		del self.lines[self.SpecConcStartStopLines[0]:self.SpecConcStartStopLines[1]]
 		isFirst = True
-		for species in self.spc_config['HistorySpecConcToSave']:
+		for count, species in enumerate(self.spc_config['HistorySpecConcToSave']):
 			print(f'Adding {species} to the SpeciesConc collection in HISTORY.rc.')
-			self.lines.insert(self.SpecConcStartStopLines[0], self.makeSpecConcString(species,isFirst))
+			self.lines.insert(self.SpecConcStartStopLines[0]+count, self.makeSpecConcString(species,isFirst))
 			isFirst = False
 	def writeHistoryConfig(self):
 		with open(self.historyrc_path+'HISTORY.rc', 'w') as f:
