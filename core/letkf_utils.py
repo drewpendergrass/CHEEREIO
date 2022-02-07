@@ -791,7 +791,7 @@ class Assimilator(object):
 			return analysisSubset
 	def applyAnalysisCorrections(self,analysisSubset,backgroundSubset):
 		#Get scalefactors off the end of statevector
-		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:]
+		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
 		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
 		#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
 		for i in range(len(self.InflateScalingsToXOfPreviousStandardDeviation)):
@@ -803,7 +803,8 @@ class Assimilator(object):
 				if ~np.isnan(ratio): #Sometimes background standard deviation is approximately 0.
 					if ratio < inflator:
 						new_std = inflator*background_std
-						analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)
+						meanrebalance = np.mean(analysisScalefactor[i,:])*((new_std/analysis_std)-1)
+						analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)-meanrebalance #Scale so sd is new_std and mean is old mean
 		#Apply maximum relative change per assimilation period:
 		for i in range(len(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod)):
 			maxchange=self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[i]
