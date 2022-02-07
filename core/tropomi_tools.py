@@ -349,6 +349,8 @@ class TROPOMI_Translator(object):
 				filterinfo = ["TROPOMI_CH4",float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
 			else:
 				filterinfo = None
+		else:
+			filterinfo = None
 		for obs in obs_list:
 			trop_obs.append(read_tropomi(obs,species,filterinfo))
 		met = {}
