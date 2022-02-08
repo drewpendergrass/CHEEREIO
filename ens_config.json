@@ -27,7 +27,7 @@
 	"ENS_SPINUP_END" : "20180501",
 	"START_DATE" : "20180501",
 	"ASSIM_START_DATE" : "20180508",
-	"END_DATE" : "20181201",
+	"END_DATE" : "20180619",
 	"HISTORY_collections_to_customize" : [
 		"SpeciesConc",
 		"CH4",
