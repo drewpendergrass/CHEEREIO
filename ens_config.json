@@ -82,7 +82,7 @@
 		"True"
 	],
 	"TROPOMI_dirs" : {
-		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4/2018"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
