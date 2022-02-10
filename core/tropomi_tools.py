@@ -188,6 +188,7 @@ def getGCCols(GC,TROPOMI,species,returninds=False):
 	else:
 		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 
+#This seems to be the memory bottleneck
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
