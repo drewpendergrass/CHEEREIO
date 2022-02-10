@@ -34,7 +34,7 @@
 		"LevelEdgeDiags"
 	],
 	"HISTORY_freq" : "00000000 010000",
-	"HISTORY_dur" : "00000001 000000",
+	"HISTORY_dur" : "00000000 010000",
 	"SPINUP_HISTORY_freq" : "00000100 000000",
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"nEnsemble" : "2",
@@ -46,7 +46,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"Partition" : "huce_bigmem",
-	"Memory" : "112000",
+	"Memory" : "200000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "1-00\\:00",
 	"EnsSpinupWallTime" : "0-08\\:00",
@@ -144,7 +144,7 @@
 		"0.10"
 	],
 	"INFLATION_FACTOR": "0.08",
-	"ASSIM_TIME": "24",
+	"ASSIM_TIME": "2",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "5",
 	"AV_TO_GC_GRID" : "True",
