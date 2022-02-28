@@ -189,7 +189,7 @@ def getGCCols(GC,TROPOMI,species,returninds=False):
 		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 
 #This seems to be the memory bottleneck
-def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
+def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
@@ -202,24 +202,47 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
 	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
 	GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
-	# Define vectors that give the "low" and "high" pressure
-	# values for each GEOS-Chem and satellite layer.
-	GC_lo = GC_edges[:, 1:][:, :, None]
-	GC_hi = GC_edges[:, :-1][:, :, None]
-	sat_lo = sat_edges[:, 1:][:, None, :]
-	sat_hi = sat_edges[:, :-1][:, None, :]
-	# Get the indices where the GC-to-satellite mapping, which is
-	# a nobs x ngc x nsat matrix, is non-zero
-	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
-	# Find the fraction of each GC level that contributes to each
-	# TROPOMI level. We should first divide (to normalize) and then
-	# multiply (to apply the map to the column) by the GC pressure
-	# difference, but we exclude this (since it's the same as x1).
-	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
-	GC_to_sat[~idx] = 0
-	# Now map the GC CH4 to the satellite levels
-	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
-	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
+	#Low mem calculation avoids allocating large arrays but runs slower.
+	#This is accomplished by iterating over the nobs axis.
+	#Default, higher memory calculation exploits vectorization for speed
+	#But can result in enormous matrices for some experiments. 
+	if lowmem:
+		satshape = np.shape(sat_edges)
+		finalshape = (satshape[0],satshape[1]-1)
+		GC_on_sat = np.zeros(finalshape)
+		for i in range(np.shape(GC_edges)[0]):
+			# Define vectors that give the "low" and "high" pressure
+			# values for each GEOS-Chem and satellite layer.
+			GC_lo = GC_edges[i, 1:][:, None]
+			GC_hi = GC_edges[i, :-1][:, None]
+			sat_lo = sat_edges[i, 1:][None, :]
+			sat_hi = sat_edges[i, :-1][None, :]
+			idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+			GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+			GC_to_sat[~idx] = 0
+			# Now map the GC CH4 to the satellite levels
+			GC_on_sat_subset = (GC_to_sat*GC_SPC[i, :, None]).sum(axis=0)
+			GC_on_sat_subset = GC_on_sat_subset/GC_to_sat.sum(axis=0)
+			GC_on_sat[i,:] = GC_on_sat_subset
+	else:
+		# Define vectors that give the "low" and "high" pressure
+		# values for each GEOS-Chem and satellite layer.
+		GC_lo = GC_edges[:, 1:][:, :, None]
+		GC_hi = GC_edges[:, :-1][:, :, None]
+		sat_lo = sat_edges[:, 1:][:, None, :]
+		sat_hi = sat_edges[:, :-1][:, None, :]
+		# Get the indices where the GC-to-satellite mapping, which is
+		# a nobs x ngc x nsat matrix, is non-zero
+		idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+		# Find the fraction of each GC level that contributes to each
+		# TROPOMI level. We should first divide (to normalize) and then
+		# multiply (to apply the map to the column) by the GC pressure
+		# difference, but we exclude this (since it's the same as x1).
+		GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+		GC_to_sat[~idx] = 0
+		# Now map the GC CH4 to the satellite levels
+		GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
+		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
 def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=None):
@@ -367,7 +390,8 @@ class TROPOMI_Translator(object):
 		GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True)
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
-		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
+		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
+		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting)
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
