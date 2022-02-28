@@ -145,7 +145,7 @@
 		"0.10"
 	],
 	"INFLATION_FACTOR": "0.08",
-	"ASSIM_TIME": "2",
+	"ASSIM_TIME": "24",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "5",
 	"AV_TO_GC_GRID" : "True",
