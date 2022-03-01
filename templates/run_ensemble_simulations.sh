@@ -115,11 +115,11 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   fi
   #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
   if [ $x -eq 1 ]; then
-    bash cleanup.sh ${TESTING} #This also will break us out of this loop when assimilation complete.
     if [ "${firstrun}" = true ]; then
       bash change_histrst_durfreq.sh
       firstrun=false
     fi
+    bash cleanup.sh ${TESTING} #This also will break us out of this loop when assimilation complete.
   fi
   #Hang until cleanup complete, as determined by temp file deletion.
   until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
