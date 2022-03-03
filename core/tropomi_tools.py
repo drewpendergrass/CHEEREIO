@@ -245,7 +245,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
 		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
-def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=None):
+def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=None,synthetic_partial_columns=False):
 	'''
 	Apply the averaging kernel
 	Inputs:
@@ -259,6 +259,8 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=Non
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
+	if synthetic_partial_columns:
+		GC_SPC = np.cumsum(GC_SPC,axis=1)
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
 	else:
@@ -384,8 +386,10 @@ class TROPOMI_Translator(object):
 	def gcCompare(self,species,timeperiod,TROPOMI,GC,saveAlbedo=False):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
+			synthetic_partial_columns = False
 		elif species=='NO2':
 			TROP_PRIOR=None
+			synthetic_partial_columns = True
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True)
 		if species=='CH4':
