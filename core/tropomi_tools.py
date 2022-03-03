@@ -181,11 +181,15 @@ def nearest_loc(GC,TROPOMI):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,TROPOMI,species,returninds=False,returnStateMet=False):
+def getGCCols(GC,TROPOMI,species,returninds=False,returnStateMet=False,GC_area=None):
 	i,j,t = nearest_loc(GC,TROPOMI)
 	to_return = [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 	if returnStateMet:
 		to_return.append(GC[f'Met_AD'].values[t,:,j,i])
+	if GC_area:
+		to_return.append(GC_area['AREA'].values[j,i])
+	else:
+		to_return.append(None)
 	if returninds:
 		to_return = to_return + [i,j,t]
 	return to_return
@@ -259,7 +263,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False):
 	else:
 		return GC_on_sat
 
-def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_sat=None,filt=None):
+def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_sat=None,GC_area=None,filt=None):
 	'''
 	Apply the averaging kernel
 	Inputs:
@@ -273,8 +277,11 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
-	if GC_M_on_sat: #Take partial columns
-		GC_SPC = np.cumsum(GC_SPC,axis=1)
+	if GC_M_on_sat: #Take partial columns, which also involves the area and air mass
+		GC_SPC = GC_SPC/0.02897 #convert to mol/kg air
+		GC_SPC = GC_SPC*GC_M_on_sat #Convert to mol of interest per box
+		GC_SPC = np.cumsum(GC_SPC,axis=1) #Convert to partial column
+		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per m2, which is TROPOMI dimensions
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
 	else:
@@ -407,9 +414,9 @@ class TROPOMI_Translator(object):
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
 		if returnStateMet:
-			GC_SPC,GC_P,GC_M,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet)
+			GC_SPC,GC_P,GC_M,GC_area,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		else:
-			GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet)
+			GC_SPC,GC_P,GC_area,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
 		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
@@ -418,7 +425,7 @@ class TROPOMI_Translator(object):
 		else:
 			GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting)
 			GC_M_on_sat = None
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat)
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
 				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])
