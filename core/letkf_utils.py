@@ -375,14 +375,19 @@ class HIST_Translator(object):
 				dataset.append(hist_val)
 		dataset = xr.merge(dataset)
 		return dataset
+	def getArea(self):
+		specconc_list=self.globSubDir(self.timeperiod,useLevelEdge=False,useStateMet=False)
+		AREA = xr.load_dataset(specconc_list[0])[f'AREA']
+		return AREA
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,fullperiod=False,interval=None,testing=False,saveAlbedo=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,testing=False,saveAlbedo=False):
 		self.testing = testing
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
+		self.useArea = useArea
 		self.spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
@@ -411,6 +416,10 @@ class HIST_Ens(object):
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.maxobs=int(self.spc_config['MAXNUMOBS'])
 		self.interval=interval
+		if self.useArea:
+			self.AREA = self.ht[1].getArea()
+		else:
+			self.AREA = None
 		self.makeBigY()
 	def makeSatTrans(self):
 		self.SAT_TRANSLATOR = {}
@@ -444,14 +453,14 @@ class HIST_Ens(object):
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge,self.useStateMet)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:
-				firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,saveAlbedo=True)
+				firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True)
 			else:
-				firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
 		else:
 			if self.saveAlbedo:
-				firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,saveAlbedo=True)
+				firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True)
 			else:
-				firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+				firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -462,9 +471,9 @@ class HIST_Ens(object):
 			if i!=firstens:
 				hist4D = self.ht[i].combineHist(species,self.useLevelEdge,self.useStateMet)
 				if self.spc_config['AV_TO_GC_GRID']=="True":
-					col,_,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+					col,_,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
 				else:
-					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D)
+					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
 				conc2D[:,i-1] = col
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:

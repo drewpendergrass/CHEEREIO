@@ -181,15 +181,17 @@ def nearest_loc(GC,TROPOMI):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,TROPOMI,species,returninds=False):
+def getGCCols(GC,TROPOMI,species,returninds=False,returnStateMet=False):
 	i,j,t = nearest_loc(GC,TROPOMI)
+	to_return = [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
+	if returnStateMet:
+		to_return.append(GC[f'Met_AD'].values[t,:,j,i])
 	if returninds:
-		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i],i,j,t]
-	else:
-		return [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
+		to_return = to_return + [i,j,t]
+	return to_return
 
 #This seems to be the memory bottleneck
-def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
+def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
@@ -209,6 +211,8 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
 	if lowmem:
 		satshape = np.shape(sat_edges)
 		finalshape = (satshape[0],satshape[1]-1)
+		if GC_M:
+			GC_M_on_sat = np.zeros(finalshape)
 		GC_on_sat = np.zeros(finalshape)
 		for i in range(np.shape(GC_edges)[0]):
 			# Define vectors that give the "low" and "high" pressure
@@ -224,6 +228,10 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
 			GC_on_sat_subset = (GC_to_sat*GC_SPC[i, :, None]).sum(axis=0)
 			GC_on_sat_subset = GC_on_sat_subset/GC_to_sat.sum(axis=0)
 			GC_on_sat[i,:] = GC_on_sat_subset
+			if GC_M:
+				GC_M_on_sat_subset = (GC_to_sat*GC_M[i, :, None]).sum(axis=0)
+				GC_M_on_sat_subset = GC_M_on_sat_subset/GC_to_sat.sum(axis=0)
+				GC_M_on_sat[i,:] = GC_M_on_sat_subset
 	else:
 		# Define vectors that give the "low" and "high" pressure
 		# values for each GEOS-Chem and satellite layer.
@@ -243,9 +251,15 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, lowmem=False):
 		# Now map the GC CH4 to the satellite levels
 		GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
-	return GC_on_sat
+		if GC_M:
+			GC_M_on_sat = (GC_to_sat*GC_M[:, :, None]).sum(axis=1)
+			GC_M_on_sat = GC_M_on_sat/GC_to_sat.sum(axis=1)
+	if GC_M:
+		return [GC_on_sat,GC_M_on_sat]
+	else:
+		return GC_on_sat
 
-def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=None,synthetic_partial_columns=False):
+def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_sat=None,filt=None):
 	'''
 	Apply the averaging kernel
 	Inputs:
@@ -259,7 +273,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None, filt=Non
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
-	if synthetic_partial_columns:
+	if GC_M_on_sat: #Take partial columns
 		GC_SPC = np.cumsum(GC_SPC,axis=1)
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
@@ -383,7 +397,7 @@ class TROPOMI_Translator(object):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,timeperiod,TROPOMI,GC,saveAlbedo=False):
+	def gcCompare(self,species,timeperiod,TROPOMI,GC,GC_area=None,saveAlbedo=False):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
@@ -391,12 +405,20 @@ class TROPOMI_Translator(object):
 			TROP_PRIOR=None
 			synthetic_partial_columns = True
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
-		GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True)
+		returnStateMet = self.spc_config['SaveStateMet']=='True'
+		if returnStateMet:
+			GC_SPC,GC_P,GC_M,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet)
+		else:
+			GC_SPC,GC_P,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet)
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
 		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
-		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting)
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
+		if returnStateMet:
+			GC_on_sat,GC_M_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],GC_M = GC_M, lowmem=memsetting)
+		else:
+			GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting)
+			GC_M_on_sat = None
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
 				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])
