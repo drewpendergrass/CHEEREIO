@@ -28,19 +28,9 @@
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190108",
 	"END_DATE" : "20190701",
-	"HISTORY_collections_to_customize" : [
-		"SpeciesConc",
-		"CH4",
-		"LevelEdgeDiags"
-	],
-	"HISTORY_freq" : "00000000 040000",
-	"HISTORY_dur" : "00000001 000000",
-	"SPINUP_HISTORY_freq" : "00000100 000000",
-	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"nEnsemble" : "24",
 	"pPERT" : "4",
 	"SIMULATE_NATURE" : "false",
-	"SaveLevelEdgeDiags" : "True",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
@@ -66,12 +56,33 @@
 	"CONTROL_VECTOR_EMIS" : {
 		"CH4":"CH4"
 	},
+	"comment009" : "******************************************************************************",
+	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
+	"comment011" : "******************************************************************************",
+	"HISTORY_collections_to_customize" : [
+		"SpeciesConc",
+		"CH4",
+		"LevelEdgeDiags",
+		"StateMet"
+	],
+	"HISTORY_freq" : "00000000 040000",
+	"HISTORY_dur" : "00000001 000000",
+	"SPINUP_HISTORY_freq" : "00000100 000000",
+	"SPINUP_HISTORY_dur" : "00000100 000000",
+	"SaveLevelEdgeDiags" : "True",
+	"SaveStateMet" : "True",
 	"HistorySpecConcToSave" : [
 		"CH4"
 	],
-	"comment009" : "******************************************************************************",
-	"comment010" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
-	"comment011" : "******************************************************************************",
+	"HistoryLevelEdgeDiagsToSave" : [
+		"Met_PEDGE"
+	],
+	"HistoryStateMetToSave" : [
+		"Met_AD"
+	],
+	"comment012" : "******************************************************************************",
+	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
+	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
 		"CH4_TROPOMI": "CH4"
 	},
@@ -95,9 +106,9 @@
 	"TROPOMI_CH4_filter_winter_lat" : "50",
 	"TROPOMI_CH4_filter_roughness" : "60",
 	"TROPOMI_CH4_filter_swir_aot" : "0.1",
-	"comment012" : "******************************************************************************",
-	"comment013" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
-	"comment014" : "******************************************************************************",
+	"comment015" : "******************************************************************************",
+	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
+	"comment017" : "******************************************************************************",
 	"MaskOceanScaleFactor" : [
 		"True"
 	],
@@ -120,9 +131,9 @@
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : [
 		"0.5"
 	],
-	"comment015" : "******************************************************************************",
-	"comment016" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
-	"comment017" : "******************************************************************************",
+	"comment018" : "******************************************************************************",
+	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
+	"comment020" : "******************************************************************************",
 	"OBS_ERROR_MATRICES": [
 		"0.10"
 	],
@@ -134,9 +145,9 @@
 	"LOCALIZATION_RADIUS_km" : "2000",
 	"AveragePriorAndPosterior" : "True",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
-	"comment018" : "**********************************************************************************",
-	"comment019" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
-	"comment020" : "**********************************************************************************",
+	"comment021" : "**********************************************************************************",
+	"comment022" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
+	"comment023" : "**********************************************************************************",
 	"TESTBIAS": "0.5",
 	"OBS_OPERATORS": [
 		"SumOperator"

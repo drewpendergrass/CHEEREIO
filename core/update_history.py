@@ -74,11 +74,11 @@ class HISTORY_Translator():
 				if line.startswith(f'  {collection}.duration'):
 					whitespace = " "*(18-len(collection))
 					self.lines[num] = f'  {collection}.duration:{whitespace}{durstr}\n'
-	def findSpecConcLines(self):
+	def findSectionLines(self,sectionname):
 		counting = False
 		startstop = []
 		for num,line in enumerate(self.lines):
-			if line.startswith('  SpeciesConc.fields:'):
+			if line.startswith(f'  {sectionname}.fields:'):
 				counting = True
 				startstop.append(num)
 				continue
@@ -86,7 +86,7 @@ class HISTORY_Translator():
 				counting = False
 				startstop.append(num)
 				break
-		self.SpecConcStartStopLines = startstop
+		return startstop
 	def prepLevelEdgeDiags(self):
 		if self.spc_config['SaveLevelEdgeDiags']=='True':
 			print('Turning on the LevelEdgeDiags collection in HISTORY.rc!')
@@ -96,23 +96,54 @@ class HISTORY_Translator():
 					break
 		else:
 			print('Turning off the LevelEdgeDiags collection in HISTORY.rc!')
-	def makeSpecConcString(self,species,isFirst):
-		if isFirst:
-			startstring = "  SpeciesConc.fields:         "
+	def prepStateMet(self):
+		if self.spc_config['SaveStateMet']=='True':
+			print('Turning on the StateMet collection in HISTORY.rc!')
+			for num,line in enumerate(self.lines):
+				if "#'StateMet'," in line:
+					self.lines[num] = self.lines[num].replace('#','')
+					break
 		else:
-			startstring = "                              "
-		secondstring = "'SpeciesConc_"
-		endwhitespacecount=18-len(species)
+			print('Turning off the StateMet collection in HISTORY.rc!')
+	def makeSectionString(self,species,isFirst,sectionname):
+		if sectionname=='SpeciesConc':
+			if isFirst:
+				startstring = "  SpeciesConc.fields:         "
+			else:
+				startstring = "                              "
+			secondstring = "'SpeciesConc_"
+			endwhitespacecount=18-len(species)
+		elif sectionname=='LevelEdgeDiags':
+			if isFirst:
+				startstring = "  LevelEdgeDiags.fields:      "
+			else:
+				startstring = "                              "
+			secondstring = ""
+			endwhitespacecount=30-len(species)
+		elif sectionname=='StateMet':
+			if isFirst:
+				startstring = "  StateMet.fields:            "
+			else:
+				startstring = "                              "
+			secondstring = ""
+			endwhitespacecount=30-len(species)
 		finalstring = "',\n"
 		return startstring+secondstring+species+(' '*endwhitespacecount)+finalstring
-	def customizeSpecConc(self):
-		print('Overwriting default SpeciesConc collection in HISTORY.rc.')
-		del self.lines[self.SpecConcStartStopLines[0]:self.SpecConcStartStopLines[1]]
+	def customizeSection(self,sectionname):
+		print(f'Overwriting default {sectionname} collection in HISTORY.rc.')
+		startstop = self.findSectionLines(sectionname)
+		del self.lines[startstop[0]:startstop[1]]
 		isFirst = True
-		for count, species in enumerate(self.spc_config['HistorySpecConcToSave']):
-			print(f'Adding {species} to the SpeciesConc collection in HISTORY.rc.')
-			self.lines.insert(self.SpecConcStartStopLines[0]+count, self.makeSpecConcString(species,isFirst))
+		for count, species in enumerate(self.spc_config[f'History{sectionname}ToSave']):
+			print(f'Adding {species} to the {sectionname} collection in HISTORY.rc.')
+			self.lines.insert(startstop[0]+count, self.makeSectionString(species,isFirst,sectionname))
 			isFirst = False
+	def customizeAllSections(self):
+		self.customizeSection('SpeciesConc')
+		if self.spc_config['SaveLevelEdgeDiags']=='True':
+			self.customizeSection('LevelEdgeDiags')
+		if self.spc_config['SaveStateMet']=='True':
+			self.customizeSection('StateMet')
 	def writeHistoryConfig(self):
 		with open(self.historyrc_path+'HISTORY.rc', 'w') as f:
 			for line in self.lines:
@@ -124,15 +155,15 @@ trans = HISTORY_Translator()
 
 if settingsstr=="TEMPLATEDIR":
 	trans.prepLevelEdgeDiags()
+	trans.prepStateMet()
 	trans.updateRestartDurationFrequency(isFirst="First")
-	trans.findSpecConcLines()
-	trans.customizeSpecConc()
+	trans.customizeAllSections()
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="SPINUP":
 	trans.prepLevelEdgeDiags()
+	trans.prepStateMet()
 	trans.updateRestartDurationFrequency(isFirst="Spinup")
-	trans.findSpecConcLines()
-	trans.customizeSpecConc()
+	trans.customizeAllSections()
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
 elif settingsstr=="PREPMAIN":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
