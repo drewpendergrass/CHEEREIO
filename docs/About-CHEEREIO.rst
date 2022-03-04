@@ -6,6 +6,17 @@ What CHEEREIO is
 
 The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a package that wraps the `GEOS-Chem <https://github.com/geoschem>`__ chemical transport model source code. After a simple modification of a single configuration file (``ens_config.json``), CHEEREIO automatically produces and compiles an ensemble of GEOS-Chem run directories. Each ensemble member comes with a randomized set of gridded emissions scaling factors, drawn from a prior distribution reflecting emissions uncertainties, for the set of species specified by the user. As the ensemble of runs progresses, CHEEREIO will periodically pause the ensemble, compare with a set of observations (i.e. satellite, surface, and/or aircraft), and update relevant emissions scaling factors and chemical concentrations to best match reality given the uncertainties of measurements and model. CHEEREIO calculates this update via the 4D Asynchronous Localized Ensemble Transform Kalman Filter (4D-LETKF) as described in `Hunt. et. al., [2007] <https://doi.org/10.1016/j.physd.2006.11.008>`__. Because this approach is model agnostic (specifically, it does not rely on the adjoint), CHEEREIO supports emissions updates and chemical concentration corrections for arbitrary configurations of the GEOS-Chem model. However, the current CHEEREIO codebase assumes that GEOS-Chem code is version 13.0.0 or later.
 
+How CHEEREIO works
+-----------------------------
+
+Although the mathematics of CHEEREIO is complex (see :ref:`Further Reading` for details), the algorithm that powers this package is quite intuitive. The LETKF algorithm follows an ensemble approach. This means that CHEEREIO is managing many (often 32) simultaneously running simulations of the atmosphere, each representing different assumptions (usually represented in the form of varying emissions scaling factors). The ensemble itself thus represents our uncertainty of the atmospheric state that arises from the uncertainty in our assumptions (e.g., the range of ammonia concentrations we would expect to arise in the atmosphere given our uncertainty in ammonia emissions). We might have some observations of the real atmosphere at a given time, such as those from a satellite column, from surface measurements, or from an aircraft campaign. This observation, which comes with its own uncertainty, constrains the reasonable range of concentrations our model should represent. Even if we only observe a related species (such as SO\ :sub:`2`\ , NO\ :sub:`2`\ , or even AOD, which might give us a clue on the state of Sulfate-Nitrate-Ammonium aerosol formation), we still may have some useful information that will allow CHEEREIO to update the emissions and concentrations of interest. As the figure below demonstrates, this results in updates of the entire ensemble to better match reality.
+
+.. image:: ensemble_diagram.png
+  :width: 600
+  :alt: Figure demonstrating how ensemble of simulations is adjusted to match observations over time. 
+
+One way to think about this is that the ensemble emulates the error matrix for the model, giving us a kind of "low rank approximation" of model uncertainty. Since we know the error matrix for the observations (or at least can make an educated guess), then we can consider LETKF as a Bayesian method that updates a prior distribution of concentrations and emissions to create a posterior ensemble that better reflects reality. With each update, LETKF accumulates information about the true atmospheric state.
+
 An overview of the CHEEREIO workflow
 -----------------------------
 
@@ -22,18 +33,6 @@ The CHEEREIO workflow is described in detail throughout this documentation, but 
 .. image:: cheereio_workflow.png
   :width: 600
   :alt: Figure demonstrating how CHEEREIO installation and runtime works. 
-
-
-How CHEEREIO works
------------------------------
-
-Although the mathematics of CHEEREIO is complex (see :ref:`Further Reading` for details), the algorithm that powers this package is quite intuitive. The LETKF algorithm follows an ensemble approach. This means that CHEEREIO is managing many (often 32) simultaneously running simulations of the atmosphere, each representing different assumptions (usually represented in the form of varying emissions scaling factors). The ensemble itself thus represents our uncertainty of the atmospheric state that arises from the uncertainty in our assumptions (e.g., the range of ammonia concentrations we would expect to arise in the atmosphere given our uncertainty in ammonia emissions). We might have some observations of the real atmosphere at a given time, such as those from a satellite column, from surface measurements, or from an aircraft campaign. This observation, which comes with its own uncertainty, constrains the reasonable range of concentrations our model should represent. Even if we only observe a related species (such as SO\ :sub:`2`\ , NO\ :sub:`2`\ , or even AOD, which might give us a clue on the state of Sulfate-Nitrate-Ammonium aerosol formation), we still may have some useful information that will allow CHEEREIO to update the emissions and concentrations of interest. As the figure below demonstrates, this results in updates of the entire ensemble to better match reality.
-
-.. image:: ensemble_diagram.png
-  :width: 600
-  :alt: Figure demonstrating how ensemble of simulations is adjusted to match observations over time. 
-
-One way to think about this is that the ensemble emulates the error matrix for the model, giving us a kind of "low rank approximation" of model uncertainty. Since we know the error matrix for the observations (or at least can make an educated guess), then we can consider LETKF as a Bayesian method that updates a prior distribution of concentrations and emissions to create a posterior ensemble that better reflects reality. With each update, LETKF accumulates information about the true atmospheric state.
 
 .. _Further reading:
 
