@@ -83,6 +83,7 @@
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "True",
+	"SaveArea" : "True",
 	"HistorySpecConcToSave" : [
 		"NO",
 		"NO2",
@@ -174,5 +175,5 @@
 	"comment023" : "**********************************************************************************",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
-	"postprocess_save_albedo":"True"
+	"postprocess_save_albedo":"False"
 }

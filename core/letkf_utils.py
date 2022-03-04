@@ -646,6 +646,9 @@ class Assimilator(object):
 		self.InflateScalingsToXOfPreviousStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfPreviousStandardDeviation"]]
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=[float(s) for s in spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
+		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
+		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
+		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
@@ -661,7 +664,7 @@ class Assimilator(object):
 		if self.testing:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		self.inflation = float(spc_config['INFLATION_FACTOR'])
-		self.histens = HIST_Ens(timestamp,True,testing=self.testing)
+		self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,testing=self.testing)
 		if self.testing:
 			print(f"Assimilator construction complete")
 	def getLat(self):

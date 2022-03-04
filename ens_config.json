@@ -59,6 +59,7 @@
 	"comment009" : "******************************************************************************",
 	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
 	"comment011" : "******************************************************************************",
+	"useArea" : "False",
 	"HISTORY_collections_to_customize" : [
 		"SpeciesConc",
 		"CH4",
@@ -70,7 +71,7 @@
 	"SPINUP_HISTORY_freq" : "00000100 000000",
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"SaveLevelEdgeDiags" : "True",
-	"SaveStateMet" : "True",
+	"SaveStateMet" : "False",
 	"HistorySpecConcToSave" : [
 		"CH4"
 	],
