@@ -15,7 +15,7 @@
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
 	"BC_FILES" : "",
-	"sim_name" : "fullchem",
+	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
 	"sim_extra_option" : "none",
 	"DO_SPINUP" : "false",
@@ -28,19 +28,9 @@
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190108",
 	"END_DATE" : "20190115",
-	"HISTORY_collections_to_customize" : [
-		"SpeciesConc",
-		"CH4",
-		"LevelEdgeDiags"
-	],
-	"HISTORY_freq" : "00000000 010000",
-	"HISTORY_dur" : "00000000 010000",
-	"SPINUP_HISTORY_freq" : "00000100 000000",
-	"SPINUP_HISTORY_dur" : "00000100 000000",
-	"nEnsemble" : "16",
+	"nEnsemble" : "24",
 	"pPERT" : "4",
 	"SIMULATE_NATURE" : "false",
-	"SaveLevelEdgeDiags" : "True",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
@@ -78,6 +68,21 @@
 	"CONTROL_VECTOR_EMIS" : {
 		"NOx":["NO","NO2"]
 	},
+	"comment009" : "******************************************************************************",
+	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
+	"comment011" : "******************************************************************************",
+	"HISTORY_collections_to_customize" : [
+		"SpeciesConc",
+		"CH4",
+		"LevelEdgeDiags",
+		"StateMet"
+	],
+	"HISTORY_freq" : "00000000 010000",
+	"HISTORY_dur" : "00000000 010000",
+	"SPINUP_HISTORY_freq" : "00000100 000000",
+	"SPINUP_HISTORY_dur" : "00000100 000000",
+	"SaveLevelEdgeDiags" : "True",
+	"SaveStateMet" : "True",
 	"HistorySpecConcToSave" : [
 		"NO",
 		"NO2",
@@ -87,9 +92,15 @@
 		"MPAN",
 		"N2O5"
 	],
-	"comment009" : "******************************************************************************",
-	"comment010" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
-	"comment011" : "******************************************************************************",
+	"HistoryLevelEdgeDiagsToSave" : [
+		"Met_PEDGE"
+	],
+	"HistoryStateMetToSave" : [
+		"Met_AD"
+	],
+	"comment012" : "******************************************************************************",
+	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
+	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
 		"NO2_TROPOMI": "NO2"
 	},
@@ -105,7 +116,7 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
-	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "True",
+	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "False",
 	"TROPOMI_CH4_FILTERS" : "False",
 	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
 	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
@@ -113,9 +124,9 @@
 	"TROPOMI_CH4_filter_winter_lat" : "50",
 	"TROPOMI_CH4_filter_roughness" : "60",
 	"TROPOMI_CH4_filter_swir_aot" : "0.1",
-	"comment012" : "******************************************************************************",
-	"comment013" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
-	"comment014" : "******************************************************************************",
+	"comment015" : "******************************************************************************",
+	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
+	"comment017" : "******************************************************************************",
 	"MaskOceanScaleFactor" : [
 		"True"
 	],
@@ -138,11 +149,17 @@
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : [
 		"0.5"
 	],
-	"comment015" : "******************************************************************************",
-	"comment016" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
-	"comment017" : "******************************************************************************",
-	"OBS_ERROR_MATRICES": [
+	"comment018" : "******************************************************************************",
+	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
+	"comment020" : "******************************************************************************",
+	"REGULARIZING_FACTOR_GAMMA": [
 		"0.10"
+	],
+	"OBS_COVARIANCE": [
+		"0.1"
+	],
+	"OBS_COVARIANCE_TYPE":[
+		"relative"
 	],
 	"INFLATION_FACTOR": "0.08",
 	"ASSIM_TIME": "24",
@@ -150,21 +167,12 @@
 	"MINNUMOBS" : "5",
 	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "1000",
-	"AveragePriorAndPosterior" : "True",
+	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
-	"comment018" : "**********************************************************************************",
-	"comment019" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
-	"comment020" : "**********************************************************************************",
-	"TESTBIAS": "0.5",
-	"OBS_OPERATORS": [
-		"SumOperator"
-	],
-	"NATURE_H_FUNCTIONS" : [
-		"column_sum"
-	],
+	"comment021" : "**********************************************************************************",
+	"comment022" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
+	"comment023" : "**********************************************************************************",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
-	"postprocess_save_albedo":"False"
+	"postprocess_save_albedo":"True"
 }
-
-

@@ -149,21 +149,12 @@
 	"MINNUMOBS" : "5",
 	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "2000",
-	"AveragePriorAndPosterior" : "True",
+	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"comment021" : "**********************************************************************************",
 	"comment022" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
 	"comment023" : "**********************************************************************************",
-	"TESTBIAS": "0.5",
-	"OBS_OPERATORS": [
-		"SumOperator"
-	],
-	"NATURE_H_FUNCTIONS" : [
-		"column_sum"
-	],
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
 	"postprocess_save_albedo":"True"
 }
-
-
