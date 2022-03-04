@@ -51,6 +51,9 @@ def read_tropomi(filename, species, filterinfo=None):
 		raise ValueError('Species not supported')
 	met['qa_value'] = qa[sl,gp]
 	if species=='NO2':
+		airmassfactor_trop = data['air_mass_factor_troposphere'].values[0,sl,gp]
+		airmassfactor_total = data['air_mass_factor_total'].values[0,sl,gp]
+		trop_layer_index = data['tm5_tropopause_layer_index'].values[0,sl,gp].astype(int)
 		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,sl,gp]
 	elif species=='CH4':
 		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
@@ -64,6 +67,11 @@ def read_tropomi(filename, species, filterinfo=None):
 
 	if species=='NO2':
 		met['column_AK'] = data['averaging_kernel'].values[0,sl,gp,::-1]
+		#Multiply by total airmass over trop airmass, as in PUM 8.8 "Using the averaging kernel"
+		met['column_AK'] = met['column_AK'] * (airmassfactor_total/airmassfactor_trop).reshape((len(airmassfactor_total),1))
+		#set averaging kernel above tropopause to 0, as in PUM 8.8. Layer is 0-indexed
+		for i in range(len(airmassfactor_total)):
+			met['column_AK'][i,(trop_layer_index[i]+1):] = 0
 		a = np.append(data['tm5_constant_a'].values[:,0],data['tm5_constant_a'].values[-1,1]) #layer, vertices (bottom/top)
 		b = np.append(data['tm5_constant_b'].values[:,0],data['tm5_constant_b'].values[-1,1])
 
@@ -280,8 +288,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 	if GC_M_on_sat: #Take partial columns, which also involves the area and air mass
 		GC_SPC = GC_SPC/0.02897 #convert to mol/kg air
 		GC_SPC = GC_SPC*GC_M_on_sat #Convert to mol of interest per box
-		GC_SPC = np.cumsum(GC_SPC,axis=1) #Convert to partial column
-		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per m2, which is TROPOMI dimensions
+		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per box per m2, which is TROPOMI dimensions
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
 	else:
