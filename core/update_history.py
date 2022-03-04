@@ -118,14 +118,14 @@ class HISTORY_Translator():
 				startstring = "  LevelEdgeDiags.fields:      "
 			else:
 				startstring = "                              "
-			secondstring = ""
+			secondstring = "'"
 			endwhitespacecount=30-len(species)
 		elif sectionname=='StateMet':
 			if isFirst:
 				startstring = "  StateMet.fields:            "
 			else:
 				startstring = "                              "
-			secondstring = ""
+			secondstring = "'"
 			endwhitespacecount=30-len(species)
 		finalstring = "',\n"
 		return startstring+secondstring+species+(' '*endwhitespacecount)+finalstring
