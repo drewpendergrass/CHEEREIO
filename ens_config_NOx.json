@@ -15,7 +15,7 @@
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
 	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
 	"BC_FILES" : "",
-	"sim_name" : "CH4",
+	"sim_name" : "fullchem",
 	"chemgrid" : "trop+strat",
 	"sim_extra_option" : "none",
 	"DO_SPINUP" : "false",
