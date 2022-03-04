@@ -138,7 +138,7 @@
 		"0.10"
 	],
 	"OBS_COVARIANCE": [
-		"0.10"
+		"15"
 	],
 	"OBS_COVARIANCE_TYPE":[
 		"absolute"

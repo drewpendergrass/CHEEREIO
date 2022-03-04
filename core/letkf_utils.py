@@ -420,10 +420,25 @@ class HIST_Ens(object):
 		self.bigYDict = {}
 		for spec in self.satSpecies:
 			self.bigYDict[spec] = self.getColsforSpecies(spec)
-	#This is just a filler.
+	#Gamma^-1 applied in this stage.
 	def makeRforSpecies(self,species,latind,lonind):
+		speciesind = self.satSpecies.index(species)
+		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
+		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 		inds = self.getIndsOfInterest(species,latind,lonind)
-		return np.diag(np.repeat(15,len(inds)))
+		if errtype=='absolute':
+			to_return = np.diag(np.repeat(errval,len(inds)))
+		elif errtype=='relative':
+			if self.spc_config['AV_TO_GC_GRID']=="True":
+				_,satcol,_,_,_,_ = self.bigYDict[spec]
+			else:
+				_,satcol,_,_,_ = self.bigYDict[spec]
+			satcol = satcol[ind]
+			to_return = np.diag(satcol*errval)
+		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
+		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
+		to_return*=invgamma
+		return to_return
 	def makeR(self,latind,lonind):
 		errmats = []
 		for spec in self.satSpecies:
