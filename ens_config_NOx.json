@@ -84,7 +84,7 @@
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "True",
 	"SaveArea" : "True",
-	"HistorySpecConcToSave" : [
+	"HistorySpeciesConcToSave" : [
 		"NO",
 		"NO2",
 		"HNO3",

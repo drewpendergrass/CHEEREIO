@@ -72,7 +72,7 @@
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "False",
-	"HistorySpecConcToSave" : [
+	"HistorySpeciesConcToSave" : [
 		"CH4"
 	],
 	"HistoryLevelEdgeDiagsToSave" : [
