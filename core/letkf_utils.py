@@ -9,7 +9,7 @@ from datetime import date,datetime,timedelta
 
 def getLETKFConfig(testing=False):
 	data = tx.getSpeciesConfig(testing)
-	err_config = data['OBS_ERROR_MATRICES']
+	err_config = data['OBS_COVARIANCE']
 	if '.npy' in err_config[0]: #Load error matrices from numpy files
 		raise NotImplementedError 
 	else: #Assume list of strings
