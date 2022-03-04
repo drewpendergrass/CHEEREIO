@@ -10,6 +10,7 @@ from datetime import date,datetime,timedelta
 def getLETKFConfig(testing=False):
 	data = tx.getSpeciesConfig(testing)
 	err_config = data['OBS_COVARIANCE']
+	err_type = data['OBS_COVARIANCE_TYPE']
 	if '.npy' in err_config[0]: #Load error matrices from numpy files
 		raise NotImplementedError 
 	else: #Assume list of strings
@@ -650,13 +651,12 @@ class Assimilator(object):
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=[float(s) for s in spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
-		self.forceOverrideNature=True #Set to true to ignore existing nature directory. Only for testing
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		if self.testing:
 			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if (ens==0) and (not self.forceOverrideNature):
+			if ens==0:
 				self.nature = GC_Translator(directory, timestamp, False,self.testing)
 			else: 
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
@@ -664,15 +664,8 @@ class Assimilator(object):
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		if self.testing:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
-		if self.nature is None:
-			self.full4D = True #Implement me
-			self.inflation = float(spc_config['INFLATION_FACTOR'])
-			self.histens = HIST_Ens(timestamp,True,testing=self.testing)
-		else:
-			self.full4D = False
-			error_multipliers_or_matrices, self.ObsOperatorClass_list,nature_h_functions,self.inflation = getLETKFConfig(self.testing)
-			self.NatureHelperInstance = obs.NatureHelper(self.nature,self.observed_species,nature_h_functions,error_multipliers_or_matrices,self.testing)
-			self.makeObsOps()
+		self.inflation = float(spc_config['INFLATION_FACTOR'])
+		self.histens = HIST_Ens(timestamp,True,testing=self.testing)
 		if self.testing:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -681,13 +674,6 @@ class Assimilator(object):
 		return self.gt[1].getLon()
 	def getLev(self):
 		return self.gt[1].getLev()
-	def makeObsOps(self):
-		if self.testing:
-			print(f'makeObsOps called in Assimilator')
-		self.ObsOp = {}
-		for i,obs_spec_key in enumerate(self.observed_species.keys()):
-			ObsOp_instance = self.NatureHelperInstance.makeObsOp(obs_spec_key,self.ObsOperatorClass_list[i])
-			self.ObsOp[obs_spec_key] = ObsOp_instance
 	def combineEnsemble(self,latind=None,lonind=None):
 		if self.testing:
 			print(f'combineEnsemble called in Assimilator for lat/lon inds {(latind,lonind)}')
@@ -712,23 +698,6 @@ class Assimilator(object):
 		if self.testing:
 			print(f'Ensemble mean at {(latval,lonval)} has dimensions {np.shape(state_mean)} and bigX at at {(latval,lonval)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
-	def ensObsMeanPertDiff(self,latval,lonval):
-		if self.testing:
-			print(f'ensObsMeanPertDiff called in Assimilator for lat/lon inds {(latval,lonval)}')
-		obsmeans = []
-		obsperts = []
-		obsdiffs = []
-		for obskey,species in zip(list(self.observed_species.keys()),list(self.observed_species.values())):
-			obsmean,obspert  = self.ensObsMeanAndPertForSpecies(obskey,species,latval,lonval)
-			obsmeans.append(obsmean)
-			obsperts.append(obspert)
-			obsdiffs.append(self.obsDiffForSpecies(obskey,obsmean,latval,lonval))
-		full_obsmeans = np.concatenate(obsmeans)
-		full_obsperts = np.concatenate(obsperts,axis = 0)
-		full_obsdiffs = np.concatenate(obsdiffs)
-		if self.testing:
-			print(f'Full ObsMeans at {(latval,lonval)} has dimensions {np.shape(full_obsmeans)}; Full ObsPerts at {(latval,lonval)} has dimensions {np.shape(full_obsperts)}; and Full ObsDiffs at {(latval,lonval)} has dimensions {np.shape(full_obsdiffs)}.')
-		return [full_obsmeans,full_obsperts,full_obsdiffs]
 	def combineEnsembleForSpecies(self,species):
 		if self.testing:
 			print(f'combineEnsembleForSpecies called in Assimilator for species {species}')
@@ -745,22 +714,10 @@ class Assimilator(object):
 			if i!=firstens:
 				conc4D[:,:,:,i-1] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
-	def ensObsMeanAndPertForSpecies(self, observation_key,species,latval,lonval):
-		if self.testing:
-			print(f'ensObsMeanAndPertForSpecies called for keys {observation_key} -> {species} in Assimilator for lat/lon inds {(latval,lonval)}')
-		spec_4D = self.combineEnsembleForSpecies(species)
-		return self.ObsOp[observation_key].obsMeanAndPert(spec_4D,latval,lonval)
-	def obsDiffForSpecies(self,observation_key,ensvec,latval,lonval):
-		if self.testing:
-			print(f'prepareMeansAndPerts called for {observation_key} in Assimilator for lat/lon inds {(latval,lonval)}')
-		return self.ObsOp[observation_key].obsDiff(ensvec,latval,lonval)
 	def prepareMeansAndPerts(self,latval,lonval):
 		if self.testing:
 			print(f'prepareMeansAndPerts called in Assimilator for lat/lon inds {(latval,lonval)}')
-		if self.full4D:
-			self.ybar_background, self.Ypert_background, self.ydiff = self.histens.getLocObsMeanPertDiff(latval,lonval)
-		else:
-			self.ybar_background, self.Ypert_background, self.ydiff = self.ensObsMeanPertDiff(latval,lonval)
+		self.ybar_background, self.Ypert_background, self.ydiff = self.histens.getLocObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
 		if self.testing:
 			print(f'ybar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ybar_background)}.')
