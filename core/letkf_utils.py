@@ -343,7 +343,7 @@ class HIST_Translator(object):
 				lev_val = xr.load_dataset(lefile)[f'Met_PEDGE']
 				data_val = xr.merge([hist_val, lev_val])
 				dataset.append(data_val)
-		elif: useStateMet:
+		elif useStateMet:
 			specconc_list,met_list=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet)
 			for specfile,metfile in zip(specconc_list,met_list):
 				hist_val = xr.load_dataset(specfile)[f'SpeciesConc_{species}']
