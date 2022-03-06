@@ -727,13 +727,7 @@ class Assimilator(object):
 	def makeR(self,latind=None,lonind=None):
 		if self.testing:
 			print(f"Making R for lat/lon inds {(latind,lonind)}.")
-		if self.full4D:
-			self.R = self.histens.makeR(latind,lonind)
-		else:
-			errmats = []
-			for species in self.observed_species:
-				errmats.append(self.ObsOp[species].obsinfo.getObsErr(latind,lonind))
-			self.R = la.block_diag(*errmats)
+		self.R = self.histens.makeR(latind,lonind)
 		if self.testing:
 			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
