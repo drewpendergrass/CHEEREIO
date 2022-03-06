@@ -288,6 +288,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 	if GC_M_on_sat is not None: #Take partial columns, which also involves the area and air mass
 		GC_SPC = GC_SPC/0.02897 #convert to mol/kg air
 		GC_SPC = GC_SPC*GC_M_on_sat #Convert to mol of interest per box
+		GC_area = GC_area.reshape((len(GC_area),1)) #reshape to make conformable
 		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per box per m2, which is TROPOMI dimensions
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
