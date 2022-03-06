@@ -223,7 +223,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False):
 	if lowmem:
 		satshape = np.shape(sat_edges)
 		finalshape = (satshape[0],satshape[1]-1)
-		if GC_M:
+		if GC_M is not None:
 			GC_M_on_sat = np.zeros(finalshape)
 		GC_on_sat = np.zeros(finalshape)
 		for i in range(np.shape(GC_edges)[0]):
@@ -240,7 +240,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False):
 			GC_on_sat_subset = (GC_to_sat*GC_SPC[i, :, None]).sum(axis=0)
 			GC_on_sat_subset = GC_on_sat_subset/GC_to_sat.sum(axis=0)
 			GC_on_sat[i,:] = GC_on_sat_subset
-			if GC_M:
+			if GC_M is not None:
 				GC_M_on_sat_subset = (GC_to_sat*GC_M[i, :, None]).sum(axis=0)
 				GC_M_on_sat_subset = GC_M_on_sat_subset/GC_to_sat.sum(axis=0)
 				GC_M_on_sat[i,:] = GC_M_on_sat_subset
@@ -263,10 +263,10 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False):
 		# Now map the GC CH4 to the satellite levels
 		GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
-		if GC_M:
+		if GC_M is not None:
 			GC_M_on_sat = (GC_to_sat*GC_M[:, :, None]).sum(axis=1)
 			GC_M_on_sat = GC_M_on_sat/GC_to_sat.sum(axis=1)
-	if GC_M:
+	if GC_M is not None:
 		return [GC_on_sat,GC_M_on_sat]
 	else:
 		return GC_on_sat
@@ -285,7 +285,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
-	if GC_M_on_sat: #Take partial columns, which also involves the area and air mass
+	if GC_M_on_sat is not None: #Take partial columns, which also involves the area and air mass
 		GC_SPC = GC_SPC/0.02897 #convert to mol/kg air
 		GC_SPC = GC_SPC*GC_M_on_sat #Convert to mol of interest per box
 		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per box per m2, which is TROPOMI dimensions
