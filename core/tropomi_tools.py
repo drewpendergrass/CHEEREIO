@@ -194,7 +194,7 @@ def getGCCols(GC,TROPOMI,species,returninds=False,returnStateMet=False,GC_area=N
 	to_return = [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
 	if returnStateMet:
 		to_return.append(GC[f'Met_AD'].values[t,:,j,i])
-	if GC_area:
+	if GC_area is not None:
 		to_return.append(GC_area['AREA'].values[j,i])
 	else:
 		to_return.append(None)
