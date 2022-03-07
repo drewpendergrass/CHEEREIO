@@ -430,10 +430,10 @@ class HIST_Ens(object):
 			to_return = np.diag(np.repeat(errval,len(inds)))
 		elif errtype=='relative':
 			if self.spc_config['AV_TO_GC_GRID']=="True":
-				_,satcol,_,_,_,_ = self.bigYDict[spec]
+				_,satcol,_,_,_,_ = self.bigYDict[species]
 			else:
-				_,satcol,_,_,_ = self.bigYDict[spec]
-			satcol = satcol[ind]
+				_,satcol,_,_,_ = self.bigYDict[species]
+			satcol = satcol[inds]
 			to_return = np.diag(satcol*errval)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
