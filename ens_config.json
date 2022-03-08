@@ -100,6 +100,7 @@
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "False",
+	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE" : "100000",
 	"TROPOMI_CH4_FILTERS" : "True",
 	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
 	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
