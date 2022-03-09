@@ -111,11 +111,11 @@ def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,f
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(timestamp_list, use_numav = True, use_albedo=True, fullpath_output_name = None):
+def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,useArea=False, use_numav = True, use_albedo=True, fullpath_output_name = None):
 	masterY = {}
 	for timestamp in timestamp_list:
 		print(f'Processing the Y dictionary for time {timestamp}')
-		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,testing=False,saveAlbedo=use_albedo)
+		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,testing=False,saveAlbedo=use_albedo)
 		bigy = hist.bigYDict 
 		for spec in list(bigy.keys()):
 			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec][4]]
