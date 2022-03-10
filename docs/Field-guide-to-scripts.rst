@@ -3,10 +3,10 @@ Field guide to all core CHEEREIO scripts
 
 Intro TKTKT
 
-Installation- and spinup-time scripts
+Installation and spinup scripts
 -------------
 
-Change_HistCollections_DurFreq.sh
+change_histcollections_durfreq.sh
 ~~~~~~~~~~~~~
 
 change_histrst_durfreq.sh
@@ -36,7 +36,7 @@ update_history.py
 Run management scripts
 -------------
 
-Advance_Timestep.py
+advance_timestep.py
 ~~~~~~~~~~~~~
 
 check_and_complete_assimilation.sh
@@ -87,8 +87,10 @@ tropomi_tools.py
 Deprecated scripts
 -------------
 
-diff_col.py
-observation_operators.py
-randomize_restarts.py
-regrid_landmask_fraction.py
-tropomi_loader.py
+The following scripts have been deprecated and will be removed before the official release of CHEEREIO:
+
+* diff_col.py
+* observation_operators.py
+* randomize_restarts.py
+* regrid_landmask_fraction.py
+* tropomi_loader.py
