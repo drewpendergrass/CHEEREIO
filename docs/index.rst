@@ -21,7 +21,7 @@ This manual assumes that you are familiar with setting up and running the GEOS-C
 I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at pendergrass [AT] g [DOT] harvard [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. Bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
 
 .. toctree::
-   :maxdepth: 3   
+   :maxdepth: 4   
    :caption: Basics of CHEEREIO
 
    About-CHEEREIO
@@ -29,7 +29,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    Overview-Of-Capabilities
 
 .. toctree::
-   :maxdepth: 3   
+   :maxdepth: 4  
    :caption: Using the ensemble
 
    The-ensemble-configuration-file
@@ -38,14 +38,14 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    Running-the-ensemble
 
 .. toctree::
-   :maxdepth: 3   
+   :maxdepth: 4 
    :caption: The assimilation toolkit
 
    The-letkf-utils-module
    The-observation-operator-module
 
 .. toctree::
-   :maxdepth: 3   
+   :maxdepth: 4
    :caption: Postprocessing
 
    Combining-ensemble-runs
