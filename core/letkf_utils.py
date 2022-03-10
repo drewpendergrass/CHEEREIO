@@ -427,14 +427,14 @@ class HIST_Ens(object):
 		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 		inds = self.getIndsOfInterest(species,latind,lonind)
 		if errtype=='absolute':
-			to_return = np.diag(np.repeat(errval,len(inds)))
+			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
 		elif errtype=='relative':
 			if self.spc_config['AV_TO_GC_GRID']=="True":
 				_,satcol,_,_,_,_ = self.bigYDict[species]
 			else:
 				_,satcol,_,_,_ = self.bigYDict[species]
 			satcol = satcol[inds]
-			to_return = np.diag(satcol*errval)
+			to_return = np.diag((satcol*errval)**2) #multiply measurements by relative error, then square it.
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
 		to_return*=invgamma
