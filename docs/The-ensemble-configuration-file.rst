@@ -116,7 +116,7 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 * CondaEnv: The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the YAML file that ships with CHEEREIO in the ``environments/`` folder.
 * MaxPar: Maximum number of cores to use while assimilating columns in parallel using CHEEREIO, maxing out at ``NumCores``. Setting this number smaller than NumCores saves on memory but adds to the assimilation time. 
 
-Species in state/control/observation vectors
+Species in state/control vectors
 ~~~~~~~~~~~~~
 
 * STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array. This is an example for NO\ :sub:`x` data assimilation: 
