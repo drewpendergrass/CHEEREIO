@@ -32,7 +32,8 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    :maxdepth: 3   
    :caption: Using the ensemble
 
-   Deploying-the-ensemble
+   The-ensemble-configuration-file
+   The-setup ensemble-script
    Guide-to-the-ensemble-directory
    Running-the-ensemble
 
