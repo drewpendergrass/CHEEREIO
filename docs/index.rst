@@ -41,13 +41,14 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    :maxdepth: 4 
    :caption: The assimilation toolkit
 
+   Field-guide-to-scripts
    The-letkf-utils-module
-   The-observation-operator-module
+   Adding-new-observations
 
 .. toctree::
    :maxdepth: 4
    :caption: Postprocessing
 
-   Combining-ensemble-runs
-   Plotting-with-GCPy
+   Postprocess-workflow
+   Postprocessing-API-guidebook
 
