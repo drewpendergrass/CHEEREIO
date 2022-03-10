@@ -35,7 +35,7 @@
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
-	"Partition" : "huce_intel",
+	"Partition" : "huce_bigmem",
 	"Memory" : "72000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "5-00\\:00",
