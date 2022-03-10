@@ -99,7 +99,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 * ASSIM_START_DATE: Date where assimilation begins (YYYYMMDD). After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.  
 * END_DATE: End date for ensemble run (YYYYMMDD).
 * nEnsemble: Number of ensemble members. 32 is usually a good number. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
-* pPERT: Setting for initial emissions scaling factor creation, where the number provided :math:`p` is used to generate random scaling factors from the distribution :math:`p^u,\\ u{\\sim}U(-1,1)`, meaning that u is a uniform random variable ranging from -1 to 1. For example, if ``pPERT`` is "4" then scalings will range from 0.25 to 4, centered on 1.
+* pPERT: Setting for initial emissions scaling factor creation, where the number provided :math:`p` is used to generate random scaling factors from the distribution :math:`p^u,\\ u{\sim}U(-1,1)`, meaning that u is a uniform random variable ranging from -1 to 1. For example, if ``pPERT`` is "4" then scalings will range from 0.25 to 4, centered on 1.
 * SIMULATE_NATURE: *Deprecated: will be removed before official release (DP, 2022/03/09)*. End users should leave this set to "false", as this was used for testing in early CHEEREIO development.  
 
 Cluster settings
