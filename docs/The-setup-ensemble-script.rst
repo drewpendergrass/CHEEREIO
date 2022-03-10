@@ -1,0 +1,15 @@
+.. _Setup Ensemble:
+
+The setup ensemble script
+-------------
+
+The ``setup_ensemble.sh`` script manages the creation of the CHEEREIO template directory, spinup directory (if enabled), scratch directory, and ensemble runs directory (which contains a run directory for each ensemble member). More details on these folders are available in :ref:`Guide to the Ensemble Directory`. Because all the relevant settings are included in ``ens_config.json``, running this script should be relatively easy. ``setup_ensemble.sh`` contains routines from normal GEOS-Chem run directory creation, plus CHEEREIO-specific routines to modify HEMCO_Config, input.geos, and so on.
+
+Here is the recommended use of ``setup_ensemble.sh``:
+
+#. Run ``setup_ensemble.sh`` with ``SetupTemplateRundir`` set to ``true`` and all other main switches set to ``false``. This will create a template run directory that has some important differences from standard GEOS-Chem run directories. ``input.geos``, for example, will have empty tags set at key locations that will allow CHEEREIO to resubmit GEOS-Chem runs for different time periods. ``HEMCO_Config.rc`` is represented by two template files. ``HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc`` is for spinup and "nature" simulations, neither of which include randomized scaling factors. ``HEMCO_Config.rc`` is for ensemble members, all of whom will have perturbed emissions. References to gridded scaling factors are added at key lines in this config file.
+#. **VERIFY THAT HEMCO_Config.rc IS CORRECT**. In particular, while CHEEREIO does support multiple emissions updates within the same species (for example, updating NO agricultural emissions separately from the rest of NO emissions), it is not capable of distinguishing these kinds of species on its own. Instead, it will just add scaling factor references wherever the species of interest emerges. In this case, user must delete the correct duplicated scaling factor. See the `GEOS-Chem Wiki Page for HEMCO_Config.rc <http://wiki.seas.harvard.edu/geos-chem/index.php/The_HEMCO_Config.rc_file>`__ for more information.
+#. Make any additional changes to the template directory that should be reflected in the ensemble.
+#. Re-run ``setup_ensemble.sh`` with ``SetupTemplateRundir`` set to ``false`` and all other main switches set to ``true``. However, if you are not using a Spinup run, you should set the ``SetupSpinupRun`` switch to ``false``. This will take a while, as it involves compiling GEOS-Chem and copying and modifying large files. You can set the ``CompileTemplateRundir`` switch to ``false`` and compile yourself first if you have custom compile-time settings you wish to invoke.
+
+If your ``ens_config.json`` file is set up correctly, then ``setup_ensemble.sh`` should run without problems. Most issues occur with an incorrect software environment. Be sure to activate the one that ships with CHEEREIO or an equivalent.
