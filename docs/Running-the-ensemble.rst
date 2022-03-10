@@ -13,7 +13,7 @@ Information about the ensemble state is continuously recorded during run time, a
 
 * Overall run status for the entire job array (one job per ensemble member) is available from the SLURM scheduler. A good command is ``sacct``, which will display run status (it is especially useful as jobs are pending while resources become available). Each run of GEOS-Chem will be recorded as a separate entry under the ``time`` sub-job label, as each GEOS-Chem run (initialized by the outcome of the previous assimilation step) is submitted with a separate (timed) ``srun`` command. 
 * GEOS-Chem run status for individual ensemble members are available in the ``GC.log`` file in each ensemble member run directory.
-* Additional log files, including shell-level ``.err`` and ``.out`` files and log files containing data about assimilation, are all available in the ``log`` folder under :ref:`Ensemble Runs`.
+* Additional log files, including shell-level ``.err`` and ``.out`` files and log files containing data about assimilation, are all available in the ``log`` folder described in :ref:`Ensemble Runs`.
 
 .. _Run Ensemble Simulations:
 
@@ -51,7 +51,7 @@ Before GEOS-Chem is run or assimilation can be calculated, a few global settings
 	source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 	eval "$(conda shell.bash hook)"
 
-Next, a few global variables are set. The end user will likely not ever make use of CHEEREIO's testing suite, so the variable ``TESTING`` is set to false automatically. A few key directories are stored in the variables ``$ENSDIR`` (the Ensemble Runs directory), ``$MY_PATH`` (path to the directory containing all CHEEREIO ensembles), and ``$RUN_NAME`` (the name of this ensemble). The latter two are grabbed from the ``ens_config.json`` file using the ``jq`` command, which allows shell scripts to access data stored in JSON format on the disk. The variable ``$x`` includes the ensemble member ID (ranging from 1 to the total number of ensemble members).  
+Next, a few global variables are set. CHEEREIO's testing suite is deprecated, so the variable ``TESTING`` is set to false automatically. A few key directories are stored in the variables ``$ENSDIR`` (the Ensemble Runs directory), ``$MY_PATH`` (path to the directory containing all CHEEREIO ensembles), and ``$RUN_NAME`` (the name of this ensemble). The latter two are grabbed from the ``ens_config.json`` file using the ``jq`` command, which allows shell scripts to access data stored in JSON format on the disk. The variable ``$x`` includes the ensemble member ID (ranging from 1 to the total number of ensemble members).  
 
 .. code-block:: bash
 
@@ -81,9 +81,11 @@ Next, a few global variables are set. The end user will likely not ever make use
 	  xstr="${x}"
 	fi
 
-After all these variables are set, then CHEEREIO navigates to the particular ensemble run directory it has been assigned and exports the proper number of OpenMP threads so that GEOS-Chem can exploit parallelization.
+After all these variables are set, then CHEEREIO navigates to the particular ensemble run directory it has been assigned and exports the proper number of OpenMP threads so that GEOS-Chem can exploit parallelization. Since we are about to start are first run of the main program loop, we set a boolean tag ``firstrun`` to ``true``. This is to facilitate ensemble spinup.
 
 .. code-block:: bash
+	
+	firstrun=true
 
 	### Run GEOS-Chem in the directory corresponding to the cluster Id
 	cd  {RunName}_${xstr}
@@ -172,10 +174,14 @@ With all GEOS-Chem runs completed successfully, we can now begin the assimilatio
 	  cd {ASSIM}/core
 	  #Use GNU parallel to submit parallel sruns, except nature
 	  if [ $x -ne 0 ]; then
-	    parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{NumCores}}
+	    if [ {MaxPar} -eq 1 ]; then
+	      bash par_assim.sh ${TESTING} ${x} 1
+	    else
+	      parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{MaxPar}}
+	    fi 
 	  fi
 
-The GNU parallel line works as follows. Up to ``MaxPar`` jobs in a single ensemble member will run the command ``bash par_assim.sh ${TESTING} ${x} {1}`` simultaneously. The ``par_assim.sh`` takes three command line inputs: a boolean signal for whether or not we are in testing mode; and ensemble ID number; and a core ID number. The first two inputs are supplied by global settings, while the third is supplied by a special GNU Parallel substitution line. Each core will then compute the LETKF data assimilation for each of its assigned columns and save them in ``.npy`` format to the scratch directory.
+The GNU parallel line works as follows. Up to ``MaxPar`` jobs in a single ensemble member will run the command ``bash par_assim.sh ${TESTING} ${x} {1}`` simultaneously. The ``par_assim.sh`` takes three command line inputs: a boolean signal for whether or not we are in testing mode; and ensemble ID number; and a core ID number. The first two inputs are supplied by global settings, while the third is supplied by a special GNU Parallel substitution line. Each core will then compute the LETKF data assimilation for each of its assigned columns and save them in ``.npy`` format to the scratch directory. If ``MaxPar`` equals 1 then we can just submit the ``par_assim.sh`` script as a normal bash script.
 
 While loop part 3: Clean-up and ensemble completion 
 ~~~~~~~~~~~~~
@@ -193,13 +199,18 @@ Once this parallelized assimilation is complete, a fair amount of clean up must 
 	    sleep 1
 	  done
 
-Next, we do our usual check for the ``KILL_ENS`` file, which will be generated if any of the CHEEREIO Python scripts fail. If everything works correctly, then ensemble member 1 runs the script ``cleanup.sh``. This clean-up script deletes flag files and column files particular to this assimilation run from the Scratch folder, updates internal state files with the new correct dates, and prepares the ``input.geos`` file in each ensemble member run directory so that we can correctly run GEOS-Chem for the next assimilation period.
+Next, we do our usual check for the ``KILL_ENS`` file, which will be generated if any of the CHEEREIO Python scripts fail. If everything works correctly, then ensemble member 1 runs the script ``cleanup.sh``. This clean-up script deletes flag files and column files particular to this assimilation run from the Scratch folder, updates internal state files with the new correct dates, and prepares the ``input.geos`` file in each ensemble member run directory so that we can correctly run GEOS-Chem for the next assimilation period. If this is the first run through the loop, special updates are applied to the HISTORY.rc files to change the frequency of output file creation (i.e. switching from ensemble spinup mode to assimilation mode).
 
 .. code-block:: bash
 
 	  #If there is a problem, the KILL_ENS file will be produced. Break then
 	  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
 	    break
+	  fi
+	  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
+	  if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
+	    bash change_histrst_durfreq.sh
+	    firstrun=false
 	  fi
 	  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
 	  if [ $x -eq 1 ]; then
@@ -210,12 +221,7 @@ Next, we do our usual check for the ``KILL_ENS`` file, which will be generated i
 	    sleep 1
 	  done
 
-	  #CD back to run directory
-	  cd ${ENSDIR}/{RunName}_${xstr}
-	  #Everything cleaned up; we can head back to the beginning.
-	done
-
-If, after clean-up completes, our current date now exceeds the ensemble end time stored in the ``ens_config.json`` file, then the file ``ENSEMBLE_COMPLETE`` will appear in the Scratch directory and the while loop will terminate. However, the loop will also terminate if the ``KILL_ENS`` file is created due to a script failure. CHEEREIO picks the exit code for the job accordingly.
+If, after clean-up completes, our current date now exceeds the ensemble end date stored in the ``ens_config.json`` file, then the file ``ENSEMBLE_COMPLETE`` will appear in the Scratch directory and the while loop will terminate. However, the loop will also terminate if the ``KILL_ENS`` file is created due to a script failure. CHEEREIO picks the exit code for the job accordingly.
 
 .. code-block:: bash
 
