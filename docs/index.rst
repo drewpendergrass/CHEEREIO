@@ -33,7 +33,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    :caption: Using the ensemble
 
    The-ensemble-configuration-file
-   The-setup ensemble-script
+   The-setup-ensemble-script
    Guide-to-the-ensemble-directory
    Running-the-ensemble
 
