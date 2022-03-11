@@ -39,7 +39,7 @@
 	"Memory" : "72000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "5-00\\:00",
-	"EnsSpinupWallTime" : "0-08\\:00",
+	"EnsSpinupWallTime" : "1-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
 	"AnimationEnv" : "geoplt_2",
