@@ -19,14 +19,22 @@ A shell script, called in the course of running ``run_ensemble_spinup_simulation
 check_for_all_ensemble_spinup_restarts.sh
 ~~~~~~~~~~~~~
 
+A shell script, called in the course of running ``run_ensemble_spinup_simulations.sh`` in the ensemble spinup process, that checks if all restart files expected to be present at the end of ensemble spinup have in fact been created. 
+
 hemco_config_updater.py
 ~~~~~~~~~~~~~
+
+A very short Python script that invokes ``hemco_utils.py`` and updates ``HEMCO_Config.rc`` to match user settings specified in ``ens_config.json``. This is called in the template run directory creation stage of ``setup_ensemble.sh``.
 
 hemco_utils.py
 ~~~~~~~~~~~~~
 
+A set of Python classes and functions designed to help parse, modify, and save ``HEMCO_Config.rc`` so that it matches user settings; in particular, these utilities are designed for linking CHEEREIO-generated scaling factors to key emissions.
+
 initialize_scaling_factors.py
 ~~~~~~~~~~~~~
+
+A Python script that creates a randomized initial set of scaling factors for each emissions grouping the user would like to assimilate, incorporating relevant user settings from ``ens_config.json``. This reflects the prior emissions scaling distribution and is called in the ensemble run directory creation stage of ``setup_ensemble.sh``.
 
 prep_par.py
 ~~~~~~~~~~~~~
