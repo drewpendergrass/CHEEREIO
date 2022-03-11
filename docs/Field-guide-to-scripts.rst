@@ -39,11 +39,17 @@ A Python script that creates a randomized initial set of scaling factors for eac
 prep_par.py
 ~~~~~~~~~~~~~
 
+A Python script that prepares LETKF parallelization in advance of any assimilation. This is done by dividing up the columns that will be assimilated by each core in each ensemble run job (LETKF is an "embarassingly parallel" algorithm and requires no coordination between columns at assimilation time). This division of columns is stored in the ``scratch/`` directory and is consulted by each core at run time to ensure each column is processed exactly once. The script is called in the ensemble run directory creation stage of ``setup_ensemble.sh``.
+
 prepare_template_hemco_config.sh
 ~~~~~~~~~~~~~
 
+A simple wrapper shell script, called by ``setup_ensemble.sh`` in the template run directory creation stage, that in turn calls ``hemco_config_updater.py`` within an appropriate conda environment.
+
 update_history.py
 ~~~~~~~~~~~~~
+
+A Python toolkit and set of scripts designed to align the ``HISTORY.rc`` output settings with CHEEREIO's needs at various stages of the installation, spinup, and assimilation processes. This script is called in several places by ``setup_ensemble.sh``, ``change_histcollections_durfreq.sh``, and ``change_histrst_durfreq.sh`` to update CHEEREIO output settings at different stages of execution.
 
 Run management scripts
 -------------
