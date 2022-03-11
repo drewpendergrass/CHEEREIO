@@ -9,8 +9,12 @@ Installation and spinup scripts
 change_histcollections_durfreq.sh
 ~~~~~~~~~~~~~
 
+A shell script, called in the course of running ``run_ensemble_spinup_simulations.sh`` in the ensemble spinup process, that updates the duration and frequency by which GEOS-Chem output is saved from spinup mode (monthly mean output) to assimilation mode (much more frequent output).
+
 change_histrst_durfreq.sh
 ~~~~~~~~~~~~~
+
+A shell script, called in the course of running ``run_ensemble_spinup_simulations.sh`` in the ensemble spinup process, that updates the duration and frequency by which GEOS-Chem restart files are saved from spinup mode to assimilation mode.
 
 check_for_all_ensemble_spinup_restarts.sh
 ~~~~~~~~~~~~~
