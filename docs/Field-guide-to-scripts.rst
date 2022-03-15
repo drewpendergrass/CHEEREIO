@@ -57,8 +57,12 @@ Run management scripts
 advance_timestep.py
 ~~~~~~~~~~~~~
 
+This short Python script advances the ensemble timestep stored in the ``scratch/`` directory. It also checks if the simulation is complete, and if so produces the file ``ENSEMBLE_COMPLETE`` stored in ``scratch/``, which terminates assimilation.
+
 check_and_complete_assimilation.sh
 ~~~~~~~~~~~~~
+
+A shell script that calls the Python script ``check_for_all_columns.py`` to see if all expected assimilated columns (with extension ``.npy`` are present in the ``scratch/`` folder. If they are, execute the Python script ``combine_columns_and_update.py`` to update NetCDF files.
 
 check_for_all_columns.py
 ~~~~~~~~~~~~~
