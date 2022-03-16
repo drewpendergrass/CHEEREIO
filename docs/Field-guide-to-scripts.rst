@@ -57,7 +57,7 @@ Run management scripts
 advance_timestep.py
 ~~~~~~~~~~~~~
 
-This short Python script advances the ensemble timestep stored in the ``scratch/`` directory. It also checks if the simulation is complete, and if so produces the file ``ENSEMBLE_COMPLETE`` stored in ``scratch/``, which terminates assimilation.
+This short Python script called by ``update_input_geos.sh`` at the end of assimilation, which advances the ensemble timestep stored in the ``scratch/`` directory. It also checks if the simulation is complete, and if so produces the file ``ENSEMBLE_COMPLETE`` stored in ``scratch/``, which terminates assimilation.
 
 check_and_complete_assimilation.sh
 ~~~~~~~~~~~~~
@@ -67,17 +67,27 @@ A shell script that calls the Python script ``check_for_all_columns.py`` to see 
 check_for_all_columns.py
 ~~~~~~~~~~~~~
 
+A brief Python script which counts the number of ``.npy`` files present in the ``scratch/`` folder, and checks if it matches the total number of columns that need to be assimilated. If all expected files are present, it writes a file called ``ALL_COLUMNS_FOUND`` into the ``scratch/`` folder, signalling to all runs that it is time to complete assimilation.
+
 check_for_all_restarts.sh
 ~~~~~~~~~~~~~
+
+A shell script which checks if all expected restarts are present with a timestamp corresponding to the end of the current GEOS-Chem run period. If all expected restarts are present, the script writes a file called ``ALL_RUNS_COMPLETE`` into the ``scratch/`` folder. This file's presence means that all ensemble members have finished running their respective GEOS-Chem simulations and the assimilation step can begin. 
 
 cleanup.sh
 ~~~~~~~~~~~~~
 
+A shell script called after assimilation has fully completed (i.e., all restart files and scaling factors are updated with the posterior results). This script (1) removes all assimilated columns and signal files from ``scratch/``, and (2) calls ``update_current_time.sh`` and ``update_input_geos.sh`` which prepare the GEOS-Chem input files for the next run. The removal of signal files like ``ALL_RUNS_COMPLETE`` indicate to the ensemble run script that it is safe to start GEOS-Chem again.
+
 update_current_time.sh
 ~~~~~~~~~~~~~
 
+A very brief shell script called at the very end of assimilation by ``cleanup.sh``, which updates the file ``CURRENT_DATE_TIME`` in ``scratch/`` so that it contains the start date for the upcoming GEOS-Chem run. 
+
 update_input_geos.sh
 ~~~~~~~~~~~~~
+
+A shell script which (1) calls ``advance_timestep.py`` to update the internal time stored in the ``scratch/`` directory, and (2) uses that updated internal time to update the ``input.geos`` file across the ensemble.
 
 Assimilation scripts
 -------------
