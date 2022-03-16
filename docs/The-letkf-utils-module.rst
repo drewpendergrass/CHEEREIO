@@ -1,3 +1,5 @@
+.. _LETKF Utility module:
+
 The LETKF Utility module
 ==========
 

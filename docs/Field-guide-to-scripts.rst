@@ -95,17 +95,27 @@ Assimilation scripts
 combine_columns_and_update.py
 ~~~~~~~~~~~~~
 
+If the script ``check_and_complete_assimilation.sh`` finds that all expected ``.npy`` files containing assimilated columns are present in ``scratch/``, then this Python script is called. This script gathers the assimilated columns and loads in all the ensemble restarts and scaling factors, uses the contents of the columns to update restarts and scaling factors, and then writes the updated data to disk.
+
 letkf_utils.py
 ~~~~~~~~~~~~~
+
+This long Python file is the core of CHEEREIO, and is described in detail in the :ref:`LETKF Utility module` page. It contains complex classes and associated methods that do the IO and associated calculations required for the LETKF algorithm.
 
 par_assim.sh
 ~~~~~~~~~~~~~
 
+A wrapper shell script that calls ``par_letkf.py`` within the appropriate conda environment, passes information to the Python script ensuring that the appropriate set of columns are assimilated, and logs errors that occur in the assimilation process.
+
 par_letkf.py
 ~~~~~~~~~~~~~
 
+A short Python script, many instantiations of which are run in parallel, that creates relevant objects and calls methods from ``letkf_utils.py`` to assimilate the set of columns assigned to a particular core or set of cores.
+
 toolbox.py
 ~~~~~~~~~~~~~
+
+Basic utilities including distance calculations, JSON file I/O, and indexing support that are used across CHEEREIO Python scripts. 
 
 Observation scripts
 -------------
