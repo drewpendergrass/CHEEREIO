@@ -99,6 +99,7 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
+	"DOFS_filter" : "1",
 	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "False",
 	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE" : "1000000",
 	"TROPOMI_CH4_FILTERS" : "True",

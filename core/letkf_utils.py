@@ -649,6 +649,7 @@ class Assimilator(object):
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
 		self.SaveArea = spc_config["SaveArea"] == "True"
+		self.DOFS_filter = float(spc_config["DOFS_filter"])
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
@@ -759,20 +760,55 @@ class Assimilator(object):
 	def makeAnalysisCombinedEnsemble(self):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
 		k = len(self.ensemble_numbers)
-		for i in range(k):
-			self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
+		if np.isnan(self.DOFS_filter):
+			for i in range(k):
+				self.analysisEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])+self.xbar_background
+		else:
+			self.analysisPertEnsemble = np.zeros(np.shape(self.Xpert_background))
+			for i in range(k):
+				self.analysisPertEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])
+				self.analysisEnsemble[:,i] = self.analysisPertEnsemble[:,i]+self.xbar_background
 		if self.testing:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
-	def getAnalysisAndBackgroundColumn(self,latval,lonval,doBackground=True):
+	def getAnalysisAndBackgroundColumn(self,latval,lonval,doBackground=True, doPerts=False):
 		colinds = self.gt[1].getColumnIndicesFromLocalizedStateVector(latval,lonval)
 		analysisSubset = self.analysisEnsemble[colinds,:]
+		if doPerts:
+			analysisPertSubset = self.analysisPertEnsemble[colinds,:]
 		if doBackground:
 			backgroundSubset = np.zeros(np.shape(self.Xpert_background[colinds,:]))
 			k = len(self.ensemble_numbers)
-			for i in range(k):
-				backgroundSubset[:,i] = self.Xpert_background[colinds,i]+self.xbar_background[colinds]
-			return [analysisSubset,backgroundSubset]
+			if doPerts:
+				backgroundPertSubset = np.zeros(np.shape(self.Xpert_background[colinds,:]))
+				for i in range(k):
+					backgroundPertSubset[:,i] = self.Xpert_background[colinds,i]
+					backgroundSubset[:,i] = backgroundPertSubset[:,i] +self.xbar_background[colinds]
+				return [analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset]
+			else:
+				for i in range(k):
+					backgroundSubset[:,i] = self.Xpert_background[colinds,i]+self.xbar_background[colinds]
+				return [analysisSubset,backgroundSubset]
 		else:
+			return analysisSubset
+	def calculateDOFS(self, analysisPert,backgroundPert):
+		k = len(self.ensemble_numbers)
+		prior_err_cov = (1/(k-1))*backgroundPert@np.transpose(backgroundPert)
+		#I checked the math and eqn 13 and eqn 23 in Hunt et al are equivalent bc P tilde is symmetric
+		#DCP, 28.03.2022
+		posterior_err_cov = (1/(k-1))*analysisPert@np.transpose(analysisPert)
+		#DOFS per eqn 11.91 in Brasseur and Jacob is n-tr(Posterior @ Prior -1). Prior isn't full rank so use pseudoinverse.
+		traceval = np.trace(posterior_err_cov@np.linalg.pinv(prior_err_cov))
+		n_elements = np.shape(posterior_err_cov)[0]
+		dofs = n_elements-traceval
+		return dofs
+	#If for whatever reason we want to skip optimization this can be called.
+	def setPosteriorEqualToPrior(self,latval,lonval, returnSubset = True):
+		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
+		k = len(self.ensemble_numbers)
+		for i in range(k):
+			self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background
+		if returnSubset:
+			analysisSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=False)	
 			return analysisSubset
 	def applyAnalysisCorrections(self,analysisSubset,backgroundSubset):
 		#Get scalefactors off the end of statevector
@@ -825,11 +861,8 @@ class Assimilator(object):
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:
-				self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
-				k = len(self.ensemble_numbers)
-				for i in range(k):
-					self.analysisEnsemble[:,i] = self.Xpert_background[:,i]+self.xbar_background
-				analysisSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=False)	
+				#If we don't have enough observations, set posterior equal to prior
+				analysisSubset = self.setPosteriorEqualToPrior(latval,lonval,returnSubset=True)
 			else:
 				self.makeR(latval,lonval)
 				self.makeC()
@@ -838,6 +871,14 @@ class Assimilator(object):
 				self.makeWbarAnalysis()
 				self.adjWAnalysis()
 				self.makeAnalysisCombinedEnsemble()
-				analysisSubset,backgroundSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True)
-				analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset)
+				if np.isnan(self.DOFS_filter):
+					analysisSubset,backgroundSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=False)
+					analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset)
+				else:
+					analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=False)
+					dofs = self.calculateDOFS(analysisPertSubset,backgroundPertSubset)
+					if dofs >= self.DOFS_filter: #DOFS high enough, proceed with corrections and overwrite
+						analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset) 
+					else: #DOFS too low, not enough information to optimize
+						analysisSubset=backgroundSubset #set analysis equal to background
 			self.saveColumn(latval,lonval,analysisSubset)
