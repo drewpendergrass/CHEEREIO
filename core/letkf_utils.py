@@ -630,6 +630,7 @@ class Assimilator(object):
 		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
+		self.path_to_logs = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs/logs"
 		self.parfilename = f'ens_{ensnum}_core_{corenum}_time_{timestamp}'
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -649,6 +650,7 @@ class Assimilator(object):
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
 		self.SaveArea = spc_config["SaveArea"] == "True"
+		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.gt = {}
@@ -859,10 +861,16 @@ class Assimilator(object):
 		for latval,lonval in zip(self.latinds,self.loninds):
 			if self.testing:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
+			if self.SaveDOFS:
+				latlen = len(self.gt[ens].getLat())
+				lonlen = len(self.gt[ens].getLon())
+				dofsmat = np.nan*np.zeros((latlen,lonlen))
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:
 				#If we don't have enough observations, set posterior equal to prior
 				analysisSubset = self.setPosteriorEqualToPrior(latval,lonval,returnSubset=True)
+				if self.SaveDOFS:
+					dofs = -1
 			else:
 				self.makeR(latval,lonval)
 				self.makeC()
@@ -882,3 +890,7 @@ class Assimilator(object):
 					else: #DOFS too low, not enough information to optimize
 						analysisSubset=backgroundSubset #set analysis equal to background
 			self.saveColumn(latval,lonval,analysisSubset)
+			if self.SaveDOFS:
+				dofsmat[latval,lonval] = dofs
+		if self.SaveDOFS:
+			np.save(f'{self.path_to_logs}/{self.parfilename}_dofsgrid.npy',dofsmat)

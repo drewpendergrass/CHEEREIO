@@ -14,6 +14,8 @@ else:
 
 data = tx.getSpeciesConfig(testing=testing)
 
+SaveDOFS = data["SaveDOFS"] == "True"
+
 dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 print(f'One core is gathering columns to overwrite at time {dateval}.')
@@ -25,5 +27,12 @@ start = time.time()
 wrapper.reconstructAnalysisEnsemble()
 wrapper.updateRestartsAndScalingFactors()
 wrapper.saveRestartsAndScalingFactors()
+
+if SaveDOFS:
+	npy_dofs_files = glob(f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/logs/*.npy")
+	npy_dofs = np.stack([np.load(file) for file in npy_dofs_files])
+	dofs_combined = np.nansum(npy_dofs,axis=0) #Perfectly nonoverlapping, so just nansum to combine
+	np.save(f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/logs/combined_dofsgrid_{timestamp}.npy",dofs_combined)
+
 end = time.time()
 print(f'Saved updated restarts and emissions in {end - start} seconds. We can cleanup and resume GC now!')
