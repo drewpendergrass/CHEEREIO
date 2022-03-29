@@ -525,10 +525,19 @@ class HIST_Ens(object):
 		obsdiffs = []
 		for spec in self.satSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
+			speciesind = self.satSpecies.index(spec)
+			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+			useError = errtype=='product'
 			if self.spc_config['AV_TO_GC_GRID']=="True":
-				gccol,satcol,_,_,_,_ = self.bigYDict[spec]
+				if useError:
+					gccol,satcol,_,_,_,_,_ = self.bigYDict[spec]
+				else:
+					gccol,satcol,_,_,_,_ = self.bigYDict[spec]
 			else:
-				gccol,satcol,_,_,_ = self.bigYDict[spec]
+				if useError:
+					gccol,satcol,_,_,_,_ = self.bigYDict[spec]
+				else:
+					gccol,satcol,_,_,_ = self.bigYDict[spec]
 			gccol = gccol[ind,:]
 			satcol = satcol[ind]
 			obsmean = np.mean(gccol,axis=1)
