@@ -413,7 +413,10 @@ class HIST_Ens(object):
 	def getSatData(self):
 		self.SAT_DATA = {}
 		for spec in self.satSpecies:
-			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod,self.interval)
+			speciesind = self.satSpecies.index(spec)
+			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+			calcError = errtype == 'product'
+			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getSatellite(spec,self.timeperiod,self.interval,calcError=calcError)
 	def makeBigY(self):
 		self.makeSatTrans()
 		self.getSatData()

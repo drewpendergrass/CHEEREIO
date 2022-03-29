@@ -432,7 +432,7 @@ class TROPOMI_Translator(object):
 		else:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getSatellite(self,species,timeperiod, interval=None):
+	def getSatellite(self,species,timeperiod, interval=None, calcError=False):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
 		if species=='CH4':
@@ -443,7 +443,7 @@ class TROPOMI_Translator(object):
 		else:
 			filterinfo = None
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species,filterinfo))
+			trop_obs.append(read_tropomi(obs,species,filterinfo,calcError=calcError))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
