@@ -889,8 +889,8 @@ class Assimilator(object):
 			if self.testing:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			if self.SaveDOFS:
-				latlen = len(self.gt[ens].getLat())
-				lonlen = len(self.gt[ens].getLon())
+				latlen = len(self.gt[1].getLat())
+				lonlen = len(self.gt[1].getLon())
 				dofsmat = np.nan*np.zeros((latlen,lonlen))
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:
