@@ -10,7 +10,7 @@ import os.path
 import xarray as xr
 import numpy as np
 
-def read_tropomi(filename, species, filterinfo=None):
+def read_tropomi(filename, species, filterinfo=None, calcError = False):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -60,6 +60,11 @@ def read_tropomi(filename, species, filterinfo=None):
 	else:
 		raise ValueError('Species not supported')
 
+	if calcError:
+		if species=='NO2':
+			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
+		elif species=='CH4':
+			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
 	
 	met['longitude'] = data['longitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['latitude'] = data['latitude'].values[0,sl,gp] #time,scanline,groundpixel
@@ -347,7 +352,7 @@ def averageByGCTROPOMIlocs(index,GConsat,satvals,satlat,satlon,sattime):
 	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 
 #No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_swir=None,albedo_nir=None,blended_albedo=None):
+def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_swir=None,albedo_nir=None,blended_albedo=None, satError = None, modelTransportError = None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -367,6 +372,8 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_s
 		swir_av = np.zeros(av_len)
 		nir_av = np.zeros(av_len)
 		blended_av = np.zeros(av_len)
+	if satError is not None:
+		err_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
 		indmatch = np.where(index==ind)[0]
 		gc_av[count] = np.mean(GConsat[indmatch])
@@ -379,10 +386,16 @@ def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_s
 			swir_av[count] = np.mean(albedo_swir[indmatch])
 			nir_av[count] = np.mean(albedo_nir[indmatch])
 			blended_av[count] = np.mean(blended_albedo[indmatch])
+		if satError is not None:
+			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation
+			err_av[count] = (np.mean(satError[indmatch])/np.sqrt(num_av[count]))+modelTransportError
 	if albedo_swir is not None:
-		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
+		to_return = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
 	else:
-		return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+		to_return = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+	if satError is not None:
+		to_return.append(err_av)
+	return to_return
 
 class TROPOMI_Translator(object):
 	def __init__(self,testing=False):
@@ -435,7 +448,7 @@ class TROPOMI_Translator(object):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,timeperiod,TROPOMI,GC,GC_area=None,saveAlbedo=False):
+	def gcCompare(self,species,timeperiod,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
@@ -463,14 +476,24 @@ class TROPOMI_Translator(object):
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
-				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])
+				if saveError:
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError)
+				else:
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])					
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
 			else:
-				gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
+				if saveError:
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],satError = TROPOMI['Error'], modelTransportError = transportError)
+				else:
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+			if saveError:
+				toreturn.append(err_av)
 		else:
 			if saveAlbedo:
 				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo']]
 			else:
 				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
+			if saveError:
+				toreturn.append(TROPOMI['Error'])
 		return toreturn

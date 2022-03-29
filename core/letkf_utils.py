@@ -429,12 +429,14 @@ class HIST_Ens(object):
 		if errtype=='absolute':
 			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
 		elif errtype=='relative':
-			if self.spc_config['AV_TO_GC_GRID']=="True":
-				_,satcol,_,_,_,_ = self.bigYDict[species]
-			else:
-				_,satcol,_,_,_ = self.bigYDict[species]
+			satdat = self.bigYDict[species]
+			satcol = satdat[1]
 			satcol = satcol[inds]
 			to_return = np.diag((satcol*errval)**2) #multiply measurements by relative error, then square it.
+		elif errtype=='product':
+			satdat = self.bigYDict[species]
+			err_av = satdat[-1]
+			to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
 		to_return*=invgamma
@@ -446,18 +448,37 @@ class HIST_Ens(object):
 		return la.block_diag(*errmats)
 	def getColsforSpecies(self,species):
 		col3D = []
+		speciesind = self.satSpecies.index(species)
+		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
+		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+		if errtype=='product':
+			useError = True
+		else:
+			useError = False
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge,self.useStateMet)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:
-				firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True)
+				if useError:
+					firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval)
+				else:
+					firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
 			else:
-				firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
+				if useError:
+					firstcol,satcol,satlat,satlon,sattime,numav,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval)
+				else:
+					firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
 		else:
 			if self.saveAlbedo:
-				firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True)
+				if useError:
+					firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval)
+				else:
+					firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
 			else:
-				firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
+				if useError:
+					firstcol,satcol,satlat,satlon,sattime,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval)
+				else:
+					firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.timeperiod,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -474,14 +495,17 @@ class HIST_Ens(object):
 				conc2D[:,i-1] = col
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:
-				return [conc2D,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av]
+				to_return = [conc2D,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av]
 			else:
-				return [conc2D,satcol,satlat,satlon,sattime,numav]
+				to_return = [conc2D,satcol,satlat,satlon,sattime,numav]
 		else:
 			if self.saveAlbedo:
-				return [conc2D,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av]
+				to_return = [conc2D,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av]
 			else:
-				return [conc2D,satcol,satlat,satlon,sattime]
+				to_return = [conc2D,satcol,satlat,satlon,sattime]
+		if useError:
+			to_return.append(err_av)
+		return to_return
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)

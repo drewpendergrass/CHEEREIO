@@ -139,13 +139,13 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": [
-		"0.10"
+		"0.002"
 	],
 	"OBS_COVARIANCE": [
-		"225"
+		"5"
 	],
 	"OBS_COVARIANCE_TYPE":[
-		"absolute"
+		"product"
 	],
 	"INFLATION_FACTOR": "0.08",
 	"ASSIM_TIME": "168",
