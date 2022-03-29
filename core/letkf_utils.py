@@ -893,4 +893,4 @@ class Assimilator(object):
 			if self.SaveDOFS:
 				dofsmat[latval,lonval] = dofs
 		if self.SaveDOFS:
-			np.save(f'{self.path_to_logs}/{self.parfilename}_dofsgrid.npy',dofsmat)
+			np.save(f'{self.path_to_logs}/dofs_scratch/{self.parfilename}_dofsgrid.npy',dofsmat)

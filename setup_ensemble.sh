@@ -402,6 +402,13 @@ mkdir -p ensemble_runs
 mkdir -p ensemble_runs/logs
 mkdir -p scratch
 mkdir -p postprocess
+
+SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
+if [ "${SaveDOFS}" = "True" ]; then
+  mkdir -p ensemble_runs/logs/dofs_scratch
+  mkdir -p ensemble_runs/logs/dofs_complete
+fi
+
 echo "GC-CHEERIO uses this directory to save out intermediate data and track its internal state. Modifying contents of this folder can lead to model failure." > scratch/README
 
 cp ${ASSIM_PATH}/templates/run_ensemble_simulations.sh ensemble_runs/
