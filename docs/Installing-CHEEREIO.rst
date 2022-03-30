@@ -1,4 +1,5 @@
 .. _Installation:
+
 Installing CHEEREIO
 ==========
 
