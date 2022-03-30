@@ -123,8 +123,12 @@ Observation scripts
 omi_tools.py
 ~~~~~~~~~~~~~
 
+This long Python file includes tools and classes necessary for interfacing with OMI satellite products, and is described in detail in the :ref:`OMI tools` entry.
+
 tropomi_tools.py
 ~~~~~~~~~~~~~
+
+This long Python file includes tools and classes necessary for interfacing with TROPOMI satellite products, and is described in detail in the :ref:`TROPOMI tools` entry.
 
 Deprecated scripts
 -------------
