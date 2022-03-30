@@ -59,7 +59,7 @@ while [ $x -le $nEnsemble ];do
 
 
   ### Modify the desired line
-  sed -i "s/^DiagnFreq*./${freqstr}/" ${name}/HEMCO_Config.rc
+  sed -i "/DiagnFreq/c\\${freqstr}" ${name}/HEMCO_Config.rc
 
   ### Increment
   x=$[$x+1]
