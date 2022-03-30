@@ -62,7 +62,7 @@ def read_tropomi(filename, species, filterinfo=None, calcError = False):
 
 	if calcError:
 		if species=='NO2':
-			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
+			met['Error'] = data['nitrogendioxide_tropospheric_column_precision'].values[0,sl,gp]
 		elif species=='CH4':
 			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
 	
