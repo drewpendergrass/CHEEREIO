@@ -57,6 +57,8 @@ EnsSpinupMemory="$(jq -r ".EnsSpinupMemory" ens_config.json)"
 EnsSpinupWallTime="$(jq -r ".EnsSpinupWallTime" ens_config.json)"
 MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
+SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
+
 printf " \n"
 printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
 printf "  / __|  | || |   | __|   | __|   | _ \   | __|   |_ _|   / _ \  \n"
@@ -403,7 +405,6 @@ mkdir -p ensemble_runs/logs
 mkdir -p scratch
 mkdir -p postprocess
 
-SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
 if [ "${SaveDOFS}" = "True" ]; then
   mkdir -p ensemble_runs/logs/dofs_scratch
   mkdir -p ensemble_runs/logs/dofs_complete
