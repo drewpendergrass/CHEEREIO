@@ -43,7 +43,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
 
    Field-guide-to-scripts
    The-letkf-utils-module
-   Adding-new-observations
+   Observations
 
 .. toctree::
    :maxdepth: 4
