@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to CHEEREIO's documentation!
+Welcome to CHEEREIO!
 ====================================
 
 Welcome to the **CHEEREIO** website and documentation! This site provides a manual for the installation, use, and modification of CHEEREIO for a variety of scientific applications. You can download CHEEREIO from the `Github page <https://github.com/drewpendergrass/CHEEREIO/>`__ and install by following the instructions on the :ref:`Installation` page later in the documentation.
