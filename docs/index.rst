@@ -6,7 +6,7 @@
 Welcome to CHEEREIO's documentation!
 ====================================
 
-Welcome to the **CHEEREIO** website and documentation! This site provides a manual for the installation, use, and modification of CHEEREIO for a variety of scientific applications.
+Welcome to the **CHEEREIO** website and documentation! This site provides a manual for the installation, use, and modification of CHEEREIO for a variety of scientific applications. You can download CHEEREIO from the `Github page <https://github.com/drewpendergrass/CHEEREIO/>`__ and install by following the instructions on the :ref:`Installation` page later in the documentation.
 
 The GEOS-Chem CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint). CHEEREIO follows five design principles:
 
