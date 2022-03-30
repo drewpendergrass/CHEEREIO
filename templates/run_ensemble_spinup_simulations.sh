@@ -48,7 +48,7 @@ wait
 nEnsemble="$(jq -r ".nEnsemble" {ASSIM}/ens_config.json)"
 
 if [ $x = $nEnsemble ]; then
-  until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE ]; do
+  until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE ]; do
     sleep 1
     bash check_for_all_ensemble_spinup_restarts.sh
   done
