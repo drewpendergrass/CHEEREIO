@@ -920,7 +920,7 @@ class Assimilator(object):
 					analysisSubset,backgroundSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=False)
 					analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset)
 				else:
-					analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=False)
+					analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=True)
 					dofs = self.calculateDOFS(analysisPertSubset,backgroundPertSubset)
 					if dofs >= self.DOFS_filter: #DOFS high enough, proceed with corrections and overwrite
 						analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset) 
