@@ -438,7 +438,8 @@ class HIST_Ens(object):
 			to_return = np.diag((satcol*errval)**2) #multiply measurements by relative error, then square it.
 		elif errtype=='product':
 			satdat = self.bigYDict[species]
-			err_av = satdat[-1]
+			err_av = satdat[-1] #Will be the last entry
+			err_av = err_av[inds]
 			to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
