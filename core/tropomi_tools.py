@@ -9,6 +9,7 @@ import pickle
 import os.path
 import xarray as xr
 import numpy as np
+import observation_operators as obsop
 
 def read_tropomi(filename, species, filterinfo=None, calcError = False):
 	"""
@@ -127,85 +128,10 @@ def read_tropomi(filename, species, filterinfo=None, calcError = False):
 	met['pressures'] = pressures
 	
 	if filterinfo:
-		met = apply_filters(met,filterinfo)
+		met = obsop.apply_filters(met,filterinfo)
 
 	return met
 
-def apply_filters(TROPOMI,filterinfo):
-	to_keep = []
-	if filterinfo[0] == "TROPOMI_CH4":
-		filter_blended_albedo = filterinfo[1]
-		filter_swir_albedo_low = filterinfo[2]
-		filter_swir_albedo_high = filterinfo[3]
-		filter_winter_lat = filterinfo[4]
-		filter_roughness = filterinfo[5]
-		filter_swir_aot = filterinfo[6]
-		if ~np.isnan(filter_blended_albedo):
-			to_keep.append(np.where(TROPOMI['blended_albedo']<filter_blended_albedo)[0])
-		if ~np.isnan(filter_swir_albedo_low):
-			to_keep.append(np.where(TROPOMI['albedo_swir']>filter_swir_albedo_low)[0])
-		if ~np.isnan(filter_swir_albedo_high):
-			to_keep.append(np.where(TROPOMI['albedo_swir']<filter_swir_albedo_high)[0])
-		if ~np.isnan(filter_winter_lat):
-			months = TROPOMI['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
-			nh_winter = np.array([1,2,3,11,12])
-			sh_winter = np.array([5,6,7,8,9])
-			to_keep.append(np.where( ~( ( (TROPOMI['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
-		if ~np.isnan(filter_roughness):
-			to_keep.append(np.where(TROPOMI['surface_elevation_sd']<filter_roughness)[0])
-		if ~np.isnan(filter_swir_aot):
-			to_keep.append(np.where(TROPOMI['swir_aot']<filter_swir_aot)[0])
-	if len(to_keep)==0:
-		return TROPOMI
-	else:
-		if len(to_keep)==1:
-			to_keep = to_keep[0]
-		elif len(to_keep)==2:
-			to_keep = np.intersect1d(to_keep[0],to_keep[1])
-		elif len(to_keep)==3:
-			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),to_keep[2])
-		elif len(to_keep)==4:
-			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3]))
-		elif len(to_keep)==5:
-			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),to_keep[4])
-		elif len(to_keep)==6:
-			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),np.intersect1d(to_keep[4],to_keep[5]))
-		keys = list(TROPOMI.keys())
-		for key in keys:
-			if len(np.shape(TROPOMI[key])) == 1:
-				TROPOMI[key] = TROPOMI[key][to_keep]
-			else:
-				TROPOMI[key] = TROPOMI[key][to_keep,:]
-		return TROPOMI
-
-def nearest_loc(GC,TROPOMI):
-	# Find the grid box and time indices corresponding to TROPOMI obs
-	# i index
-	iGC = np.abs(GC.lon.values.reshape((-1, 1))
-				 - TROPOMI['longitude'].reshape((1, -1)))
-	iGC = iGC.argmin(axis=0)
-	# j index
-	jGC = np.abs(GC.lat.values.reshape((-1, 1))
-				 - TROPOMI['latitude'].reshape((1, -1)))
-	jGC = jGC.argmin(axis=0)
-	# Time index
-	tGC = np.abs(GC.time.values.reshape((-1, 1))
-				 - TROPOMI['utctime'].astype('datetime64').reshape((1, -1)))
-	tGC = tGC.argmin(axis=0)
-	return iGC, jGC, tGC
-
-def getGCCols(GC,TROPOMI,species,returninds=False,returnStateMet=False,GC_area=None):
-	i,j,t = nearest_loc(GC,TROPOMI)
-	to_return = [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
-	if returnStateMet:
-		to_return.append(GC[f'Met_AD'].values[t,:,j,i])
-	if GC_area is not None:
-		to_return.append(GC_area.values[j,i])
-	else:
-		to_return.append(None)
-	if returninds:
-		to_return = to_return + [i,j,t]
-	return to_return
 
 #This seems to be the memory bottleneck
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False,batchsize=None):
@@ -326,82 +252,9 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 	GC_col = GC_col.sum(axis=1)
 	return GC_col 
 
-#Takes index in form index = (iGC*100000000)+(jGC*10000)+tGC
-def averageByGCTROPOMIlocs(index,GConsat,satvals,satlat,satlon,sattime):
-	unique_inds = np.unique(index)
-	av_len = len(unique_inds)
-	gc_av = np.zeros(av_len)
-	sat_av = np.zeros(av_len)
-	satlat_av = np.zeros(av_len)
-	satlon_av = np.zeros(av_len)
-	sattime_av = np.zeros(av_len)
-	num_av = np.zeros(av_len)
-	delta_sec = np.timedelta64(1, 's')
-	epoch = np.datetime64('1970-01-01T00:00:00')
-	for count,ind in enumerate(unique_inds):
-		indmatch = np.where(index==ind)[0]
-		gc_av[count] = np.mean(GConsat[indmatch])
-		sat_av[count] = np.mean(satvals[indmatch])
-		satlat_av[count] = np.mean(satlat[indmatch])
-		satlon_av[count] = np.mean(satlon[indmatch])
-		dt = sattime[indmatch].astype('datetime64')
-		epoch_sec = (dt - epoch) / delta_sec
-		epoch_sec_mean = np.mean(epoch_sec)
-		sattime_av[count] = epoch + np.timedelta64(int(epoch_sec_mean), 's')
-		num_av[count] = len(indmatch)
-	return [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
-
-#No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GConsat,satvals,satlat,satlon,sattime,albedo_swir=None,albedo_nir=None,blended_albedo=None, satError = None, modelTransportError = None):
-	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
-	unique_inds = np.unique(index)
-	i_unique = np.floor(unique_inds/100000000).astype(int)-1
-	j_unique = (np.floor(unique_inds/10000).astype(int) % 10000)-1
-	t_unique = (unique_inds % 10000).astype(int)-1
-	lonvals = GC.lon.values[i_unique]
-	latvals = GC.lat.values[j_unique]
-	timevals = GC.time.values[t_unique]
-	av_len = len(unique_inds)
-	gc_av = np.zeros(av_len)
-	sat_av = np.zeros(av_len)
-	satlat_av = np.zeros(av_len)
-	satlon_av = np.zeros(av_len)
-	sattime_av = np.zeros(av_len)
-	num_av = np.zeros(av_len)
-	if albedo_swir is not None:
-		swir_av = np.zeros(av_len)
-		nir_av = np.zeros(av_len)
-		blended_av = np.zeros(av_len)
-	if satError is not None:
-		err_av = np.zeros(av_len)
-	for count,ind in enumerate(unique_inds):
-		indmatch = np.where(index==ind)[0]
-		gc_av[count] = np.mean(GConsat[indmatch])
-		sat_av[count] = np.mean(satvals[indmatch])
-		satlat_av[count] = latvals[count]
-		satlon_av[count] = lonvals[count]
-		sattime_av[count] = timevals[count]
-		num_av[count] = len(indmatch)
-		if albedo_swir is not None:
-			swir_av[count] = np.mean(albedo_swir[indmatch])
-			nir_av[count] = np.mean(albedo_nir[indmatch])
-			blended_av[count] = np.mean(blended_albedo[indmatch])
-		if satError is not None:
-			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation
-			err_av[count] = (np.mean(satError[indmatch])/np.sqrt(num_av[count]))+modelTransportError
-	if albedo_swir is not None:
-		to_return = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
-	else:
-		to_return = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
-	if satError is not None:
-		to_return.append(err_av)
-	return to_return
-
-class TROPOMI_Translator(object):
+class TROPOMI_Translator(obsop.Observation_Translator):
 	def __init__(self,testing=False):
-		self.testing = testing
-		self.spc_config = tx.getSpeciesConfig(self.testing)
-		self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
+		super.__init__(testing)
 	#Save dictionary of dates for later use
 	def initialReadDate(self):
 		sourcedirs = self.spc_config['TROPOMI_dirs']
@@ -432,7 +285,7 @@ class TROPOMI_Translator(object):
 		else:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getSatellite(self,species,timeperiod, interval=None, calcError=False):
+	def getObservations(self,species,timeperiod, interval=None, calcError=False):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
 		if species=='CH4':
@@ -448,7 +301,7 @@ class TROPOMI_Translator(object):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,timeperiod,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
+	def gcCompare(self,species,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
@@ -458,9 +311,9 @@ class TROPOMI_Translator(object):
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
 		if returnStateMet:
-			GC_SPC,GC_P,GC_M,GC_area,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+			GC_SPC,GC_P,GC_M,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		else:
-			GC_SPC,GC_P,GC_area,i,j,t = getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+			GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
 		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
@@ -477,15 +330,15 @@ class TROPOMI_Translator(object):
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
 				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError)
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError)
 				else:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])					
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])					
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
 			else:
 				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],satError = TROPOMI['Error'], modelTransportError = transportError)
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],satError = TROPOMI['Error'], modelTransportError = transportError)
 				else:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species])
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
 			if saveError:
 				toreturn.append(err_av)
