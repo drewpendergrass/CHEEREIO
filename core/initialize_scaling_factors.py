@@ -118,10 +118,18 @@ if subhalf or subquarter:
 	mask = mask[lonok,latok]
 	mask = np.where(mask==0)
 
-perturbation = float(spc_config["pPERT"]) #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
-
-if (perturbation <= 1):
-	raise ValueError('Perturbation must be at least 1.')
+perttype = spc_config["pertType"]
+perturbation = float(spc_config["pPERT"]) 
+if perttype == "exp":
+	if (perturbation <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
+		raise ValueError('Exponential perturbation must be at least 1.')
+elif perttype == "percent":
+	if (perturbation <= 0): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
+		raise ValueError('Percent perturbation must be positive.')
+	elif (perturbation > 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
+		raise ValueError('Percent perturbation must be 1 or less.')
+else:
+	raise ValueError("Perturbation type unrecognized.")
 
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
@@ -134,8 +142,11 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
-			scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
-			scaling_factors = perturbation**scaling_factor_exp
+			if perttype == "exp":
+				scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
+				scaling_factors = perturbation**scaling_factor_exp
+			elif perttype == "percent":
+				scaling_factors = (2*perturbation*np.random.rand(1,len(lat),len(lon)))-perturbation+1
 		if maskoceanboolval=='True':
 			scaling_factors[0,mask[1],mask[0]] = 1
 		if maskarcticboolval=='True':
