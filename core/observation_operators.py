@@ -90,7 +90,7 @@ def getGCCols(GC,OBSDATA,species,returninds=False,returnStateMet=False,GC_area=N
 	return to_return
 
 #No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_nir=None,blended_albedo=None, satError = None, modelTransportError = None):
+def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_nir=None,blended_albedo=None, satError = None, modelTransportError = None, errorCorr = None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -125,8 +125,8 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 			nir_av[count] = np.mean(albedo_nir[indmatch])
 			blended_av[count] = np.mean(blended_albedo[indmatch])
 		if satError is not None:
-			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation
-			err_av[count] = (np.mean(satError[indmatch])/np.sqrt(num_av[count]))+modelTransportError
+			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
+			err_av[count] = (np.mean(satError[indmatch]) * np.sqrt(((1-errorCorr)/num_av[count]) + errorCorr) )+modelTransportError
 	if albedo_swir is not None:
 		to_return = [gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av,swir_av,nir_av,blended_av]
 	else:

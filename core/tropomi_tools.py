@@ -301,7 +301,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
+	def gcCompare(self,species,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0, errorCorr = 0):
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
@@ -330,13 +330,13 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if saveAlbedo:
 				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError)
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError, errorCorr=errorCorr)
 				else:
 					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])					
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
 			else:
 				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],satError = TROPOMI['Error'], modelTransportError = transportError)
+					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],satError = TROPOMI['Error'], modelTransportError = transportError, errorCorr=errorCorr)
 				else:
 					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species])
 				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]

@@ -147,6 +147,9 @@
 	"OBS_COVARIANCE_TYPE":[
 		"product"
 	],
+	"OBS_ERROR_SELF_CORRELATION" : [
+		"0.15"
+	],
 	"INFLATION_FACTOR": "0.08",
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
