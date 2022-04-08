@@ -31,7 +31,7 @@ def apply_filters(OBSDATA,filterinfo):
 			months = OBSDATA['utctime'].astype('datetime64[M]').astype(int) % 12 + 1
 			nh_winter = np.array([1,2,3,11,12])
 			sh_winter = np.array([5,6,7,8,9])
-			to_keep.append(np.where( ~( ( (OBSDATA['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (TROPOMI['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
+			to_keep.append(np.where( ~( ( (OBSDATA['latitude']>filter_winter_lat)&(np.isin(months,nh_winter)) )| ( (OBSDATA['latitude']<(-1*filter_winter_lat))&(np.isin(months,sh_winter)) ) ) )[0])
 		if ~np.isnan(filter_roughness):
 			to_keep.append(np.where(OBSDATA['surface_elevation_sd']<filter_roughness)[0])
 		if ~np.isnan(filter_swir_aot):
