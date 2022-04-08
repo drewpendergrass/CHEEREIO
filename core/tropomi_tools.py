@@ -254,7 +254,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 
 class TROPOMI_Translator(obsop.Observation_Translator):
 	def __init__(self,testing=False):
-		super.__init__(testing)
+		super().__init__(testing)
 	#Save dictionary of dates for later use
 	def initialReadDate(self):
 		sourcedirs = self.spc_config['TROPOMI_dirs']
