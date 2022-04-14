@@ -130,7 +130,7 @@
 	"MaximumScalingFactorAllowed" : [
 		"20"
 	],
-	"InflateScalingsToXOfPreviousStandardDeviation" : [
+	"InflateScalingsToXOfInitialStandardDeviation" : [
 		"0.3"
 	],
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : [

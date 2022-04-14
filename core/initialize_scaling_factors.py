@@ -131,6 +131,10 @@ elif perttype == "percent":
 else:
 	raise ValueError("Perturbation type unrecognized.")
 
+scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors),len(lat),len(lon)))
+subdircount = 0
+speciescount = 0 
+
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
 		continue
@@ -180,4 +184,12 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			}
 		)
 		ds.to_netcdf(f"{outdir}/{name}.nc")
+		scaling_factor_cube[subdircount,speciescount,:,:] = scaling_factors[0,:,:]
 		print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{stringnum} initialized successfully!")
+		speciescount+=1
+	subdircount+=1
+
+#save out std
+for ind,emis_name in enumerate(emis_scaling_factors):
+	scaling_factor_sd = np.std(scaling_factor_cube[:,ind,:,:],axis=0)
+	np.save(f'{parent_dir}/{emis_name}_SCALEFACTOR_INIT_STD.npy',scaling_factor_sd)

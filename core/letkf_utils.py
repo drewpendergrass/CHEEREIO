@@ -682,7 +682,12 @@ class Assimilator(object):
 		self.MINNUMOBS = int(spc_config['MINNUMOBS'])
 		self.MinimumScalingFactorAllowed = [float(s) for s in spc_config["MinimumScalingFactorAllowed"]]
 		self.MaximumScalingFactorAllowed = [float(s) for s in spc_config["MaximumScalingFactorAllowed"]]
-		self.InflateScalingsToXOfPreviousStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfPreviousStandardDeviation"]]
+		self.InflateScalingsToXOfInitialStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfInitialStandardDeviation"]]
+		self.emis_names = list(spc_config['CONTROL_VECTOR_EMIS'].keys())
+		self.InitEmisSTD = {}
+		for name in self.emis_names:
+			stds = np.load(f'{path_to_ensemble}/{name}_SCALEFACTOR_INIT_STD.npy')
+			self.InitEmisSTD[name] = stds
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=[float(s) for s in spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
@@ -850,18 +855,19 @@ class Assimilator(object):
 		if returnSubset:
 			analysisSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=False)	
 			return analysisSubset
-	def applyAnalysisCorrections(self,analysisSubset,backgroundSubset):
+	def applyAnalysisCorrections(self,analysisSubset,backgroundSubset,latind,lonind):
 		#Get scalefactors off the end of statevector
 		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
 		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
 		#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
-		for i in range(len(self.InflateScalingsToXOfPreviousStandardDeviation)):
-			inflator = self.InflateScalingsToXOfPreviousStandardDeviation[i]
+		for i in range(len(self.InflateScalingsToXOfInitialStandardDeviation)):
+			inflator = self.InflateScalingsToXOfInitialStandardDeviation[i]
 			if ~np.isnan(inflator):
+				name = self.emis_names[i]
 				analysis_std = np.std(analysisScalefactor[i,:])
-				background_std = np.std(backgroundScalefactor[i,:])
+				background_std = self.InitEmisSTD[name][latind,lonind]
 				ratio=analysis_std/background_std
-				if ~np.isnan(ratio): #Sometimes background standard deviation is approximately 0.
+				if ~np.isnan(ratio): 
 					if ratio < inflator:
 						new_std = inflator*background_std
 						meanrebalance = np.mean(analysisScalefactor[i,:])*((new_std/analysis_std)-1)
@@ -919,12 +925,12 @@ class Assimilator(object):
 				self.makeAnalysisCombinedEnsemble()
 				if np.isnan(self.DOFS_filter):
 					analysisSubset,backgroundSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=False)
-					analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset)
+					analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset,latval,lonval)
 				else:
 					analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset = self.getAnalysisAndBackgroundColumn(latval,lonval,doBackground=True,doPerts=True)
 					dofs = self.calculateDOFS(analysisPertSubset,backgroundPertSubset)
 					if dofs >= self.DOFS_filter: #DOFS high enough, proceed with corrections and overwrite
-						analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset) 
+						analysisSubset = self.applyAnalysisCorrections(analysisSubset,backgroundSubset,latval,lonval) 
 					else: #DOFS too low, not enough information to optimize
 						analysisSubset=backgroundSubset #set analysis equal to background
 			self.saveColumn(latval,lonval,analysisSubset)
