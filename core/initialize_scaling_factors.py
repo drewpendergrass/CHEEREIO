@@ -188,6 +188,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{stringnum} initialized successfully!")
 		speciescount+=1
 	subdircount+=1
+	speciescount = 0
 
 #save out std
 for ind,emis_name in enumerate(emis_scaling_factors):
