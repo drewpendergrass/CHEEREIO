@@ -2,17 +2,10 @@
 
 #Check if all columns are saved. If so, combine and overwrite
 
-if [ "${1}" = true ]; then
-	MY_PATH="$(jq -r ".MY_PATH" ../testing/test_config.json)"
-	RUN_NAME="$(jq -r ".RUN_NAME" ../testing/test_config.json)"
-	CONDA_ENV=$(jq -r ".CondaEnv" ../testing/test_config.json)
-	TESTSTR='TESTING'
-else
-	MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
-	RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
-	CONDA_ENV=$(jq -r ".CondaEnv" ../ens_config.json)
-	TESTSTR='PRODUCTION'
-fi
+MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
+RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
+CONDA_ENV=$(jq -r ".CondaEnv" ../ens_config.json)
+TESTSTR='PRODUCTION'
 
 end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters

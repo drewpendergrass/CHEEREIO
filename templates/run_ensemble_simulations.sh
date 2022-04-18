@@ -18,13 +18,8 @@ eval "$(conda shell.bash hook)"
 TESTING={TESTBOOL}
 ENSDIR=$(pwd -P)
 
-if [ "${TESTING}" = true ]; then
-  MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/testing/test_config.json)"
-  RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/testing/test_config.json)"
-else
-  MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
-  RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
-fi
+MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
+RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
 
 ### Get current task ID
 x=${SLURM_ARRAY_TASK_ID}
@@ -105,7 +100,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
     #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
     if [ $x -eq 1 ]; then
-      bash check_and_complete_assimilation.sh ${TESTING}
+      bash check_and_complete_assimilation.sh
     fi
     sleep 1
   done

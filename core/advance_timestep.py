@@ -2,12 +2,8 @@ import toolbox as tx
 from datetime import datetime,timedelta
 import sys
 
-teststr = str(sys.argv[1])
-periodstr = str(sys.argv[2])
-if teststr=="TESTING":
-	spc_config = tx.getSpeciesConfig(testing=True)
-else:
-	spc_config = tx.getSpeciesConfig(testing=False)
+periodstr = str(sys.argv[1])
+spc_config = tx.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}"
 ens_dir = f"{parent_dir}/ensemble_runs"
