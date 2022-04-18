@@ -162,6 +162,7 @@
 	"comment021" : "**********************************************************************************",
 	"comment022" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
 	"comment023" : "**********************************************************************************",
+	"verbose":"1",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
 	"postprocess_save_albedo":"True"

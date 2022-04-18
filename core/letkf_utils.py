@@ -72,12 +72,12 @@ class GC_Translator(object):
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
 		tstr = f'{self.timestamp[0:4]}-{self.timestamp[4:6]}-{self.timestamp[6:8]}T{self.timestamp[9:11]}:{self.timestamp[11:13]}:00.000000000'
 		new_last_time = np.datetime64(tstr)
-		if tx.getSpeciesConfig(self.testing)['DO_ENS_SPINUP']=='true':
-			START_DATE = tx.getSpeciesConfig(self.testing)['ENS_SPINUP_START']
+		if tx.getSpeciesConfig()['DO_ENS_SPINUP']=='true':
+			START_DATE = tx.getSpeciesConfig()['ENS_SPINUP_START']
 		else:
-			START_DATE = tx.getSpeciesConfig(self.testing)['START_DATE']
+			START_DATE = tx.getSpeciesConfig()['START_DATE']
 		orig_timestamp = f'{START_DATE[0:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}' #Start date from  JSON
-		END_DATE = tx.getSpeciesConfig(self.testing)['END_DATE']
+		END_DATE = tx.getSpeciesConfig()['END_DATE']
 		end_timestamp = f'{END_DATE[0:4]}-{END_DATE[4:6]}-{END_DATE[6:8]}'
 		#Create dataset with this timestep's scaling factors
 		ds = xr.Dataset(
@@ -105,7 +105,7 @@ class GC_Translator(object):
 		if self.testing:
 			print("*****************************************************************")
 			print(f"GC_Translator number {self.num} is starting build of statevector!")
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		statevec_components = []
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.getSpecies3Dconc(spec_conc).flatten())
@@ -122,7 +122,7 @@ class GC_Translator(object):
 			print(f"GC_Translator number {self.num} has built statevector; it is of dimension {np.shape(self.statevec)}.")
 			print("*****************************************************************")
 	def getLocalizedStateVectorIndices(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
 		if self.testing:
 			print(f"GC_Translator is getting localized statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
@@ -137,7 +137,7 @@ class GC_Translator(object):
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		if self.testing:
 			print(f"Within a flattened 2D dummy square, {len(dummy2dwhere_flat)} entries are valid.")
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -167,7 +167,7 @@ class GC_Translator(object):
 		dummy2dwhere_flat = dummy2d[latind,lonind]
 		if self.testing:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat} is sole valid entry.")
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -184,7 +184,7 @@ class GC_Translator(object):
 		return statevecinds
 	def getSpeciesConcIndicesInColumn(self,species):
 		levcount = len(self.getLev())
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		cur_offset = 0
 		for ind,spec in enumerate(species_config['STATE_VECTOR_CONC']):
 			if species == spec:
@@ -193,7 +193,7 @@ class GC_Translator(object):
 		return None #If loop doesn't terminate we did not find the species
 	def getSpeciesEmisIndicesInColumn(self,species):
 		levcount = len(self.getLev())
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		cur_offset = len(species_config['STATE_VECTOR_CONC'])*levcount
 		for ind,spec in enumerate(species_config['CONTROL_VECTOR_EMIS']):
 			if species == spec:
@@ -201,7 +201,7 @@ class GC_Translator(object):
 			cur_offset+=1
 		return None #If loop doesn't terminate we did not find the species
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
-		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind,testing=self.testing)
+		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
 		if self.testing:
 			print(f"GC_Translator is getting column statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
@@ -222,7 +222,7 @@ class GC_Translator(object):
 		if self.testing:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat_column} is the sole valid index in the column.")
 			print(f"Matched value in the overall flattened and subsetted square is {dummy2dwhere_match}")
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -252,7 +252,7 @@ class GC_Translator(object):
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
 	def randomizeRestart(self,perturbation=0.1,bias=0):
-		statevec_species = tx.getSpeciesConfig(self.testing)['STATE_VECTOR_CONC']
+		statevec_species = tx.getSpeciesConfig()['STATE_VECTOR_CONC']
 		offset = 1-perturbation
 		scale = perturbation*2
 		for spec in statevec_species:
@@ -264,7 +264,7 @@ class GC_Translator(object):
 	#Also construct new scaling factors and add them as a separate array at the new timestep in each of the scaling factor netCDFs.
 	#However, only do so for species in the control vectors of emissions and concentrations.
 	def reconstructArrays(self,analysis_vector):
-		species_config = tx.getSpeciesConfig(self.testing)
+		species_config = tx.getSpeciesConfig()
 		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
 		emislist=list(species_config['CONTROL_VECTOR_EMIS'].keys())
 		emis_shape = np.shape(self.getEmisSF(emislist[0]))
@@ -657,15 +657,15 @@ class GT_Container(object):
 #That restart will be overwritten in place (name not changed) so next run starts from the assimilation state vector.
 #Emissions scaling factors are most recent available (one assimilation timestep ago). New values will be appended to netCDF. 
 class Assimilator(object):
-	def __init__(self,timestamp,ensnum,corenum,testing=False):
-		self.testing = testing
+	def __init__(self,timestamp,ensnum,corenum):
+		spc_config = tx.getSpeciesConfig()
+		self.verbose = int(spc_config['verbose'])
 		self.ensnum = ensnum
 		self.corenum = corenum
 		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum,self.testing)
-		if self.testing:
+		if self.verbose>=2:
 			print(f"Assimilator has been called for ens {self.ensnum} core {self.corenum}; construction beginning")
 			print(f"This core will be handling lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")
-		spc_config = tx.getSpeciesConfig(self.testing)
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
 		self.path_to_logs = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs/logs"
@@ -673,7 +673,7 @@ class Assimilator(object):
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
 		dirnames = [d.split('/')[-2] for d in subdirs]
-		if self.testing:
+		if self.verbose>=2:
 			print(f"The following ensemble directories were detected: {dirnames}")
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
@@ -698,7 +698,7 @@ class Assimilator(object):
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
-		if self.testing:
+		if self.verbose>=2:
 			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
@@ -707,11 +707,11 @@ class Assimilator(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
-		if self.testing:
+		if self.verbose>=2:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		self.inflation = float(spc_config['INFLATION_FACTOR'])
 		self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,testing=self.testing)
-		if self.testing:
+		if self.verbose>=2:
 			print(f"Assimilator construction complete")
 	def getLat(self):
 		return self.gt[1].getLat() #Latitude of first ensemble member, who should always exist
@@ -720,7 +720,7 @@ class Assimilator(object):
 	def getLev(self):
 		return self.gt[1].getLev()
 	def combineEnsemble(self,latind=None,lonind=None):
-		if self.testing:
+		if self.verbose>=2:
 			print(f'combineEnsemble called in Assimilator for lat/lon inds {(latind,lonind)}')
 		firstens = self.ensemble_numbers[0]
 		firstvec = self.gt[firstens].getStateVector(latind,lonind)
@@ -729,22 +729,22 @@ class Assimilator(object):
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				statevecs[:,i-1] = self.gt[i].getStateVector(latind,lonind)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'Ensemble combined in Assimilator for lat/lon inds {(latind,lonind)} and has dimensions {np.shape(statevecs)}.')
 		return statevecs
 	def ensMeanAndPert(self,latval,lonval):
-		if self.testing:
+		if self.verbose>=2:
 			print(f'ensMeanAndPert called in Assimilator for lat/lon inds {(latval,lonval)}')
 		statevecs = self.combineEnsemble(latval,lonval)
 		state_mean = np.mean(statevecs,axis = 1) #calculate ensemble mean
 		bigX = np.zeros(np.shape(statevecs))
 		for i in range(np.shape(bigX)[1]):
 			bigX[:,i] = statevecs[:,i]-state_mean
-		if self.testing:
+		if self.verbose>=2:
 			print(f'Ensemble mean at {(latval,lonval)} has dimensions {np.shape(state_mean)} and bigX at at {(latval,lonval)} has dimensions {np.shape(bigX)}.')
 		return [state_mean,bigX]
 	def combineEnsembleForSpecies(self,species):
-		if self.testing:
+		if self.verbose>=2:
 			print(f'combineEnsembleForSpecies called in Assimilator for species {species}')
 		conc3D = []
 		firstens = self.ensemble_numbers[0]
@@ -760,47 +760,47 @@ class Assimilator(object):
 				conc4D[:,:,:,i-1] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
 	def prepareMeansAndPerts(self,latval,lonval):
-		if self.testing:
+		if self.verbose>=2:
 			print(f'prepareMeansAndPerts called in Assimilator for lat/lon inds {(latval,lonval)}')
 		self.ybar_background, self.Ypert_background, self.ydiff = self.histens.getLocObsMeanPertDiff(latval,lonval)
 		self.xbar_background, self.Xpert_background = self.ensMeanAndPert(latval,lonval)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'ybar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ybar_background)}.')
 			print(f'Ypert_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.Ypert_background)}.')
 			print(f'ydiff for lat/lon inds {(latval,lonval)} has shape {np.shape(self.ydiff)}.')
 			print(f'xbar_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.xbar_background)}.')
 			print(f'Xpert_background for lat/lon inds {(latval,lonval)} has shape {np.shape(self.Xpert_background)}.')
 	def makeR(self,latind=None,lonind=None):
-		if self.testing:
+		if self.verbose>=2:
 			print(f"Making R for lat/lon inds {(latind,lonind)}.")
 		self.R = self.histens.makeR(latind,lonind)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
 		self.C = np.transpose(self.Ypert_background) @ la.inv(self.R)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'C made in Assimilator. It has dimension {np.shape(self.C)} and value {self.C}')
 	def makePtildeAnalysis(self):
 		cyb = self.C @ self.Ypert_background
 		k = len(self.ensemble_numbers)
 		iden = (k-1)*np.identity(k)/(1+self.inflation)
 		self.PtildeAnalysis = la.inv(iden+cyb)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'PtildeAnalysis made in Assimilator. It has dimension {np.shape(self.PtildeAnalysis)} and value {self.PtildeAnalysis}')
 	def makeWAnalysis(self):
 		k = len(self.ensemble_numbers)
 		self.WAnalysis = la.sqrtm((k-1)*self.PtildeAnalysis)
-		if self.testing:
+		if self.verbose>=2:
 			print(f'WAnalysis initialized in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeWbarAnalysis(self):
 		self.WbarAnalysis = self.PtildeAnalysis@self.C@self.ydiff
-		if self.testing:
+		if self.verbose>=2:
 			print(f'WbarAnalysis made in Assimilator. It has dimension {np.shape(self.WbarAnalysis)} and value {self.WbarAnalysis}')
 	def adjWAnalysis(self):
 		k = len(self.ensemble_numbers)
 		for i in range(k):
 			self.WAnalysis[:,i]+=self.WbarAnalysis
-		if self.testing:
+		if self.verbose>=2:
 			print(f'WAnalysis adjusted in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeAnalysisCombinedEnsemble(self):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
@@ -813,7 +813,7 @@ class Assimilator(object):
 			for i in range(k):
 				self.analysisPertEnsemble[:,i] = self.Xpert_background.dot(self.WAnalysis[:,i])
 				self.analysisEnsemble[:,i] = self.analysisPertEnsemble[:,i]+self.xbar_background
-		if self.testing:
+		if self.verbose>=2:
 			print(f'analysisEnsemble made in Assimilator. It has dimension {np.shape(self.analysisEnsemble)} and value {self.analysisEnsemble}')
 	def getAnalysisAndBackgroundColumn(self,latval,lonval,doBackground=True, doPerts=False):
 		colinds = self.gt[1].getColumnIndicesFromLocalizedStateVector(latval,lonval)
@@ -900,14 +900,14 @@ class Assimilator(object):
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
 	def LETKF(self):
-		if self.testing:
+		if self.verbose>=2:
 			print(f"LETKF called! Beginning loop.")
 		if self.SaveDOFS:
 			latlen = len(self.gt[1].getLat())
 			lonlen = len(self.gt[1].getLon())
 			dofsmat = np.nan*np.zeros((latlen,lonlen))
 		for latval,lonval in zip(self.latinds,self.loninds):
-			if self.testing:
+			if self.verbose>=1:
 				print(f"Beginning LETKF loop for lat/lon inds {(latval,lonval)}.")
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:

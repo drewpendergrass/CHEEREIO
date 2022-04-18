@@ -420,7 +420,6 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{Partition}:${Partition}:g" \
        -e "s:{Memory}:${Memory}:g" \
        -e "s:{WallTime}:${WallTime}:g" \
-       -e "s:{TESTBOOL}:false:g" \
        -e "s:{MaxPar}:${MaxPar}:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
@@ -439,7 +438,6 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
          -e "s:{Partition}:${Partition}:g" \
          -e "s:{Memory}:${EnsSpinupMemory}:g" \
          -e "s:{WallTime}:${EnsSpinupWallTime}:g" \
-         -e "s:{TESTBOOL}:false:g" \
          -e "s:{MaxPar}:${MaxPar}:g" \
          -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_spinup_simulations.sh
 

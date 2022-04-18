@@ -15,7 +15,6 @@ source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluste
 eval "$(conda shell.bash hook)"
 
 ### Run directory
-TESTING={TESTBOOL}
 ENSDIR=$(pwd -P)
 
 MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
@@ -47,53 +46,45 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 #Run GC; hang until assimilation complete (later also will do assimilation).
 #This will loop until a file appears in scratch signalling assimilation is complete.
 while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
-  # Run GEOS_Chem.  The "time" command will return CPU and wall times.
-  # Stdout and stderr will be directed to the "GC.log" log file
-  # If just testing assimilation, skip all this
-  if [ "${TESTING}" = false ]; then
-    srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
-    wait
-    taillog="$(tail -n 1 GC.log)"
-    #Check if GC finished.
-    if [[ "${taillog:0:1}" != "*" ]]; then
-      #This file's presence breaks loop loop
-      printf "GEOS-Chem did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
-    fi
-      #If there is a problem, the KILL_ENS file will be produced. Break then
-    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
-      break
-    fi
-    #Ensemble member 1 handles checking. CD to core.
-    if [ $x -eq 1 ]; then
-      cd {ASSIM}/core
-    fi
-    #Hang until ALL_RUNS_COMPLETE found in scratch folder
-    until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]
-    do
-      #If this is ensemble member 1, look for all restarts and flag if found. Otherwise do nothing.
-      if [ $x -eq 1 ]; then
-        bash check_for_all_restarts.sh #Check if restarts exist; if they do, create ALL_RUNS_COMPLETE.
-      fi
-      #If there is a problem, the KILL_ENS file will be produced. Break then
-      if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
-        break 2
-      fi
-      sleep 1
-    done
-  else
-    #Create done signal
-    if [ $x -eq 1 ]; then
-      echo "Done" > ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE
-    fi
+# Run GEOS_Chem.  The "time" command will return CPU and wall times.
+# Stdout and stderr will be directed to the "GC.log" log file
+  srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
+  wait
+  taillog="$(tail -n 1 GC.log)"
+  #Check if GC finished.
+  if [[ "${taillog:0:1}" != "*" ]]; then
+    #This file's presence breaks loop loop
+    printf "GEOS-Chem did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
   fi
+    #If there is a problem, the KILL_ENS file will be produced. Break then
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+    break
+  fi
+  #Ensemble member 1 handles checking. CD to core.
+  if [ $x -eq 1 ]; then
+    cd {ASSIM}/core
+  fi
+  #Hang until ALL_RUNS_COMPLETE found in scratch folder
+  until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]
+  do
+    #If this is ensemble member 1, look for all restarts and flag if found. Otherwise do nothing.
+    if [ $x -eq 1 ]; then
+      bash check_for_all_restarts.sh #Check if restarts exist; if they do, create ALL_RUNS_COMPLETE.
+    fi
+    #If there is a problem, the KILL_ENS file will be produced. Break then
+    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+      break 2
+    fi
+    sleep 1
+  done
   #CD to core
   cd {ASSIM}/core
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
     if [ {MaxPar} -eq 1 ]; then
-      bash par_assim.sh ${TESTING} ${x} 1
+      bash par_assim.sh ${x} 1
     else
-      parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{MaxPar}}
+      parallel -j {MaxPar} "bash par_assim.sh ${x} {1}" ::: {1..{MaxPar}}
     fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
@@ -115,7 +106,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   fi
   #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
   if [ $x -eq 1 ]; then
-    bash cleanup.sh ${TESTING} #This also will break us out of this loop when assimilation complete.
+    bash cleanup.sh #This also will break us out of this loop when assimilation complete.
   fi
   #Hang until cleanup complete, as determined by temp file deletion.
   until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
