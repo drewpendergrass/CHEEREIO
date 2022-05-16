@@ -136,9 +136,9 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 	return to_return
 
 class Observation_Translator(object):
-	def __init__(self,testing=False):
-		self.testing = testing
-		self.spc_config = tx.getSpeciesConfig(self.testing)
+	def __init__(self,verbose=1):
+		self.verbose = verbose
+		self.spc_config = tx.getSpeciesConfig()
 		self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 	#The globObs function returns a dictionary of observations that are within a user-specified timeperiod, and, if specified
 	#that take place at a user-specified interval. The inherited function must have this signature.

@@ -11,40 +11,40 @@ from datetime import date,datetime,timedelta
 #emissions scaling factor netCDFs. After initialization it contains the necessary data
 #and can output it in useful ways to other functions in the LETKF procedure.
 class GC_Translator(object):
-	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,testing=False):
+	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,verbose=1):
 		#self.latinds,self.loninds = tx.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestamp=timestamp
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
 		self.restart_ds = xr.load_dataset(self.filename)
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
-		self.testing=testing
-		if self.testing:
+		self.verbose=verbose
+		if self.verbose>=3:
 			self.num = path_to_rundir.split('_')[-1][0:4]
 			print(f"GC_translator number {self.num} has been called for directory {path_to_rundir} and restart {self.filename}; construction beginning")
 		self.emis_ds_list = {}
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name] = xr.load_dataset(file)
-			if self.testing:
+			if self.verbose>=3:
 				print(f"GC_translator number {self.num} has loaded scaling factors for {name}")
 		if computeStateVec:
 			self.buildStateVector()
 		else:
 			self.statevec = None
 			self.statevec_lengths = None #Until state vector is initialized this variable is None
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} construction complete.")
 	#Since only one timestamp, returns in format lev,lat,lon
 	def getSpecies3Dconc(self, species):
 		da = np.array(self.restart_ds[f'SpeciesRst_{species}']).squeeze()
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} got 3D conc for species {species} which are of dimension {np.shape(da)}.")
 		return da
 	def setSpecies3Dconc(self, species, conc3d):
 		baseshape = np.shape(conc3d)
 		conc4d = conc3d.reshape(np.concatenate([np.array([1]),baseshape]))
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} set 3D conc for species {species} which are of dimension {np.shape(conc4d)}.")
 		self.restart_ds[f'SpeciesRst_{species}'] = (["time","lev","lat","lon"],conc4d,{"long_name":f"Dry mixing ratio of species {species}","units":"mol mol-1 dry","averaging_method":"instantaneous"})
 	def getLat(self):
@@ -102,7 +102,7 @@ class GC_Translator(object):
 		)
 		self.emis_ds_list[species] = xr.concat([self.emis_ds_list[species],ds],dim = 'time') #Concatenate
 	def buildStateVector(self):
-		if self.testing:
+		if self.verbose>=3:
 			print("*****************************************************************")
 			print(f"GC_Translator number {self.num} is starting build of statevector!")
 		species_config = tx.getSpeciesConfig()
@@ -118,12 +118,12 @@ class GC_Translator(object):
 				statevec_components.append(self.getEmisSF(spec_emis).flatten())
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} has built statevector; it is of dimension {np.shape(self.statevec)}.")
 			print("*****************************************************************")
 	def getLocalizedStateVectorIndices(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator is getting localized statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
@@ -131,11 +131,11 @@ class GC_Translator(object):
 		totalcount = levcount*latcount*loncount
 		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat)} entries are valid.")
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {len(dummy2dwhere_flat)} entries are valid.")
 		species_config = tx.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
@@ -149,11 +149,11 @@ class GC_Translator(object):
 			ind_collector.append((dummy2dwhere_flat+cur_offset))
 			cur_offset+=(latcount*loncount)
 		statevecinds = np.concatenate(ind_collector)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return statevecinds
 	def getColumnIndicesFromFullStateVector(self,latind,lonind):
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator is getting column statevec indices FOR FULL VECTOR at {(latind,lonind)}.")
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
@@ -161,11 +161,11 @@ class GC_Translator(object):
 		totalcount = levcount*latcount*loncount
 		dummy3d = np.arange(0, totalcount).reshape((levcount,latcount,loncount))
 		dummywhere_flat = dummy3d[:,latind,lonind].flatten()
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat)} entries are valid.")
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[latind,lonind]
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat} is sole valid entry.")
 		species_config = tx.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
@@ -179,7 +179,7 @@ class GC_Translator(object):
 			ind_collector.append(np.array([dummy2dwhere_flat+cur_offset]))
 			cur_offset+=(latcount*loncount)
 		statevecinds = np.concatenate(ind_collector)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"There are a total of {len(statevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return statevecinds
 	def getSpeciesConcIndicesInColumn(self,species):
@@ -202,7 +202,7 @@ class GC_Translator(object):
 		return None #If loop doesn't terminate we did not find the species
 	def getColumnIndicesFromLocalizedStateVector(self,latind,lonind):
 		surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC_Translator is getting column statevec indices surrounding {(latind,lonind)} (lat/lon inds have shapes {np.shape(surr_latinds)}/{np.shape(surr_loninds)}); Lat inds are {surr_latinds} and lon inds are {surr_loninds}.")
 		levcount = len(self.getLev())
 		latcount = len(self.getLat())
@@ -212,14 +212,14 @@ class GC_Translator(object):
 		dummywhere_flat = dummy3d[:,surr_latinds,surr_loninds].flatten()
 		dummywhere_flat_column = dummy3d[:,latind,lonind].flatten()
 		dummywhere_match = np.where(np.in1d(dummywhere_flat,dummywhere_flat_column))[0]
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 3D dummy cube, {len(dummywhere_flat_column)} entries are valid in the column.")
 			print(f"Matched {len(dummywhere_match)} entries in the overall flattened and subsetted column; values are {dummywhere_match}")
 		dummy2d = np.arange(0, latcount*loncount).reshape((latcount,loncount))
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		dummy2dwhere_flat_column = dummy2d[latind,lonind]
 		dummy2dwhere_match = np.where(np.in1d(dummy2dwhere_flat,dummy2dwhere_flat_column))[0]
-		if self.testing:
+		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat_column} is the sole valid index in the column.")
 			print(f"Matched value in the overall flattened and subsetted square is {dummy2dwhere_match}")
 		species_config = tx.getSpeciesConfig()
@@ -234,7 +234,7 @@ class GC_Translator(object):
 			ind_collector.append((dummy2dwhere_match+cur_offset))
 			cur_offset+=len(dummy2dwhere_flat) #Only one value here.
 		localizedstatevecinds = np.concatenate(ind_collector)
-		if self.testing:
+		if self.verbose>=3:
 			print(f"There are a total of {len(localizedstatevecinds)}/{len(self.statevec)} selected from total statevec.")
 		return localizedstatevecinds
 	def getStateVector(self,latind=None,lonind=None):
@@ -245,7 +245,7 @@ class GC_Translator(object):
 			statevec_toreturn = self.statevec[statevecinds]
 		else: #Return the whole vector
 			statevec_toreturn = self.statevec
-		if self.testing:
+		if self.verbose>=3:
 			print(f"GC Translator number {self.num} got statevector for inds {(latind,lonind)}; this vec has length {len(statevec_toreturn)} of total statevec {len(self.statevec)}.")
 		return statevec_toreturn
 	#Randomize the restart for purposes of testing. Perturbation is 1/2 of range of percent change selected from a uniform distribution.
@@ -294,9 +294,9 @@ class GC_Translator(object):
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
-	def __init__(self, path_to_rundir,timeperiod,interval=None,testing=False):
-		self.testing = testing
-		self.spc_config = tx.getSpeciesConfig(self.testing)
+	def __init__(self, path_to_rundir,timeperiod,interval=None,verbose=1):
+		self.verbose = verbose
+		self.spc_config = tx.getSpeciesConfig()
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
 		self.interval = interval
@@ -364,13 +364,13 @@ class HIST_Translator(object):
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,testing=False,saveAlbedo=False):
-		self.testing = testing
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False):
+		self.verbose = verbose
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
 		self.useArea = useArea
-		self.spc_config = tx.getSpeciesConfig(self.testing)
+		self.spc_config = tx.getSpeciesConfig()
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -391,9 +391,9 @@ class HIST_Ens(object):
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens!=0:
 				if fullperiod:
-					self.ht[ens] = HIST_Translator(directory, self.timeperiod,interval,testing=self.testing)
+					self.ht[ens] = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
 				else:
-					self.ht[ens] = HIST_Translator(directory, self.timeperiod,testing=self.testing)
+					self.ht[ens] = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.maxobs=int(self.spc_config['MAXNUMOBS'])
@@ -408,7 +408,7 @@ class HIST_Ens(object):
 		self.satSpecies = []
 		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.values()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
 			if (bool4D and boolTROPOMI):
-				self.SAT_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.testing)
+				self.SAT_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
 				self.satSpecies.append(spec)
 	def getSatData(self):
 		self.SAT_DATA = {}
@@ -513,7 +513,7 @@ class HIST_Ens(object):
 		return to_return
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
-		origlat,origlon = tx.getLatLonVals(self.spc_config,self.testing)
+		origlat,origlon = tx.getLatLonVals(self.spc_config)
 		latval = origlat[latind]
 		lonval = origlon[lonind]
 		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
@@ -557,9 +557,8 @@ class HIST_Ens(object):
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
-	def __init__(self,timestamp,testing=False,constructStateVecs=True):
-		self.testing = testing
-		spc_config = tx.getSpeciesConfig(self.testing)
+	def __init__(self,timestamp,constructStateVecs=True):
+		spc_config = tx.getSpeciesConfig()
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
 		npy_column_files = glob(f'{self.path_to_scratch}/**/*.npy',recursive=True)
@@ -576,9 +575,9 @@ class GT_Container(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
+				self.nature = GC_Translator(directory, timestamp, constructStateVecs)
 			else:
-				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs,self.testing)
+				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 	#Gets saved column and compares to the original files
@@ -662,7 +661,7 @@ class Assimilator(object):
 		self.verbose = int(spc_config['verbose'])
 		self.ensnum = ensnum
 		self.corenum = corenum
-		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum,self.testing)
+		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum)
 		if self.verbose>=2:
 			print(f"Assimilator has been called for ens {self.ensnum} core {self.corenum}; construction beginning")
 			print(f"This core will be handling lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")
@@ -702,15 +701,15 @@ class Assimilator(object):
 			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp, False,self.testing)
+				self.nature = GC_Translator(directory, timestamp, False,self.verbose)
 			else: 
-				self.gt[ens] = GC_Translator(directory, timestamp, True,self.testing)
+				self.gt[ens] = GC_Translator(directory, timestamp, True,self.verbose)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		if self.verbose>=2:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		self.inflation = float(spc_config['INFLATION_FACTOR'])
-		self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,testing=self.testing)
+		self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -866,7 +865,10 @@ class Assimilator(object):
 				name = self.emis_names[i]
 				analysis_std = np.std(analysisScalefactor[i,:])
 				background_std = self.InitEmisSTD[name][latind,lonind]
-				ratio=analysis_std/background_std
+				if background_std == 0:
+					ratio = np.nan 
+				else:
+					ratio=analysis_std/background_std
 				if ~np.isnan(ratio): 
 					if ratio < inflator:
 						new_std = inflator*background_std

@@ -2,13 +2,8 @@ from glob import glob
 import toolbox as tx 
 import sys 
 
-cmdarg = str(sys.argv[1])
-if cmdarg=="TESTING":
-	data = tx.getSpeciesConfig(testing=True)
-	latgrid,longrid = tx.getLatLonVals(data,True)
-else:
-	data = tx.getSpeciesConfig(testing=False)
-	latgrid,longrid = tx.getLatLonVals(data,False)
+data = tx.getSpeciesConfig()
+latgrid,longrid = tx.getLatLonVals(data)
 
 path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 columns = glob(f'{path_to_scratch}/**/*.npy',recursive=True)

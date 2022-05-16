@@ -2,9 +2,17 @@ import json
 import geopy.distance as gd
 import numpy as np
 
+#Load in settings from ens_config.json. If settings_to_override is active (entry override is True)
+#the overwrite entries provided
 def getSpeciesConfig():
 	with open('../ens_config.json') as f:
 		data = json.load(f)
+	with open('../settings_to_override.json') as f:
+		over_data = json.load(f)
+	if over_data['override'] == "True":
+		for key in list(over_data.keys()):
+			if key != 'override':
+				data['key'] = over_data['key']
 	return data
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
