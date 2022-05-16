@@ -7,13 +7,7 @@ import os
 
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
 
-cmdarg = str(sys.argv[2])
-if cmdarg=="TESTING":
-	testing=True
-else:
-	testing=False
-
-data = tx.getSpeciesConfig(testing=testing)
+data = tx.getSpeciesConfig()
 
 SaveDOFS = data["SaveDOFS"] == "True"
 
@@ -21,7 +15,7 @@ dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 print(f'One core is gathering columns to overwrite at time {dateval}.')
 start = time.time()
-wrapper = lu.GT_Container(timestamp,testing)
+wrapper = lu.GT_Container(timestamp)
 end = time.time()
 print(f'Core gathered columns and ensemble in {end - start} seconds. Begin saving.')
 start = time.time()

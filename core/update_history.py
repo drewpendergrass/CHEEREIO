@@ -4,8 +4,8 @@ import numpy as np
 
 class HISTORY_Translator():
 	#Constructor. If foldername is none, open template HISTORY.rc. Otherwise open ensemble member
-	def __init__(self,foldername=None,testing=False):
-		self.spc_config = tx.getSpeciesConfig(testing)
+	def __init__(self,foldername=None):
+		self.spc_config = tx.getSpeciesConfig()
 		if foldername:
 			self.foldername = foldername
 		else:

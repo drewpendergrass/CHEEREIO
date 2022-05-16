@@ -6,11 +6,7 @@ from glob import glob
 import sys
 import pathlib
 
-cmdarg = str(sys.argv[1])
-if cmdarg=="TESTING":
-	data = tx.getSpeciesConfig(testing=True)
-else:
-	data = tx.getSpeciesConfig(testing=False)
+data = tx.getSpeciesConfig()
 
 path_to_sim = f"{data['MY_PATH']}/{data['RUN_NAME']}/"
 subdirs = glob(f"{path_to_sim}ensemble_runs/*/")
