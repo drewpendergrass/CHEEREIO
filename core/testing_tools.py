@@ -1,4 +1,5 @@
 import letkf_utils as lu
+import numpy as np
 
 assimilator = lu.Assimilator('20190108_0000',2,1) #we aren't using ens or core num here.
 
@@ -30,5 +31,8 @@ def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in n
 	print(f'This represents a percent difference of {100*((meananalysis-meanbackground)/meanbackground)}%')
 	dofs = assim.calculateDOFS(analysisPertSubset,backgroundPertSubset)
 	print(f'DOFS has value {dofs}')
-	analysisSubsetAdjusted = self.applyAnalysisCorrections(analysisSubset,backgroundSubset,latind,lonind)
-	print()
+	analysisSubsetAdjusted = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,latind,lonind)
+	meananalysisSubsetAdjusted = np.mean(analysisSubsetAdjusted,axis=1)
+	print(f'Old analysis ensemble mean for column was {meananalysis}.')
+	print(f'After postprocessing, new analysis ensemble mean for column is {meananalysisSubsetAdjusted}.')
+	print(f'This represents a percent difference of {100*((meananalysisSubsetAdjusted-meananalysis)/meananalysis)}%')
