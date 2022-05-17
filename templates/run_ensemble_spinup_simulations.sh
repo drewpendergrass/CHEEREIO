@@ -45,9 +45,7 @@ srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
 wait
 
 
-nEnsemble="$(jq -r ".nEnsemble" {ASSIM}/ens_config.json)"
-
-if [ $x = $nEnsemble ]; then
+if [ $x -eq 1 ]; then
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE ]; do
     sleep 1
     bash check_for_all_ensemble_spinup_restarts.sh
@@ -59,6 +57,8 @@ if [ $x = $nEnsemble ]; then
   bash change_hemcodiag_freq.sh #update hemco diagnostics frequency.
   cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
   sed -i -e "s|SpeciesBC_?ALL?|SpeciesRst_?ALL?|g" {RunName}_*/HEMCO_Config.rc #Sometimes we spin up from BCs; this fixes.
+  cd ${MY_PATH} #Make backup
+  cp -r ${MY_PATH}/${RUN_NAME} ${MY_PATH}/${RUN_NAME}_BACKUP
 fi
 
 # Exit normally
