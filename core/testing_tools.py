@@ -8,7 +8,7 @@ def makeAssimilator():
 	return assimilator
 
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
-def overrideSettings(settings_to_override, overwrite = False)
+def overrideSettings(settings_to_override, overwrite = False):
 	with open('../settings_to_override.json') as f:
 		over_data = json.load(f)
 	if overwrite:
