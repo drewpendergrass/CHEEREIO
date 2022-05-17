@@ -30,5 +30,5 @@ def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in n
 	print(f'This represents a percent difference of {100*((meananalysis-meanbackground)/meanbackground)}%')
 	dofs = assim.calculateDOFS(analysisPertSubset,backgroundPertSubset)
 	print(f'DOFS has value {dofs}')
-	
+	analysisSubsetAdjusted = self.applyAnalysisCorrections(analysisSubset,backgroundSubset,latind,lonind)
 	print()

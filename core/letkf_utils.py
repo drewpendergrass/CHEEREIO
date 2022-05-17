@@ -950,6 +950,8 @@ class Assimilator(object):
 			if (priorweight<0) or (priorweight>1):
 				raise ValueError('Invalid prior weight; must be between 0 and 1.') 
 			posteriorweight = 1-priorweight
+			if self.verbose>=2:
+				print(f'Averaging prior and posterior, with prior weight of {priorweight} and posterior weight of {posteriorweight}.')
 			analysisSubset = (backgroundSubset*priorweight)+(analysisSubset*posteriorweight)
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
