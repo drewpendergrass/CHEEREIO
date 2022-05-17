@@ -15,6 +15,7 @@ class GC_Translator(object):
 		#self.latinds,self.loninds = tx.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestamp=timestamp
+		self.timestamp_as_date = np.datetime64(f'{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]}T{timestamp[9:11]}:{timestamp[11:13]}:00')
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
 		self.restart_ds = xr.load_dataset(self.filename)
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
@@ -57,10 +58,12 @@ class GC_Translator(object):
 		return np.array(self.restart_ds['time'])
 	def getEmisTime(self):
 		return np.array(list(self.emis_ds_list.values())[0]['time'])
-	#We work with the most recent timestamp. Rest are just for archival purposes.
+	#Get the emissions from the timestamp nearest to the one supplied by the user.
 	def getEmisSF(self, species):
 		da = self.emis_ds_list[species]['Scalar']
-		return np.array(da)[-1,:,:].squeeze()
+		time_array = self.getEmisTime()
+		ind_closest = np.argmin(np.abs(time_array-self.timestamp_as_date))
+		return np.array(da)[ind_closest,:,:].squeeze()
 	def getEmisLat(self, species):
 		return np.array(self.emis_ds_list[species]['lat'])
 	def getEmisLon(self, species):
