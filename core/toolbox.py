@@ -12,7 +12,7 @@ def getSpeciesConfig():
 	if over_data['override'] == "True":
 		for key in list(over_data.keys()):
 			if key != 'override':
-				data['key'] = over_data['key']
+				data[key] = over_data[key]
 	return data
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
