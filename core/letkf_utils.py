@@ -780,29 +780,29 @@ class Assimilator(object):
 			print(f'R for {(latind,lonind)} has dimension {np.shape(self.R)} and value {self.R}')
 	def makeC(self):
 		self.C = np.transpose(self.Ypert_background) @ la.inv(self.R)
-		if self.verbose>=2:
+		if self.verbose>=3:
 			print(f'C made in Assimilator. It has dimension {np.shape(self.C)} and value {self.C}')
 	def makePtildeAnalysis(self):
 		cyb = self.C @ self.Ypert_background
 		k = len(self.ensemble_numbers)
 		iden = (k-1)*np.identity(k)/(1+self.inflation)
 		self.PtildeAnalysis = la.inv(iden+cyb)
-		if self.verbose>=2:
+		if self.verbose>=3:
 			print(f'PtildeAnalysis made in Assimilator. It has dimension {np.shape(self.PtildeAnalysis)} and value {self.PtildeAnalysis}')
 	def makeWAnalysis(self):
 		k = len(self.ensemble_numbers)
 		self.WAnalysis = la.sqrtm((k-1)*self.PtildeAnalysis)
-		if self.verbose>=2:
+		if self.verbose>=3:
 			print(f'WAnalysis initialized in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeWbarAnalysis(self):
 		self.WbarAnalysis = self.PtildeAnalysis@self.C@self.ydiff
-		if self.verbose>=2:
+		if self.verbose>=3:
 			print(f'WbarAnalysis made in Assimilator. It has dimension {np.shape(self.WbarAnalysis)} and value {self.WbarAnalysis}')
 	def adjWAnalysis(self):
 		k = len(self.ensemble_numbers)
 		for i in range(k):
 			self.WAnalysis[:,i]+=self.WbarAnalysis
-		if self.verbose>=2:
+		if self.verbose>=3:
 			print(f'WAnalysis adjusted in Assimilator. It has dimension {np.shape(self.WAnalysis)} and value {self.WAnalysis}')
 	def makeAnalysisCombinedEnsemble(self):
 		self.analysisEnsemble = np.zeros(np.shape(self.Xpert_background))
