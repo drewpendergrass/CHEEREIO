@@ -27,7 +27,7 @@
 	"ENS_SPINUP_END" : "20190101",
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190108",
-	"END_DATE" : "20190601",
+	"END_DATE" : "20190401",
 	"nEnsemble" : "24",
 	"pPERT" : "0.5",
 	"pertType" : "percent",
@@ -140,7 +140,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": [
-		"0.002"
+		"0.1"
 	],
 	"OBS_COVARIANCE": [
 		"5"
@@ -151,10 +151,10 @@
 	"OBS_ERROR_SELF_CORRELATION" : [
 		"0.15"
 	],
-	"INFLATION_FACTOR": "0.08",
+	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
-	"MINNUMOBS" : "5",
+	"MINNUMOBS" : "1",
 	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "500",
 	"AveragePriorAndPosterior" : "False",
