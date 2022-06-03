@@ -1,4 +1,4 @@
-import letkf_utils as lu
+from GC_Translator import GC_Translator
 from glob import glob
 import sys
 
@@ -18,7 +18,7 @@ meanval = (maxdir+1)/2
 for ens, directory in zip(subdir_numbers,subdirs):
 	if ens!=0:
 		print(f'Perturbing directory #{ens}.')
-		gt = lu.GC_Translator(directory, timestamp, False, True)
+		gt = GC_Translator(directory, timestamp, False, True)
 		gt.randomizeRestart(perturbation=0,bias=(ens/meanval)-1+biasshift)
 		gt.saveRestart()
 

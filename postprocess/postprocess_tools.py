@@ -9,7 +9,7 @@ import sys
 import pickle
 import pandas as pd
 sys.path.append('../core')
-import letkf_utils as lu 
+from HIST_Ens import HIST_Ens 
 import tropomi_tools as tt 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
@@ -115,7 +115,7 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 	masterY = {}
 	for timestamp in timestamp_list:
 		print(f'Processing the Y dictionary for time {timestamp}')
-		hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,testing=False,saveAlbedo=use_albedo)
+		hist = HIST_Ens(timestamp=timestamp,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,testing=False,saveAlbedo=use_albedo)
 		bigy = hist.bigYDict 
 		for spec in list(bigy.keys()):
 			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec][4]]
@@ -151,7 +151,7 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 
 
 def makeYWholePeriod(timestamp,hourlysub=6,use_numav = False, fullpath_output_name = None):
-	hist = lu.HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub,testing=False)
+	hist = HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub,testing=False)
 	bigy = hist.bigYDict 
 	for spec in list(bigy.keys()):
 		t = [datetime.strptime(tt,"%Y-%m-%dT%H:%M:%S.%fZ") for tt in bigy[spec][4]]

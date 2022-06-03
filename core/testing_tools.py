@@ -1,11 +1,11 @@
-import letkf_utils as lu
+from Assimilator import Assimilator
 import numpy as np
 import json
 
 #Makes an assimilator object
 def makeAssimilator():
-	assimilator = lu.Assimilator('20190108_0000',2,1) #we aren't using ens or core num here.
-	return assimilator
+	a = Assimilator('20190108_0000',2,1) #we aren't using ens or core num here.
+	return a
 
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
 def overrideSettings(settings_to_override, overwrite = False):

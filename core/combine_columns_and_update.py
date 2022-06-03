@@ -1,7 +1,7 @@
 from glob import glob
 import toolbox as tx 
 import sys 
-import letkf_utils as lu
+from GT_Container import GT_Container
 import time
 import os
 
@@ -15,7 +15,7 @@ dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 print(f'One core is gathering columns to overwrite at time {dateval}.')
 start = time.time()
-wrapper = lu.GT_Container(timestamp)
+wrapper = GT_Container(timestamp)
 end = time.time()
 print(f'Core gathered columns and ensemble in {end - start} seconds. Begin saving.')
 start = time.time()
