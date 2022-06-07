@@ -23,8 +23,6 @@ def test_col_subset_of_localized_state_vector_methane():
 	ds = xr.load_dataset('data_for_tests/METHANE_TEST/TEST_0001/GEOSChem.Restart.20190101_0000z.nc4')
 	da = np.array(ds[f'SpeciesRst_CH4']).squeeze()
 	column_from_file = da[:,10,10]
-	#turn off override so that CHEEREIO continues to behave as expected in case test fails here.
-	testing_tools.turnOffOverride()
 	assert np.allclose(column_from_statevec,column_from_file,atol=1e-10)
 
 #From the methane restart, get column from full state vector.
@@ -41,7 +39,5 @@ def test_col_subset_of_full_state_vector_methane():
 	ds = xr.load_dataset('data_for_tests/METHANE_TEST/TEST_0001/GEOSChem.Restart.20190101_0000z.nc4')
 	da = np.array(ds[f'SpeciesRst_CH4']).squeeze()
 	column_from_file = da[:,12,16]
-	#turn off override so that CHEEREIO continues to behave as expected in case test fails here.
-	testing_tools.turnOffOverride()
 	assert np.allclose(column_from_statevec,column_from_file,atol=1e-10)
 
