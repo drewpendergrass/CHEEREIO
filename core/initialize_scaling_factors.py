@@ -14,7 +14,6 @@ else:
 
 spc_config = tx.getSpeciesConfig()
 
-
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
 subdirs.remove(f"{parent_dir}/logs/")
@@ -30,6 +29,8 @@ mask_ocean_bool = spc_config['MaskOceanScaleFactor']
 mask_coast_bool = spc_config['MaskCoastsGT25pctOcean']
 mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
+perttype = spc_config["pertType"]
+perturbation = float(spc_config["pPERT"]) 
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
@@ -114,18 +115,21 @@ if subhalf or subquarter:
 	mask = mask[lonok,latok]
 	mask = np.where(mask==0)
 
-perttype = spc_config["pertType"]
-perturbation = float(spc_config["pPERT"]) 
-if perttype == "exp":
-	if (perturbation <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
-		raise ValueError('Exponential perturbation must be at least 1.')
-elif perttype == "percent":
-	if (perturbation <= 0): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
-		raise ValueError('Percent perturbation must be positive.')
-	elif (perturbation > 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4.
-		raise ValueError('Percent perturbation must be 1 or less.')
-else:
-	raise ValueError("Perturbation type unrecognized.")
+#Check that the user-inputed perturbations are sensible given user-supplied interpretation rule
+for pt, p in zip(perttype,perturbation):
+	if pt == "exp":
+		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
+			raise ValueError('Exponential perturbation must be at least 1.')
+	elif pt == "percent":
+		if (p <= 0): #perturbation, fraction. i.e. if it is 0.5 scaling factors will range between 0.5 and 1.5. Uniform distribution used, no correlation.
+			raise ValueError('Percent perturbation must be positive.')
+		elif (p > 1): #perturbation, fraction. i.e. if it is 0.5 scaling factors will range between 0.5 and 1.5. Uniform distribution used, no correlation.
+			raise ValueError('Percent perturbation must be 1 or less.')
+	elif pt == "std":
+		if (p <= 0): #perturbation, standard deviation from a normal distribution. i.e. if it is 0.5 scaling factors will be centered at 1 with standard deviation 0.5.
+			raise ValueError('Standard deviation perturbation must be positive.')
+	else:
+		raise ValueError("Perturbation type unrecognized.")
 
 scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors),len(lat),len(lon)))
 subdircount = 0
