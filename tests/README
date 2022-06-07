@@ -1,0 +1,13 @@
+This testing workflow verifies that the most important aspects of the assimilation module are working properly.
+It checks that state vectors are formed and subsetted properly, and that assimilation calculations are correct.
+It also verifies that satellite operators are working as expected and that data is being passed across modules correctly.
+
+However, not every scenario can be tested by this workflow, so please be careful!
+This workflow also does not test the full CHEEREIO run, which involves running GEOS-Chem. It only works on assimilation.
+
+Run this workflow every time you make modifications to the assimilation workflow, just to make sure you didn't break it!
+
+TO RUN THIS WORKFLOW:
+(1) activate your CHEEREIO conda environment.
+(2) Run the command 'pytest' at the command line within this directory.
+(3) Test results will be printed to the terminal.
