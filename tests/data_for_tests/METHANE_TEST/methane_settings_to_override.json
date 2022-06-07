@@ -1,0 +1,12 @@
+{
+	"STATE_VECTOR_CONC" : [
+		"CH4"
+	],
+	"CONTROL_VECTOR_CONC" : [
+		"CH4"
+	],
+	"CONTROL_VECTOR_EMIS" : {
+		"CH4":"CH4"
+	},
+	"LOCALIZATION_RADIUS_km" : "500"
+}

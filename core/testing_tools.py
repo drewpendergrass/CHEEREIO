@@ -21,6 +21,21 @@ def overrideSettings(settings_to_override, overwrite = False):
 	with open('../settings_to_override.json', 'w') as f:
 		json.dump(over_data, f, ensure_ascii=False, indent=4)
 
+def setupPytestSettings(simtype='methane'):
+	if simtype=='methane':
+		with open('../tests/data_for_tests/METHANE_TEST/methane_settings_to_override.json') as f:
+			settings_to_override = json.load(f)
+	else:
+		raise ValueError('Cheereio Pytest setting not supported') 
+	overrideSettings(settings_to_override,overwrite=True)
+
+def turnOffOverride():
+	with open('../settings_to_override.json') as f:
+		over_data = json.load(f)
+	over_data['override'] = "False" #Turn off overriding capability
+	with open('../settings_to_override.json', 'w') as f:
+		json.dump(over_data, f, ensure_ascii=False, indent=4)
+
 #Walks through with extensive print statements an assimilation cycle
 def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California, arbitrary 
 	print('*************************************************')

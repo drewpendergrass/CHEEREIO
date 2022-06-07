@@ -2,14 +2,18 @@ import sys
 import pytest
 import xarray as xr
 import numpy as np
+import json
 sys.path.append('../core/')
 from GC_Translator import GC_Translator
+import testing_tools
 
 #These tests ensure that we are subsetting columns correctly in the GC_Translator class.
 
 #From the methane restart, localize the state vector about 10,10 then get the column from the localization.
 #Compare this to the true column from the file
 def test_col_subset_of_localized_state_vector_methane():
+	#override ens_config so that we are set to interpret the data properly
+	testing_tools.setupPytestSettings('methane')
 	#Get the column from the localized state vector
 	gt = GC_Translator('data_for_tests/METHANE_TEST/TEST_0001/','20190101_0000',computeStateVec = True)
 	locstatevec = gt.getStateVector(10,10)
@@ -24,6 +28,8 @@ def test_col_subset_of_localized_state_vector_methane():
 #From the methane restart, get column from full state vector.
 #Compare this to the true column from the file
 def test_col_subset_of_full_state_vector_methane():
+	#override ens_config so that we are set to interpret the data properly
+	testing_tools.setupPytestSettings('methane')
 	#Get the column from the localized state vector
 	gt = GC_Translator('data_for_tests/METHANE_TEST/TEST_0001/','20190101_0000',computeStateVec = True)
 	statevec = gt.getStateVector()
