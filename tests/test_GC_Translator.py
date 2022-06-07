@@ -2,7 +2,7 @@ import sys
 import pytest
 import xarray as xr
 import numpy as np
-sys.path.append('../')
+sys.path.append('../core/')
 from GC_Translator import GC_Translator
 
 #These tests ensure that we are subsetting columns correctly in the GC_Translator class.
