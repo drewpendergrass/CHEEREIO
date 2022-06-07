@@ -29,8 +29,6 @@
 	"ASSIM_START_DATE" : "20190108",
 	"END_DATE" : "20190401",
 	"nEnsemble" : "24",
-	"pPERT" : "0.5",
-	"pertType" : "percent",
 	"SIMULATE_NATURE" : "false",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
@@ -114,6 +112,18 @@
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
+	"pPERT" : [
+		"0.5"
+	],
+	"pertType" : [
+		"percent"
+	],
+	"correlatedInitialScalings" : [
+		"False"
+	],
+	"corrDistances" : [
+		"1000"
+	],
 	"MaskOceanScaleFactor" : [
 		"True"
 	],
