@@ -1,6 +1,8 @@
 import json
 import geopy.distance as gd
 import numpy as np
+import scipy.stats as ss
+
 
 #Load in settings from ens_config.json. If settings_to_override is active (entry override is True)
 #the overwrite entries provided
@@ -138,6 +140,17 @@ def makeDistMat(instruction = 'file', verbose = 1, makeDistMat = True):
 	#Option to just get lon/lat coordinates from distmat file
 	else:
 		return XY
+
+def getDistMat(instruction):
+	pass #Load from file, otherwise make the distmat 
+
+def makeCovMat(instruction,corrdist):
+	distmat = getDistMat(instruction)
+	cov = np.exp(-distmat**2/(2*corrdist)) # This will do as a covariance matrix
+	return cov
+
+def sampleCorrelatedStructure(cov,std, outshape):
+	field = ss.multivariate_normal.rvs(mean = np.ones(np.shape(cov)[0]),cov = (std**2)*cov).reshape(outshape)
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
