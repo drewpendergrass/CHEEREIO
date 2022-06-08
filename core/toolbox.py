@@ -37,7 +37,7 @@ def calcDist_km(lat1,lon1,lat2,lon2):
 	d = gd.great_circle(coords_1, coords_2).km #This approximation is fine.
 	return d
 
-def makeLatLonGridWithMask(gridlabel):
+def makeLatLonGridWithMask(gridlabel,mask_coast_bool="True"):
 	mask = None
 	subhalf = False
 	subquarter = False
