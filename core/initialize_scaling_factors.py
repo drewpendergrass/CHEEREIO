@@ -24,13 +24,24 @@ subdir_nums = [int(n.split('_')[-1]) for n in dirnames]
 maxdir = max(subdir_nums)
 meanval = (maxdir+1)/2
 
+#Load in the relevant parameters from ens_config.json.
+
 emis_scaling_factors = spc_config['CONTROL_VECTOR_EMIS'].keys()
 mask_ocean_bool = spc_config['MaskOceanScaleFactor']
 mask_coast_bool = spc_config['MaskCoastsGT25pctOcean']
 mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
 perttype = spc_config["pertType"]
-perturbation = float(spc_config["pPERT"]) 
+perturbation = spc_config["pPERT"]
+perturbation = np.array([float(p) for p in perturbation])
+minsf = spc_config['MinimumScalingFactorAllowed']
+minsf = np.array([float(m) for m in minsf])
+maxsf = spc_config['MaximumScalingFactorAllowed']
+maxsf = np.array([float(m) for m in maxsf])
+correlatedInitialScalings = spc_config['correlatedInitialScalings']
+corrDistances = spc_config['correlatedInitialScalings']
+corrDistances = np.array([float(p) for p in corrDistances])
+
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
@@ -40,83 +51,13 @@ if len(spc_config["REGION"])==0:
 else:
 	gridlabel = f'{spc_config["REGION"]}_{spc_config["met_name"]}'
 
-subhalf = False
-subquarter = False
-#Create traditional GEOS-Chem longitude and latitude centers, as specified by the settings in ens_config.json
-if gridlabel == '4.0x5.0':
-	lon = np.arange(-180.0,176.0, 5.0)
-	lat = np.concatenate([[-89.0],np.arange(-86.0,87.0, 4.0), [89.0]])
-	if mask_coast_bool=="True":
-		mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid_landfraction_gt_75pct.csv',delimiter=','))
-	else:
-		mask = np.transpose(np.genfromtxt('../templates/landmask_4x5_gcgrid.csv',delimiter=','))
-	mask = np.where(mask==0)
-elif gridlabel == '2.0x2.5':
-	lon = np.arange(-180.0,178.0, 2.5)
-	lat = np.concatenate([[-89.5],np.arange(-88.0,89.0, 2.0), [89.5]])
-	if mask_coast_bool=="True":
-		mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid_landfraction_gt_75pct.csv',delimiter=','))
-	else:
-		mask = np.transpose(np.genfromtxt('../templates/landmask_2x2p5_gcgrid.csv',delimiter=','))
-	mask = np.where(mask==0)
-elif gridlabel == '1x1':
-	lon = np.arange(-179.5,180.0, 1.0)
-	lat = np.arange(-89.5,90, 1.0)
-	mask = np.transpose(np.genfromtxt('../templates/landmask_1x1_gcgrid.csv',delimiter=','))
-	mask = np.where(mask==0)
-elif (gridlabel == '0.5x0.625') | (gridlabel == 'MERRA2'): #MERRA2 NATIVE GRID
-	lon = -180.0 + (0.625*np.arange(0.0,576.0,1.0))
-	lat = -90.0 + (0.5*np.arange(0.0,361.0,1.0))
-	mask = np.transpose(np.genfromtxt('../templates/landmask_0p5x0p625_gcgrid.csv',delimiter=','))
-	mask = np.where(mask==0)
-elif (gridlabel == 'AS_MERRA2'): #ASIA NESTED GRID FOR MERRA2
-	lon = np.arange(60.0,150.01, 0.625)
-	lat = np.arange(-11.0,55.01, 0.5)
-	subhalf = True
-elif (gridlabel == 'EU_MERRA2'): #EUROPE NESTED GRID FOR MERRA2
-	lon = np.arange(-30.0,50.01, 0.625)
-	lat = np.arange(30.0,70.01, 0.5)
-	subhalf = True
-elif (gridlabel == 'NA_MERRA2'): #NORTH AMERICA NESTED GRID FOR MERRA2
-	lon = np.arange(-140.0,-39.99, 0.625)
-	lat = np.arange(10.0,70.01, 0.5)
-	subhalf = True
-elif (gridlabel == '0.25x0.3125') | (gridlabel == 'GEOSFP'):
-	lon = -180.0 + (0.3125*np.arange(0.0,1152.0,1.0))
-	lat = -90.0 + (0.25*np.arange(0.0,721.0,1.0))
-	mask = np.transpose(np.genfromtxt('../templates/landmask_0p25x0p3125_gcgrid.csv',delimiter=','))
-	mask = np.where(mask==0)
-elif (gridlabel == 'CH_GEOSFP'): #CHINA NESTED GRID FOR GEOS-FP
-	lon = np.arange(70.0,140.01, 0.3125)
-	lat = np.arange(15.0,55.01, 0.25)
-	subquarter = True
-elif (gridlabel == 'EU_GEOSFP'): #EU NESTED GRID FOR GEOS-FP
-	lon = np.arange(-15.0,40.01, 0.3125)
-	lat = np.arange(32.75,61.26, 0.25)
-	subquarter = True
-elif (gridlabel == 'NA_GEOSFP'): #NA NESTED GRID FOR GEOS-FP
-	lon = np.arange(-130.0,-59.99, 0.3125)
-	lat = np.arange(9.75,60.01, 0.25)
-	subquarter = True
-else:
-	raise ValueError('Scaling factor initialization utility does not recognize grid specification.')
-
-if subhalf or subquarter:
-	if subhalf:
-		fulllon = -180.0 + (0.625*np.arange(0.0,576.0,1.0))
-		fulllat = -90.0 + (0.5*np.arange(0.0,361.0,1.0))
-		mask = np.transpose(np.genfromtxt('../templates/landmask_0p5x0p625_gcgrid.csv',delimiter=','))
-	elif subquarter:
-		fulllon = -180.0 + (0.3125*np.arange(0.0,1152.0,1.0))
-		fulllat = -90.0 + (0.25*np.arange(0.0,721.0,1.0))
-		mask = np.transpose(np.genfromtxt('../templates/landmask_0p25x0p3125_gcgrid.csv',delimiter=','))
-	lonok = np.where((fulllon>=np.min(lon)) & (fulllon<=np.max(lon)))[0]
-	latok = np.where((fulllat>=np.min(lat)) & (fulllat<=np.max(lat)))[0]
-	mask = mask[lonok,latok]
-	mask = np.where(mask==0)
+lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel)
 
 #Check that the user-inputed perturbations are sensible given user-supplied interpretation rule
-for pt, p in zip(perttype,perturbation):
+for pt, p, emis, corrbool in zip(perttype,perturbation,emis_scaling_factors,correlatedInitialScalings):
+	if (corrbool == 'True') and (pt != "std"):
+		pt = "std"
+		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
 	if pt == "exp":
 		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
 			raise ValueError('Exponential perturbation must be at least 1.')
@@ -138,7 +79,7 @@ speciescount = 0
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
 		continue
-	for emis_name,maskoceanboolval,maskarcticboolval,maskantarcticboolval in zip(emis_scaling_factors,mask_ocean_bool,mask_arctic_bool,mask_antarctic_bool): #Loop through the species we want scaling factors for
+	for emis_name,maskoceanboolval,maskarcticboolval,maskantarcticboolval,pt,p,minval,maxval,corrbool,corrdist in zip(emis_scaling_factors,mask_ocean_bool,mask_arctic_bool,mask_antarctic_bool,perttype,perturbation,minsf,maxsf, correlatedInitialScalings,corrDistances): #Loop through the species we want scaling factors for
 		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
 		if testbool:
 			offset = 1
@@ -146,11 +87,20 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
-			if perttype == "exp":
-				scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
-				scaling_factors = perturbation**scaling_factor_exp
-			elif perttype == "percent":
-				scaling_factors = (2*perturbation*np.random.rand(1,len(lat),len(lon)))-perturbation+1
+			if coorbool == "True": #Will sample a normal with correlation
+
+			else:
+				if pt == "exp":
+					scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
+					scaling_factors = p**scaling_factor_exp
+				elif pt == "percent":
+					scaling_factors = (2*p*np.random.rand(1,len(lat),len(lon)))-p+1
+				elif pt == "std":
+					scaling_factors = np.random.normal(loc=1,scale=p,size=[1,len(lat),len(lon)])
+		if ~np.isnan(minval): #Enforce minimum sf.
+			scaling_factors[scaling_factors<minval] = minval
+		if ~np.isnan(maxval): #Enforce maximum sf.
+			scaling_factors[scaling_factors>maxval] = maxval
 		if maskoceanboolval=='True':
 			scaling_factors[0,mask[1],mask[0]] = 1
 		if maskarcticboolval=='True':
