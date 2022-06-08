@@ -131,7 +131,7 @@ def makeDistMat(instruction = 'file', verbose = 1, makeDistMat = True):
 			if verbose >= 1:
 				print(f'Calculating row {i} of {numpoints}')
 			for j in range(i, numpoints):
-				distval = calcDist_km[XY[i,1],XY[i,0],XY[j,1],XY[j,0]]
+				distval = calcDist_km(XY[i,1],XY[i,0],XY[j,1],XY[j,0])
 				distmat[i,j] = distval
 				distmat[j,i] = distval
 		return [distmat,XY]
