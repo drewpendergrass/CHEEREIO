@@ -1,4 +1,7 @@
 {
+	"RUN_NAME" : "METHANE_TEST",
+	"MY_PATH" : "tests/data_for_tests",
+	"verbose" : "0",
 	"STATE_VECTOR_CONC" : [
 		"CH4"
 	],
