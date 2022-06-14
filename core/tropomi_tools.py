@@ -3,7 +3,6 @@
 #explaining much of TROPOMI.
 
 from datetime import datetime
-import toolbox as tx
 from glob import glob
 import pickle
 import os.path
