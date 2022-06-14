@@ -7,6 +7,7 @@ sys.path.append('../core/')
 from Assimilator import Assimilator
 import testing_tools
 
+#Right now we just want to check that the Assimilator constructor works
 def test_assim_loads():
 	#override ens_config so that we are set to interpret the data properly
 	testing_tools.setupPytestSettings('methane')
