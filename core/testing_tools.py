@@ -23,15 +23,15 @@ def overrideSettings(settings_to_override, overwrite = False):
 		json.dump(over_data, f, ensure_ascii=False, indent=4)
 
 def setupPytestSettings(simtype='methane'):
-	assimdir = tx.getSpeciesConfig()['ASSIM_PATH']
+	assimdir = tx.getSpeciesConfig()['ASSIM_PATH'] #Assim path, so that we can overwrite text in override json file.
 	if simtype=='methane':
 		with open('../tests/data_for_tests/METHANE_TEST/methane_settings_to_override.json') as f:
 			settings_to_override = json.load(f)
 	else:
 		raise ValueError('Cheereio Pytest setting not supported')
 	for key in settings_to_override:
-		if '{ASSIM_PATH}' in settings_to_override[key]:
-			settings_to_override[key].replace('{ASSIM_PATH}',assimdir)
+		if '{ASSIM_PATH}' in settings_to_override[key]: #Overwrite {ASSIM_PATH} in settings to override file with real path.
+			settings_to_override[key] = settings_to_override[key].replace('{ASSIM_PATH}',assimdir)
 	overrideSettings(settings_to_override,overwrite=True)
 
 def turnOffOverride():
