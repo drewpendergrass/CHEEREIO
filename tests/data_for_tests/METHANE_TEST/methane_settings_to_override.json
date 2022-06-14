@@ -1,6 +1,6 @@
 {
 	"RUN_NAME" : "METHANE_TEST",
-	"MY_PATH" : "{ASSIM_TEST}/tests/data_for_tests",
+	"MY_PATH" : "{ASSIM_PATH}/tests/data_for_tests",
 	"nEnsemble" : "2",
 	"verbose" : "0",
 	"ASSIM_TIME": "24",
