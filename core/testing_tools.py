@@ -32,6 +32,9 @@ def setupPytestSettings(simtype='methane'):
 	for key in settings_to_override:
 		if '{ASSIM_PATH}' in settings_to_override[key]: #Overwrite {ASSIM_PATH} in settings to override file with real path.
 			settings_to_override[key] = settings_to_override[key].replace('{ASSIM_PATH}',assimdir)
+		if key == "TROPOMI_dirs": #Recurse down another level
+			for key2 in settings_to_override[key]: #Overwrite {ASSIM_PATH} in settings to override file with real path.
+				settings_to_override[key][key2] = settings_to_override[key][key2].replace('{ASSIM_PATH}',assimdir)
 	overrideSettings(settings_to_override,overwrite=True)
 
 def turnOffOverride():
