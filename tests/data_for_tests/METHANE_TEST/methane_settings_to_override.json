@@ -1,7 +1,9 @@
 {
 	"RUN_NAME" : "METHANE_TEST",
 	"MY_PATH" : "{ASSIM_TEST}/tests/data_for_tests",
+	"nEnsemble" : "2",
 	"verbose" : "0",
+	"ASSIM_TIME": "24",
 	"STATE_VECTOR_CONC" : [
 		"CH4"
 	],
@@ -11,5 +13,61 @@
 	"CONTROL_VECTOR_EMIS" : {
 		"CH4":"CH4"
 	},
-	"LOCALIZATION_RADIUS_km" : "500"
+	"SaveLevelEdgeDiags" : "True",
+	"SaveStateMet" : "False",
+	"SaveArea" : "False",
+	"OBSERVED_SPECIES" : {
+		"CH4_TROPOMI": "CH4"
+	},
+	"OBS_4D" : [
+		"True"
+	],
+	"OBS_TYPE_TROPOMI" : [
+		"True"
+	],
+	"TROPOMI_dirs" : {
+		"CH4" : "/{ASSIM_TEST}/tests/data_for_tests/METHANE_TEST/tropomi"
+	},
+	"SaveDOFS" : "True",
+	"DOFS_filter" : "1",
+	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "False",
+	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE" : "1000000",
+	"TROPOMI_CH4_FILTERS" : "True",
+	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
+	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
+	"TROPOMI_CH4_filter_swir_albedo_high" : "0.4",
+	"TROPOMI_CH4_filter_winter_lat" : "50",
+	"TROPOMI_CH4_filter_roughness" : "60",
+	"TROPOMI_CH4_filter_swir_aot" : "0.1",
+	"MinimumScalingFactorAllowed" : [
+		"0.05"
+	],
+	"MaximumScalingFactorAllowed" : [
+		"20"
+	],
+	"InflateScalingsToXOfInitialStandardDeviation" : [
+		"0.3"
+	],
+	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : [
+		"0.5"
+	],
+	"REGULARIZING_FACTOR_GAMMA": [
+		"0.02"
+	],
+	"OBS_COVARIANCE": [
+		"5"
+	],
+	"OBS_COVARIANCE_TYPE":[
+		"product"
+	],
+	"OBS_ERROR_SELF_CORRELATION" : [
+		"0.15"
+	],
+	"INFLATION_FACTOR": "0.01",
+	"MAXNUMOBS" : "3000",
+	"MINNUMOBS" : "1",
+	"AV_TO_GC_GRID" : "True",
+	"LOCALIZATION_RADIUS_km" : "500",
+	"AveragePriorAndPosterior" : "False",
+	"PriorWeightinPriorPosteriorAverage" : "0.5",
 }
