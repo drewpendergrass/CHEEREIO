@@ -1,6 +1,6 @@
 {
 	"RUN_NAME" : "METHANE_TEST",
-	"MY_PATH" : "tests/data_for_tests",
+	"MY_PATH" : "{ASSIM_TEST}/tests/data_for_tests",
 	"verbose" : "0",
 	"STATE_VECTOR_CONC" : [
 		"CH4"

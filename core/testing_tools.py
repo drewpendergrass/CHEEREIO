@@ -1,6 +1,7 @@
 from Assimilator import Assimilator
 import numpy as np
 import json
+import toolbox as tx
 
 #Makes an assimilator object
 def makeAssimilator():
@@ -22,11 +23,15 @@ def overrideSettings(settings_to_override, overwrite = False):
 		json.dump(over_data, f, ensure_ascii=False, indent=4)
 
 def setupPytestSettings(simtype='methane'):
+	assimdir = tx.getSpeciesConfig()['ASSIM_PATH']
 	if simtype=='methane':
 		with open('../tests/data_for_tests/METHANE_TEST/methane_settings_to_override.json') as f:
 			settings_to_override = json.load(f)
 	else:
-		raise ValueError('Cheereio Pytest setting not supported') 
+		raise ValueError('Cheereio Pytest setting not supported')
+	for key in settings_to_override:
+		if '{ASSIM_PATH}' in settings_to_override[key]:
+			settings_to_override[key].replace('{ASSIM_PATH}',assimdir)
 	overrideSettings(settings_to_override,overwrite=True)
 
 def turnOffOverride():
