@@ -145,10 +145,9 @@ def getDistMat(instruction):
 	file = f'../templates/distmat_{instruction}.npy'
 	try:
 		distmat = np.load(file)
-	except IOError:
+	except IOError: #make the matrix if no file
 		distmat,_ = makeDistMat(instruction)
-		#do what you want if there is an error with the file opening
-	pass #Load from file, otherwise make the distmat 
+	return distmat
 
 def makeCovMat(instruction,corrdist):
 	distmat = getDistMat(instruction)
@@ -157,6 +156,7 @@ def makeCovMat(instruction,corrdist):
 
 def sampleCorrelatedStructure(cov,std, outshape):
 	field = ss.multivariate_normal.rvs(mean = np.ones(np.shape(cov)[0]),cov = (std**2)*cov).reshape(outshape)
+	return field
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
