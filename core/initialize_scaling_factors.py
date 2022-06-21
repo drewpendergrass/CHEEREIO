@@ -87,7 +87,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
-			if coorbool == "True": #Will sample a normal with correlation
+			if corrbool == "True": #Will sample a normal with correlation
 				cov = tx.makeCovMat(gridlabel,corrdist)
 				scaling_factors = sampleCorrelatedStructure(cov,p, (len(lat),len(lon)))
 			else:
