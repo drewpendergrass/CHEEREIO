@@ -89,7 +89,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		else:
 			if corrbool == "True": #Will sample a normal with correlation
 				cov = tx.makeCovMat(gridlabel,corrdist)
-				scaling_factors = sampleCorrelatedStructure(cov,p, (len(lat),len(lon)))
+				scaling_factors = tx.sampleCorrelatedStructure(cov,p, (len(lat),len(lon)))
 			else:
 				if pt == "exp":
 					scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
