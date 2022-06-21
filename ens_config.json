@@ -113,13 +113,13 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"pPERT" : [
-		"0.5"
+		"0.25"
 	],
 	"pertType" : [
-		"percent"
+		"std"
 	],
 	"correlatedInitialScalings" : [
-		"False"
+		"True"
 	],
 	"corrDistances" : [
 		"1000"

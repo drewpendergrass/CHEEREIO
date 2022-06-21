@@ -142,6 +142,12 @@ def makeDistMat(instruction = 'file', verbose = 1, makeDistMat = True):
 		return XY
 
 def getDistMat(instruction):
+	file = f'../templates/distmat_{instruction}.npy'
+	try:
+		distmat = np.load(file)
+	except IOError:
+		distmat,_ = makeDistMat(instruction)
+		#do what you want if there is an error with the file opening
 	pass #Load from file, otherwise make the distmat 
 
 def makeCovMat(instruction,corrdist):
