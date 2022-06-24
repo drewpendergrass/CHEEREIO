@@ -94,6 +94,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			if corrbool == "True": #Will sample a normal with correlation
 				cov = tx.makeCovMat(distmat,corrdist)
 				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)), speedyCorrelationApprox)
+				scaling_factors = np.expand_dims(scaling_factors, axis=0) # add time dimension
 			else:
 				if pt == "exp":
 					scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1
