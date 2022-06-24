@@ -39,6 +39,7 @@ minsf = np.array([float(m) for m in minsf])
 maxsf = spc_config['MaximumScalingFactorAllowed']
 maxsf = np.array([float(m) for m in maxsf])
 correlatedInitialScalings = spc_config['correlatedInitialScalings']
+speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
 corrDistances = np.array([float(p) for p in corrDistances])
 
@@ -74,7 +75,10 @@ for pt, p, emis, corrbool in zip(perttype,perturbation,emis_scaling_factors,corr
 
 scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors),len(lat),len(lon)))
 subdircount = 0
-speciescount = 0 
+speciescount = 0
+
+if 'True' in correlatedInitialScalings:
+	distmat = tx.getDistMat(gridlabel)
 
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
@@ -88,8 +92,8 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
 			if corrbool == "True": #Will sample a normal with correlation
-				cov = tx.makeCovMat(gridlabel,corrdist)
-				scaling_factors = tx.sampleCorrelatedStructure(cov,p, (len(lat),len(lon)))
+				cov = tx.makeCovMat(distmat,corrdist)
+				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)), speedyCorrelationApprox)
 			else:
 				if pt == "exp":
 					scaling_factor_exp = (2*np.random.rand(1,len(lat),len(lon)))-1

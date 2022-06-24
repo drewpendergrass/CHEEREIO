@@ -149,13 +149,22 @@ def getDistMat(instruction):
 		distmat,_ = makeDistMat(instruction)
 	return distmat
 
-def makeCovMat(instruction,corrdist):
-	distmat = getDistMat(instruction)
+def makeCovMat(instruction_or_distmat,corrdist):
+	if type(instruction_or_distmat) == str: #make a distmat
+		distmat = getDistMat(instruction_or_distmat)
+	else:
+		distmat = instruction_or_distmat #Otherwise we are supplied a distmat
 	cov = np.exp(-distmat**2/(2*corrdist)) # This will do as a covariance matrix
 	return cov
 
-def sampleCorrelatedStructure(cov,std, outshape):
-	field = ss.multivariate_normal.rvs(mean = np.ones(np.shape(cov)[0]),cov = (std**2)*cov).reshape(outshape)
+def sampleCorrelatedStructure(corrdist,cov,std, outshape, speedy=False):
+	if speedy:
+		filter_kernel = (corrdist)*(cov/np.sum(cov))
+		field = std*np.random.randn(outshape[0], outshape[1])
+		field = scipy.signal.fftconvolve(field, filter_kernel, mode='same')
+		field+=1
+	else:
+		field = ss.multivariate_normal.rvs(mean = np.ones(np.shape(cov)[0]),cov = (std**2)*cov).reshape(outshape)
 	return field
 
 #Get index values within the localization range
