@@ -2,6 +2,7 @@ import json
 import geopy.distance as gd
 import numpy as np
 import scipy.stats as ss
+import scipy.signal
 
 
 #Load in settings from ens_config.json. If settings_to_override is active (entry override is True)

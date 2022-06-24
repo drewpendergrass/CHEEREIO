@@ -4,7 +4,6 @@ import xarray as xr
 from datetime import date
 import toolbox as tx
 from glob import glob
-import scipy.signal
 import sys
 
 teststr = str(sys.argv[1])
