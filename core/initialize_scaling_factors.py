@@ -77,7 +77,7 @@ scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors)
 subdircount = 0
 speciescount = 0
 
-if 'True' in correlatedInitialScalings:
+if ('True' in correlatedInitialScalings) and (not speedyCorrelationApprox):
 	distmat = tx.getDistMat(gridlabel)
 
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
@@ -92,8 +92,11 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
 		else:
 			if corrbool == "True": #Will sample a normal with correlation
-				cov = tx.makeCovMat(distmat,corrdist)
-				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)), speedyCorrelationApprox)
+				if speedyCorrelationApprox:
+					scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
+				else:
+					cov = tx.makeCovMat(distmat,corrdist)
+					scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
 				scaling_factors = np.expand_dims(scaling_factors, axis=0) # add time dimension
 			else:
 				if pt == "exp":
