@@ -35,7 +35,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"Partition" : "huce_bigmem",
-	"Memory" : "72000",
+	"Memory" : "16000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "5-00\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
