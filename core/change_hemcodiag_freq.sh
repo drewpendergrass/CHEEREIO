@@ -27,7 +27,7 @@ else
   daysstr="${days}"
 fi
 
-timestr="00000000 ${daysstr}${hoursstr}00"
+timestr="000000${daysstr} ${hoursstr}0000"
 freqstr="DiagnFreq\:                   ${timestr}"
 
 cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
