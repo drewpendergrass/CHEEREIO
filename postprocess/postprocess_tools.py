@@ -49,7 +49,7 @@ def globSubDirLevelEdge(hist_dir,timeperiod=None,hourlysub = 6):
 	return edgeconc_list
 
 def combineScaleFactors(ensemble_dir,output_dir):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
 	sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
@@ -64,7 +64,7 @@ def combineScaleFactors(ensemble_dir,output_dir):
 		ds.to_netcdf(output_dir+'/'+name)
 
 def combineHemcoDiag(ensemble_dir,output_dir):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
 	combined_ds = []
 	for subdir in subdirs:
 		paths = glob(f'{subdir}/HEMCO_diagnostics.*.nc')
