@@ -49,7 +49,7 @@ def globSubDirLevelEdge(hist_dir,timeperiod=None,hourlysub = 6):
 	return edgeconc_list
 
 def combineScaleFactors(ensemble_dir,output_dir):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
 	sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
@@ -62,6 +62,20 @@ def combineScaleFactors(ensemble_dir,output_dir):
 		ds = xr.concat(ds_files,'Ensemble')
 		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 		ds.to_netcdf(output_dir+'/'+name)
+
+def combineHemcoDiag(ensemble_dir,output_dir):
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
+	combined_ds = []
+	for subdir in subdirs:
+		paths = glob(f'{subdir}/HEMCO_diagnostics.*.nc')
+		paths.sort()
+		ds_files = []
+		for path in paths:
+			ds_files.append(xr.open_dataset(path))
+		combined_ds.append(xr.concat(ds_files,'time'))
+	ds = xr.concat(combined_ds,'Ensemble')
+	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
+	ds.to_netcdf(output_dir+'/combined_HEMCO_diagnostics.nc')
 
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
 	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
