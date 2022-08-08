@@ -46,11 +46,11 @@ wait
 
 
 if [ $x -eq 1 ]; then
+  cd {ASSIM}/core
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_SPINUP_COMPLETE ]; do
     sleep 1
     bash check_for_all_ensemble_spinup_restarts.sh
   done
-  cd {ASSIM}/core
 	printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
 	bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
   bash change_histcollections_durfreq.sh #update history collections.
