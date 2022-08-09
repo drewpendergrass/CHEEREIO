@@ -1,6 +1,12 @@
 Running the ensemble
 ==========
 
+In this section, we will discuss in detail the implementation of the CHEEREIO runtime workflow. See below for a diagram of key scripts and processes that manage this core functionality of CHEEREIO:
+
+.. image:: runtime_detail.png
+  :width: 600
+  :alt: Figure showing the CHEEREIO runtime workflow process. 
+
 Starting the run
 -------------
 
