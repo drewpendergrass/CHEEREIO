@@ -32,7 +32,7 @@ The CHEEREIO workflow is described in detail throughout this documentation, but 
 
 **Postprocess time.** Once the ensemble run is complete, users have access to a variety of tools and pre-built workflows in the ``postprocess/`` folder of the main CHEEREIO code directory. In particular, the SLURM batch script ``postprocess_prep.batch`` will automatically create a variety of figures, movies, and consolidated data files that the user can then view and modify. The folder also includes an API of useful functions in the ``postprocess_tools.py`` file.
 
-.. image:: cheereio_workflow.png
+.. image:: cheereio_workflow_2.png
   :width: 600
   :alt: Figure demonstrating how CHEEREIO installation and runtime works. 
 
