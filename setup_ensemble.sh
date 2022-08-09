@@ -1021,7 +1021,8 @@ if "$SetupEnsembleRuns"; then
     else
       python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
     fi
-    python prep_par.py "PRODUCTION"
+    python prep_par.py "PRODUCTION" #Figure out who should assimilate which cores. 
+    python setup_obs_dates.py #Create date dictionaries for rapid reference at assimilation time.
     conda deactivate #Exit Conda environment
 
     #Store current time.
