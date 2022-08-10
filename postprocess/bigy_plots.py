@@ -3,7 +3,7 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
-from matplotlib.colors import LogNorm
+from map_tools import *
 import pickle
 import json
 
@@ -33,21 +33,6 @@ gclon = np.array(ll_data['lon'])
 
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 
-def plotMap(flat,labelname,outfile,clim=None,useLog=False):
-	fig = plt.figure(figsize=(10, 8))
-	m.drawcountries(color='lightgray')
-	m.drawcoastlines(color='lightgray')
-	if useLog:
-		mesh = m.pcolormesh(gclon, gclat, flat,latlon=True,cmap=plt.cm.jet,norm=LogNorm())
-	else:
-		mesh = m.pcolormesh(gclon, gclat, flat,latlon=True,cmap=plt.cm.jet)
-	if clim is not None:
-		plt.clim(clim[0],clim[1])
-	else:
-		plt.clim(np.min(flat), np.max(flat))
-	plt.colorbar(label=labelname)
-	fig.savefig(outfile)
-
 total_obs_in_period = np.sum(total_satellite_obs,axis=0)
 total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
 
@@ -56,6 +41,9 @@ for i,species in enumerate(specieslist):
 		for k in range(len(gclon)):
 			total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[:,i,j,k],weights=total_satellite_obs[:,i,j,k])
 
+#Plot observation means and counts
+
 for i,species in enumerate(specieslist):
-	plotmap(total_obs_in_period[i,:,:],species,f'total_obs_count_{species}.png',useLog=True)
-	plotmap(total_weighted_mean_true_obs[i,:,:],species,f'weighted_mean_obs_{species}.png') 
+	plotmap(m,gclat,gclon,total_obs_in_period[i,:,:],species,f'total_obs_count_{species}.png',useLog=True)
+	plotmap(m,gclat,gclon,total_weighted_mean_true_obs[i,:,:],species,f'weighted_mean_obs_{species}.png') 
+
