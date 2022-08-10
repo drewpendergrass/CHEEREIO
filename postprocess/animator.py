@@ -92,7 +92,7 @@ for i in range(length):
 
     #####GLOBAL#########
     # call the animator.  blit=True means only re-draw the parts that have changed.
-    fig = plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(10, 6))
     m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
     m.drawcountries(color='lightgray')
     m.drawcoastlines(color='lightgray')
@@ -125,7 +125,7 @@ for i in range(length):
             return mesh
 
         # call the animator.  blit=True means only re-draw the parts that have changed.
-        fig = plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(10, 6))
         m = Basemap(projection='cyl', resolution='l',llcrnrlat=latlim[0], urcrnrlat=latlim[1],llcrnrlon=lonlim[0], urcrnrlon=lonlim[1])
         m.drawcountries(color='lightgray')
         m.drawcoastlines(color='lightgray')

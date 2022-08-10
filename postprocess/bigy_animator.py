@@ -55,7 +55,7 @@ for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
 			mesh.set_array(temp.ravel())
 			return mesh
 		# call the animator.  blit=True means only re-draw the parts that have changed.
-		fig = plt.figure(figsize=(10, 8))
+		fig = plt.figure(figsize=(10, 6))
 		m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 		m.drawcountries(color='lightgray')
 		m.drawcoastlines(color='lightgray')
