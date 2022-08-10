@@ -47,3 +47,6 @@ for i,species in enumerate(specieslist):
 	plotmap(m,gclat,gclon,total_obs_in_period[i,:,:],species,f'total_obs_count_{species}.png',useLog=True)
 	plotmap(m,gclat,gclon,total_weighted_mean_true_obs[i,:,:],species,f'weighted_mean_obs_{species}.png') 
 
+#Plot scale factor slices
+
+plotScaleFactor(m,gclat,gclon,ppdir, plotMonthStartOnly=True)
