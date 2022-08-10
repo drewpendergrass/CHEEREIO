@@ -20,19 +20,22 @@ with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 
 dates = pickledata[2]
 specieslist = pickledata[3]
+total_satellite_obs=pickledata[0]
+total_averaged_obs=pickledata[1]
+true_obs = pickledata[4]
+sim_obs = pickledata[5]
+
 if postprocess_save_albedo:
-	total_satellite_obs=pickledata[0]
-	total_averaged_obs=pickledata[1]
-	total_swir = pickledata[4]
-	total_nir = pickledata[5]
-	total_blended = pickledata[6]
-	arraysbase=[total_satellite_obs,total_averaged_obs,total_swir,total_nir,total_blended]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
-	labelnames = ['Count','Count','Albedo','Albedo','Albedo']
+	total_swir = pickledata[6]
+	total_nir = pickledata[7]
+	total_blended = pickledata[8]
+	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs,total_swir,total_nir,total_blended]
+	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
+	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)', 'Albedo','Albedo','Albedo']
 else:
-	arraysbase = pickledata[0:2]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts']
-	labelnames = ['Count','Count']
+	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs]
+	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations']
+	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)']
 
 with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
 	ll_data = json.load(f)
@@ -61,5 +64,5 @@ for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
 		plt.colorbar(label=labelname);
 		anim = animation.FuncAnimation(fig, animate,len(dates), blit=False)
 		Writer = animation.writers['ffmpeg']
-		writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+		writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
 		anim.save(f'{filenamebase}_{species}.mp4', writer=writer)

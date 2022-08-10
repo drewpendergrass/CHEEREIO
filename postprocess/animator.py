@@ -139,7 +139,7 @@ for i in range(length):
         #save as GIF
 
         Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+        writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
         if looping:
             anim.save(f'{file_out}_{func}_{rname}.mp4', writer=writer)
         else:
