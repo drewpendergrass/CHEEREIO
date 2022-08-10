@@ -19,4 +19,5 @@ python bigy_prep.py
 conda deactivate 
 conda activate $(jq -r ".AnimationEnv" ../ens_config.json)
 python bigy_animator.py
+python bigy_plots.py
 conda deactivate
