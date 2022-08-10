@@ -256,7 +256,7 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 	datestrs = list(bigY.keys())
 	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in datestrs]
 	for date in datestrs:
-		conc2D=np.array(bigY[date][species].iloc[:,1:(numens+1)])
+		conc2D=np.array(bigY[date][species].iloc[:,0:numens])
 		assimperiodensmean = np.mean(conc2D,axis=0) #One average for each ensemble member
 		ensmean = np.mean(assimperiodensmean) #Ensemble mean for total average
 		enssd = np.std(assimperiodensmean)
@@ -292,7 +292,7 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 def tsPlotSatCompareFullRange(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
 	df = df.groupby(pd.Grouper(key='Time',freq=freq)).mean()
 	df.reset_index(inplace=True)
-	conc2D=np.array(df.iloc[:,1:(numens+1)])
+	conc2D=np.array(df.iloc[:,0:numens])
 	satcol=np.array(df['Satellite'])
 	sattime=np.array(df['Time'])
 	ensmean = np.mean(conc2D,axis=1)
