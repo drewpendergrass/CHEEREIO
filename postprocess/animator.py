@@ -4,6 +4,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
+from matplotlib.colors import LinearSegmentedColormap
 import sys
 
 file_in=str(sys.argv[1])
@@ -96,8 +97,21 @@ for i in range(length):
     m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
     m.drawcountries(color='lightgray')
     m.drawcoastlines(color='lightgray')
-    mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=plt.cm.jet)
-    plt.clim(np.min(ensmean), np.max(ensmean))
+    
+    #custom bwr colormap for scalings
+    if variable == 'Scalar':
+        cvals  = [0.0, 1.0, np.max(ensmean)]
+        colors = ["blue","white","red"]
+        pltnorm=plt.Normalize(min(cvals),max(cvals))
+        tuples = list(zip(map(pltnorm,cvals), colors))
+        cmap = LinearSegmentedColormap.from_list("", tuples)
+        clim = [0.0, np.max(ensmean)]
+    else:
+        cmap=plt.cm.jet
+        clim = [np.min(ensmean), np.max(ensmean)]
+
+    mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=cmap)
+    plt.clim(clim[0],clim[1])
     plt.colorbar(label=variable);
     anim = animation.FuncAnimation(fig, animate,len(time), blit=False)
     #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
@@ -129,8 +143,20 @@ for i in range(length):
         m = Basemap(projection='cyl', resolution='l',llcrnrlat=latlim[0], urcrnrlat=latlim[1],llcrnrlon=lonlim[0], urcrnrlon=lonlim[1])
         m.drawcountries(color='lightgray')
         m.drawcoastlines(color='lightgray')
-        mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)],latlon=True,cmap=plt.cm.jet)
-        plt.clim(np.min(ensmean[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]), np.max(ensmean[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]))
+
+        #custom bwr colormap for scalings
+        if variable == 'Scalar':
+            cvals  = [0.0, 1.0, np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
+            colors = ["blue","white","red"]
+            pltnorm=plt.Normalize(min(cvals),max(cvals))
+            tuples = list(zip(map(pltnorm,cvals), colors))
+            cmap = LinearSegmentedColormap.from_list("", tuples)
+            clim = [0.0, np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
+        else:
+            cmap=plt.cm.jet
+            clim = [np.min(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]), np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
+        mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)],latlon=True,cmap=cmap)
+        plt.clim(clim[0],clim[1])
         plt.colorbar(label=variable);
         anim = animation.FuncAnimation(fig, animate_region,len(time), blit=False)
         #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
