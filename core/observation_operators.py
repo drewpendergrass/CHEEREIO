@@ -5,6 +5,8 @@ import pickle
 import os.path
 import xarray as xr
 import numpy as np
+import functools
+
 
 #All observations are passed as dictionaries. Filter info is a list
 #The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude"
@@ -41,16 +43,8 @@ def apply_filters(OBSDATA,filterinfo):
 	else:
 		if len(to_keep)==1:
 			to_keep = to_keep[0]
-		elif len(to_keep)==2:
-			to_keep = np.intersect1d(to_keep[0],to_keep[1])
-		elif len(to_keep)==3:
-			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),to_keep[2])
-		elif len(to_keep)==4:
-			to_keep = np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3]))
-		elif len(to_keep)==5:
-			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),to_keep[4])
-		elif len(to_keep)==6:
-			to_keep = np.intersect1d(np.intersect1d(np.intersect1d(to_keep[0],to_keep[1]),np.intersect1d(to_keep[2],to_keep[3])),np.intersect1d(to_keep[4],to_keep[5]))
+		else:
+			to_keep = functools.reduce(np.intersect1d, to_keep)
 		keys = list(OBSDATA.keys())
 		for key in keys:
 			if len(np.shape(OBSDATA[key])) == 1:
