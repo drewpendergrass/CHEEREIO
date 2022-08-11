@@ -315,6 +315,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
+		#TROPOMI_ALL setting extension must be on!!
 		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
 		if memsetting:
 			batchsize = int(self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE'])
