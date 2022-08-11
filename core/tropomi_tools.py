@@ -288,7 +288,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
 		if species=='CH4':
-			if self.spc_config['TROPOMI_CH4_FILTERS']=="True":
+			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
 				filterinfo = ["TROPOMI_CH4",float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
 			else:
 				filterinfo = None
