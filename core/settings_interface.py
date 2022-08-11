@@ -5,6 +5,12 @@ import json
 def getSpeciesConfig():
 	with open('../ens_config.json') as f:
 		data = json.load(f)
+	#Load extensions and add if turned on
+	extensions = data['Extensions']
+	for key in list(extensions.keys()):
+		if extensions[key] == 'True':
+			data = addExtension(data,f'../templates/{key}_extension.json')
+	#Override settings --- mostly used by the automated testing utility.
 	with open('../settings_to_override.json') as f:
 		over_data = json.load(f)
 	if over_data['override'] == "True":
@@ -12,6 +18,15 @@ def getSpeciesConfig():
 			if key != 'override':
 				data[key] = over_data[key]
 	return data
+
+#Add extension setting data to main data list
+def addExtension(data,file):
+	with open(file) as f:
+		extdata = json.load(f)
+	for key in list(extdata.keys()):
+		data[key] = extdata[key]
+	return data
+
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
 def getLatLonList(ensnum,corenum):

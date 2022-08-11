@@ -30,12 +30,13 @@
 	"END_DATE" : "20191231",
 	"nEnsemble" : "24",
 	"SIMULATE_NATURE" : "false",
+	"verbose":"1",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"Partition" : "huce_intel",
-	"Memory" : "20000",
+	"Memory" : "30000",
 	"EnsSpinupMemory" : "8000",
 	"WallTime" : "7-00\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
@@ -100,15 +101,6 @@
 	},
 	"SaveDOFS" : "True",
 	"DOFS_filter" : "1",
-	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC" : "False",
-	"LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE" : "1000000",
-	"TROPOMI_CH4_FILTERS" : "True",
-	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
-	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
-	"TROPOMI_CH4_filter_swir_albedo_high" : "0.4",
-	"TROPOMI_CH4_filter_winter_lat" : "50",
-	"TROPOMI_CH4_filter_roughness" : "60",
-	"TROPOMI_CH4_filter_swir_aot" : "0.1",
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
@@ -171,13 +163,19 @@
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"comment021" : "**********************************************************************************",
-	"comment022" : "*********************BEGIN MISCELLANEOUS AND TESTING SETTINGS*********************",
+	"comment022" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment023" : "**********************************************************************************",
-	"verbose":"1",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
 	"postprocess_save_albedo":"True",
 	"hemco_diags_to_animate" : [
 		"EmisCH4_Total"
-	]
+	],
+	"comment021" : "**********************************************************************************",
+	"comment022" : "******************************BEGIN SETTING EXTENSIONS****************************",
+	"comment023" : "**********************************************************************************",
+	"Extensions": {
+		"TROPOMI_ALL":"True",
+		"TROPOMI_CH4":"True"
+	}
 }

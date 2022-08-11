@@ -1,0 +1,9 @@
+{
+	"TROPOMI_CH4_FILTERS" : "True",
+	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
+	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
+	"TROPOMI_CH4_filter_swir_albedo_high" : "0.4",
+	"TROPOMI_CH4_filter_winter_lat" : "50",
+	"TROPOMI_CH4_filter_roughness" : "60",
+	"TROPOMI_CH4_filter_swir_aot" : "0.1"
+}
