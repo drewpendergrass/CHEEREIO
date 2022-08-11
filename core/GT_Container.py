@@ -1,13 +1,13 @@
 import numpy as np
 from glob import glob
-import toolbox as tx 
+import settings_interface as si 
 from datetime import date,datetime,timedelta
 from GC_Translator import GC_Translator
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
 	def __init__(self,timestamp,constructStateVecs=True):
-		spc_config = tx.getSpeciesConfig()
+		spc_config = si.getSpeciesConfig()
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
 		npy_column_files = glob(f'{self.path_to_scratch}/**/*.npy',recursive=True)

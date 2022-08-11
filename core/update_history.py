@@ -1,11 +1,11 @@
-import toolbox as tx
+import settings_interface as si 
 import sys
 import numpy as np
 
 class HISTORY_Translator():
 	#Constructor. If foldername is none, open template HISTORY.rc. Otherwise open ensemble member
 	def __init__(self,foldername=None):
-		self.spc_config = tx.getSpeciesConfig()
+		self.spc_config = si.getSpeciesConfig()
 		if foldername:
 			self.foldername = foldername
 		else:

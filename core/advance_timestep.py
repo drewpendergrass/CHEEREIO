@@ -1,9 +1,9 @@
-import toolbox as tx
+import settings_interface as si 
 from datetime import datetime,timedelta
 import sys
 
 periodstr = str(sys.argv[1])
-spc_config = tx.getSpeciesConfig()
+spc_config = si.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}"
 ens_dir = f"{parent_dir}/ensemble_runs"

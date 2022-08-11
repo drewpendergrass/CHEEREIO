@@ -1,5 +1,5 @@
 from datetime import datetime
-import toolbox as tx
+import settings_interface as si 
 from glob import glob
 import pickle
 import os.path
@@ -138,7 +138,7 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 class Observation_Translator(object):
 	def __init__(self,verbose=1):
 		self.verbose = verbose
-		self.spc_config = tx.getSpeciesConfig()
+		self.spc_config = si.getSpeciesConfig()
 		self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 	#The globObs function returns a dictionary of observations that are within a user-specified timeperiod, and, if specified
 	#that take place at a user-specified interval. The inherited function must have this signature.

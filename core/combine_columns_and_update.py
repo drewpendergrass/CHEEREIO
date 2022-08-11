@@ -1,5 +1,5 @@
 from glob import glob
-import toolbox as tx 
+import settings_interface as si 
 import sys 
 from GT_Container import GT_Container
 import time
@@ -7,7 +7,7 @@ import os
 
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
 
-data = tx.getSpeciesConfig()
+data = si.getSpeciesConfig()
 
 SaveDOFS = data["SaveDOFS"] == "True"
 

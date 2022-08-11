@@ -1,4 +1,5 @@
 #Some of this code is based on work from Nick Balasus and Kang Sun based on https://amt.copernicus.org/articles/11/6679/2018/amt-11-6679-2018.pdf
+#THIS FILE IS OUT OF DATE AND BASED ON AN OLD VERSION OF CHEEREIO; MUST BE REWRITTEN BEFORE USE.
 
 import os
 from netCDF4 import Dataset
@@ -6,6 +7,7 @@ from datetime import datetime,timedelta,time
 import numpy as np
 import glob
 import h5py
+import settings_interface as si 
 
 l2_dir = '/n/holylfs05/LABS/jacob_lab/nbalasus/omi/'
 #west,east,south,north = 124,131,33,39
@@ -120,7 +122,7 @@ def F_subset_OMNO2(l2_dir,start_date,end_date,maxsza,maxcf,data_fields,west=None
 class OMI_Translator(object):
     def __init__(self,testing=False):
         self.testing = testing
-        self.spc_config = tx.getSpeciesConfig(self.testing)
+        self.spc_config = si.getSpeciesConfig()
         self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
     #Save dictionary of dates for later use
     def initialReadDate(self):

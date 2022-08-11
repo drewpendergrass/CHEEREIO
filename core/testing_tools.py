@@ -1,7 +1,7 @@
 from Assimilator import Assimilator
 import numpy as np
 import json
-import toolbox as tx
+import settings_interface as si 
 
 #Makes an assimilator object
 def makeAssimilator():
@@ -23,7 +23,7 @@ def overrideSettings(settings_to_override, overwrite = False):
 		json.dump(over_data, f, ensure_ascii=False, indent=4)
 
 def setupPytestSettings(simtype='methane'):
-	assimdir = tx.getSpeciesConfig()['ASSIM_PATH'] #Assim path, so that we can overwrite text in override json file.
+	assimdir = si.getSpeciesConfig()['ASSIM_PATH'] #Assim path, so that we can overwrite text in override json file.
 	if simtype=='methane':
 		with open('../tests/data_for_tests/METHANE_TEST/methane_settings_to_override.json') as f:
 			settings_to_override = json.load(f)

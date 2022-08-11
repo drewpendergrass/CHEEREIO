@@ -1,13 +1,13 @@
 import xarray as xr
 from glob import glob
-import toolbox as tx 
+import settings_interface as si 
 from datetime import date,datetime,timedelta
 
 #A class that takes history files and connects them with the main state vector and observation matrices
 class HIST_Translator(object):
 	def __init__(self, path_to_rundir,timeperiod,interval=None,verbose=1):
 		self.verbose = verbose
-		self.spc_config = tx.getSpeciesConfig()
+		self.spc_config = si.getSpeciesConfig()
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
 		self.interval = interval

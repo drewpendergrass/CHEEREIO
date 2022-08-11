@@ -3,6 +3,7 @@ import pandas as pd
 import xarray as xr
 from datetime import date
 import toolbox as tx
+import settings_interface as si 
 from glob import glob
 import sys
 
@@ -12,7 +13,7 @@ if (teststr=="TESTING") or (teststr == "TESTPROD"):
 else:
 	testbool = False
 
-spc_config = tx.getSpeciesConfig()
+spc_config = si.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")

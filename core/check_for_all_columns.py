@@ -1,9 +1,9 @@
 from glob import glob
-import toolbox as tx 
+import settings_interface as si 
 import sys 
 
-data = tx.getSpeciesConfig()
-latgrid,longrid = tx.getLatLonVals(data)
+data = si.getSpeciesConfig()
+latgrid,longrid = si.getLatLonVals(data)
 
 path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 columns = glob(f'{path_to_scratch}/**/*.npy',recursive=True)

@@ -1,5 +1,5 @@
 import sys 
-import toolbox as tx
+import settings_interface as si 
 from GT_Container import GT_Container
 
 #Called like so: python diff_col.py TIMESTAMP TESTSTRING LATIND LONIND
@@ -12,7 +12,7 @@ if cmdarg=="TESTING":
 else:
 	testbool = False
 
-data = tx.getSpeciesConfig(testing=testbool)
+data = si.getSpeciesConfig(testing=testbool)
 if len(sys.argv)==5:
 	latind = int(sys.argv[3])
 	lonind = int(sys.argv[4])
@@ -35,7 +35,7 @@ if customind:
 	for species in control_emis:
 		wrapper.compareSpeciesEmis(species,latind,lonind)
 else:
-	latlist,lonlist = tx.getLatLonList(1,1,testbool)
+	latlist,lonlist = si.getLatLonList(1,1,testbool)
 	for i in range(2):
 		print(f'AUTOTESTING CONTROL VECTOR SPECIES AT {(latlist[i],lonlist[i])}')
 		for species in control_conc:

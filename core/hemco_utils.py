@@ -1,11 +1,11 @@
-import toolbox as tx 
+import settings_interface as si 
 import numpy as np
 import re
 
 class HEMCO_Translator():
 	#Constructor. If foldername is none, open template HEMCO_Config. Otherwise open ensemble member
 	def __init__(self,foldername=None):
-		self.spc_config = tx.getSpeciesConfig()
+		self.spc_config = si.getSpeciesConfig()
 		if foldername:
 			self.foldername = foldername
 		else:

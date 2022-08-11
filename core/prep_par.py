@@ -1,4 +1,4 @@
-import toolbox as tx
+import settings_interface as si 
 import json
 import numpy as np
 import xarray as xr
@@ -6,7 +6,7 @@ from glob import glob
 import sys
 import pathlib
 
-data = tx.getSpeciesConfig()
+data = si.getSpeciesConfig()
 
 path_to_sim = f"{data['MY_PATH']}/{data['RUN_NAME']}/"
 subdirs = glob(f"{path_to_sim}ensemble_runs/*/")

@@ -2,6 +2,7 @@ import numpy as np
 import xarray as xr
 from glob import glob
 import toolbox as tx 
+import settings_interface as si 
 from datetime import date,datetime,timedelta
 
 #This class contains useful methods for getting data from GEOS-Chem restart files and 
@@ -9,7 +10,7 @@ from datetime import date,datetime,timedelta
 #and can output it in useful ways to other functions in the LETKF procedure.
 class GC_Translator(object):
 	def __init__(self, path_to_rundir,timestamp,computeStateVec = False,verbose=1):
-		#self.latinds,self.loninds = tx.getLatLonList(ensnum)
+		#self.latinds,self.loninds = si.getLatLonList(ensnum)
 		self.filename = f'{path_to_rundir}GEOSChem.Restart.{timestamp}z.nc4'
 		self.timestamp=timestamp
 		self.timestamp_as_date = np.datetime64(f'{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]}T{timestamp[9:11]}:{timestamp[11:13]}:00')
@@ -72,12 +73,12 @@ class GC_Translator(object):
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
 		tstr = f'{self.timestamp[0:4]}-{self.timestamp[4:6]}-{self.timestamp[6:8]}T{self.timestamp[9:11]}:{self.timestamp[11:13]}:00.000000000'
 		new_last_time = np.datetime64(tstr)
-		if tx.getSpeciesConfig()['DO_ENS_SPINUP']=='true':
-			START_DATE = tx.getSpeciesConfig()['ENS_SPINUP_START']
+		if si.getSpeciesConfig()['DO_ENS_SPINUP']=='true':
+			START_DATE = si.getSpeciesConfig()['ENS_SPINUP_START']
 		else:
-			START_DATE = tx.getSpeciesConfig()['START_DATE']
+			START_DATE = si.getSpeciesConfig()['START_DATE']
 		orig_timestamp = f'{START_DATE[0:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}' #Start date from  JSON
-		END_DATE = tx.getSpeciesConfig()['END_DATE']
+		END_DATE = si.getSpeciesConfig()['END_DATE']
 		end_timestamp = f'{END_DATE[0:4]}-{END_DATE[4:6]}-{END_DATE[6:8]}'
 		#Create dataset with this timestep's scaling factors
 		ds = xr.Dataset(
@@ -105,7 +106,7 @@ class GC_Translator(object):
 		if self.verbose>=3:
 			print("*****************************************************************")
 			print(f"GC_Translator number {self.num} is starting build of statevector!")
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		statevec_components = []
 		for spec_conc in species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.getSpecies3Dconc(spec_conc).flatten())
@@ -137,7 +138,7 @@ class GC_Translator(object):
 		dummy2dwhere_flat = dummy2d[surr_latinds,surr_loninds].flatten()
 		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {len(dummy2dwhere_flat)} entries are valid.")
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -167,7 +168,7 @@ class GC_Translator(object):
 		dummy2dwhere_flat = dummy2d[latind,lonind]
 		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat} is sole valid entry.")
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -184,7 +185,7 @@ class GC_Translator(object):
 		return statevecinds
 	def getSpeciesConcIndicesInColumn(self,species):
 		levcount = len(self.getLev())
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		cur_offset = 0
 		for ind,spec in enumerate(species_config['STATE_VECTOR_CONC']):
 			if species == spec:
@@ -193,7 +194,7 @@ class GC_Translator(object):
 		return None #If loop doesn't terminate we did not find the species
 	def getSpeciesEmisIndicesInColumn(self,species):
 		levcount = len(self.getLev())
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		cur_offset = len(species_config['STATE_VECTOR_CONC'])*levcount
 		for ind,spec in enumerate(species_config['CONTROL_VECTOR_EMIS']):
 			if species == spec:
@@ -222,7 +223,7 @@ class GC_Translator(object):
 		if self.verbose>=3:
 			print(f"Within a flattened 2D dummy square, {dummy2dwhere_flat_column} is the sole valid index in the column.")
 			print(f"Matched value in the overall flattened and subsetted square is {dummy2dwhere_match}")
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		conccount = len(species_config['STATE_VECTOR_CONC'])
 		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
@@ -252,7 +253,7 @@ class GC_Translator(object):
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
 	def randomizeRestart(self,perturbation=0.1,bias=0):
-		statevec_species = tx.getSpeciesConfig()['STATE_VECTOR_CONC']
+		statevec_species = si.getSpeciesConfig()['STATE_VECTOR_CONC']
 		offset = 1-perturbation
 		scale = perturbation*2
 		for spec in statevec_species:
@@ -264,7 +265,7 @@ class GC_Translator(object):
 	#Also construct new scaling factors and add them as a separate array at the new timestep in each of the scaling factor netCDFs.
 	#However, only do so for species in the control vectors of emissions and concentrations.
 	def reconstructArrays(self,analysis_vector):
-		species_config = tx.getSpeciesConfig()
+		species_config = si.getSpeciesConfig()
 		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
 		emislist=list(species_config['CONTROL_VECTOR_EMIS'].keys())
 		emis_shape = np.shape(self.getEmisSF(emislist[0]))

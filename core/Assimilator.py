@@ -3,7 +3,7 @@ import xarray as xr
 from glob import glob
 import tropomi_tools as tt
 import scipy.linalg as la
-import toolbox as tx 
+import settings_interface as si 
 from datetime import date,datetime,timedelta
 from GC_Translator import GC_Translator
 from HIST_Ens import HIST_Ens
@@ -18,11 +18,11 @@ from HIST_Ens import HIST_Ens
 #Emissions scaling factors are most recent available (one assimilation timestep ago). New values will be appended to netCDF. 
 class Assimilator(object):
 	def __init__(self,timestamp,ensnum,corenum):
-		spc_config = tx.getSpeciesConfig()
+		spc_config = si.getSpeciesConfig()
 		self.verbose = int(spc_config['verbose'])
 		self.ensnum = ensnum
 		self.corenum = corenum
-		self.latinds,self.loninds = tx.getLatLonList(ensnum,corenum)
+		self.latinds,self.loninds = si.getLatLonList(ensnum,corenum)
 		if self.verbose>=2:
 			print(f"Assimilator has been called for ens {self.ensnum} core {self.corenum}; construction beginning")
 			print(f"This core will be handling lat and lon values {[(latval,lonval) for latval,lonval in zip(self.latinds,self.loninds)]}")

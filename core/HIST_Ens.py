@@ -3,6 +3,7 @@ from glob import glob
 import tropomi_tools as tt
 import scipy.linalg as la
 import toolbox as tx 
+import settings_interface as si 
 from datetime import date,datetime,timedelta
 from HIST_Translator import HIST_Translator
 
@@ -14,7 +15,7 @@ class HIST_Ens(object):
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
 		self.useArea = useArea
-		self.spc_config = tx.getSpeciesConfig()
+		self.spc_config = si.getSpeciesConfig()
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -157,7 +158,7 @@ class HIST_Ens(object):
 		return to_return
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
-		origlat,origlon = tx.getLatLonVals(self.spc_config)
+		origlat,origlon = si.getLatLonVals(self.spc_config)
 		latval = origlat[latind]
 		lonval = origlon[lonind]
 		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
