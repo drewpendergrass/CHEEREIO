@@ -78,12 +78,12 @@ class HIST_Ens(object):
 			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
 		elif errtype=='relative':
 			obsdat = self.bigYDict[species]
-			obscol = obsdat[1]
+			obscol = obsdat.getObsCol()
 			obscol = obscol[inds]
 			to_return = np.diag((obscol*errval)**2) #multiply measurements by relative error, then square it.
 		elif errtype=='product':
 			obsdat = self.bigYDict[species]
-			err_av = obsdat[-1] #Will be the last entry
+			err_av = obsdat.getDataByKey('err_av')
 			err_av = err_av[inds]
 			to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
@@ -107,28 +107,7 @@ class HIST_Ens(object):
 			useError = False
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge,self.useStateMet)
-		if self.spc_config['AV_TO_GC_GRID']=="True":
-			if self.saveAlbedo:
-				if useError:
-					firstcol,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
-				else:
-					firstcol,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
-			else:
-				if useError:
-					firstcol,obscol,obslat,obslon,obstime,numav,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
-				else:
-					firstcol,obscol,obslat,obslon,obstime,numav = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
-		else:
-			if self.saveAlbedo:
-				if useError:
-					firstcol,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
-				else:
-					firstcol,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
-			else:
-				if useError:
-					firstcol,obscol,obslat,obslon,obstime,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
-				else:
-					firstcol,obscol,obslat,obslon,obstime = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
+		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,saveError=useError,transportError = errval,errorCorr = errcorr)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -138,30 +117,17 @@ class HIST_Ens(object):
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D = self.ht[i].combineHist(species,self.useLevelEdge,self.useStateMet)
-				if self.spc_config['AV_TO_GC_GRID']=="True":
-					col,_,_,_,_,_ = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA)
-				else:
-					col,_,_,_,_ = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA)
+				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
 				conc2D[:,i-1] = col
-		if self.spc_config['AV_TO_GC_GRID']=="True":
-			if self.saveAlbedo:
-				to_return = [conc2D,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av]
-			else:
-				to_return = [conc2D,obscol,obslat,obslon,obstime,numav]
-		else:
-			if self.saveAlbedo:
-				to_return = [conc2D,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av]
-			else:
-				to_return = [conc2D,obscol,obslat,obslon,obstime]
-		if useError:
-			to_return.append(err_av)
-		return to_return
+		obsdata.setGCCol(conc2D)
+		return obsdata
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = si.getLatLonVals(self.spc_config)
 		latval = origlat[latind]
 		lonval = origlon[lonind]
-		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(self.bigYDict[species][2],self.bigYDict[species][3])])
+		alllat,alllon = self.bigYDict[species].getLatLon()
+		distvec = np.array([tx.calcDist_km(latval,lonval,a,b) for a,b in zip(alllat,alllon)])
 		inds = np.where(distvec<=loc_rad)[0]
 		if len(inds) > self.maxobs:
 			inds = np.random.choice(inds, self.maxobs,replace=False) #Randomly subset down to appropriate number of observations
@@ -175,16 +141,7 @@ class HIST_Ens(object):
 			speciesind = self.obsSpecies.index(spec)
 			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 			useError = errtype=='product'
-			if self.spc_config['AV_TO_GC_GRID']=="True":
-				if useError:
-					gccol,obscol,_,_,_,_,_ = self.bigYDict[spec]
-				else:
-					gccol,obscol,_,_,_,_ = self.bigYDict[spec]
-			else:
-				if useError:
-					gccol,obscol,_,_,_,_ = self.bigYDict[spec]
-				else:
-					gccol,obscol,_,_,_ = self.bigYDict[spec]
+			gccol,obscol = self.bigYDict[spec].getCols()
 			gccol = gccol[ind,:]
 			obscol = obscol[ind]
 			obsmean = np.mean(gccol,axis=1)

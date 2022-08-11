@@ -127,12 +127,11 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 		if satError is not None:
 			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
 			err_av[count] = (np.mean(satError[indmatch]) * np.sqrt(((1-errorCorr)/num_av[count]) + errorCorr) )+modelTransportError
+	to_return = ObsData(gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av=num_av)
 	if albedo_swir is not None:
-		to_return = [gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av,swir_av,nir_av,blended_av]
-	else:
-		to_return = [gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av]
+		to_return.addData(swir_av=swir_av,nir_av=nir_av,blended_av=blended_av)
 	if satError is not None:
-		to_return.append(err_av)
+		to_return.addData(err_av=err_av)
 	return to_return
 
 class Observation_Translator(object):
@@ -145,8 +144,44 @@ class Observation_Translator(object):
 	#The returned dictionary must have keys for "latitude", "longitude", and "utctime",
 	#where UTC time is an ISO 8601 date time string
 	def getObservations(self,species,timeperiod, interval=None, calcError=False):
+		#Returns a specifically formatted dictionary (see above for instructions)
 		raise NotImplementedError
-	#The function that gets the comparison between GEOS-Chem and the observations. Inherited function
-	#must have this signature and return a list in a highly specific order.
+	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).
+	#). Inherited function must have this signature and return an ObsData object.
 	def gcCompare(self,species,OBSDATA,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
+		#Returns an ObsData object
 		raise NotImplementedError
+
+#Class containing simulated and actual observations, feeds directly into HIST_Ens and then into the LETKF routine in Assimilator.
+#If you are adding a piece of additional data not already supported (e.g. you want to pass data along and save to plot in postprocessing, like TROPOMI albedo),
+#you will have to implement this in HIST_Ens and relevant postprocessing scripts
+class ObsData(object):
+	def __init__(self,gccol,obscol,obslat,obslon,obstime,**additional_data):
+		self.gccol = gccol #Note: this is sometimes a set of columns, as when stored in bigYDict in HIST_Ens
+		self.obscol = obscol
+		self.obslat = obslat
+		self.obslon = obslon
+		self.obstime = obstime
+		self.additional_data = additional_data #dictionary of additional data for various observations operators (e.g. albedo, averaging information)
+	def getGCCol(self):
+		return self.gccol
+	def setGCCol(self,gccol):
+		self.gccol = gccol
+	def getObsCol(self):
+		return self.obscol
+	def getCols(self):
+		return [self.gccol,self.obscol]
+	def getLatLon(self):
+		return [self.obslat,self.obslon]
+	def getTime(self):
+		return self.obstime
+	def addData(self,**data_to_add):
+		for key in data_to_add.keys():
+			self.additional_data[key] = data_to_add[key]
+	def getDataByKey(self,key):
+		if type(key) is list:
+			to_return = [self.additional_data[keyval] for keyval in key]
+		else:
+			to_return = self.additional_data[key]
+		return to_return
+

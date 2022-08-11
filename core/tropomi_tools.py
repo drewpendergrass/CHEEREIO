@@ -327,25 +327,22 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_M_on_sat = None
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
-			if saveAlbedo:
-				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'],satError = TROPOMI['Error'], modelTransportError = transportError, errorCorr=errorCorr)
-				else:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo'])					
-				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,swir_av,nir_av,blended_av]
-			else:
-				if saveError:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av,err_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],satError = TROPOMI['Error'], modelTransportError = transportError, errorCorr=errorCorr)
-				else:
-					gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species])
-				toreturn = [gc_av,sat_av,satlat_av,satlon_av,sattime_av,num_av]
+			additional_args_avgGC = {}
 			if saveError:
-				toreturn.append(err_av)
+				additional_args_avgGC['satError'] = TROPOMI['Error']
+				additional_args_avgGC['modelTransportError'] = transportError
+				additional_args_avgGC['errorCorr'] = errorCorr
+			if saveAlbedo:
+				additional_args_avgGC['albedo_swir'] = TROPOMI['albedo_swir']
+				additional_args_avgGC['albedo_nir'] = TROPOMI['albedo_nir']
+				additional_args_avgGC['blended_albedo'] = TROPOMI['blended_albedo']
+			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],**additional_args_avgGC)
 		else:
+			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 			if saveAlbedo:
-				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'],TROPOMI['albedo_swir'],TROPOMI['albedo_nir'],TROPOMI['blended_albedo']]
-			else:
-				toreturn = [GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime']]
+				toreturn.addData(swir_av=TROPOMI['albedo_swir'],nir_av=TROPOMI['albedo_nir'],blended_av=TROPOMI['blended_albedo'])
 			if saveError:
-				toreturn.append(TROPOMI['Error'])
+				toreturn.addData(err_av=TROPOMI['Error'])
 		return toreturn
+
+
