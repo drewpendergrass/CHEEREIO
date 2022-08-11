@@ -132,28 +132,21 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 		hist = HIST_Ens(timestamp=timestamp,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,saveAlbedo=use_albedo)
 		bigy = hist.bigYDict 
 		for spec in list(bigy.keys()):
-			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec][4]]
+			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec].getTime()]
 			t = np.array(t,dtype='datetime64[us]')
-			colnum = np.shape(bigy[spec][0])[1]
+			colnum = np.shape(bigy[spec].getGCCol())[1]
 			colnames = []
 			for i in range(colnum):
 				colnames.append(f"Ens{str(i+1).zfill(3)}")
-			df = pd.DataFrame(bigy[spec][0], columns = colnames)
-			df['Satellite'] = bigy[spec][1]
-			df['Latitude'] = bigy[spec][2]
-			df['Longitude'] = bigy[spec][3]
+			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
+			df['Satellite'] = bigy[spec].getObsCol()
+			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
 			if use_numav:
-				df['Num_Averaged'] = bigy[spec][5]
-				if use_albedo:
-					df['Albedo_SWIR'] = bigy[spec][6]
-					df['Albedo_NIR'] = bigy[spec][7]
-					df['Blended_Albedo'] = bigy[spec][8]
+				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
 			else:
 				df['Num_Averaged'] = None
-				if use_albedo:
-					df['Albedo_SWIR'] = bigy[spec][5]
-					df['Albedo_NIR'] = bigy[spec][6]
-					df['Blended_Albedo'] = bigy[spec][7]
+			if use_albedo:
+				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av,nir_av,blended_av'])
 			df['time'] = t
 			bigy[spec] = df
 		masterY[timestamp] = bigy
@@ -162,34 +155,6 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 		pickle.dump(masterY,f)
 		f.close()
 	return masterY
-
-
-def makeYWholePeriod(timestamp,hourlysub=6,use_numav = False, fullpath_output_name = None):
-	hist = HIST_Ens(timestamp=timestamp,useLevelEdge=True,fullperiod=True,interval=hourlysub)
-	bigy = hist.bigYDict 
-	for spec in list(bigy.keys()):
-		t = [datetime.strptime(tt,"%Y-%m-%dT%H:%M:%S.%fZ") for tt in bigy[spec][4]]
-		t = np.array(t,dtype='datetime64[us]')
-		colnum = np.shape(bigy[spec][0])[1]
-		colnames = []
-		for i in range(colnum):
-			colnames.append(f"Ens{str(i+1).zfill(3)}")
-		df = pd.DataFrame(bigy[spec][0], columns = colnames)
-		df['Satellite'] = bigy[spec][1]
-		df['Latitude'] = bigy[spec][2]
-		df['Longitude'] = bigy[spec][3]
-		if use_numav:
-			df['Num_Averaged'] = bigy[spec][4]
-		else:
-			df['Num_Averaged'] = np.ones(len(bigy[spec][3]))
-		df['Time'] = t
-		bigy[spec] = df
-	if fullpath_output_name:
-		f = open(fullpath_output_name,"wb")
-		pickle.dump(bigy,f)
-		f.close()
-	return bigy
-
 
 def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm'):
 	if unit=='ppm':
