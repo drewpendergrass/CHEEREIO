@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 from map_tools import *
 import pickle
-import json
+import sys 
+sys.path.append('../core')
+import settings_interface as si 
 
-with open('../ens_config.json') as f:
-	data = json.load(f)
+data = si.getSpeciesConfig()
+ll_data = si.getLatLonVals(data)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
@@ -24,9 +26,6 @@ total_satellite_obs=pickledata[0]
 total_averaged_obs=pickledata[1]
 true_obs = pickledata[4]
 sim_obs = pickledata[5]
-
-with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
-	ll_data = json.load(f)
 
 gclat = np.array(ll_data['lat'])
 gclon = np.array(ll_data['lon'])

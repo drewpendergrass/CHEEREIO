@@ -1,15 +1,15 @@
-import json
 import xarray as xr
 import postprocess_tools as pt
 from glob import glob
 from datetime import datetime,timedelta
-import sys 
 import pickle
 import pandas as pd
 import numpy as np
+import sys 
+sys.path.append('../core')
+import settings_interface as si 
 
-with open('../ens_config.json') as f:
-	data = json.load(f)
+data = si.getSpeciesConfig()
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"

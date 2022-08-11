@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
 import pickle
-import json
+import sys 
+sys.path.append('../core')
+import settings_interface as si 
 
-with open('../ens_config.json') as f:
-	data = json.load(f)
+data = si.getSpeciesConfig()
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
 with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 	bigy=pickle.load(f)
 
-with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
-	ll_data = json.load(f)
+ll_data = si.getLatLonVals(data)
 
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])

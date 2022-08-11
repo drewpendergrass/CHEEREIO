@@ -6,7 +6,6 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LogNorm,LinearSegmentedColormap
 import pickle
 from glob import glob
-import json
 
 def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False):
 	fig = plt.figure(figsize=(10, 6))

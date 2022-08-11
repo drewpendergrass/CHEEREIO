@@ -5,12 +5,17 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
 import pickle
-import json
+import sys 
+sys.path.append('../core')
+import settings_interface as si 
 
-with open('../ens_config.json') as f:
-	data = json.load(f)
+data = si.getSpeciesConfig()
+ll_data = si.getLatLonVals(data)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
+
+with open(f"{pp_dir}/bigY.pkl",'rb') as f:
+	bigy=pickle.load(f)
 
 anim_fps = int(data['animation_fps_scalingfactor'])
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
@@ -36,9 +41,6 @@ else:
 	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs]
 	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations']
 	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)']
-
-with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
-	ll_data = json.load(f)
 
 gclat = np.array(ll_data['lat'])
 gclon = np.array(ll_data['lon'])
