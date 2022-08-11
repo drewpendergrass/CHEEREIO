@@ -48,42 +48,42 @@ class HIST_Ens(object):
 		else:
 			self.AREA = None
 		self.makeBigY()
-	def makeSatTrans(self):
-		self.SAT_TRANSLATOR = {}
-		self.satSpecies = []
+	def makeObsTrans(self):
+		self.OBS_TRANSLATOR = {}
+		self.obsSpecies = []
 		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.values()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
 			if (bool4D and boolTROPOMI):
-				self.SAT_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
-				self.satSpecies.append(spec)
-	def getSatData(self):
-		self.SAT_DATA = {}
-		for spec in self.satSpecies:
-			speciesind = self.satSpecies.index(spec)
+				self.OBS_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
+				self.obsSpecies.append(spec)
+	def getObsData(self):
+		self.OBS_DATA = {}
+		for spec in self.obsSpecies:
+			speciesind = self.obsSpecies.index(spec)
 			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 			calcError = errtype == 'product'
-			self.SAT_DATA[spec] = self.SAT_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,calcError=calcError)
+			self.OBS_DATA[spec] = self.OBS_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,calcError=calcError)
 	def makeBigY(self):
-		self.makeSatTrans()
-		self.getSatData()
+		self.makeObsTrans()
+		self.getObsData()
 		self.bigYDict = {}
-		for spec in self.satSpecies:
+		for spec in self.obsSpecies:
 			self.bigYDict[spec] = self.getColsforSpecies(spec)
 	#Gamma^-1 applied in this stage.
 	def makeRforSpecies(self,species,latind,lonind):
-		speciesind = self.satSpecies.index(species)
+		speciesind = self.obsSpecies.index(species)
 		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
 		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 		inds = self.getIndsOfInterest(species,latind,lonind)
 		if errtype=='absolute':
 			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
 		elif errtype=='relative':
-			satdat = self.bigYDict[species]
-			satcol = satdat[1]
-			satcol = satcol[inds]
-			to_return = np.diag((satcol*errval)**2) #multiply measurements by relative error, then square it.
+			obsdat = self.bigYDict[species]
+			obscol = obsdat[1]
+			obscol = obscol[inds]
+			to_return = np.diag((obscol*errval)**2) #multiply measurements by relative error, then square it.
 		elif errtype=='product':
-			satdat = self.bigYDict[species]
-			err_av = satdat[-1] #Will be the last entry
+			obsdat = self.bigYDict[species]
+			err_av = obsdat[-1] #Will be the last entry
 			err_av = err_av[inds]
 			to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
@@ -92,12 +92,12 @@ class HIST_Ens(object):
 		return to_return
 	def makeR(self,latind,lonind):
 		errmats = []
-		for spec in self.satSpecies:
+		for spec in self.obsSpecies:
 			errmats.append(self.makeRforSpecies(spec,latind,lonind))
 		return la.block_diag(*errmats)
 	def getColsforSpecies(self,species):
 		col3D = []
-		speciesind = self.satSpecies.index(species)
+		speciesind = self.obsSpecies.index(species)
 		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
 		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][speciesind])
 		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
@@ -110,25 +110,25 @@ class HIST_Ens(object):
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:
 				if useError:
-					firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
+					firstcol,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
 				else:
-					firstcol,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
+					firstcol,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
 			else:
 				if useError:
-					firstcol,satcol,satlat,satlon,sattime,numav,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
+					firstcol,obscol,obslat,obslon,obstime,numav,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
 				else:
-					firstcol,satcol,satlat,satlon,sattime,numav = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
+					firstcol,obscol,obslat,obslon,obstime,numav = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
 		else:
 			if self.saveAlbedo:
 				if useError:
-					firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
+					firstcol,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=True,transportError = errval,errorCorr = errcorr)
 				else:
-					firstcol,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
+					firstcol,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=True,saveError=False)
 			else:
 				if useError:
-					firstcol,satcol,satlat,satlon,sattime,err_av = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
+					firstcol,obscol,obslat,obslon,obstime,err_av = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=True,transportError = errval,errorCorr = errcorr)
 				else:
-					firstcol,satcol,satlat,satlon,sattime = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
+					firstcol,obscol,obslat,obslon,obstime = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveError=False)
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
@@ -139,20 +139,20 @@ class HIST_Ens(object):
 			if i!=firstens:
 				hist4D = self.ht[i].combineHist(species,self.useLevelEdge,self.useStateMet)
 				if self.spc_config['AV_TO_GC_GRID']=="True":
-					col,_,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
+					col,_,_,_,_,_ = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA)
 				else:
-					col,_,_,_,_ = self.SAT_TRANSLATOR[species].gcCompare(species,self.SAT_DATA[species],hist4D,GC_area=self.AREA)
+					col,_,_,_,_ = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA)
 				conc2D[:,i-1] = col
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			if self.saveAlbedo:
-				to_return = [conc2D,satcol,satlat,satlon,sattime,numav,swir_av,nir_av,blended_av]
+				to_return = [conc2D,obscol,obslat,obslon,obstime,numav,swir_av,nir_av,blended_av]
 			else:
-				to_return = [conc2D,satcol,satlat,satlon,sattime,numav]
+				to_return = [conc2D,obscol,obslat,obslon,obstime,numav]
 		else:
 			if self.saveAlbedo:
-				to_return = [conc2D,satcol,satlat,satlon,sattime,swir_av,nir_av,blended_av]
+				to_return = [conc2D,obscol,obslat,obslon,obstime,swir_av,nir_av,blended_av]
 			else:
-				to_return = [conc2D,satcol,satlat,satlon,sattime]
+				to_return = [conc2D,obscol,obslat,obslon,obstime]
 		if useError:
 			to_return.append(err_av)
 		return to_return
@@ -170,28 +170,28 @@ class HIST_Ens(object):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
-		for spec in self.satSpecies:
+		for spec in self.obsSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
-			speciesind = self.satSpecies.index(spec)
+			speciesind = self.obsSpecies.index(spec)
 			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
 			useError = errtype=='product'
 			if self.spc_config['AV_TO_GC_GRID']=="True":
 				if useError:
-					gccol,satcol,_,_,_,_,_ = self.bigYDict[spec]
+					gccol,obscol,_,_,_,_,_ = self.bigYDict[spec]
 				else:
-					gccol,satcol,_,_,_,_ = self.bigYDict[spec]
+					gccol,obscol,_,_,_,_ = self.bigYDict[spec]
 			else:
 				if useError:
-					gccol,satcol,_,_,_,_ = self.bigYDict[spec]
+					gccol,obscol,_,_,_,_ = self.bigYDict[spec]
 				else:
-					gccol,satcol,_,_,_ = self.bigYDict[spec]
+					gccol,obscol,_,_,_ = self.bigYDict[spec]
 			gccol = gccol[ind,:]
-			satcol = satcol[ind]
+			obscol = obscol[ind]
 			obsmean = np.mean(gccol,axis=1)
 			obspert = np.zeros(np.shape(gccol))
 			for i in range(np.shape(gccol)[1]):
 				obspert[:,i]=gccol[:,i]-obsmean
-			obsdiff = satcol-obsmean
+			obsdiff = obscol-obsmean
 			obsmeans.append(obsmean)
 			obsperts.append(obspert)
 			obsdiffs.append(obsdiff)
