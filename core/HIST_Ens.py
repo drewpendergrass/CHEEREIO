@@ -108,6 +108,7 @@ class HIST_Ens(object):
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge,self.useStateMet)
 		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,saveError=useError,transportError = errval,errorCorr = errcorr)
+		firstcol = obsdata.getGCCol()
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
 		shape2D[1]=len(self.ensemble_numbers)
