@@ -33,3 +33,18 @@ def testGetGCCols():
 	correct_answer = 5+(27*np.array([0,0,0,1,1,1,1,2,2,2]))
 	assert np.array_equal(results_level0,correct_answer)
 
+def testAverageByGC():
+	GC = testing_tools.makeMiniFakeDataSet()
+	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
+	iGC, jGC, tGC = obsop.nearest_loc(GC,OBSDATA)
+	obsvals = np.arange(10)
+	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
+	obsdata_results = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals)
+	correctlon = np.repeat(2,3)
+	correctlat = np.repeat(1,3)
+	testlat,testlon = obsdata_results.getLatLon()
+	lonresult = np.array_equal(correctlon,testlon)
+	latresult = np.array_equal(correctlat,testlat)
+	testgc, testobs = obsdata_results.getCols()
+	assert lonresult and latresult
+
