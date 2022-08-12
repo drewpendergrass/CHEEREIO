@@ -2,6 +2,7 @@ import sys
 import pytest
 import xarray as xr
 import numpy as np
+import pandas as pd
 import json
 sys.path.append('../core/')
 import observation_operators as obsop
@@ -33,6 +34,7 @@ def testGetGCCols():
 	correct_answer = 5+(27*np.array([0,0,0,1,1,1,1,2,2,2]))
 	assert np.array_equal(results_level0,correct_answer)
 
+#Make sure we average observations to GEOS-Chem grid correctly! Check that all 6 main parameters are averaged as expected.
 def testAverageByGC():
 	GC = testing_tools.makeMiniFakeDataSet()
 	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
@@ -40,11 +42,21 @@ def testAverageByGC():
 	obsvals = np.arange(10)
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
 	obsdata_results = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals)
-	correctlon = np.repeat(2,3)
-	correctlat = np.repeat(1,3)
+	correctlon = np.repeat(10,3) #Nearest longitude to 9 is 10 on our 0,5,10 gc grid
+	correctlat = np.repeat(5,3) #Nearest latitude to 4 is 5.
 	testlat,testlon = obsdata_results.getLatLon()
 	lonresult = np.array_equal(correctlon,testlon)
 	latresult = np.array_equal(correctlat,testlat)
 	testgc, testobs = obsdata_results.getCols()
-	assert lonresult and latresult
+	correctgc = np.arange(3)
+	correctobs = np.array([np.mean(obsvals[0:3]), np.mean(obsvals[3:7]), np.mean(obsvals[7:10])])
+	gcresult = np.array_equal(correctgc,testgc)
+	obsresult = np.array_equal(correctobs,testobs)
+	testtime = obsdata_results.getTime()
+	correcttime = pd.date_range(start='2022-08-01',end='2022-08-08',periods=3).values.astype(int)
+	timeresult = np.array_equal(testtime,timeresult)
+	testnum = obsdata_results.getDataByKey('num_av')
+	correctnum = np.array([3,4,3]) #3 matches, 4 matches, 3 matches
+	numresult = np.array_equal(testnum,correctnum)
+	assert lonresult and latresult and gcresult and obsresult and timeresult
 
