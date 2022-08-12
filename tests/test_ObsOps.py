@@ -14,8 +14,8 @@ def test_all_good_qa_values_in_methane():
 	assert np.sum(met['qa_value']>0.5) == len(met['qa_value'])
 
 def testGCindexing():
-	GC = makeMiniFakeDataSet()
-	OBSDATA = makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
+	GC = testing_tools.makeMiniFakeDataSet()
+	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
 	iGC, jGC, tGC = obsop.nearest_loc(GC,OBSDATA)
 	#i is lon, j is lat, t is time. Expect all lats to be nearest middle index (1), all lons to be near the last index (2),
 	#and for the first three and last three times to be on the edges (0 and 2) and the middle four to be in the middle (1)
