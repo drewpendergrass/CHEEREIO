@@ -69,5 +69,9 @@
 	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "500",
 	"AveragePriorAndPosterior" : "False",
-	"PriorWeightinPriorPosteriorAverage" : "0.5"
+	"PriorWeightinPriorPosteriorAverage" : "0.5",
+	"Extensions": {
+		"TROPOMI_ALL":"True",
+		"TROPOMI_CH4":"True"
+	}
 }
