@@ -71,9 +71,9 @@ def makeMiniFakeDataSet(nlat = 3, nlon = 3, nlev = 3, ntime = 3):
 def makeMiniFakeObsData(latlocs,lonlocs,ntime):
 	obsdata = {'latitude':np.array([]),'longitude':np.array([]),'utctime':np.array([])}
 	for latloc,lonloc in zip(latlocs,lonlocs):
-		obsdata['latitude'].append(np.repeat(latloc,ntime))
-		obsdata['longitude'].append(np.repeat(lonloc,ntime))
-		obsdata['utctime'].append(pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values)
+		obsdata['latitude'] = np.append(obsdata['latitude'],np.repeat(latloc,ntime))
+		obsdata['longitude'] = np.append(obsdata['longitude'],np.repeat(lonloc,ntime))
+		obsdata['utctime'] = np.append(obsdata['utctime'],pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values)
 	return obsdata
 
 #Walks through with extensive print statements an assimilation cycle
