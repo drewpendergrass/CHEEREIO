@@ -54,9 +54,9 @@ def testAverageByGC():
 	obsresult = np.array_equal(correctobs,testobs)
 	testtime = obsdata_results.getTime()
 	correcttime = pd.date_range(start='2022-08-01',end='2022-08-08',periods=3).values.astype(int)
-	timeresult = np.array_equal(testtime,timeresult)
+	timeresult = np.array_equal(testtime,correcttime)
 	testnum = obsdata_results.getDataByKey('num_av')
 	correctnum = np.array([3,4,3]) #3 matches, 4 matches, 3 matches
 	numresult = np.array_equal(testnum,correctnum)
-	assert lonresult and latresult and gcresult and obsresult and timeresult
+	assert lonresult and latresult and gcresult and obsresult and timeresult and numresult
 
