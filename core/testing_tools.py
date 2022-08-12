@@ -1,7 +1,9 @@
 from Assimilator import Assimilator
 import numpy as np
+import pandas as pd
 import json
 import settings_interface as si 
+import xarray as xr
 
 #Makes an assimilator object
 def makeAssimilator():
@@ -43,6 +45,36 @@ def turnOffOverride():
 	over_data['override'] = "False" #Turn off overriding capability
 	with open('../settings_to_override.json', 'w') as f:
 		json.dump(over_data, f, ensure_ascii=False, indent=4)
+
+
+def makeMiniFakeDataSet(nlat = 3, nlon = 3, nlev = 3, ntime = 3):
+	lat = np.linspace(0,10, nlat)
+	lon = np.linspace(0,10, nlon)
+	lev = np.linspace(0,10, nlev)
+	time = pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values
+	values = np.arange(ntime*nlev*nlat*nlon).reshape((ntime,nlev,nlat,nlon)) #0 through nlatnlon on timestamp 0, and so on.
+	ds = xr.Dataset(
+		{"SpeciesConc_TEST": (("time","lev","lat","lon"), values,{"long_name": "Test data", "units":"1"}),
+		"Met_PEDGE": (("time","lev","lat","lon"), values,{"long_name": "Test data", "units":"1"})},
+		coords={
+			"time": (["time"], time, {"long_name": "time", "calendar": "standard"}),
+			"lev": (["lev"], lev,{"long_name": "Levels"}),
+			"lat": (["lat"], lat,{"long_name": "Latitude", "units":"degrees_north"}),
+			"lon": (["lon"], lon,{"long_name": "Longitude", "units":"degrees_east"})
+		},
+		attrs={
+			"Title":"Test dataset",
+		}
+	)
+	return ds
+
+def makeMiniFakeObsData(latlocs,lonlocs,ntime):
+	obsdata = {'latitude':np.array([]),'longitude':np.array([]),'utctime':np.array([])}
+	for latloc,lonloc in zip(latlocs,lonlocs):
+		obsdata['latitude'].append(np.repeat(latloc,ntime))
+		obsdata['longitude'].append(np.repeat(lonloc,ntime))
+		obsdata['utctime'].append(pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values)
+	return obsdata
 
 #Walks through with extensive print statements an assimilation cycle
 def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California, arbitrary 
