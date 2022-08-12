@@ -69,7 +69,7 @@ def makeMiniFakeDataSet(nlat = 3, nlon = 3, nlev = 3, ntime = 3):
 	return ds
 
 def makeMiniFakeObsData(latlocs,lonlocs,ntime):
-	obsdata = {'latitude':np.array([]),'longitude':np.array([]),'utctime':np.array([])}
+	obsdata = {'latitude':np.array([]),'longitude':np.array([]),'utctime':np.array([],dtype = np.datetime64)}
 	for latloc,lonloc in zip(latlocs,lonlocs):
 		obsdata['latitude'] = np.append(obsdata['latitude'],np.repeat(latloc,ntime))
 		obsdata['longitude'] = np.append(obsdata['longitude'],np.repeat(lonloc,ntime))
