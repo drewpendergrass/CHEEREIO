@@ -32,7 +32,7 @@ def test_LETKF_calculation():
 	assim.makeAnalysisCombinedEnsemble()
 	assim_answer = assim.analysisEnsemble
 	#calculate actual answer, using assumption of 2 ensemble members and 0 inflation.
-	ptilde = la.inv(np.diag(np.ones(5)) + (np.transpose(assim.Ypert_background)@la.inv(assim.R)@assim.Ypert_background))
+	ptilde = la.inv(np.diag(np.ones(2)) + (np.transpose(assim.Ypert_background)@la.inv(assim.R)@assim.Ypert_background))
 	bigW = la.sqrtm(ptilde)
 	lilW = ptilde @ np.transpose(assim.Ypert_background)@la.inv(assim.R)@assim.ydiff
 	real_answer = np.zeros(np.shape(assim.Xpert_background))
