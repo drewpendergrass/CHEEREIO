@@ -176,6 +176,7 @@
 	"comment023" : "**********************************************************************************",
 	"Extensions": {
 		"TROPOMI_ALL":"True",
-		"TROPOMI_CH4":"True"
+		"TROPOMI_CH4":"True",
+		"CH4":"True"
 	}
 }

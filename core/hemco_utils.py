@@ -29,6 +29,7 @@ class HEMCO_Translator():
 		#Add updates for scaling factors
 		self.addScalingFactorNumbers()
 		self.addScalingFactorFile()
+		self.updateOHforCH4()
 		self.writeHEMCOConfig(False)
 	def getHEMCOSwitches(self):
 		self.switchnames = []
@@ -238,6 +239,13 @@ class HEMCO_Translator():
 		else:
 			print('Skipping boundary condition update in HEMCO_Config.')
 	#Write HEMCO Config file. Save different names if it's spinup or nature (only update background) or main (adds scaling factors).
+	def updateOHforCH4(self):
+		if (self.spc_config["Extensions"]["CH4"] == "True") and (self.spc_config["USE_CUSTOM_CH4_OH_ENTRY"] == "True"):
+			ohval = self.spc_config["CUSTOM_CH4_OH_ENTRY"]
+			for num,line in enumerate(self.lines):
+				if line.startswith("* GLOBAL_OH"):
+					self.lines[num] = ohval
+					break
 	def writeHEMCOConfig(self,spinup_or_nature = False):
 		if spinup_or_nature:
 			with open(self.hemco_config_path+'HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc', 'w') as f:
