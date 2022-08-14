@@ -38,7 +38,10 @@ total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
 for i,species in enumerate(specieslist):
 	for j in range(len(gclat)):
 		for k in range(len(gclon)):
-			total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[:,i,j,k],weights=total_satellite_obs[:,i,j,k])
+			if np.sum(total_satellite_obs[:,i,j,k]) == 0:
+				total_weighted_mean_true_obs[i,j,k] = np.nan
+			else:
+				total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[:,i,j,k],weights=total_satellite_obs[:,i,j,k])
 
 #Plot observation means and counts
 

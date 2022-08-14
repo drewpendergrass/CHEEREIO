@@ -42,11 +42,11 @@ def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
 		scalar = np.mean(scalar,axis=0) #average across ensemble
 		timelabels = [str(timeval)[0:13] for timeval in dates]
 		#Make custom blue-white-red colorbar centered at one
-		cvals  = [0.0, 1.0, np.max(scalar)]
+		cvals  = [0.0, 1.0, np.max([np.max(scalar),1.1])]
 		colors = ["blue","white","red"]
 		pltnorm=plt.Normalize(min(cvals),max(cvals))
 		tuples = list(zip(map(pltnorm,cvals), colors))
 		cmap = LinearSegmentedColormap.from_list("", tuples)
 		for i,dateval in enumerate(timelabels):
-			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{name}_{dateval}_scalefactor.png',clim=[0,np.max(scalar)],cmap=cmap)
+			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{name}_{dateval}_scalefactor.png',clim=[0,np.max([np.max(scalar),1.1])],cmap=cmap)
 
