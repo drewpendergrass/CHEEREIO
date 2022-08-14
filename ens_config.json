@@ -114,7 +114,7 @@
 		"True"
 	],
 	"corrDistances" : [
-		"1000"
+		"750"
 	],
 	"speedyCorrelationApprox" : "True",
 	"MaskOceanScaleFactor" : [
