@@ -244,7 +244,7 @@ class HEMCO_Translator():
 			ohval = self.spc_config["CUSTOM_CH4_OH_ENTRY"]
 			for num,line in enumerate(self.lines):
 				if line.startswith("* GLOBAL_OH"):
-					self.lines[num] = ohval
+					self.lines[num] = f"{ohval}\n"
 					break
 	def writeHEMCOConfig(self,spinup_or_nature = False):
 		if spinup_or_nature:
