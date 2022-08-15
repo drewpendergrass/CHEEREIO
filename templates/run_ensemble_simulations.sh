@@ -93,13 +93,17 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
     if [ $x -eq 1 ]; then
       bash check_and_complete_assimilation.sh
     fi
+    #If there is a problem, the KILL_ENS file will be produced. Break then
+    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+      break 2
+    fi
     sleep 1
   done
   #If there is a problem, the KILL_ENS file will be produced. Break then
   if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
     break
   fi
-  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
+  #If this is ensemble member 1, and this is the first run, switch to main assimilation mode with regular intervals.
   if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
     bash change_histrst_durfreq.sh
     firstrun=false
@@ -110,11 +114,21 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   fi
   #Hang until cleanup complete, as determined by temp file deletion.
   until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
+    #If there is a problem, the KILL_ENS file will be produced. Break then
+    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+      break 2
+    fi
     sleep 1
   done
 
   #CD back to run directory
   cd ${ENSDIR}/{RunName}_${xstr}
+
+  #If there is a problem, the KILL_ENS file will be produced. Break then
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+    break
+  fi
+
   #Everything cleaned up; we can head back to the beginning.
 done
 
