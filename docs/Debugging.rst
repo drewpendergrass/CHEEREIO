@@ -7,7 +7,7 @@ Help! CHEEREIO killed my ensemble
 So you've found the dreaded KILL_ENS file in your ensemble's ``scratch`` folder. This file is produced by CHEEREIO if something goes wrong with either (1) GEOS-Chem, or (2) the assimilation routine. The presence of this file signals all runs to cease operations and exit with nonzero status. Here we discuss the most common causes of ensemble failure and how to fix them. First, if the ensemble is still running, cancel it. Next, examine the contents of KILL_ENS. The file will give you an idea of where to look for more detailed error information. 
 
 .. image:: kill_ens.png
-  :width: 300
+  :width: 600
   :alt: Picture of terminal with KILL_ENS file present. 
 
 
