@@ -27,6 +27,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    About-CHEEREIO
    Installing-CHEEREIO
    Overview-Of-Capabilities
+   Debugging
 
 .. toctree::
    :maxdepth: 4  
