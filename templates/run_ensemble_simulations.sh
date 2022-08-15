@@ -54,7 +54,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   #Check if GC finished.
   if [[ "${taillog:0:1}" != "*" ]]; then
     #This file's presence breaks loop loop
-    printf "GEOS-Chem did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
+    printf "GEOS-Chem in ensemble member ${xstr} did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
   fi
     #If there is a problem, the KILL_ENS file will be produced. Break then
   if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
