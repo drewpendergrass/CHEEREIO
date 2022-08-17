@@ -100,12 +100,12 @@ for i in range(length):
     
     #custom bwr colormap for scalings
     if variable == 'Scalar':
-        cvals  = [0.0, 1.0, np.max(ensmean)]
+        cvals  = [0.0, 1.0, np.max([np.max(ensmean),1.1])]
         colors = ["blue","white","red"]
         pltnorm=plt.Normalize(min(cvals),max(cvals))
         tuples = list(zip(map(pltnorm,cvals), colors))
         cmap = LinearSegmentedColormap.from_list("", tuples)
-        clim = [0.0, np.max(ensmean)]
+        clim = [0.0, np.max([np.max(ensmean),1.1])]
     else:
         cmap=plt.cm.jet
         clim = [np.min(ensmean), np.max(ensmean)]
@@ -146,12 +146,12 @@ for i in range(length):
 
         #custom bwr colormap for scalings
         if variable == 'Scalar':
-            cvals  = [0.0, 1.0, np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
+            cvals  = [0.0, 1.0, np.max([np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]),1.1])]
             colors = ["blue","white","red"]
             pltnorm=plt.Normalize(min(cvals),max(cvals))
             tuples = list(zip(map(pltnorm,cvals), colors))
             cmap = LinearSegmentedColormap.from_list("", tuples)
-            clim = [0.0, np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
+            clim = [0.0, np.max([np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]),1.1])]
         else:
             cmap=plt.cm.jet
             clim = [np.min(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]), np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
