@@ -5,6 +5,7 @@ from datetime import datetime,timedelta
 import pickle
 import pandas as pd
 import numpy as np
+from os.path import exists
 import sys 
 sys.path.append('../core')
 import settings_interface as si 
@@ -18,7 +19,7 @@ controlvec = data['CONTROL_VECTOR_CONC']
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
-emisvec = data['CONTROL_VECTOR_EMIS']
+emisvec = list(data['CONTROL_VECTOR_EMIS'].keys())
 START_DATE=datetime.strptime(data['START_DATE'], "%Y%m%d")
 ASSIM_START_DATE=datetime.strptime(data['ASSIM_START_DATE'], "%Y%m%d")
 endtime=datetime.strptime(data['END_DATE'], "%Y%m%d")
@@ -31,11 +32,14 @@ useLevelEdge=data['SaveLevelEdgeDiags']=="True"
 useStateMet=data['SaveStateMet']=="True"
 useArea=data['SaveArea']=="True"
 
-pt.combineScaleFactors(ens_dir,pp_dir)
-scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
-for scalefactor in scalefactor_files:
-	sf_name = '_'.join(scalefactor.split('/')[-1].split('_')[0:-1])
-	pt.plotEmissionsCell(scalefactor,30,59,outfile=f'{pp_dir}/wuhan_cell_emis_{sf_name}.png')
+
+if len(emisvec) > 0:
+	if not exists(f'{pp_dir}/{emisvec[0]}_SCALEFACTOR.nc'):
+		pt.combineScaleFactors(ens_dir,pp_dir)
+	scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
+	for scalefactor in scalefactor_files:
+		sf_name = '_'.join(scalefactor.split('/')[-1].split('_')[0:-1])
+		pt.plotEmissionsCell(scalefactor,30,59,outfile=f'{pp_dir}/wuhan_cell_emis_{sf_name}.png')
 
 try:
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
