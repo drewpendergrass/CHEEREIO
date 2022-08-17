@@ -146,7 +146,7 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 			else:
 				df['Num_Averaged'] = None
 			if use_albedo:
-				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av,nir_av,blended_av'])
+				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
 			df['time'] = t
 			bigy[spec] = df
 		masterY[timestamp] = bigy
