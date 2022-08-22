@@ -50,4 +50,4 @@ for i,species in enumerate(specieslist):
 
 #Plot scale factor slices
 
-plotScaleFactor(m,gclat,gclon,ppdir, plotMonthStartOnly=True)
+plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=True)
