@@ -14,6 +14,8 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False):
 	if cmap is None:
 		cmap = plt.cm.jet
 	if useLog:
+		if np.nanmin(flat)<=0:
+			flat[np.where(flat<=0)] = np.nan
 		mesh = m.pcolormesh(lon, lat, flat,latlon=True,cmap=cmap,norm=LogNorm())
 	else:
 		mesh = m.pcolormesh(lon, lat, flat,latlon=True,cmap=cmap)
