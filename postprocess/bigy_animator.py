@@ -14,9 +14,6 @@ ll_data = si.getLatLonVals(data)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
-with open(f"{pp_dir}/bigY.pkl",'rb') as f:
-	bigy=pickle.load(f)
-
 anim_fps = int(data['animation_fps_scalingfactor'])
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 
