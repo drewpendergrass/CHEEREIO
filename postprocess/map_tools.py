@@ -21,7 +21,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False):
 	if clim is not None:
 		plt.clim(clim[0],clim[1])
 	else:
-		plt.clim(np.min(flat), np.max(flat))
+		plt.clim(np.nanmin(flat), np.nanmax(flat))
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
