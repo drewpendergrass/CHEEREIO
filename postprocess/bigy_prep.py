@@ -12,7 +12,7 @@ pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 	bigy=pickle.load(f)
 
-gclat,gclon = si.getLatLonVals()
+gclat,gclon = si.getLatLonVals(data)
 gclat = np.array(gclat)
 gclon = np.array(gclon)
 

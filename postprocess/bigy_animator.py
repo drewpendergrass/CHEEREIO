@@ -10,7 +10,7 @@ sys.path.append('../core')
 import settings_interface as si 
 
 data = si.getSpeciesConfig()
-gclat,gclon = si.getLatLonVals()
+gclat,gclon = si.getLatLonVals(data)
 gclat = np.array(gclat)
 gclon = np.array(gclon)
 

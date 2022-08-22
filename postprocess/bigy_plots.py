@@ -10,7 +10,9 @@ sys.path.append('../core')
 import settings_interface as si 
 
 data = si.getSpeciesConfig()
-ll_data = si.getLatLonVals(data)
+gclat,gclon = si.getLatLonVals(data)
+gclat = np.array(gclat)
+gclon = np.array(gclon)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
@@ -26,9 +28,6 @@ total_satellite_obs=pickledata[0]
 total_averaged_obs=pickledata[1]
 true_obs = pickledata[4]
 sim_obs = pickledata[5]
-
-gclat = np.array(ll_data['lat'])
-gclon = np.array(ll_data['lon'])
 
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 
