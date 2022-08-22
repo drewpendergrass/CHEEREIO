@@ -49,5 +49,5 @@ def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
 		tuples = list(zip(map(pltnorm,cvals), colors))
 		cmap = LinearSegmentedColormap.from_list("", tuples)
 		for i,dateval in enumerate(timelabels):
-			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{name}_{dateval}_scalefactor.png',clim=[0,np.max([np.max(scalar),1.1])],cmap=cmap)
+			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=[0,np.max([np.max(scalar),1.1])],cmap=cmap)
 
