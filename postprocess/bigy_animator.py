@@ -10,7 +10,9 @@ sys.path.append('../core')
 import settings_interface as si 
 
 data = si.getSpeciesConfig()
-ll_data = si.getLatLonVals(data)
+gclat,gclon = si.getLatLonVals()
+gclat = np.array(gclat)
+gclon = np.array(gclon)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
@@ -39,8 +41,7 @@ else:
 	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations']
 	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)']
 
-gclat = np.array(ll_data['lat'])
-gclon = np.array(ll_data['lon'])
+
 
 for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
 	for ind,species in enumerate(specieslist):

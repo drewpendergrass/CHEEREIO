@@ -12,13 +12,12 @@ pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 	bigy=pickle.load(f)
 
-ll_data = si.getLatLonVals(data)
+gclat,gclon = si.getLatLonVals()
+gclat = np.array(gclat)
+gclon = np.array(gclon)
 
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])
-
-gclat = np.array(ll_data['lat'])
-gclon = np.array(ll_data['lon'])
 
 dates = list(bigy.keys())
 specieslist = list(bigy[dates[0]].keys())
