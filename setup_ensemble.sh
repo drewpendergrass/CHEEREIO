@@ -18,6 +18,7 @@
 SetupTemplateRundir=true
 CompileTemplateRundir=true
 SetupSpinupRun=false
+SetupControlRun=false
 SetupEnsembleRuns=true
 
 eval "$(conda shell.bash hook)"
@@ -40,6 +41,11 @@ ENS_SPINUP_FROM_BC_RESTART=$(jq -r ".ENS_SPINUP_FROM_BC_RESTART" ens_config.json
 ENS_SPINUP_START=$(jq -r ".ENS_SPINUP_START" ens_config.json)
 ENS_SPINUP_END=$(jq -r ".ENS_SPINUP_END" ens_config.json)
 
+# Start and end date for the control (no assimilation) simulations
+CONTROL_START=$(jq -r ".CONTROL_START" ens_config.json)
+CONTROL_END=$(jq -r ".CONTROL_END" ens_config.json)
+
+
 # Start and end date for the production simulations
 START_DATE=$(jq -r ".START_DATE" ens_config.json)
 END_DATE=$(jq -r ".END_DATE" ens_config.json)
@@ -53,7 +59,8 @@ Partition="$(jq -r ".Partition" ens_config.json)"
 Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
 SpinupWallTime="$(jq -r ".SpinupWallTime" ens_config.json)"
-EnsSpinupMemory="$(jq -r ".EnsSpinupMemory" ens_config.json)"
+ControlWallTime="$(jq -r ".ControlWallTime" ens_config.json)"
+EnsCtrlSpinupMemory="$(jq -r ".EnsCtrlSpinupMemory" ens_config.json)"
 EnsSpinupWallTime="$(jq -r ".EnsSpinupWallTime" ens_config.json)"
 MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
@@ -436,7 +443,7 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
   sed -i -e "s:{RunName}:${RUN_NAME}:g" \
          -e "s:{NumCores}:${NumCores}:g" \
          -e "s:{Partition}:${Partition}:g" \
-         -e "s:{Memory}:${EnsSpinupMemory}:g" \
+         -e "s:{Memory}:${EnsCtrlSpinupMemory}:g" \
          -e "s:{WallTime}:${EnsSpinupWallTime}:g" \
          -e "s:{MaxPar}:${MaxPar}:g" \
          -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_spinup_simulations.sh
@@ -879,7 +886,7 @@ if  "$SetupSpinupRun"; then
 
     cd ${MY_PATH}/${RUN_NAME}
     
-    ### Define the run directory name
+    ### Define the run name
     spinup_name="${RUN_NAME}_Spinup"
 
     ### Make the directory
@@ -923,6 +930,61 @@ if  "$SetupSpinupRun"; then
     cd ${MY_PATH}/${RUN_NAME}
     
 fi # SetupSpinupRun
+
+##=======================================================================
+##  Set up control (no assimilation) run directory
+##=======================================================================
+if  "$SetupControlRun"; then
+
+    printf "${thickline}CHEERIO CONTROL (no assimilation) RUN DIRECTORY CREATION${thickline}"
+
+    cd ${MY_PATH}/${RUN_NAME}
+    
+    ### Define the run name
+    control_name="${RUN_NAME}_Control"
+
+    ### Make the directory
+    runDir="control_run"
+    mkdir -p ${runDir}
+
+    ### Copy and point to the necessary data
+    cp -r ${RUN_TEMPLATE}/*  ${runDir}
+    cp -RLv ${ASSIM_PATH}/templates/ensemble_run.template ${runDir}
+    cd $runDir
+
+    ### Link to GEOS-Chem executable instead of having a copy in each rundir
+    rm -rf gcclassic
+    ln -s ../${RUN_TEMPLATE}/gcclassic .
+    # Link to restart file
+    ln -s $RESTART_FILE GEOSChem.Restart.${CONTROL_START}_0000z.nc4
+
+    #Switch HEMCO_Config to base/nature one.
+    rm HEMCO_Config.rc #This one has updated scaling factors.
+    mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates BCs.
+    
+    ### Update settings in input.geos
+    sed -i -e "s:{DATE1}:${CONTROL_START}:g" \
+           -e "s:{DATE2}:${CONTROL_END}:g" \
+           -e "s:{TIME1}:000000:g" \
+           -e "s:{TIME2}:000000:g" input.geos
+
+    ### Create run script from template
+    sed -e "s:namename:${control_name}:g" \
+        -e "s:{NumCores}:${NumCtrlCores}:g" \
+        -e "s:{Partition}:${Partition}:g" \
+        -e "s:{Memory}:${EnsCtrlSpinupMemory}:g" \
+        -e "s:{SpinupWallTime}:${ControlWallTime}:g" ensemble_run.template > ${control_name}.run #change
+    chmod 755 ${control_name}.run
+    rm -f ensemble_run.template
+
+    ### Print diagnostics
+    printf "${thinline}CREATED: ${runDir}${thinline}"
+    
+    ### Navigate back to top-level directory
+    cd ${MY_PATH}/${RUN_NAME}
+    
+fi # SetupConrolRun
+
 
 ##=======================================================================
 ##  Set up Ensemble run directories
