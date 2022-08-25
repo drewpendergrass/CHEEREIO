@@ -40,15 +40,15 @@ class Assimilator(object):
 		self.nature = None
 		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
 		self.MINNUMOBS = int(spc_config['MINNUMOBS'])
-		self.MinimumScalingFactorAllowed = [float(s) for s in spc_config["MinimumScalingFactorAllowed"]]
-		self.MaximumScalingFactorAllowed = [float(s) for s in spc_config["MaximumScalingFactorAllowed"]]
-		self.InflateScalingsToXOfInitialStandardDeviation = [float(s) for s in spc_config["InflateScalingsToXOfInitialStandardDeviation"]]
+		self.MinimumScalingFactorAllowed = spc_config["MinimumScalingFactorAllowed"]
+		self.MaximumScalingFactorAllowed = spc_config["MaximumScalingFactorAllowed"]
+		self.InflateScalingsToXOfInitialStandardDeviation = spc_config["InflateScalingsToXOfInitialStandardDeviation"]
 		self.emis_names = list(spc_config['CONTROL_VECTOR_EMIS'].keys())
 		self.InitEmisSTD = {}
 		for name in self.emis_names:
 			stds = np.load(f'{path_to_ensemble}/{name}_SCALEFACTOR_INIT_STD.npy')
 			self.InitEmisSTD[name] = stds
-		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=[float(s) for s in spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]]
+		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
@@ -229,15 +229,14 @@ class Assimilator(object):
 		#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
 		if self.verbose>=2:
 			print('BEGIN section InflateScalingsToXOfInitialStandardDeviation')
-		for i in range(len(self.InflateScalingsToXOfInitialStandardDeviation)):
-			inflator = self.InflateScalingsToXOfInitialStandardDeviation[i]
+		for i,emis in enumerate(self.emis_names):
+			inflator = float(self.InflateScalingsToXOfInitialStandardDeviation[emis])
 			if ~np.isnan(inflator):
-				name = self.emis_names[i]
 				analysis_std = np.std(analysisScalefactor[i,:])
-				background_std = self.InitEmisSTD[name][latind,lonind]
+				background_std = self.InitEmisSTD[emis][latind,lonind]
 				if self.verbose>=2:
-					print(f'Inflating {name} scalings to {inflator} of initial scaling factor standard deviation.')
-					print(f'The {name} analysis scaling standard deviation is {analysis_std}, against an initial standard deviation of {background_std}.')
+					print(f'Inflating {emis} scalings to {inflator} of initial scaling factor standard deviation.')
+					print(f'The {emis} analysis scaling standard deviation is {analysis_std}, against an initial standard deviation of {background_std}.')
 				if background_std == 0:
 					ratio = np.nan 
 				else:
@@ -254,7 +253,7 @@ class Assimilator(object):
 							print(f'Old analysis scale factors were {analysisScalefactor[i,:]}, which have mean {np.mean(analysisScalefactor[i,:])} and standard deviation {np.std(analysisScalefactor[i,:])}.')
 						analysisScalefactor[i,:] = analysisScalefactor[i,:]*(new_std/analysis_std)-meanrebalance #Scale so sd is new_std and mean is old mean
 						if self.verbose>=2:
-							print(f'New {name} analysis scale factors are {analysisScalefactor[i,:]}, which have mean {np.mean(analysisScalefactor[i,:])} and standard deviation {np.std(analysisScalefactor[i,:])}.')
+							print(f'New {emis} analysis scale factors are {analysisScalefactor[i,:]}, which have mean {np.mean(analysisScalefactor[i,:])} and standard deviation {np.std(analysisScalefactor[i,:])}.')
 					else:
 						if self.verbose>=2:
 							print(f'Ratio {ratio} is greater than inflator standard {inflator}, so doing nothing.')
@@ -263,38 +262,38 @@ class Assimilator(object):
 		if self.verbose>=2:
 			print('BEGIN section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
 		#Apply maximum relative change per assimilation period:
-		for i in range(len(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod)):
-			maxchange=self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[i]
+		for i,emis in enumerate(self.emis_names):
+			maxchange = float(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[emis])
 			if ~np.isnan(maxchange):
-				name = self.emis_names[i]
 				if self.verbose>=2:
-					print(f'If changes in scaling factor for {name} is greater than {maxchange}, saturate.')
+					print(f'If changes in scaling factor for {emis} is greater than {maxchange}, saturate.')
 				relativechanges=(analysisScalefactor[i,:]-backgroundScalefactor[i,:])/backgroundScalefactor[i,:]
 				if self.verbose>=2:
-					print(f'Relative changes for {name} are {relativechanges}.')
+					print(f'Relative changes for {emis} are {relativechanges}.')
 				relOverwrite = np.where(np.abs(relativechanges)>maxchange)[0]
 				if self.verbose>=2:
 					print(f'The following locations exceed the saturation cap: {relOverwrite}')
 				analysisScalefactor[i,relOverwrite] = (1+(np.sign(relativechanges[relOverwrite])*maxchange))*backgroundScalefactor[i,relOverwrite]
 				if self.verbose>=2:
-					print(f'New {name} analysis scale factors are {analysisScalefactor[i,:]}.')
+					print(f'New {emis} analysis scale factors are {analysisScalefactor[i,:]}.')
 		if self.verbose>=2:
 			print('END section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
 		if self.verbose>=2:
 			print('BEGIN section Minimum/MaximumScalingFactorAllowed')
 		#Set min/max scale factor:
-		for i in range(len(self.MinimumScalingFactorAllowed)):
-			name = self.emis_names[i]
-			if ~np.isnan(self.MinimumScalingFactorAllowed[i]):
-				minOverwrite = np.where(analysisScalefactor[i,:]<self.MinimumScalingFactorAllowed[i])[0]
+		for i,emis in enumerate(self.emis_names):
+			minsf = float(self.MinimumScalingFactorAllowed[emis])
+			maxsf = float(self.MaximumScalingFactorAllowed[emis])
+			if ~np.isnan(minsf):
+				minOverwrite = np.where(analysisScalefactor[i,:]<minsf)[0]
 				if self.verbose>=2:
-					print(f'The following {name} scaling factors fall below minimum of {self.MinimumScalingFactorAllowed[i]}: {analysisScalefactor[i,minOverwrite]}')
-				analysisScalefactor[i,minOverwrite] = self.MinimumScalingFactorAllowed[i]
-			if ~np.isnan(self.MaximumScalingFactorAllowed[i]):
-				maxOverwrite = np.where(analysisScalefactor[i,:]>self.MaximumScalingFactorAllowed[i])[0]
+					print(f'The following {emis} scaling factors fall below minimum of {minsf}: {analysisScalefactor[i,minOverwrite]}')
+				analysisScalefactor[i,minOverwrite] = minsf
+			if ~np.isnan(maxsf):
+				maxOverwrite = np.where(analysisScalefactor[i,:]>maxsf)[0]
 				if self.verbose>=2:
-					print(f'The following {name} scaling factors rise above maximum of {self.MaximumScalingFactorAllowed[i]}: {analysisScalefactor[i,maxOverwrite]}')
-				analysisScalefactor[i,maxOverwrite] = self.MaximumScalingFactorAllowed[i]
+					print(f'The following {emis} scaling factors rise above maximum of {maxsf}: {analysisScalefactor[i,maxOverwrite]}')
+				analysisScalefactor[i,maxOverwrite] = maxsf
 			if self.verbose>=2:
 				print(f'New analysis scale factors are {analysisScalefactor[i,:]}.')
 		if self.verbose>=2:
