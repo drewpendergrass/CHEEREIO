@@ -34,15 +34,11 @@ mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
 perttype = spc_config["pertType"]
 perturbation = spc_config["pPERT"]
-perturbation = np.array([float(p) for p in perturbation])
 minsf = spc_config['MinimumScalingFactorAllowed']
-minsf = np.array([float(m) for m in minsf])
 maxsf = spc_config['MaximumScalingFactorAllowed']
-maxsf = np.array([float(m) for m in maxsf])
 correlatedInitialScalings = spc_config['correlatedInitialScalings']
 speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
-corrDistances = np.array([float(p) for p in corrDistances])
 
 
 timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
@@ -56,7 +52,10 @@ else:
 lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel)
 
 #Check that the user-inputed perturbations are sensible given user-supplied interpretation rule
-for pt, p, emis, corrbool in zip(perttype,perturbation,emis_scaling_factors,correlatedInitialScalings):
+for emis in emis_scaling_factors:
+	pt = perttype[emis]
+	p = float(perturbation[emis])
+	corrbool = correlatedInitialScalings[emis]
 	if (corrbool == 'True') and (pt != "std"):
 		pt = "std"
 		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
@@ -78,13 +77,22 @@ scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors)
 subdircount = 0
 speciescount = 0
 
-if ('True' in correlatedInitialScalings) and (not speedyCorrelationApprox):
+if ('True' in list(correlatedInitialScalings.values())) and (not speedyCorrelationApprox):
 	distmat = tx.getDistMat(gridlabel)
 
 for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
 	if num == 0:
 		continue
-	for emis_name,maskoceanboolval,maskarcticboolval,maskantarcticboolval,pt,p,minval,maxval,corrbool,corrdist in zip(emis_scaling_factors,mask_ocean_bool,mask_arctic_bool,mask_antarctic_bool,perttype,perturbation,minsf,maxsf, correlatedInitialScalings,corrDistances): #Loop through the species we want scaling factors for
+	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
+		maskoceanboolval=mask_ocean_bool[emis_name]
+		maskarcticboolval=mask_arctic_bool[emis_name]
+		maskantarcticboolval=mask_antarctic_bool[emis_name]
+		pt=perttype[emis_name]
+		p=float(perturbation[emis_name])
+		minval=float(minsf[emis_name])
+		maxval=float(maxsf[emis_name])
+		corrbool=correlatedInitialScalings[emis_name]
+		corrdist=float(corrDistances[emis_name])
 		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
 		if testbool:
 			offset = 1
