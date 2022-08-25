@@ -8,7 +8,7 @@ import numpy as np
 import functools
 
 
-#All observations are passed as dictionaries. Filter info is a list
+#All observations are passed as dictionaries. Filter info is a dictionary. Filter info keys indicate filter family.
 #The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude"
 #and one labeled "utctime". The "utctime" entry must be formatted by ISO 8601 data time format
 # ISO 8601 represents date and time by starting with the year, followed by the month, the day, 
@@ -16,13 +16,20 @@ import functools
 #represents the 10th of July 2020 at 3 p.m. Timezone is assumed to be UTC
 def apply_filters(OBSDATA,filterinfo):
 	to_keep = []
-	if filterinfo[0] == "TROPOMI_CH4":
-		filter_blended_albedo = filterinfo[1]
-		filter_swir_albedo_low = filterinfo[2]
-		filter_swir_albedo_high = filterinfo[3]
-		filter_winter_lat = filterinfo[4]
-		filter_roughness = filterinfo[5]
-		filter_swir_aot = filterinfo[6]
+	filter_families = list(filterinfo.keys())
+	if "MAIN" in filter_families:
+		filter_data = filterinfo["MAIN"]
+		filter_latitude = filter_data[0]
+		if ~np.isnan(filter_latitude):
+			to_keep.append(np.where(np.abs(OBSDATA['latitude'])<=filter_latitude)[0])
+	if "TROPOMI_CH4" in filter_families:
+		filter_data = filterinfo["TROPOMI_CH4"]
+		filter_blended_albedo = filter_data[0]
+		filter_swir_albedo_low = filter_data[1]
+		filter_swir_albedo_high = filter_data[2]
+		filter_winter_lat = filter_data[3]
+		filter_roughness = filter_data[4]
+		filter_swir_aot = filter_data[5]
 		if ~np.isnan(filter_blended_albedo):
 			to_keep.append(np.where(OBSDATA['blended_albedo']<filter_blended_albedo)[0])
 		if ~np.isnan(filter_swir_albedo_low):
@@ -135,9 +142,10 @@ class Observation_Translator(object):
 		self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 	#The globObs function returns a dictionary of observations that are within a user-specified timeperiod, and, if specified
 	#that take place at a user-specified interval. The inherited function must have this signature.
+	#Please note that the "species" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#The returned dictionary must have keys for "latitude", "longitude", and "utctime",
 	#where UTC time is an ISO 8601 date time string
-	def getObservations(self,species,timeperiod, interval=None, calcError=False):
+	def getObservations(self,specieskey,timeperiod, interval=None, calcError=False):
 		#Returns a specifically formatted dictionary (see above for instructions)
 		raise NotImplementedError
 	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).

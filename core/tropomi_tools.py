@@ -126,7 +126,7 @@ def read_tropomi(filename, species, filterinfo=None, calcError = False):
 	
 	met['pressures'] = pressures
 	
-	if filterinfo:
+	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
 
 	return met
@@ -284,16 +284,16 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		else:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getObservations(self,species,timeperiod, interval=None, calcError=False):
+	def getObservations(self,specieskey,timeperiod, interval=None, calcError=False):
+		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
+		filterinfo = {}
 		if species=='CH4':
 			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
-				filterinfo = ["TROPOMI_CH4",float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
-			else:
-				filterinfo = None
-		else:
-			filterinfo = None
+				filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
+			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
 			trop_obs.append(read_tropomi(obs,species,filterinfo,calcError=calcError))
 		met = {}

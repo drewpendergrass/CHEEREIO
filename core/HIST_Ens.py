@@ -51,7 +51,7 @@ class HIST_Ens(object):
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
-		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.values()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
+		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.keys()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
 			if (bool4D and boolTROPOMI):
 				self.OBS_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
 				self.obsSpecies.append(spec)
