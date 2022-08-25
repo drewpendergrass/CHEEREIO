@@ -153,10 +153,10 @@ def saveNetCDF(scalefactor2D, stringnum, emis_name):
 	ds.to_netcdf(f"{outdir}/{name}.nc")
 	print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{stringnum} initialized successfully!")
 
-#subtract mean to avoid biased initial conditions (e.g. mean zero), save out initial std for entire ensemble, save out scalefactors for each ensemble member
+#subtract mean to avoid biased initial conditions (e.g. mean one), save out initial std for entire ensemble, save out scalefactors for each ensemble member
 for ind,emis_name in enumerate(emis_scaling_factors):
 	scaling_factor_mean = np.mean(scaling_factor_cube[:,ind,:,:],axis=0)
-	scaling_factor_cube[:,ind,:,:] -= scaling_factor_mean #transform to zero mean
+	scaling_factor_cube[:,ind,:,:] -= (scaling_factor_mean-1) #transform to mean of 1
 	scaling_factor_sd = np.std(scaling_factor_cube[:,ind,:,:],axis=0)
 	np.save(f'{parent_dir}/{emis_name}_SCALEFACTOR_INIT_STD.npy',scaling_factor_sd) #save out initial std for entire ensemble
 	for dirind, stringnum in enumerate(subdir_numstring):
