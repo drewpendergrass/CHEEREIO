@@ -238,7 +238,6 @@ def updateBoundaryConds(spc_config,lines,linenums,startlinedict,endlinedict):
 		print('Skipping boundary condition update in HEMCO_Config.')
 	return lines
 
-#Write HEMCO Config file. Save different names if it's spinup or nature (only update background) or main (adds scaling factors).
 def updateOHforCH4(spc_config,lines):
 	if (spc_config["Extensions"]["CH4"] == "True") and (spc_config["USE_CUSTOM_CH4_OH_ENTRY"] == "True"):
 		ohval = spc_config["CUSTOM_CH4_OH_ENTRY"]
@@ -248,6 +247,7 @@ def updateOHforCH4(spc_config,lines):
 				break
 	return lines
 
+#Write HEMCO Config file. Save different names if it's spinup or nature (only update background) or main (adds scaling factors).
 def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
 	if spinup_or_nature:
 		with open(hemco_config_path+'HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc', 'w') as f:
@@ -258,18 +258,17 @@ def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
 			for line in lines:
 				f.write(line)
 
-#Update HEMCO config and save both (1) updated BCs but no scaling factors and
-#(2) updated BCs and scaling factors.
-def prepHEMCOConfig(spc_config,lines,hemco_config_path,scaleFactorLineAdd):
-	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
-	#Add updates for scaling factors
-	lines,species_scalid=addScalingFactorNumbers(spc_config,lines)
-	lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
-	lines = updateOHforCH4(spc_config,lines)
-	writeHEMCOConfig(hemco_config_path,lines,False)
 
-def fullWorkflow(foldername=None):
+def fullWorkflow(useString, foldername=None):
 	spc_config,lines,hemco_config_path,scaleFactorLineAdd = HEMCOsetup(foldername,returnStartEndDict=False)
-	prepHEMCOConfig(spc_config,lines,hemco_config_path,scaleFactorLineAdd)
+	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
+	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
+	if useString == 'ENSEMBLE':
+		#Add updates for scaling factors
+		lines,species_scalid=addScalingFactorNumbers(spc_config,lines)
+		lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
+		writeHEMCOConfig(hemco_config_path,lines,False)
+	elif useString == 'NATURE':
+		writeHEMCOConfig(hemco_config_path,lines,True)
 
 

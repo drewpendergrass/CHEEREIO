@@ -1,3 +1,5 @@
 import hemco_utils as hu
+import sys
 
-hu.fullWorkflow()
+settingsstr = str(sys.argv[1])
+hu.fullWorkflow(settingsstr)
