@@ -51,15 +51,14 @@ class HIST_Ens(object):
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
-		for spec,bool4D,boolTROPOMI in zip(list(self.observed_species.keys()),self.spc_config['OBS_4D'],self.spc_config['OBS_TYPE_TROPOMI']):
-			if (bool4D and boolTROPOMI):
+		for spec in list(self.observed_species.keys()):
+			if self.spc_config['OBS_TYPE'][spec]=='TROPOMI':
 				self.OBS_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
 				self.obsSpecies.append(spec)
 	def getObsData(self):
 		self.OBS_DATA = {}
 		for spec in self.obsSpecies:
-			speciesind = self.obsSpecies.index(spec)
-			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
 			calcError = errtype == 'product'
 			self.OBS_DATA[spec] = self.OBS_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,calcError=calcError)
 	def makeBigY(self):
@@ -70,9 +69,8 @@ class HIST_Ens(object):
 			self.bigYDict[spec] = self.getColsforSpecies(spec)
 	#Gamma^-1 applied in this stage.
 	def makeRforSpecies(self,species,latind,lonind):
-		speciesind = self.obsSpecies.index(species)
-		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
-		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+		errval = float(self.spc_config['OBS_COVARIANCE'][species])
+		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][species]
 		inds = self.getIndsOfInterest(species,latind,lonind)
 		if errtype=='absolute':
 			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
@@ -87,7 +85,7 @@ class HIST_Ens(object):
 			err_av = err_av[inds]
 			to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
-		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][speciesind])**-1
+		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][species])**-1
 		to_return*=invgamma
 		return to_return
 	def makeR(self,latind,lonind):
@@ -97,16 +95,15 @@ class HIST_Ens(object):
 		return la.block_diag(*errmats)
 	def getColsforSpecies(self,species):
 		col3D = []
-		speciesind = self.obsSpecies.index(species)
-		errval = float(self.spc_config['OBS_COVARIANCE'][speciesind])
-		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][speciesind])
-		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+		errval = float(self.spc_config['OBS_COVARIANCE'][species])
+		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
+		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][species]
 		if errtype=='product':
 			useError = True
 		else:
 			useError = False
 		firstens = self.ensemble_numbers[0]
-		hist4D = self.ht[firstens].combineHist(species,self.useLevelEdge,self.useStateMet)
+		hist4D = self.ht[firstens].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
 		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,saveError=useError,transportError = errval,errorCorr = errcorr)
 		firstcol = obsdata.getGCCol()
 		shape2D = np.zeros(2)
@@ -117,7 +114,7 @@ class HIST_Ens(object):
 		conc2D[:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D = self.ht[i].combineHist(species,self.useLevelEdge,self.useStateMet)
+				hist4D = self.ht[i].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
 				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
 				conc2D[:,i-1] = col
 		obsdata.setGCCol(conc2D)
@@ -137,10 +134,9 @@ class HIST_Ens(object):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
-		for spec in self.obsSpecies:
+		for spec in list(self.obsSpecies.keys()):
 			ind = self.getIndsOfInterest(spec,latind,lonind)
-			speciesind = self.obsSpecies.index(spec)
-			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][speciesind]
+			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
 			useError = errtype=='product'
 			gccol,obscol = self.bigYDict[spec].getCols()
 			gccol = gccol[ind,:]
