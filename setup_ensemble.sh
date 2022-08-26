@@ -962,6 +962,9 @@ if  "$SetupControlRun"; then
     rm HEMCO_Config.rc #This one has updated scaling factors.
     mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates BCs and a few other settings.
 
+    #CD to run core scripts
+    cd ${ASSIM_PATH}/core
+
     #update history collections for production-style run (not spinups)
     source activate $(jq -r ".CondaEnv" ../ens_config.json)
     python update_history.py "SETCONTROL"
@@ -969,6 +972,8 @@ if  "$SetupControlRun"; then
 
     bash change_hemcodiag_freq.sh "control" #update hemco diagnostics frequency.
 
+    #Back to rundir
+    cd ${MY_PATH}/${RUN_NAME}/${runDir}
     
     ### Update settings in input.geos
     sed -i -e "s:{DATE1}:${CONTROL_START}:g" \
