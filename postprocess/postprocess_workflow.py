@@ -31,7 +31,7 @@ avtogcgrid = data['AV_TO_GC_GRID']=="True"
 useLevelEdge=data['SaveLevelEdgeDiags']=="True"
 useStateMet=data['SaveStateMet']=="True"
 useArea=data['SaveArea']=="True"
-
+useControl=data['DO_CONTROL_RUN']=="true"
 
 if len(emisvec) > 0:
 	if not exists(f'{pp_dir}/{emisvec[0]}_SCALEFACTOR.nc'):
@@ -60,7 +60,7 @@ if "histprocess" in sys.argv:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
-		bigy = pt.makeYEachAssimPeriod(dates_string_array,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(dates_string_array,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,useControl = useControl, fullpath_output_name=f"{pp_dir}/bigY.pkl")
 
 if "calc850" in sys.argv:
 	print('Calculating/loading 850hPa pressure level')

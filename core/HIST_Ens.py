@@ -9,12 +9,13 @@ from HIST_Translator import HIST_Translator
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False,useControl=False):
 		self.verbose = verbose
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
 		self.useArea = useArea
+		self.useControl = useControl
 		self.spc_config = si.getSpeciesConfig()
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
@@ -40,6 +41,12 @@ class HIST_Ens(object):
 				else:
 					self.ht[ens] = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
 				ensemble_numbers.append(ens)
+		if self.useControl:
+			directory = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/control_run/"
+			if fullperiod:
+				self.control_ht = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
+			else:
+				self.control_ht = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.maxobs=int(self.spc_config['MAXNUMOBS'])
 		self.interval=interval
@@ -118,6 +125,10 @@ class HIST_Ens(object):
 				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
 				conc2D[:,i-1] = col
 		obsdata.setGCCol(conc2D)
+		if self.useControl:
+			hist4D = self.control_ht.combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
+			col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
+			obsdata.addData({"control":col})
 		return obsdata
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
