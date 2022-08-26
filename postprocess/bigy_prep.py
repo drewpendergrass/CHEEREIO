@@ -17,20 +17,24 @@ gclat = np.array(gclat)
 gclon = np.array(gclon)
 
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+useControl=data['DO_CONTROL_RUN']=="true"
 nEnsemble = int(data['nEnsemble'])
 
 dates = list(bigy.keys())
 specieslist = list(bigy[dates[0]].keys())
 
-simulated_obs_mean_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
-true_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+simulated_obs_mean_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+true_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
 
 total_satellite_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
 total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
 if postprocess_save_albedo:
-	total_swir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
-	total_nir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
-	total_blended = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+	total_swir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	total_nir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	total_blended = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+if useControl:
+	control_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+
 
 for ind1, date in enumerate(dates):
 	daydict = bigy[date]
@@ -45,6 +49,8 @@ for ind1, date in enumerate(dates):
 			swirdict = np.array(ydict['Albedo_SWIR'])
 			nirdict = np.array(ydict['Albedo_NIR'])
 			blendeddict = np.array(ydict['Blended_Albedo'])
+		if useControl:
+			controldict = np.array(ydict['Control'])
 		latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
 		latind = latind.argmin(axis=0)
 		lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
@@ -60,6 +66,7 @@ for ind1, date in enumerate(dates):
 			total_satellite_obs[ind1,ind2,latindval,lonindval]=totalcount
 			true_obs_value[ind1,ind2,latindval,lonindval]=np.mean(trueobsdict[dictind])
 			simulated_obs_mean_value[ind1,ind2,latindval,lonindval]=np.mean(simobsdict[dictind])
+			control_obs_value[ind1,ind2,latindval,lonindval]=np.mean(controldict[dictind])
 			if postprocess_save_albedo:	
 				total_swir[ind1,ind2,latindval,lonindval]=np.mean(swirdict[dictind])
 				total_nir[ind1,ind2,latindval,lonindval]=np.mean(nirdict[dictind])
@@ -70,6 +77,9 @@ if postprocess_save_albedo:
 	arraysbase['swir_albedo']=total_swir
 	arraysbase['nir_albedo']=total_nir
 	arraysbase['blended_albedo']=total_blended
+
+if useControl:
+	arraysbase['control']=control_obs_value
 
 f = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
 pickle.dump(arraysbase,f)
