@@ -22,12 +22,12 @@ postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
-dates = pickledata[2]
-specieslist = pickledata[3]
-total_satellite_obs=pickledata[0]
-total_averaged_obs=pickledata[1]
-true_obs = pickledata[4]
-sim_obs = pickledata[5]
+dates = pickledata["dates"]
+specieslist = pickledata["species"]
+total_satellite_obs=pickledata["obscount"]
+total_averaged_obs=pickledata["obscount_avg"]
+true_obs = pickledata["obs"]
+sim_obs = pickledata["sim_obs"]
 
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 

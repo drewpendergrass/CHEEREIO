@@ -22,17 +22,17 @@ postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
-dates = pickledata[2]
-specieslist = pickledata[3]
-total_satellite_obs=pickledata[0]
-total_averaged_obs=pickledata[1]
-true_obs = pickledata[4]
-sim_obs = pickledata[5]
+dates = pickledata["dates"]
+specieslist = pickledata["species"]
+total_satellite_obs=pickledata["obscount"]
+total_averaged_obs=pickledata["obscount_avg"]
+true_obs = pickledata["obs"]
+sim_obs = pickledata["sim_obs"]
 
 if postprocess_save_albedo:
-	total_swir = pickledata[6]
-	total_nir = pickledata[7]
-	total_blended = pickledata[8]
+	total_swir = pickledata["swir_albedo"]
+	total_nir = pickledata["nir_albedo"]
+	total_blended = pickledata["blended_albedo"]
 	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs,total_swir,total_nir,total_blended]
 	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
 	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)', 'Albedo','Albedo','Albedo']

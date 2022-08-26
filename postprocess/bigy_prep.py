@@ -65,10 +65,11 @@ for ind1, date in enumerate(dates):
 				total_nir[ind1,ind2,latindval,lonindval]=np.mean(nirdict[dictind])
 				total_blended[ind1,ind2,latindval,lonindval]=np.mean(blendeddict[dictind])
 
+arraysbase = {"obscount":total_satellite_obs,"obscount_avg":total_averaged_obs,"dates":dates,"species":specieslist,"obs":true_obs_value,"sim_obs":simulated_obs_mean_value}
 if postprocess_save_albedo:
-	arraysbase = [total_satellite_obs,total_averaged_obs,dates,specieslist,true_obs_value,simulated_obs_mean_value,total_swir,total_nir,total_blended]
-else:
-	arraysbase = [total_satellite_obs,total_averaged_obs,dates,specieslist,true_obs_value,simulated_obs_mean_value]
+	arraysbase['swir_albedo']=total_swir
+	arraysbase['nir_albedo']=total_nir
+	arraysbase['blended_albedo']=total_blended
 
 f = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
 pickle.dump(arraysbase,f)
