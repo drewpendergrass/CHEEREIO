@@ -14,7 +14,7 @@ def HEMCOsetup(foldername=None,returnStartEndDict=False):
 	switchnames,switchcategories,switchboolvals = getHEMCOSwitches(spc_config, lines)
 	startlinedict,endlinedict,scaleFactorLineAdd = getHEMCOLines(lines,switchnames,switchcategories,switchboolvals)
 	speciesloc = getValidSpeciesAddresses(lines,linenums,startlinedict,endlinedict)
-	to_return = [spc_config,lines,hemco_config_path,scaleFactorLineAdd]
+	to_return = [spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc]
 	if returnStartEndDict:
 		to_return = to_return + [startlinedict,endlinedict,linenums]
 	return to_return
@@ -171,7 +171,7 @@ def getValidSpeciesAddresses(lines,linenums,startlinedict,endlinedict):
 
 #Add ScalIDs to lines that we would like to scale. Doesn't differentiate if multiple copies of the same species are present.
 #The user is expected to modify
-def addScalingFactorNumbers(spc_config,lines):
+def addScalingFactorNumbers(spc_config,speciesloc,lines):
 	species_to_add = spc_config["CONTROL_VECTOR_EMIS"].values()
 	specnames = spc_config["CONTROL_VECTOR_EMIS"].keys()
 	species_scalid = {} #Dictionary with species emission and scale factor id
@@ -260,12 +260,12 @@ def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
 
 
 def fullWorkflow(useString, foldername=None):
-	spc_config,lines,hemco_config_path,scaleFactorLineAdd = HEMCOsetup(foldername,returnStartEndDict=False)
+	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc = HEMCOsetup(foldername,returnStartEndDict=False)
 	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
 	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
 	if useString == 'ENSEMBLE':
 		#Add updates for scaling factors
-		lines,species_scalid=addScalingFactorNumbers(spc_config,lines)
+		lines,species_scalid=addScalingFactorNumbers(spc_config,speciesloc,lines)
 		lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
 		writeHEMCOConfig(hemco_config_path,lines,False)
 	elif useString == 'NATURE':
