@@ -54,7 +54,7 @@ if [ $x -eq 1 ]; then
 	printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
 	bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
   bash change_histcollections_durfreq.sh #update history collections.
-  bash change_hemcodiag_freq.sh #update hemco diagnostics frequency.
+  bash change_hemcodiag_freq.sh "ensemble" #update hemco diagnostics frequency for ensemble
   cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
   sed -i -e "s|SpeciesBC_?ALL?|SpeciesRst_?ALL?|g" {RunName}_*/HEMCO_Config.rc #Sometimes we spin up from BCs; this fixes.
   cd ${MY_PATH} #Make backup

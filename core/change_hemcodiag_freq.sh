@@ -30,38 +30,45 @@ fi
 timestr="000000${daysstr} ${hoursstr}0000"
 freqstr="DiagnFreq\:                   ${timestr}"
 
-cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
-
-# Initialize (x=0 is nature run (if used); x=1 is ensemble member 1; etc.)
-if [ "${SIMULATE_NATURE}" = true ]; then
-  x=0
+if [ "${1}" = "control" ]; then
+  cd ${MY_PATH}/${RUN_NAME}/control_run
+  sed -i "/DiagnFreq/c\\${freqstr}" HEMCO_Config.rc
 else
-  x=1
-fi
+  cd ${MY_PATH}/${RUN_NAME}/ensemble_runs
 
-# Copy HISTORY.rc into each run directory
-while [ $x -le $nEnsemble ];do
-
-
-  ### Add zeros to string name
-  if [ $x -lt 10 ]; then
-      xstr="000${x}"
-  elif [ $x -lt 100 ]; then
-      xstr="00${x}"
-  elif [ $x -lt 1000 ]; then
-      xstr="0${x}"
+  # Initialize (x=0 is nature run (if used); x=1 is ensemble member 1; etc.)
+  if [ "${SIMULATE_NATURE}" = true ]; then
+    x=0
   else
-      xstr="${x}"
+    x=1
   fi
 
-  ### Define the run directory name
-  name="${RUN_NAME}_${xstr}"
+  # Copy HISTORY.rc into each run directory
+  while [ $x -le $nEnsemble ];do
 
 
-  ### Modify the desired line
-  sed -i "/DiagnFreq/c\\${freqstr}" ${name}/HEMCO_Config.rc
+    ### Add zeros to string name
+    if [ $x -lt 10 ]; then
+        xstr="000${x}"
+    elif [ $x -lt 100 ]; then
+        xstr="00${x}"
+    elif [ $x -lt 1000 ]; then
+        xstr="0${x}"
+    else
+        xstr="${x}"
+    fi
 
-  ### Increment
-  x=$[$x+1]
+    ### Define the run directory name
+    name="${RUN_NAME}_${xstr}"
 
-done
+
+    ### Modify the desired line
+    sed -i "/DiagnFreq/c\\${freqstr}" ${name}/HEMCO_Config.rc
+
+    ### Increment
+    x=$[$x+1]
+
+  done
+
+fi
+

@@ -6,16 +6,15 @@ class HISTORY_Translator():
 	#Constructor. If foldername is none, open template HISTORY.rc. Otherwise open ensemble member
 	def __init__(self,foldername=None):
 		self.spc_config = si.getSpeciesConfig()
-		if foldername:
-			self.foldername = foldername
-		else:
-			self.foldername = ''
 		if not foldername:
 			#Default to template HEMCO config
 			self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/template_run/"
 		else:
-			#Otherwise go to specific ensemble member
-			self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs/{foldername}/"
+			#Otherwise go to Control, or specific ensemble member
+			if foldername=='CONTROL':
+				self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/control_run/"
+			else:
+				self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs/{foldername}/"
 		with open(self.historyrc_path+'HISTORY.rc') as f:
 			self.lines = f.readlines()
 		self.linenums = np.arange(0,len(self.lines))
@@ -151,7 +150,11 @@ class HISTORY_Translator():
 		print('HISTORY.rc saved successfully. Please double check that all the collections match what you want to save!')
 
 settingsstr = str(sys.argv[1])
-trans = HISTORY_Translator()
+
+if settingsstr=="SETCONTROL":
+	trans = HISTORY_Translator(foldername='CONTROL')
+else:
+	trans = HISTORY_Translator()
 
 if settingsstr=="TEMPLATEDIR":
 	trans.prepLevelEdgeDiags()
@@ -167,7 +170,7 @@ elif settingsstr=="SPINUP":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
 elif settingsstr=="PREPMAIN":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
-elif settingsstr=="UPDATEDURFREQ":
+elif (settingsstr=="UPDATEDURFREQ") or (settingsstr=="SETCONTROL"):
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
 
 trans.writeHistoryConfig()
