@@ -170,7 +170,11 @@ elif settingsstr=="SPINUP":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
 elif settingsstr=="PREPMAIN":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
-elif (settingsstr=="UPDATEDURFREQ") or (settingsstr=="SETCONTROL"):
+elif settingsstr=="UPDATEDURFREQ":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
+elif settingsstr=="SETCONTROL":
+	trans.updateRestartDurationFrequency(isFirst="Midrun")
+	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
+
 
 trans.writeHistoryConfig()
