@@ -142,15 +142,16 @@ class Observation_Translator(object):
 		self.scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 	#The globObs function returns a dictionary of observations that are within a user-specified timeperiod, and, if specified
 	#that take place at a user-specified interval. The inherited function must have this signature.
-	#Please note that the "species" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
+	#Please note that the "specieskey" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#The returned dictionary must have keys for "latitude", "longitude", and "utctime",
 	#where UTC time is an ISO 8601 date time string
 	def getObservations(self,specieskey,timeperiod, interval=None, calcError=False):
 		#Returns a specifically formatted dictionary (see above for instructions)
 		raise NotImplementedError
 	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).
+	#Please note that the "specieskey" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#). Inherited function must have this signature and return an ObsData object.
-	def gcCompare(self,species,OBSDATA,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
+	def gcCompare(self,specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0):
 		#Returns an ObsData object
 		raise NotImplementedError
 

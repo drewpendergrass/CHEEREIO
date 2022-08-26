@@ -300,7 +300,8 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,species,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0, errorCorr = 0):
+	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,saveError=False, transportError = 0, errorCorr = 0):
+		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
