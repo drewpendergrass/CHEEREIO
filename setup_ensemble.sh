@@ -55,6 +55,7 @@ ASSIM_TIME=$(jq -r ".ASSIM_TIME" ens_config.json)
 
 #Run script settings
 NumCores="$(jq -r ".NumCores" ens_config.json)"
+NumCtrlCores="$(jq -r ".NumCtrlCores" ens_config.json)"
 Partition="$(jq -r ".Partition" ens_config.json)"
 Memory="$(jq -r ".Memory" ens_config.json)"
 WallTime="$(jq -r ".WallTime" ens_config.json)"
