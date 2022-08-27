@@ -145,7 +145,7 @@ class HIST_Ens(object):
 		obsmeans = []
 		obsperts = []
 		obsdiffs = []
-		for spec in list(self.obsSpecies.keys()):
+		for spec in self.obsSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
 			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
 			useError = errtype=='product'
