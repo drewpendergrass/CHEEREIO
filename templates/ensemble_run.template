@@ -6,6 +6,8 @@
 #SBATCH -p {Partition}
 #SBATCH --mem={Memory}
 
+source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
+
 # Set the proper # of threads for OpenMP
 # SLURM_CPUS_PER_TASK ensures this matches the number you set with -c above
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK

@@ -987,6 +987,7 @@ if  "$SetupControlRun"; then
         -e "s:{NumCores}:${NumCtrlCores}:g" \
         -e "s:{Partition}:${Partition}:g" \
         -e "s:{Memory}:${EnsCtrlSpinupMemory}:g" \
+        -e "s:{ASSIM}:${ASSIM_PATH}:g" \
         -e "s:{SpinupWallTime}:${ControlWallTime}:g" ensemble_run.template > ${control_name}.run #change
     chmod 755 ${control_name}.run
     rm -f ensemble_run.template
