@@ -961,7 +961,10 @@ if  "$SetupControlRun"; then
 
     #Switch HEMCO_Config to base/nature one.
     rm HEMCO_Config.rc #This one has updated scaling factors.
-    mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates BCs and a few other settings.
+    mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates a few settings.
+    if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
+        sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc #If we are spinning up from BCs, handle this
+    fi
 
     #CD to run core scripts
     cd ${ASSIM_PATH}/core
