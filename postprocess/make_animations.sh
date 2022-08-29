@@ -28,7 +28,7 @@ do
 	python animator.py "${pp_dir}/${i}_SCALEFACTOR.nc" "Scalar" "all" "${pp_dir}/SCALEFACTOR_${i}" "${animation_fps_scalingfactor}"
 done
 
-for i in "${hemco_diags_to_animate[@]}"
+for i in "${hemco_diags_to_process[@]}"
 do
 	python animator.py "${pp_dir}/combined_HEMCO_diagnostics.nc" "${i}" "all" "${pp_dir}/HEMCOdiag_${i}" "${animation_fps_scalingfactor}"
 done

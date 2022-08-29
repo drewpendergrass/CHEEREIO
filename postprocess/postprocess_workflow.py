@@ -12,8 +12,10 @@ import settings_interface as si
 
 data = si.getSpeciesConfig()
 
+hemco_diags_to_process = data['hemco_diags_to_process']
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
+control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/control_run"
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
@@ -39,7 +41,6 @@ if len(emisvec) > 0:
 	scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
 	for scalefactor in scalefactor_files:
 		sf_name = '_'.join(scalefactor.split('/')[-1].split('_')[0:-1])
-		pt.plotEmissionsCell(scalefactor,30,59,outfile=f'{pp_dir}/wuhan_cell_emis_{sf_name}.png')
 
 try:
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
@@ -51,7 +52,8 @@ try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 except FileNotFoundError:
 	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
-	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
+	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')	
+
 
 if "histprocess" in sys.argv:
 	daterange = np.arange(ASSIM_START_DATE,endtime+timedelta(hours=1),delta).astype(datetime)
@@ -61,6 +63,15 @@ if "histprocess" in sys.argv:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
 		bigy = pt.makeYEachAssimPeriod(dates_string_array,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,useControl = useControl, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+
+if useControl:
+	try:
+		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
+	except FileNotFoundError:
+		pt.combineHemcoDiagControl(control_dir,pp_dir)
+		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
+	for collection in hemco_diags_to_process:
+		tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collection,outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 
 if "calc850" in sys.argv:
 	print('Calculating/loading 850hPa pressure level')
@@ -74,7 +85,6 @@ if "calc850" in sys.argv:
 for spec in controlvec:
 	if "histprocess" in sys.argv:
 		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='ppb',satellite_name='TROPOMI',outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png')
-	pt.plotSurfaceCell(ds,spec,30,59,outfile=f'{pp_dir}/wuhan_cell_ts_{spec}.png',includesNature=False)
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=False)
 	if "calc850" in sys.argv:
 		 pt.plotSurfaceMean(ds850,spec,outfile=f'{pp_dir}/mean850hPa_ts_{spec}.png',includesNature=False)

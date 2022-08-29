@@ -173,7 +173,7 @@
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
 	"postprocess_save_albedo":"True",
-	"hemco_diags_to_animate" : [
+	"hemco_diags_to_process" : [
 		"EmisCH4_Total"
 	],
 	"comment021" : "**********************************************************************************",

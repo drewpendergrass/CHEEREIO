@@ -77,6 +77,16 @@ def combineHemcoDiag(ensemble_dir,output_dir):
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	ds.to_netcdf(output_dir+'/combined_HEMCO_diagnostics.nc')
 
+def combineHemcoDiagControl(control_dir,output_dir):
+	paths = glob(f'{control_dir}/OutputDir/HEMCO_diagnostics.*.nc')
+	paths.sort()
+	ds_files = []
+	for path in paths:
+		ds_files.append(xr.open_dataset(path))
+	ds = xr.concat(ds_files,'time')
+	ds.to_netcdf(output_dir+'/control_HEMCO_diagnostics.nc')
+
+
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
 	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
 	concstrings = [f'SpeciesConc_{name}' for name in species_names]
@@ -216,6 +226,15 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
+def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,outfile=None):
+	da = ds_ensemble[collectionName].sum(axis=(2,3)) #sum up all emissions
+	enstime = np.array(ds_ensemble['time'])
+	ensmean = da.mean(axis=0)
+	enssd = da.std(axis=0)
+	da_prior = ds_prior[collectionName].sum(axis=(1,2)) #sum up all emissions from the control run
+	priortime = np.array(ds_prior['time'])
+	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
+
 def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',outfile=None):
 	ensmeans = []
 	ensstds = []
@@ -284,14 +303,17 @@ def tsPlotSatCompareFullRange(df,species,numens,freq='H',unit='ppb',satellite_na
 
 
 
-def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
+def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,outfile=None):
 	plt.rcParams.update({'font.size': 16})
 	plt.figure(figsize=(6,4))
-	plt.plot(time,ensmean,color='b',label='Ensemble mean')
+	plt.plot(time,ensmean,color='b',label='Ensemble')
 	plt.plot(time,ensmean+enssd,':',color='b')
 	plt.plot(time,ensmean-enssd,':',color='b')
 	if nature is not None:
 		plt.plot(time,nature,color='g',label='Nature')
+		plt.legend()
+	if prior is not None:
+		plt.plot(priortime,nature,color='g',label='Prior')
 		plt.legend()
 	plt.xlabel('Time')
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
@@ -305,30 +327,3 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,outfile=None):
 		plt.savefig(outfile)
 	else:
 		plt.show()
-
-def emisPlot(time,ensmean,enssd,name,outfile=None):
-	plt.rcParams.update({'font.size': 16})
-	plt.figure(figsize=(6,4))
-	plt.plot(time,ensmean,color='b')
-	plt.plot(time,ensmean+enssd,':',color='b')
-	plt.plot(time,ensmean-enssd,':',color='b')
-	plt.xlabel('Time')
-	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
-	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=3))
-	plt.ylabel(f'{name}')
-	plt.gcf().autofmt_xdate()
-	plt.gcf().tight_layout()
-	if outfile:
-		plt.savefig(outfile)
-	else:
-		plt.show()
-
-def plotEmissionsCell(ds_file,latind,lonind,outfile=None):
-	ds = xr.open_dataset(ds_file)
-	time = np.array(ds['time'])
-	da = np.array(ds['Scalar'])
-	ens = da[:,:,latind,lonind]
-	ensmean = np.mean(ens,axis=0)
-	enssd = np.std(ens,axis=0)
-	emisPlot(time,ensmean,enssd,'_'.join(ds_file.split('/')[-1].split('_')[0:-1]),outfile)
-
