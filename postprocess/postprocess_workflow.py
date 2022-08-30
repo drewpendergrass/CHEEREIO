@@ -35,43 +35,63 @@ useStateMet=data['SaveStateMet']=="True"
 useArea=data['SaveArea']=="True"
 useControl=data['DO_CONTROL_RUN']=="true"
 
+print('Starting scale factor postprocessing.')
 if len(emisvec) > 0:
 	if not exists(f'{pp_dir}/{emisvec[0]}_SCALEFACTOR.nc'):
 		pt.combineScaleFactors(ens_dir,pp_dir)
+		print('Scale factor postprocessing file not detected; generating now.')
+	else:
+		print('Detected existing scale factor postprocessing file. Loading now.')
 	scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
 	for scalefactor in scalefactor_files:
 		sf_name = '_'.join(scalefactor.split('/')[-1].split('_')[0:-1])
 
+print('Scale factor postprocessing complete.')
+print('Starting HEMCO diagnostic (e.g. emissions) postprocessing.')
+
 try:
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
 except FileNotFoundError:
+	print('HEMCO diagnostic postprocessing file not detected; generating now.')
 	pt.combineHemcoDiag(ens_dir,pp_dir)
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
+
+print('HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
+print('Starting concentration (surface) postprocessing.')
 
 try:
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
 except FileNotFoundError:
+	print('Surface concentration postprocessing file not detected; generating now.')
 	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
 	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')	
 
+print('Surface concentration data postprocessed and loaded.')
+
 
 if "histprocess" in sys.argv:
+	print('Starting simulated observation vs actual observation (Y) postprocessing.')
 	daterange = np.arange(ASSIM_START_DATE,endtime+timedelta(hours=1),delta).astype(datetime)
 	dates_string_array = [dateval.strftime("%Y%m%d_%H%M") for dateval in daterange]
 	try:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
+		print('Observation postprocessing files not detected; generating now.')
 		bigy = pt.makeYEachAssimPeriod(dates_string_array,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,useControl = useControl, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+	print('Simulated observation vs actual observation (Y) postprocessed and loaded.')
 
 if useControl:
+	print('Starting control run HEMCO diagnostic (e.g. emissions) postprocessing.')
 	try:
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	except FileNotFoundError:
+		print('Control run HEMCO diagnostic postprocessing file not detected; generating now.')
 		pt.combineHemcoDiagControl(control_dir,pp_dir)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
 		tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
 if "calc850" in sys.argv:
 	print('Calculating/loading 850hPa pressure level')
