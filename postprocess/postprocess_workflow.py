@@ -71,7 +71,7 @@ if useControl:
 		pt.combineHemcoDiagControl(control_dir,pp_dir)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
-		tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collection,outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+		tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 
 if "calc850" in sys.argv:
 	print('Calculating/loading 850hPa pressure level')
