@@ -128,7 +128,7 @@ class HIST_Ens(object):
 		if self.useControl:
 			hist4D = self.control_ht.combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
 			col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
-			obsdata.addData({"control":col})
+			obsdata.addData(control=col)
 		return obsdata
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
