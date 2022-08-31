@@ -313,7 +313,7 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 		plt.plot(time,nature,color='g',label='Nature')
 		plt.legend()
 	if prior is not None:
-		plt.plot(priortime,nature,color='g',label='Prior')
+		plt.plot(priortime,prior,color='g',label='Prior')
 		plt.legend()
 	plt.xlabel('Time')
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
