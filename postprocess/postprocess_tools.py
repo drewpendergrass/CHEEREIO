@@ -226,7 +226,10 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,outfile=None):
+def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outfile=None):
+	if timeslice is not None:
+		ds_ensemble = ds_ensemble.sel(time=slice(timeslice[0],timeslice[1]))
+		ds_prior = ds_prior.sel(time=slice(timeslice[0],timeslice[1]))
 	da = ds_ensemble[collectionName].sum(axis=(2,3)) #sum up all emissions
 	enstime = np.array(ds_ensemble['time'])
 	ensmean = da.mean(axis=0)

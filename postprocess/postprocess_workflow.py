@@ -90,7 +90,7 @@ if useControl:
 		pt.combineHemcoDiagControl(control_dir,pp_dir)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
-		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,timeslice=[START_DATE,endtime], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
 if "calc850" in sys.argv:
