@@ -11,7 +11,7 @@ end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
     
 source activate ${CONDA_ENV} #Activate conda environment.
-python -u par_letkf.py ${end_timestamp} ${1} ${2} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${1}_${2}.out
+python -u par_letkf.py ${end_timestamp} ${1} ${2} ${3} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${1}_${2}.out
 py_exit_status=$?
 conda deactivate #Exit Conda environment
 

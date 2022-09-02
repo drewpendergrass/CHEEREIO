@@ -82,16 +82,16 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
     if [ {MaxPar} -eq 1 ]; then
-      bash par_assim.sh ${x} 1
+      bash par_assim.sh ${x} 1 ${firstrun}
     else
-      parallel -j {MaxPar} "bash par_assim.sh ${x} {1}" ::: {1..{MaxPar}}
+      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${firstrun}" ::: {1..{MaxPar}}
     fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
     #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
     if [ $x -eq 1 ]; then
-      bash check_and_complete_assimilation.sh
+      bash check_and_complete_assimilation.sh ${firstrun}
     fi
     #If there is a problem, the KILL_ENS file will be produced. Break then
     if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then

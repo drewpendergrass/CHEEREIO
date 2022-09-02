@@ -141,6 +141,11 @@ class HIST_Ens(object):
 		if len(inds) > self.maxobs:
 			inds = np.random.choice(inds, self.maxobs,replace=False) #Randomly subset down to appropriate number of observations
 		return inds
+	def getScaling(self,species):
+			gccol,obscol = self.bigYDict[species].getCols()
+			obsmean = np.mean(gccol,axis=1)
+			scaling = np.mean(obscol)/np.mean(obsmean)
+			return scaling
 	def getLocObsMeanPertDiff(self,latind,lonind):
 		obsmeans = []
 		obsperts = []

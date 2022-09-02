@@ -1,6 +1,5 @@
 from glob import glob
 import settings_interface as si 
-import sys 
 
 data = si.getSpeciesConfig()
 latgrid,longrid = si.getLatLonVals(data)

@@ -316,6 +316,27 @@ class Assimilator(object):
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
+	def scaleRestarts(self):
+		if self.verbose>=1:
+			print(f"Scaling all restarts to match observations.")
+		scale_factors_by_species_key = {}
+		for species_key in self.observed_species:
+			scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
+		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
+		for species_key in self.observed_species:
+			species_value = self.observed_species[species_key]
+			if species_value in list(scale_factors_by_species.keys())
+				scale_factors_by_species[species_value] = np.mean([scale_factors_by_species_key[species_key],scale_factors_by_species[species_value]])
+			else:
+				scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
+		for species in scale_factors_by_species:
+			scaling_factor = scale_factors_by_species[species]
+			for i in self.ensemble_numbers:
+				scaled_species = self.gt[i].getSpecies3Dconc(species)*scaling_factor
+				self.gt[i].setSpecies3Dconc(species, scaled_species)
+		#Save out the resarts
+		for i in self.ensemble_numbers:
+			self.gt[i].saveRestart()
 	def LETKF(self):
 		if self.verbose>=2:
 			print(f"LETKF called! Beginning loop.")
