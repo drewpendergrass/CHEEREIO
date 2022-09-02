@@ -6,14 +6,17 @@ from GC_Translator import GC_Translator
 
 #Lightweight container for GC_Translators; used to combine columns, update restarts, and diff columns.
 class GT_Container(object):
-	def __init__(self,timestamp,constructStateVecs=True):
+	def __init__(self,timestamp,getAssimColumns=True, constructStateVecs=True):
 		spc_config = si.getSpeciesConfig()
 		path_to_ensemble = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 		self.path_to_scratch = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch"
-		npy_column_files = glob(f'{self.path_to_scratch}/**/*.npy',recursive=True)
-		npy_col_names = [file.split('/')[-1] for file in npy_column_files]
-		npy_columns = [np.load(file) for file in npy_column_files]
-		self.columns = dict(zip(npy_col_names,npy_columns))
+		if getAssimColumns:
+			npy_column_files = glob(f'{self.path_to_scratch}/**/*.npy',recursive=True)
+			npy_col_names = [file.split('/')[-1] for file in npy_column_files]
+			npy_columns = [np.load(file) for file in npy_column_files]
+			self.columns = dict(zip(npy_col_names,npy_columns))
+		else:
+			self.columns = None
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
 		dirnames = [d.split('/')[-2] for d in subdirs]
@@ -91,7 +94,9 @@ class GT_Container(object):
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
-	def saveRestartsAndScalingFactors(self):
+	def saveRestartsAndScalingFactors(self,saveRestart=True, saveEmissions=True):
 		for i in self.ensemble_numbers:
-			self.gt[i].saveRestart()
-			self.gt[i].saveEmissions()
+			if saveRestart:
+				self.gt[i].saveRestart()
+			if saveEmissions:
+				self.gt[i].saveEmissions()
