@@ -66,8 +66,8 @@ class HIST_Ens(object):
 		self.OBS_DATA = {}
 		for spec in self.obsSpecies:
 			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
-			calcError = errtype == 'product'
-			self.OBS_DATA[spec] = self.OBS_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,calcError=calcError)
+			includeObsError = errtype == 'product'
+			self.OBS_DATA[spec] = self.OBS_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,includeObsError=includeObsError)
 	def makeBigY(self):
 		self.makeObsTrans()
 		self.getObsData()

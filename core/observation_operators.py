@@ -166,12 +166,10 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 				raise ValueError("Errors must be prescribed or included with observations; missing needed information")
 			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
 			err_av[count] = obs_f(mean_error=mean_err,num_obs=num_av[count],**obs_args)
-
-			(np.mean(obsInstrumentError[indmatch]) * np.sqrt(((1-errorCorr)/num_av[count]) + errorCorr) )+modelTransportError
 	to_return = ObsData(gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av=num_av)
 	if albedo_swir is not None:
 		to_return.addData(swir_av=swir_av,nir_av=nir_av,blended_av=blended_av)
-	if satError is not None:
+	if doSuperObs:
 		to_return.addData(err_av=err_av)
 	return to_return
 
@@ -185,7 +183,7 @@ class Observation_Translator(object):
 	#Please note that the "specieskey" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#The returned dictionary must have keys for "latitude", "longitude", and "utctime",
 	#where UTC time is an ISO 8601 date time string
-	def getObservations(self,specieskey,timeperiod, interval=None, calcError=False):
+	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 		#Returns a specifically formatted dictionary (see above for instructions)
 		raise NotImplementedError
 	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).

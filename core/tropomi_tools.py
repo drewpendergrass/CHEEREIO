@@ -10,7 +10,7 @@ import xarray as xr
 import numpy as np
 import observation_operators as obsop
 
-def read_tropomi(filename, species, filterinfo=None, calcError = False):
+def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	"""
 	Read TROPOMI data and save important variables to dictionary.
 
@@ -60,7 +60,7 @@ def read_tropomi(filename, species, filterinfo=None, calcError = False):
 	else:
 		raise ValueError('Species not supported')
 
-	if calcError:
+	if includeObsError:
 		if species=='NO2':
 			met['Error'] = data['nitrogendioxide_tropospheric_column_precision'].values[0,sl,gp]
 		elif species=='CH4':
@@ -284,7 +284,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		else:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
 		return obs_list
-	def getObservations(self,specieskey,timeperiod, interval=None, calcError=False):
+	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		obs_list = self.globObs(species,timeperiod,interval)
 		trop_obs = []
@@ -295,7 +295,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species,filterinfo,calcError=calcError))
+			trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
@@ -329,16 +329,17 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_M_on_sat = None
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
+			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
 			if saveError:
-				additional_args_avgGC['satError'] = TROPOMI['Error']
+				additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
 				additional_args_avgGC['modelTransportError'] = transportError
 				additional_args_avgGC['errorCorr'] = errorCorr
 			if saveAlbedo:
 				additional_args_avgGC['albedo_swir'] = TROPOMI['albedo_swir']
 				additional_args_avgGC['albedo_nir'] = TROPOMI['albedo_nir']
 				additional_args_avgGC['blended_albedo'] = TROPOMI['blended_albedo']
-			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],**additional_args_avgGC)
+			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=True,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 			if saveAlbedo:
