@@ -300,7 +300,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
@@ -331,26 +331,27 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
-			if useObserverError:
-				additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
-				additional_args_avgGC['modelTransportError'] = transportError
-			elif prescribed_error is not None:
-				additional_args_avgGC['prescribed_error'] = prescribed_error
-				additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+			if doErrCalc:
+				if useObserverError:
+					additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
+					additional_args_avgGC['modelTransportError'] = transportError
+				elif prescribed_error is not None:
+					additional_args_avgGC['prescribed_error'] = prescribed_error
+					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+				if minError is not None:
+					additional_args_avgGC['minError'] = minError
+				if errorCorr is not None:
+					additional_args_avgGC['errorCorr'] = errorCorr
 			if saveAlbedo:
 				additional_args_avgGC['albedo_swir'] = TROPOMI['albedo_swir']
 				additional_args_avgGC['albedo_nir'] = TROPOMI['albedo_nir']
 				additional_args_avgGC['blended_albedo'] = TROPOMI['blended_albedo']
-			if minError is not None:
-				additional_args_avgGC['minError'] = minError
-			if errorCorr is not None:
-				additional_args_avgGC['errorCorr'] = errorCorr
-			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=True,superObsFunction=superObsFunction,**additional_args_avgGC)
+			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
 			if saveAlbedo:
 				toreturn.addData(swir_av=TROPOMI['albedo_swir'],nir_av=TROPOMI['albedo_nir'],blended_av=TROPOMI['blended_albedo'])
-			if useObserverError:
+			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=TROPOMI['Error'])
 		return toreturn
 

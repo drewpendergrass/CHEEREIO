@@ -124,7 +124,7 @@ class HIST_Ens(object):
 			prescribed_error_type = errtype
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
+		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,doErrCalc=True,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
 		firstcol = obsdata.getGCCol()
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
@@ -135,12 +135,12 @@ class HIST_Ens(object):
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D = self.ht[i].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
+				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
 				conc2D[:,i-1] = col
 		obsdata.setGCCol(conc2D)
 		if self.useControl:
 			hist4D = self.control_ht.combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-			col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA).getGCCol()
+			col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
 			obsdata.addData(control=col)
 		return obsdata
 	def getIndsOfInterest(self,species,latind,lonind):
