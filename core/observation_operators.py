@@ -9,16 +9,16 @@ import functools
 
 def produceSuperObservationFunction(fname):
 	if (name is None) or (name == "default"):
-		def super_obs(mean_error,num_obs,errorCorr,transportError,min_error=0):
+		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0,transportError=0):
 			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) )+transportError],min_error)
 	elif fname == "sqrt":
-		def super_obs(mean_error,num_obs,errorCorr,min_error=0):
+		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) ),min_error])
 	elif fname == "constant":
-		def super_obs(mean_error,num_obs):
+		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return mean_error
 	elif fname == "empirical_ch4_tropomi":
-		def super_obs(mean_error,num_obs,min_error):
+		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return np.max([mean_error*(1.02 - (0.02*num_obs)),min_error])
 	else:
 		raise ValueError('Superobservation error reduction function not recognized.')

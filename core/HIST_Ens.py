@@ -65,7 +65,7 @@ class HIST_Ens(object):
 	def getObsData(self):
 		self.OBS_DATA = {}
 		for spec in self.obsSpecies:
-			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
+			errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
 			includeObsError = errtype == 'product'
 			self.OBS_DATA[spec] = self.OBS_TRANSLATOR[spec].getObservations(spec,self.timeperiod,self.interval,includeObsError=includeObsError)
 	def makeBigY(self):
@@ -76,21 +76,27 @@ class HIST_Ens(object):
 			self.bigYDict[spec] = self.getColsforSpecies(spec)
 	#Gamma^-1 applied in this stage.
 	def makeRforSpecies(self,species,latind,lonind):
-		errval = float(self.spc_config['OBS_COVARIANCE'][species])
-		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][species]
+		errval = float(self.spc_config['OBS_ERROR'][species])
+		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
 		inds = self.getIndsOfInterest(species,latind,lonind)
-		if errtype=='absolute':
-			to_return = np.diag(np.repeat(errval,len(inds))) #we are assuming the user already squared these
-		elif errtype=='relative':
-			obsdat = self.bigYDict[species]
-			obscol = obsdat.getObsCol()
-			obscol = obscol[inds]
-			to_return = np.diag((obscol*errval)**2) #multiply measurements by relative error, then square it.
-		elif errtype=='product':
+		if self.spc_config['AV_TO_GC_GRID']=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
 			obsdat = self.bigYDict[species]
 			err_av = obsdat.getDataByKey('err_av')
 			err_av = err_av[inds]
 			to_return = np.diag(err_av**2)
+		else:
+			if errtype=='absolute':
+				to_return = np.diag(np.repeat(errval**2,len(inds))) #we are assuming the user provides the square root of variance
+			elif errtype=='relative':
+				obsdat = self.bigYDict[species]
+				obscol = obsdat.getObsCol()
+				obscol = obscol[inds]
+				to_return = np.diag((obscol*errval)**2) #multiply measurements by relative error, then square it.
+			elif errtype=='product':
+				obsdat = self.bigYDict[species]
+				err_av = obsdat.getDataByKey('err_av')
+				err_av = err_av[inds]
+				to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][species])**-1
 		to_return*=invgamma
@@ -102,16 +108,23 @@ class HIST_Ens(object):
 		return la.block_diag(*errmats)
 	def getColsforSpecies(self,species):
 		col3D = []
-		errval = float(self.spc_config['OBS_COVARIANCE'][species])
+		errval = float(self.spc_config['OBS_ERROR'][species])
 		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
-		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][species]
+		minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
+		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
 		if errtype=='product':
 			useObserverError = True
+			transportError = errval
+			prescribed_error = None
+			prescribed_error_type = None
 		else:
 			useObserverError = False
+			transportError = None
+			prescribed_error = errval
+			prescribed_error_type = errtype
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,useObserverError=useObserverError,transportError = errval,errorCorr = errcorr)
+		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
 		firstcol = obsdata.getGCCol()
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
@@ -152,7 +165,7 @@ class HIST_Ens(object):
 		obsdiffs = []
 		for spec in self.obsSpecies:
 			ind = self.getIndsOfInterest(spec,latind,lonind)
-			errtype = self.spc_config['OBS_COVARIANCE_TYPE'][spec]
+			errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
 			useError = errtype=='product'
 			gccol,obscol = self.bigYDict[spec].getCols()
 			gccol = gccol[ind,:]

@@ -151,20 +151,26 @@
 	"REGULARIZING_FACTOR_GAMMA": {
 		"CH4_TROPOMI":"0.02"
 	},
-	"OBS_COVARIANCE": {
+	"OBS_ERROR": {
 		"CH4_TROPOMI":"5"
 	},
-	"OBS_COVARIANCE_TYPE":{
+	"OBS_ERROR_TYPE":{
 		"CH4_TROPOMI":"product"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
 		"CH4_TROPOMI":"0.15"
 	},
+	"MIN_OBS_ERROR":{
+		"CH4_TROPOMI":"10"
+	},
+	"AV_TO_GC_GRID" : "True",
+	"SUPER_OBSERVATION_FUNCTION":{
+		"CH4_TROPOMI":"empirical_ch4_tropomi"
+	},
 	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
-	"AV_TO_GC_GRID" : "True",
 	"LOCALIZATION_RADIUS_km" : "500",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
