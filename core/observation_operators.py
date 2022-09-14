@@ -7,6 +7,22 @@ import xarray as xr
 import numpy as np
 import functools
 
+def produceSuperObservationFunction(fname):
+	if (name is None) or (name == "default"):
+		def super_obs(mean_error,num_obs,errorCorr,transportError,min_error=0):
+			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) )+transportError],min_error)
+	elif fname == "sqrt":
+		def super_obs(mean_error,num_obs,errorCorr,min_error=0):
+			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) ),min_error])
+	elif fname == "constant":
+		def super_obs(mean_error,num_obs):
+			return mean_error
+	elif fname == "empirical_ch4_tropomi":
+		def super_obs(mean_error,num_obs,min_error):
+			return np.max([mean_error*(1.02 - (0.02*num_obs)),min_error])
+	else:
+		raise ValueError('Superobservation error reduction function not recognized.')
+	return super_obs
 
 #All observations are passed as dictionaries. Filter info is a dictionary. Filter info keys indicate filter family.
 #The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude"
@@ -91,7 +107,7 @@ def getGCCols(GC,OBSDATA,species,returninds=False,returnStateMet=False,GC_area=N
 	return to_return
 
 #No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_nir=None,blended_albedo=None, satError = None, modelTransportError = None, errorCorr = None):
+def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,albedo_swir=None,albedo_nir=None,blended_albedo=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -111,7 +127,7 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 		swir_av = np.zeros(av_len)
 		nir_av = np.zeros(av_len)
 		blended_av = np.zeros(av_len)
-	if satError is not None:
+	if doSuperObs:
 		err_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
 		indmatch = np.where(index==ind)[0]
@@ -125,9 +141,33 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,albedo_swir=None,albedo_
 			swir_av[count] = np.mean(albedo_swir[indmatch])
 			nir_av[count] = np.mean(albedo_nir[indmatch])
 			blended_av[count] = np.mean(blended_albedo[indmatch])
-		if satError is not None:
+		if doSuperObs:
+			#SuperObservation function selected by user
+			obs_f = produceSuperObservationFunction(superObsFunction)
+			obs_args = {}
+			#Add arguments that are required by the function:
+			if modelTransportError is not None:
+				obs_args['transportError'] = modelTransportError
+			if errorCorr is not None:
+				obs_args['errorCorr'] = errorCorr
+			if minError is not None: 
+				obs_args['min_error'] = minError
+			#Calculate mean error to be reduced by superobservation function. 
+			if obsInstrumentError is not None:
+				mean_err = np.mean(obsInstrumentError[indmatch])
+			elif prescribed_error is not None:
+				if prescribed_error_type == "relative":
+					mean_err = obs_av[count]*prescribed_error
+				elif prescribed_error_type == "absolute":
+					mean_err = prescribed_error
+				else:
+					raise ValueError("Errors must be prescribed or included with observations; missing needed information")
+			else:
+				raise ValueError("Errors must be prescribed or included with observations; missing needed information")
 			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
-			err_av[count] = (np.mean(satError[indmatch]) * np.sqrt(((1-errorCorr)/num_av[count]) + errorCorr) )+modelTransportError
+			err_av[count] = obs_f(mean_error=mean_err,num_obs=num_av[count],**obs_args)
+
+			(np.mean(obsInstrumentError[indmatch]) * np.sqrt(((1-errorCorr)/num_av[count]) + errorCorr) )+modelTransportError
 	to_return = ObsData(gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av=num_av)
 	if albedo_swir is not None:
 		to_return.addData(swir_av=swir_av,nir_av=nir_av,blended_av=blended_av)
