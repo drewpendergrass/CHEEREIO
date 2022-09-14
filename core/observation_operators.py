@@ -8,7 +8,7 @@ import numpy as np
 import functools
 
 def produceSuperObservationFunction(fname):
-	if (name is None) or (name == "default"):
+	if (fname is None) or (fname == "default"):
 		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0,transportError=0):
 			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) )+transportError],min_error)
 	elif fname == "sqrt":
