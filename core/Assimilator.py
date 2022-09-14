@@ -325,7 +325,7 @@ class Assimilator(object):
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		for species_key in self.observed_species:
 			species_value = self.observed_species[species_key]
-			if species_value in list(scale_factors_by_species.keys())
+			if species_value in list(scale_factors_by_species.keys()):
 				scale_factors_by_species[species_value] = np.mean([scale_factors_by_species_key[species_key],scale_factors_by_species[species_value]])
 			else:
 				scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
