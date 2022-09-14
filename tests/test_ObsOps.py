@@ -65,7 +65,7 @@ def testSuperObsFunctions():
 	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
 	iGC, jGC, tGC = obsop.nearest_loc(GC,OBSDATA)
 	obsvals = np.arange(10)
-	obsInstrumentError = np.ones(7)*5
+	obsInstrumentError = np.ones(10)*5
 	modelTransportError = 5
 	errorCorr = 0.1
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
