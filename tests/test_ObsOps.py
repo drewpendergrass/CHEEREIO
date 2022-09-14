@@ -69,7 +69,7 @@ def testSuperObsFunctions():
 	modelTransportError = 5
 	errorCorr = 0.1
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
-	testobserr_default = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default',obsInstrumentError = obsInstrumentError, modelTransportError = modelTransportError, errorCorr = errorCorr,minError=0).getDataByKey('Error')
+	testobserr_default = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default',obsInstrumentError = obsInstrumentError, modelTransportError = modelTransportError, errorCorr = errorCorr,minError=0).getDataByKey('err_av')
 	correctobserr_default = [(np.mean(obsvals[0:3]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError,(np.mean(obsvals[3:7]) * np.sqrt(((1-errorCorr)/4) + errorCorr) )+modelTransportError,(np.mean(obsvals[7:10]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError]
 	print(testobserr_default)
 	print(correctobserr_default)
