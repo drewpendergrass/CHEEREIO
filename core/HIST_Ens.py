@@ -106,12 +106,12 @@ class HIST_Ens(object):
 		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
 		errtype = self.spc_config['OBS_COVARIANCE_TYPE'][species]
 		if errtype=='product':
-			useError = True
+			useObserverError = True
 		else:
-			useError = False
+			useObserverError = False
 		firstens = self.ensemble_numbers[0]
 		hist4D = self.ht[firstens].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,saveError=useError,transportError = errval,errorCorr = errcorr)
+		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,useObserverError=useObserverError,transportError = errval,errorCorr = errcorr)
 		firstcol = obsdata.getGCCol()
 		shape2D = np.zeros(2)
 		shape2D[0] = len(firstcol)
