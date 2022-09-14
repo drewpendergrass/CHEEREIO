@@ -71,6 +71,8 @@ def testSuperObsFunctions():
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
 	testobs_default = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default',obsInstrumentError = obsInstrumentError, modelTransportError = modelTransportError, errorCorr = errorCorr,minError=0).getObsCol()
 	correctobs_default = [(np.mean(obsvals[0:3]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError,(np.mean(obsvals[3:7]) * np.sqrt(((1-errorCorr)/4) + errorCorr) )+modelTransportError,(np.mean(obsvals[7:10]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError]
+	print(testobs_default)
+	print(correctobs_default)
 	obsresult_default = np.array_equal(testobs_default,correctobs_default)
 	assert obsresult_default
 
