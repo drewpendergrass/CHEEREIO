@@ -41,7 +41,7 @@ def testAverageByGC():
 	iGC, jGC, tGC = obsop.nearest_loc(GC,OBSDATA)
 	obsvals = np.arange(10)
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
-	obsdata_results = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals)
+	obsdata_results = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default')
 	correctlon = np.repeat(10,3) #Nearest longitude to 9 is 10 on our 0,5,10 gc grid
 	correctlat = np.repeat(5,3) #Nearest latitude to 4 is 5.
 	testlat,testlon = obsdata_results.getLatLon()
