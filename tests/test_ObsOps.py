@@ -60,3 +60,19 @@ def testAverageByGC():
 	numresult = np.array_equal(testnum,correctnum)
 	assert lonresult and latresult and gcresult and obsresult and timeresult and numresult
 
+def testSuperObsFunctions():
+	GC = testing_tools.makeMiniFakeDataSet()
+	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
+	iGC, jGC, tGC = obsop.nearest_loc(GC,OBSDATA)
+	obsvals = np.arange(10)
+	obsInstrumentError = np.ones(7)*5
+	modelTransportError = 5
+	errorCorr = 0.1
+	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
+	testobs_default = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default',obsInstrumentError = obsInstrumentError, modelTransportError = modelTransportError, errorCorr = errorCorr,minError=0).getObsCol()
+	correctobs_default = [(np.mean(obsvals[0:3]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError,(np.mean(obsvals[3:7]) * np.sqrt(((1-errorCorr)/4) + errorCorr) )+modelTransportError,(np.mean(obsvals[7:10]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError]
+	obsresult_default = np.array_equal(testobs_default,correctobs_default)
+	assert obsresult_default
+
+
+
