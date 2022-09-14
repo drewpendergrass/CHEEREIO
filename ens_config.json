@@ -152,10 +152,10 @@
 		"CH4_TROPOMI":"0.02"
 	},
 	"OBS_ERROR": {
-		"CH4_TROPOMI":"5"
+		"CH4_TROPOMI":"15"
 	},
 	"OBS_ERROR_TYPE":{
-		"CH4_TROPOMI":"product"
+		"CH4_TROPOMI":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
 		"CH4_TROPOMI":"0.15"
