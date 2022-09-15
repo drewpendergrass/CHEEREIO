@@ -323,13 +323,21 @@ class Assimilator(object):
 		for species_key in self.observed_species:
 			scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
+		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
 			species_value = self.observed_species[species_key]
 			if species_value in list(scale_factors_by_species.keys()):
-				scale_factors_by_species[species_value] = np.mean([scale_factors_by_species_key[species_key],scale_factors_by_species[species_value]])
+				scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
+				scale_factors_by_species_count[species_value] += 1 #increment count for dividing next
 			else:
 				scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
+				scale_factors_by_species_count[species_value] = 1
+		#Complete the averaging by dividing by count
 		for species in scale_factors_by_species:
+			count = scale_factors_by_species_count[species]
+			if count > 1:
+				scale_factors_by_species[species] = scale_factors_by_species[species]/count #complete the average
+		for species in scale_factors_by_species: #Now we can actually go and scale
 			scaling_factor = scale_factors_by_species[species]
 			for i in self.ensemble_numbers:
 				scaled_species = self.gt[i].getSpecies3Dconc(species)*scaling_factor
