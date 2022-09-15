@@ -106,6 +106,9 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   #If this is ensemble member 1, and this is the first run, switch to main assimilation mode with regular intervals.
   if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
     bash change_histrst_durfreq.sh
+  fi
+  #For all runs, switch off the first run marker.
+  if [ "${firstrun}" = true ]; then
     firstrun=false
   fi
   #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
