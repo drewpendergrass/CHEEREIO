@@ -12,11 +12,7 @@ end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 
-if [ "${1}" = true ] && [ "${SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD}" = true ]; then
-
-	#Do nothing; par_letkf will write the ASSIMILATION_COMPLETE FILE
-
-else
+if [ "${1}" = false ] || [ "${SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD}" = false ]; then
 
 	source activate ${CONDA_ENV} #Activate conda environment.
 	python check_for_all_columns.py
