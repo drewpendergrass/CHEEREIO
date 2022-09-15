@@ -15,8 +15,24 @@ else:
 	label_str = 'LETKF'
 dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
-#If we are just scaling, only ens member 1 and core 1 will do assimilation
-if (not just_scale) or (just_scale and (ensnum == 1) and (corenum==1) ):
+if just_scale:
+	#Scaling restarts; only ens 1 core 1 will do this.
+	if (ensnum == 1) and (corenum==1):
+		print(f'Core ({ensnum},{corenum}) is gathering ensemble at time {dateval}.')
+		start = time.time()
+		print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum})')
+		a = Assimilator(timestamp,ensnum,corenum)
+		end = time.time()
+		print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
+		start = time.time()
+		a.scaleRestarts()
+		with open(f"{path_to_scratch}/ASSIMILATION_COMPLETE", "w") as f:
+			f.write("Done.\n") #If so, save flag file to ensemble folder
+		end = time.time()
+		print(f'Core ({ensnum},{corenum}) completed computation for {dateval} and saved columns in {end - start} seconds.')
+	else:
+		print(f'Just scaling restarts. Core ({ensnum},{corenum}) is not needed and will hang.')
+else:
 	print(f'Core ({ensnum},{corenum}) is gathering ensemble at time {dateval}.')
 	start = time.time()
 	print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum})')
@@ -25,14 +41,8 @@ if (not just_scale) or (just_scale and (ensnum == 1) and (corenum==1) ):
 	end = time.time()
 	print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
 	start = time.time()
-	if just_scale:
-		a.scaleRestarts()
-		with open(f"{path_to_scratch}/ASSIMILATION_COMPLETE", "w") as f:
-			f.write("Done.\n") #If so, save flag file to ensemble folder
-	else:
-		a.LETKF()
+	a.LETKF()
 	end = time.time()
 	print(f'Core ({ensnum},{corenum}) completed computation for {dateval} and saved columns in {end - start} seconds.')
-else:
-	print(f'Just scaling restarts. Core ({ensnum},{corenum}) is not needed and will hang.')
+
 print('-------------------END LETKF-------------------')
