@@ -13,7 +13,6 @@ if just_scale:
 	label_str = 'scaling'
 else:
 	label_str = 'LETKF'
-label_str
 dateval = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 #If we are just scaling, only ens member 1 and core 1 will do assimilation
