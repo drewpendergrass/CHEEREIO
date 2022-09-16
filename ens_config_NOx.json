@@ -104,7 +104,8 @@
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD",
-		"Met_TropLev"
+		"Met_TropLev",
+		"Met_BXHEIGHT"
 	],
 	"comment012" : "******************************************************************************",
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
