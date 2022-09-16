@@ -2,15 +2,14 @@
 
 # CHEEREIO
 
-The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint). CHEEREIO follows five design principles:
+The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint). CHEEREIO follows four design principles:
 
 1. **Easy to customize**: Assimilate anything, in any GEOS-Chem configuration or simulation.
 2. **Easy to maintain**: Science automatically aligned with latest model version.
 3. **Easy to deploy**: One configuration file controls installation and settings
 4. **Easy to link observations**: Object-oriented observation operator implementation allows the user to rapidly add new kinds of data with minimal programming required.
-5. **Quick to run**: Wall runtime should be no more than 2x longer than vanilla GEOS-Chem (4D-Var limit) assuming resources are available.
 
-CHEEREIO is currently fully tested and operational for 3D LETKF data assimilation. Development of 4D assimilation and additional tools for observation operator creation are currently being tested for TROPOMI CH4 and in development for TROPOMI/OMI NO2. I am adding new satellite data as rapidly as possible. After some validation runs to confirm the workflow's scientific value, I will attempt to reduce memory and I/O time complexity by switching from GNU parallel parallelization to MPI via the ray package (allowing the sharing of large matrices in memory and removing the need to write columns to file).
+The beta release for CHEEREIO and an accompanying model description is currently in prep. Until then, this codebase is under constant revision and re-engineering. At any one time the code here may be broken by an update only to be fixed later that day. Don't treat it as stable yet!
 
 ## Documentation
 Detailed documentation is available on [ReadTheDocs](https://cheereio.readthedocs.io), including installation instructions. If you encounter any problems not covered by the documentation, please open an [issue](https://github.com/drewpendergrass/CHEEREIO/issues) on GitHub.
