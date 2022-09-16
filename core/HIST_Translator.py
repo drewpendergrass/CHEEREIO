@@ -37,7 +37,7 @@ class HIST_Translator(object):
 	def combineHist(self,useLevelEdge=False, useStateMet = False):
 		dataset=[]
 		subdir_lists=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet)
-		for ind, specfile in subdir_lists['SpeciesConc']:
+		for ind, specfile in enumerate(subdir_lists['SpeciesConc']):
 			hist_ds = xr.load_dataset(specfile)
 			hist_vals = []
 			le_vals = []
