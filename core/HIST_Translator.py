@@ -59,6 +59,11 @@ class HIST_Translator(object):
 			dataset.append(data_val)
 		dataset = xr.merge(dataset)
 		return dataset
+	def reduceCombinedHistToSpecies(self,combinedHist,species):
+		for spc in self.spc_config['HistorySpeciesConcToSave']:
+			if spc != species:
+				combinedHist = combinedHist.drop_vars(spc)
+		return combinedHist
 	def getArea(self):
 		specconc_list=self.globSubDir(self.timeperiod,useLevelEdge=False,useStateMet=False)
 		AREA = xr.load_dataset(specconc_list[0])[f'AREA']

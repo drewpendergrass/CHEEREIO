@@ -71,9 +71,7 @@ class HIST_Ens(object):
 	def makeBigY(self):
 		self.makeObsTrans()
 		self.getObsData()
-		self.bigYDict = {}
-		for spec in self.obsSpecies:
-			self.bigYDict[spec] = self.getColsforSpecies(spec)
+		self.bigYDict = self.getCols()
 	#Gamma^-1 applied in this stage.
 	def makeRforSpecies(self,species,latind,lonind):
 		errval = float(self.spc_config['OBS_ERROR'][species])
@@ -106,8 +104,9 @@ class HIST_Ens(object):
 		for spec in self.obsSpecies:
 			errmats.append(self.makeRforSpecies(spec,latind,lonind))
 		return la.block_diag(*errmats)
-	def getColsforSpecies(self,species):
-		col3D = []
+	def getCols(self):
+		obsdata_toreturn = {}
+		conc2Ds = {}
 		errval = float(self.spc_config['OBS_ERROR'][species])
 		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
 		minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
@@ -123,26 +122,34 @@ class HIST_Ens(object):
 			prescribed_error = errval
 			prescribed_error_type = errtype
 		firstens = self.ensemble_numbers[0]
-		hist4D = self.ht[firstens].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-		obsdata = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,doErrCalc=True,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
-		firstcol = obsdata.getGCCol()
-		shape2D = np.zeros(2)
-		shape2D[0] = len(firstcol)
-		shape2D[1]=len(self.ensemble_numbers)
-		shape2D = shape2D.astype(int)
-		conc2D = np.zeros(shape2D)
-		conc2D[:,firstens-1] = firstcol
+		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet)
+		for species in self.observed_species:
+			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
+			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,doErrCalc=True,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
+			firstcol = obsdata_toreturn[species].getGCCol()
+			shape2D = np.zeros(2)
+			shape2D[0] = len(firstcol)
+			shape2D[1]=len(self.ensemble_numbers)
+			shape2D = shape2D.astype(int)
+			conc2Ds[species] = np.zeros(shape2D)
+			conc2Ds[species][:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D = self.ht[i].combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
-				conc2D[:,i-1] = col
-		obsdata.setGCCol(conc2D)
+				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet)
+				for species in self.observed_species:
+					hist4D = self.ht[i].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
+					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+					conc2Ds[species][:,i-1] = col
+		#Save full ensemble data in each of the obsdata objects
+		for species in self.observed_species:
+			obsdata_toreturn[species].setGCCol(conc2Ds[species])
 		if self.useControl:
-			hist4D = self.control_ht.combineHist(self.observed_species[species],self.useLevelEdge,self.useStateMet)
-			col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
-			obsdata.addData(control=col)
-		return obsdata
+			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet)
+			for species in self.observed_species:
+				hist4D = self.control_ht.reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
+				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+				obsdata_toreturn[species].addData(control=col)
+		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = si.getLatLonVals(self.spc_config)
