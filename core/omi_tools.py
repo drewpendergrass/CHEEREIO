@@ -1,13 +1,122 @@
 #Some of this code is based on work from Nick Balasus and Kang Sun based on https://amt.copernicus.org/articles/11/6679/2018/amt-11-6679-2018.pdf
 #THIS FILE IS OUT OF DATE AND BASED ON AN OLD VERSION OF CHEEREIO; MUST BE REWRITTEN BEFORE USE.
 
-import os
-from netCDF4 import Dataset
-from datetime import datetime,timedelta,time
+from datetime import datetime
+from glob import glob
+import pickle
+import os.path
+import xarray as xr
 import numpy as np
-import glob
-import h5py
-import settings_interface as si 
+import observation_operators as obsop
+
+def read_omi_no2(filename, filterinfo=None, includeObsError = False):
+    """
+    Read OMI data and save important variables to dictionary.
+
+    Arguments
+        filename [str]  : TROPOMI netcdf data file to read
+
+    Returns
+        met   [dict] : Dictionary of important variables from TROPOMI:
+                            - species
+                            - Latitude
+                            - Longitude
+                            - QA value
+                            - UTC time
+                            - Averaging kernel
+                            - Prior profile
+                            - Dry air subcolumns
+                            - Latitude bounds
+                            - Longitude bounds
+                            - Vertical pressure profile
+    """
+
+    if filename=="test":
+        filename = "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2/2016/01/OMI-Aura_L2-OMNO2_2016m0116t2320-o61202_v003-2019m0819t154726.he5"
+
+    # Initialize list for OMI data
+    met = {}
+    
+    # Store species, QA, lat, lon, time, averaging kernel
+    data = xr.open_dataset(filename, group=group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
+
+
+FROM VIRAL 
+
+import numpy as np
+import xarray as xr
+import pandas as pd
+import scipy.constants as const
+import warnings
+warnings.filterwarnings("ignore")
+
+SEASdir='/n/home12/vshah/SEAS/'
+
+# pressure to number density conversion factor
+p_to_nd = ( 1.0 / const.R *
+         10**2 * #hPa-> Pa
+         const.value('Avogadro constant') * # mol/m3 -> molec/m3
+         10**(-6)) # molec/m3 -> molec/cm3
+
+# GEOS-Chem output at OMI crossing time (satellite diagnostic)
+GC=xr.open_mfdataset(SEASdir+'BackgroundNO2/GEOSChem/rundirs/merra2_4x5_standard/'
+                        'OutputDir_R20/ts_satellite.20150[678]*.bpch',engine='pseudonetcdf',
+                          combine='by_coords')
+
+# Seasonal mean
+GC=GC.mean('time')
+
+# Need to get tropopause height (could have archived it in the satellite diagnostic but will use the July mean here)
+OutDir=SEASdir+'BackgroundNO2/GEOSChem/rundirs/merra2_4x5_standard/OutputDir_R0/'
+Met=xr.open_dataset(OutDir+'GEOSChem.StateMet.20160701_0000z.nc4')
+
+# Keep data only below the tropopause
+tpp=Met.Met_TropP.isel(time=0).values
+tpp3d=np.tile(tpp,(40,1,1))
+pe=GC['PEDGE-$_PSURF'][1:]
+pe=np.append(pe,pe[-2:-1,:,:],axis=0)
+GC['IJ-AVG-$_NO2']=GC['IJ-AVG-$_NO2'].where(pe>tpp3d)
+
+#select a subset of data & rename variables
+GCdata=GC[['IJ-AVG-$_NO2','PEDGE-$_PSURF',"BXHGHT-$_BXHEIGHT",'DAO-3D-$_TMPU']]
+GCdata=GCdata.rename({'IJ-AVG-$_NO2':'NO2MR','PEDGE-$_PSURF':'PE',
+                     "BXHGHT-$_BXHEIGHT":'BXHGHT','DAO-3D-$_TMPU':'T'})
+
+# GEOS-Chem pressure at mid-level
+GC_pm=GCdata['PE']+np.diff(GCdata['PE'],axis=1,append=0)/2.0
+
+GCdata['PM']=GCdata['PE']
+GCdata.PM.values=GC_pm.values
+
+# NO2 number density (molecules/cm3)
+GCdata['NO2ND']=GCdata['NO2MR']*p_to_nd/GCdata['T']*GCdata['PM']*1e-9
+
+# partial coumns (molecules/cm2)
+GCdata['NO2vCol']=GCdata['NO2ND']*GCdata['BXHGHT']*1e2
+
+# GC pressure mid points
+press=GCdata.PM.mean(('latitude','longitude','time'))
+
+# read scattering weights from binned OMI data and interpolate to GC pressure levels
+# I had downloaded the OMI data for a season and binned it to the GEOS-Chem (4x5) grid
+OMI=xr.open_dataset('./data/OMI2015_07-Copy1.nc').load()
+sw=OMI.interp(press=press)["SW_bin"].mean('orbit').mean(('lat','lon'))
+
+# GEOS-Chem VCD
+GC_VCD=GCdata['NO2vCol'].mean(['latitude','longitude']).sum()
+# GEOS-Chem SCD
+GC_SCD=GCdata['NO2vCol'].mean(['latitude','longitude'])*sw).sum()
+
+#AMF
+GC_AMF = GC_SCD / GC_VCD
+
+# You could either compare the GGEOS-Chem Slant Column Density (GC_SCD) with the OMI retrieved SCD,
+# or GC_VCD with the OMI VCD re-calculated using the GEOS-Chem AMF
+# OMI_VCD = OMI_SCD / GC_AMF
+
+
+
+
 
 l2_dir = '/n/holylfs05/LABS/jacob_lab/nbalasus/omi/'
 #west,east,south,north = 124,131,33,39
