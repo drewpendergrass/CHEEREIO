@@ -107,23 +107,23 @@ class HIST_Ens(object):
 	def getCols(self):
 		obsdata_toreturn = {}
 		conc2Ds = {}
-		errval = float(self.spc_config['OBS_ERROR'][species])
-		errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
-		minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
-		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
-		if errtype=='product':
-			useObserverError = True
-			transportError = errval
-			prescribed_error = None
-			prescribed_error_type = None
-		else:
-			useObserverError = False
-			transportError = None
-			prescribed_error = errval
-			prescribed_error_type = errtype
 		firstens = self.ensemble_numbers[0]
 		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet)
 		for species in self.observed_species:
+			errval = float(self.spc_config['OBS_ERROR'][species])
+			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
+			minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
+			errtype = self.spc_config['OBS_ERROR_TYPE'][species]
+			if errtype=='product':
+				useObserverError = True
+				transportError = errval
+				prescribed_error = None
+				prescribed_error_type = None
+			else:
+				useObserverError = False
+				transportError = None
+				prescribed_error = errval
+				prescribed_error_type = errtype
 			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,doErrCalc=True,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
 			firstcol = obsdata_toreturn[species].getGCCol()
