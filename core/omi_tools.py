@@ -1,4 +1,3 @@
-#Some of this code is based on work from Nick Balasus and Kang Sun based on https://amt.copernicus.org/articles/11/6679/2018/amt-11-6679-2018.pdf
 #THIS FILE IS OUT OF DATE AND BASED ON AN OLD VERSION OF CHEEREIO; MUST BE REWRITTEN BEFORE USE.
 
 from datetime import datetime
@@ -14,21 +13,10 @@ def read_omi_no2(filename, filterinfo=None, includeObsError = False):
     Read OMI data and save important variables to dictionary.
 
     Arguments
-        filename [str]  : TROPOMI netcdf data file to read
+        filename [str]  : OMI netcdf data file to read
 
     Returns
-        met   [dict] : Dictionary of important variables from TROPOMI:
-                            - species
-                            - Latitude
-                            - Longitude
-                            - QA value
-                            - UTC time
-                            - Averaging kernel
-                            - Prior profile
-                            - Dry air subcolumns
-                            - Latitude bounds
-                            - Longitude bounds
-                            - Vertical pressure profile
+        met   [dict] : Dictionary of important variables from OMI
     """
 
     if filename=="test":
@@ -37,8 +25,31 @@ def read_omi_no2(filename, filterinfo=None, includeObsError = False):
     # Initialize list for OMI data
     met = {}
     
-    # Store species, QA, lat, lon, time, averaging kernel
     data = xr.open_dataset(filename, group=group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
+    met['NO2'] = data['ColumnAmountNO2Trop'].values #Dimensions: time, Xtrack
+    met['AmfTrop'] = data['AmfTrop'].values
+    met['ScatteringWeight'] = data['ScatteringWeight'].values
+    met['ScatteringWtPressure'] = data['ScatteringWtPressure'].values
+    met['CloudRadianceFraction'] = data['CloudRadianceFraction'].values*0.001 # scale factor=0.001
+    met['TerrainReflectivity'] = data['TerrainReflectivity'].values*0.001 # scale factor=0.001
+    met['VcdQualityFlags'] = data['VcdQualityFlags'].values
+    if includeObsError:
+        met['Error'] = data['ColumnAmountNO2TropStd'].values #Dimensions: time, Xtrack
+    data.close()
+
+    data = xr.open_dataset(filename, group=group='HDFEOS/SWATHS/ColumnAmountNO2/Geolocation Fields/')
+    met['longitude'] = data['Longitude'].values
+    met['latitude'] = data['Latitude'].values
+    met['utctime'] = data['Time'].values 
+    met['SolarZenithAngle'] = data['SolarZenithAngle'].values 
+    met['FoV75CornerLongitude'] = data['FoV75CornerLongitude'].values 
+    met['FoV75CornerLatitude'] = data['FoV75CornerLatitude'].values 
+    data.close()
+
+    if filterinfo is not None:
+        met = obsop.apply_filters(met,filterinfo)
+
+    return met
 
 
 FROM VIRAL 
