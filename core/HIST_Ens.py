@@ -1,6 +1,8 @@
 import numpy as np
 from glob import glob
+#USER: if you have implemented a new observation operator, import the Python file here (must be stored in core folder). Then scroll down to "makeObsTrans" and add the operator.
 import tropomi_tools as tt
+import omi_tools as ot
 import scipy.linalg as la
 import toolbox as tx 
 import settings_interface as si 
@@ -58,10 +60,15 @@ class HIST_Ens(object):
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
+		#USER: if you have implemented a new observation operator, plug it in here following the pattern established already.
 		for spec in list(self.observed_species.keys()):
 			if self.spc_config['OBS_TYPE'][spec]=='TROPOMI':
 				self.OBS_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
-				self.obsSpecies.append(spec)
+			elif self.spc_config['OBS_TYPE'][spec]=='OMI':
+				self.OBS_TRANSLATOR[spec] = ot.OMI_Translator(self.verbose)
+			else:
+				raise ValueError(f'Observer type {self.spc_config['OBS_TYPE'][spec]} not recongized')
+			self.obsSpecies.append(spec)
 	def getObsData(self):
 		self.OBS_DATA = {}
 		for spec in self.obsSpecies:
