@@ -81,6 +81,9 @@ def apply_filters(OBSDATA,filterinfo):
 			to_keep = functools.reduce(np.intersect1d, to_keep)
 		keys = list(OBSDATA.keys())
 		for key in keys:
+			if "TO_SKIP" in filter_families:
+				if key in filterinfo["TO_SKIP"]:
+					continue
 			if len(np.shape(OBSDATA[key])) == 1:
 				OBSDATA[key] = OBSDATA[key][to_keep]
 			else:

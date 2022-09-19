@@ -150,6 +150,7 @@ class OMI_Translator(obsop.Observation_Translator):
                 filterinfo["OMI_NO2"] = [float(self.spc_config['OMI_NO2_filter_sza']),float(self.spc_config['OMI_NO2_filter_cloud_radiance_frac']),float(self.spc_config['OMI_NO2_filter_surface_albedo'])]
         if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
             filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
+        filterinfo['TO_SKIP'] = ['ScatteringWtPressure']
         for obs in obs_list:
             omi_obs.append(read_omi(obs,species,filterinfo,includeObsError=includeObsError))
         met = {}
