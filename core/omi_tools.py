@@ -1,5 +1,3 @@
-#THIS FILE IS OUT OF DATE AND BASED ON AN OLD VERSION OF CHEEREIO; MUST BE REWRITTEN BEFORE USE.
-
 from datetime import datetime,timedelta
 from glob import glob
 import pickle
@@ -75,7 +73,7 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
 
 #Clear swath edges, clear bad retrievals (bad QA), and flatten as CHEEREIO expects. Finally, drop nan rows. 
 def clearEdgesFilterByQAAndFlatten(met):
-    to_remove = (met['VCDQualityFlags'] != 0) | ((met['XTrackQualityFlags'] != 0) & (met['XTrackQualityFlags'] != 255))
+    to_remove = (met['VcdQualityFlags'] != 0) | ((met['XTrackQualityFlags'] != 0) & (met['XTrackQualityFlags'] != 255))
     met_toreturn = {}
     to_keep = []
     for key in met:
@@ -132,7 +130,7 @@ class OMI_Translator(obsop.Observation_Translator):
         filterinfo = {}
         if species=='NO2':
             if (self.spc_config['Extensions']['OMI_NO2']=="True") and (self.spc_config['OMI_NO2_FILTERS']=="True"): #Check first if extension is on before doing the OMI filtering
-                filterinfo["OMI_NO2"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+                filterinfo["OMI_NO2"] = [float(self.spc_config['OMI_NO2_filter_sza']),float(self.spc_config['OMI_NO2_filter_cloud_radiance_frac']),float(self.spc_config['OMI_NO2_filter_surface_albedo'])]
         if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
             filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
         for obs in obs_list:
