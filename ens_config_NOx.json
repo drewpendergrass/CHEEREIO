@@ -89,7 +89,7 @@
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "True",
-	"SaveArea" : "True",
+	"SaveArea" : "False",
 	"HistorySpeciesConcToSave" : [
 		"NO",
 		"NO2",
@@ -103,9 +103,9 @@
 		"Met_PEDGE"
 	],
 	"HistoryStateMetToSave" : [
-		"Met_AD",
 		"Met_TropLev",
-		"Met_BXHEIGHT"
+		"Met_BXHEIGHT",
+		"Met_T"
 	],
 	"comment012" : "******************************************************************************",
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
