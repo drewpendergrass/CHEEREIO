@@ -25,7 +25,7 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
     # Initialize list for OMI data
     met = {}
     
-    data = xr.open_dataset(filename, group=group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
+    data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
     if species=="NO2":
         met['NO2'] = data['ColumnAmountNO2Trop'].values #Dimensions: time, Xtrack
         met['AmfTrop'] = data['AmfTrop'].values
@@ -38,7 +38,7 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
             met['Error'] = data['ColumnAmountNO2TropStd'].values #Dimensions: time, Xtrack
     data.close()
 
-    data = xr.open_dataset(filename, group=group='HDFEOS/SWATHS/ColumnAmountNO2/Geolocation Fields/')
+    data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Geolocation Fields/')
     if species=="NO2":
         met['longitude'] = data['Longitude'].values
         met['latitude'] = data['Latitude'].values
