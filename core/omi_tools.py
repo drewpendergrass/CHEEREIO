@@ -28,8 +28,8 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
     if species=="NO2":
         met['NO2'] = data['ColumnAmountNO2Trop'].values #Dimensions: time, Xtrack
         met['AmfTrop'] = data['AmfTrop'].values
-        met['ScatteringWeight'] = data['ScatteringWeight'].values
-        met['ScatteringWtPressure'] = data['ScatteringWtPressure'].values
+        met['ScatteringWeight'] = data['ScatteringWeight'].values #Dimension: time, Xtrack, pressure level
+        met['ScatteringWtPressure'] = data['ScatteringWtPressure'].values #Dimension: pressure level
         met['CloudRadianceFraction'] = data['CloudRadianceFraction'].values*0.001 # scale factor=0.001
         met['TerrainReflectivity'] = data['TerrainReflectivity'].values*0.001 # scale factor=0.001
         met['VcdQualityFlags'] = data['VcdQualityFlags'].values
@@ -73,23 +73,37 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
 
 #Clear swath edges, clear bad retrievals (bad QA), and flatten as CHEEREIO expects. Finally, drop nan rows. 
 def clearEdgesFilterByQAAndFlatten(met):
-    to_remove = (met['VcdQualityFlags'] != 0) | ((met['XTrackQualityFlags'] != 0) & (met['XTrackQualityFlags'] != 255))
+    to_keep_by_flag = (met['VcdQualityFlags'] == 0) & ((met['XTrackQualityFlags'] == 0) | (met['XTrackQualityFlags'] == 255))
     met_toreturn = {}
     to_keep = []
     for key in met:
-        print(key)
+        #Skip flags; already incorporated
         if (key == "VcdQualityFlags") or (key == "XTrackQualityFlags"):
             continue
         temp = met[key]
-        temp[:,0:5] = np.nan #remove swath edges
-        temp[:,55:60] = np.nan
-        temp[to_remove] = np.nan
-        met_toreturn[key] = temp.flatten()
-        #Now we are going to drop Nans across the data; to this end we collect the places where there are no nans
-        to_keep.append(~np.isnan(met_toreturn[key]))
+        #Scattering weights have pressure dimension
+        if key == 'ScatteringWeight':
+            temp[:,0:5,:] = np.nan #remove swath edges
+            temp[:,55:60,:] = np.nan
+            met_toreturn[key] = temp[to_keep_by_flag]
+        #Scattering weight pressure has only pressure dimension; just pass through
+        elif key == 'ScatteringWtPressure':
+            met_toreturn[key] = temp
+        #Everything else handle as normal
+        else:
+            temp[:,0:5] = np.nan #remove swath edges
+            temp[:,55:60] = np.nan
+            met_toreturn[key] = temp[to_keep_by_flag]
+            #Now we are going to drop Nans across the data; to this end we collect the places where there are no nans
+            to_keep.append(~np.isnan(met_toreturn[key]))
     to_keep = functools.reduce(np.intersect1d, to_keep) #Where there are no nans across the data
     for key in met_toreturn:
-        met_toreturn[key] = met_toreturn[key][to_keep] #Subset down to remove nans.
+        if key == "ScatteringWtPressure":
+            continue
+        if key == "ScatteringWeight":
+            met_toreturn[key] = met_toreturn[key][to_keep,:] #Subset down to remove nans.
+        else:
+            met_toreturn[key] = met_toreturn[key][to_keep] #Subset down to remove nans.
     return met_toreturn
     
 
