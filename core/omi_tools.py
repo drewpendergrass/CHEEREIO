@@ -64,10 +64,10 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
 
     data.close()
 
-    #met = clearEdgesFilterByQAAndFlatten(met)
+    met = clearEdgesFilterByQAAndFlatten(met)
 
-    #if filterinfo is not None:
-    #    met = obsop.apply_filters(met,filterinfo)
+    if filterinfo is not None:
+        met = obsop.apply_filters(met,filterinfo)
 
     return met
 
