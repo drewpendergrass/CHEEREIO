@@ -18,8 +18,15 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
         met   [dict] : Dictionary of important variables from OMI
     """
 
+    #Defaults for testing
     if (filename=="test") and (species=="NO2"):
         filename = "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2/2016/01/OMI-Aura_L2-OMNO2_2016m0116t2320-o61202_v003-2019m0819t154726.he5"
+
+    if (filterinfo =="test") and (species=="NO2"):
+        filterinfo = {}
+        filterinfo['MAIN']=[60.0]
+        filterinfo['OMI_NO2']=[80,0.5,0.3]
+        filterinfo['TO_SKIP'] = ['ScatteringWtPressure']
 
     # Initialize list for OMI data
     met = {}
