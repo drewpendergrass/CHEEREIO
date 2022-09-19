@@ -111,10 +111,10 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
-		"NO2_TROPOMI": "NO2"
+		"NO2_OMI": "NO2"
 	},
 	"OBS_TYPE" : {
-		"NO2_TROPOMI":"TROPOMI"
+		"NO2_OMI":"OMI"
 	},
 	"TROPOMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2"
@@ -123,7 +123,7 @@
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"NO2_TROPOMI":"60"
+		"NO2_OMI":"60"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "1",
@@ -169,23 +169,23 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NO2_TROPOMI":"0.1"
+		"NO2_OMI":"0.1"
 	},
 	"OBS_ERROR": {
-		"NO2_TROPOMI":"0.1"
+		"NO2_OMI":"0.1"
 	},
 	"OBS_ERROR_TYPE":{
-		"NO2_TROPOMI":"relative"
+		"NO2_OMI":"relative"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"NO2_TROPOMI":"0.15"
+		"NO2_OMI":"0.15"
 	},
 	"MIN_OBS_ERROR":{
-		"NO2_TROPOMI":"0"
+		"NO2_OMI":"0"
 	},
 	"AV_TO_GC_GRID" : "True",
 	"SUPER_OBSERVATION_FUNCTION":{
-		"CH4_TROPOMI":"default"
+		"NO2_OMI":"default"
 	},
 	"INFLATION_FACTOR": "0.01",
 	"ASSIM_TIME": "24",
@@ -201,7 +201,7 @@
 	"animation_fps_concentrations":"18",
 	"postprocess_save_albedo":"True",
 	"hemco_diags_to_process" : [
-		"EmisCH4_Total"
+		"Emis_NO2"
 	],
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN SETTING EXTENSIONS****************************",
