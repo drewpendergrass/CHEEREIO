@@ -32,7 +32,7 @@
 	"ASSIM_START_DATE" : "20160108",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20160115",
-	"nEnsemble" : "24",
+	"nEnsemble" : "2",
 	"SIMULATE_NATURE" : "false",
 	"verbose":"1",
 	"comment003" : "***************************************************************************",
