@@ -95,7 +95,9 @@ def clearEdgesFilterByQAAndFlatten(met):
             temp[:,55:60] = np.nan
             met_toreturn[key] = temp[to_keep_by_flag]
             #Now we are going to drop Nans across the data; to this end we collect the places where there are no nans
-            to_keep.append(~np.isnan(met_toreturn[key]))
+            #This doesn't work for time, so skip
+            if key != 'utctime':
+                to_keep.append(~np.isnan(met_toreturn[key]))
     to_keep = functools.reduce(np.intersect1d, to_keep) #Where there are no nans across the data
     for key in met_toreturn:
         if key == "ScatteringWtPressure":
