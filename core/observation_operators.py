@@ -114,7 +114,10 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=Fals
 	to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
 		for metcoll in spc_config['HistoryStateMetToSave']:
-			to_return[metcoll] = GC[metcoll].values[t,:,j,i]
+			if len(np.shape(GC[metcoll].values))==3:
+				to_return[metcoll] = GC[metcoll].values[t,j,i]
+			else:
+				to_return[metcoll] = GC[metcoll].values[t,:,j,i]
 	if GC_area is not None:
 		to_return['GC_area']=GC_area.values[j,i]
 	if returninds:

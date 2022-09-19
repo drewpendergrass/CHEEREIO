@@ -5,6 +5,7 @@ import os.path
 import xarray as xr
 import numpy as np
 import observation_operators as obsop
+import scipy.constants as const
 import functools
 
 def read_omi(filename, species, filterinfo=None, includeObsError = False):
@@ -34,6 +35,7 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
     data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
     if species=="NO2":
         met['NO2'] = data['ColumnAmountNO2Trop'].values #Dimensions: time, Xtrack
+        met['NO2_slant'] = data['SlantColumnAmountNO2'].values #Dimensions: time, Xtrack
         met['AmfTrop'] = data['AmfTrop'].values
         met['ScatteringWeight'] = data['ScatteringWeight'].values #Dimension: time, Xtrack, pressure level
         met['ScatteringWtPressure'] = data['ScatteringWtPressure'].values #Dimension: pressure level
@@ -43,6 +45,7 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
         met['XTrackQualityFlags'] = data['XTrackQualityFlags'].values
         if includeObsError:
             met['Error'] = data['ColumnAmountNO2TropStd'].values #Dimensions: time, Xtrack
+            met['Error_slant'] = data['SlantColumnAmountNO2Std'].values #Dimensions: time, Xtrack
     data.close()
 
     data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Geolocation Fields/')
@@ -119,6 +122,11 @@ def clearEdgesFilterByQAAndFlatten(met):
 class OMI_Translator(obsop.Observation_Translator):
     def __init__(self,verbose=1):
         super().__init__(verbose)
+        # pressure to number density conversion factor
+        self.p_to_nd = ( 1.0 / const.R *
+         10**2 * #hPa-> Pa
+         const.value('Avogadro constant') * # mol/m3 -> molec/m3
+         10**(-6)) # molec/m3 -> molec/cm3
     #Save dictionary of dates for later use
     def initialReadDate(self):
         sourcedirs = self.spc_config['OMI_dirs']
@@ -174,44 +182,51 @@ class OMI_Translator(obsop.Observation_Translator):
     def gcCompare(self,specieskey,OMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
         species = self.spc_config['OBSERVED_SPECIES'][specieskey]
         returnStateMet = self.spc_config['SaveStateMet']=='True'
-        if returnStateMet:
-            GC_SPC,GC_P,GC_M,GC_area,i,j,t = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
-        else:
-            GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
-        if species=='CH4':
-            GC_SPC*=1e9 #scale to mol/mol
-        #TROPOMI_ALL setting extension must be on!!
-        memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
-        if memsetting:
-            batchsize = int(self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE'])
-        else:
-            batchsize = None
-        if returnStateMet:
-            GC_on_sat,GC_M_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],GC_M = GC_M, lowmem=memsetting,batchsize=batchsize)
-        else:
-            GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting,batchsize=batchsize)
-            GC_M_on_sat = None
-        GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
-        if self.spc_config['AV_TO_GC_GRID']=="True":
-            superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
-            additional_args_avgGC = {}
-            if doErrCalc:
-                if useObserverError:
-                    additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
-                    additional_args_avgGC['modelTransportError'] = transportError
-                elif prescribed_error is not None:
-                    additional_args_avgGC['prescribed_error'] = prescribed_error
-                    additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
-                if minError is not None:
-                    additional_args_avgGC['minError'] = minError
-                if errorCorr is not None:
-                    additional_args_avgGC['errorCorr'] = errorCorr
-            toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
-        else:
-            toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
-            if doErrCalc and useObserverError:
-                toreturn.addData(err_av=TROPOMI['Error'])
-        return toreturn
+        GC_col_data = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+        GC_SPC = GC_col_data['GC_SPC'] #Species columns at appropriate location/times
+        GC_P = GC_col_data['GC_P'] #Species pressures at appropriate location/times
+        i,j,t = GC_col_data['indices']
+        if species == 'NO2':
+            # Keep GC data only below the tropopause; replace everything else with 0s since it won't count for partial columns. 
+            for ind,troplev in enumerate(GC_col_data['Met_TropLev']):
+                GC_SPC[ind,troplev::] = 0
+            # GEOS-Chem pressure at mid-level
+            GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
+            # NO2 number density (molecules/cm3)
+            GC_SPC_nd=GC_SPC*self.p_to_nd/GC_col_data['Met_T']*GC_P_mid*1e-9
+            # partial coumns (molecules/cm2)
+            NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2
+            #Interpolate OMI scattering weights to GC pressure levels
+            #WRITE ME sw = 
+            # GEOS-Chem VCD
+            GC_VCD=np.nansum(NO2vCol,axis=1)
+            # GEOS-Chem SCD
+            GC_SCD=np.nansum(NO2vCol*sw,axis=1)
+            #GEOS=Chem AMF
+            GC_AMF = GC_SCD / GC_VCD
+            #Recalculate OMI VCD with GC AMF
+            OMI_NO2_VCD = OMI['NO2_slant'] / GC_AMF
+            OMI_NO2_ERROR = OMI['Error_slant'] / GC_AMF
+            if self.spc_config['AV_TO_GC_GRID']=="True":
+                superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+                additional_args_avgGC = {}
+                if doErrCalc:
+                    if useObserverError:
+                        additional_args_avgGC['obsInstrumentError'] = OMI_NO2_ERROR
+                        additional_args_avgGC['modelTransportError'] = transportError
+                    elif prescribed_error is not None:
+                        additional_args_avgGC['prescribed_error'] = prescribed_error
+                        additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+                    if minError is not None:
+                        additional_args_avgGC['minError'] = minError
+                    if errorCorr is not None:
+                        additional_args_avgGC['errorCorr'] = errorCorr
+                toreturn = obsop.averageByGC(i,j,t,GC,GC_VCD,OMI_NO2_VCD,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+            else:
+                toreturn = obsop.ObsData(GC_VCD,OMI_NO2_VCD,OMI['latitude'],OMI['longitude'],OMI['utctime'])
+                if doErrCalc and useObserverError:
+                    toreturn.addData(err_av=OMI_NO2_ERROR)
+            return toreturn
 
 
 
