@@ -38,6 +38,18 @@ def apply_filters(OBSDATA,filterinfo):
 		filter_latitude = filter_data[0]
 		if ~np.isnan(filter_latitude):
 			to_keep.append(np.where(np.abs(OBSDATA['latitude'])<=filter_latitude)[0])
+	if "OMI_NO2" in filter_families:
+		filter_data = filterinfo["OMI_NO2"]
+		filter_sza = filter_data[0]
+		filter_cloud_radiance_frac = filter_data[1]
+		filter_surface_albedo = filter_data[2]
+		if ~np.isnan(filter_sza):
+			to_keep.append(np.where(OBSDATA['SolarZenithAngle']<filter_sza)[0])
+		if ~np.isnan(filter_cloud_radiance_frac):
+			to_keep.append(np.where(OBSDATA['CloudRadianceFraction']<filter_cloud_radiance_frac)[0])
+		if ~np.isnan(filter_surface_albedo):
+			to_keep.append(np.where(OBSDATA['TerrainReflectivity']<filter_surface_albedo)[0])
+
 	if "TROPOMI_CH4" in filter_families:
 		filter_data = filterinfo["TROPOMI_CH4"]
 		filter_blended_albedo = filter_data[0]

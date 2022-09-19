@@ -1,9 +1,6 @@
 {
 	"OMI_NO2_FILTERS" : "True",
-	"OMI_NO2_filter_blended_albedo" : "0.75",
-	"OMI_NO2_filter_swir_albedo_low" : "0.05",
-	"OMI_NO2_filter_swir_albedo_high" : "0.4",
-	"OMI_NO2_filter_winter_lat" : "nan",
-	"OMI_NO2_filter_roughness" : "60",
-	"OMI_NO2_filter_swir_aot" : "0.1"
+	"OMI_NO2_filter_sza" : "80",
+	"OMI_NO2_filter_cloud_radiance_frac" : "0.5",
+	"OMI_NO2_filter_surface_albedo" : "0.3",
 }
