@@ -77,6 +77,7 @@ def clearEdgesFilterByQAAndFlatten(met):
     met_toreturn = {}
     to_keep = []
     for key in met:
+        print(key)
         if (key == "VcdQualityFlags") or (key == "XTrackQualityFlags"):
             continue
         temp = met[key]
