@@ -2,5 +2,5 @@
 	"OMI_NO2_FILTERS" : "True",
 	"OMI_NO2_filter_sza" : "80",
 	"OMI_NO2_filter_cloud_radiance_frac" : "0.5",
-	"OMI_NO2_filter_surface_albedo" : "0.3",
+	"OMI_NO2_filter_surface_albedo" : "0.3"
 }
