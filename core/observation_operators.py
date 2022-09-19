@@ -111,7 +111,7 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=Fals
 	i,j,t = nearest_loc(GC,OBSDATA)
 	to_return = {}
 	to_return['GC_SPC'] = GC[f'SpeciesConc_{species}'].values[t,:,j,i]
-	to_return['GC_M'] = GC[f'Met_PEDGE'].values[t,:,j,i]
+	to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
 		for metcoll in spc_config['HistoryStateMetToSave']:
 			to_return[metcoll] = GC[metcoll].values[t,:,j,i]
