@@ -107,17 +107,18 @@ def nearest_loc(GC,OBSDATA):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,OBSDATA,species,returninds=False,returnStateMet=False,GC_area=None):
+def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=False,GC_area=None):
 	i,j,t = nearest_loc(GC,OBSDATA)
-	to_return = [GC[f'SpeciesConc_{species}'].values[t,:,j,i],GC[f'Met_PEDGE'].values[t,:,j,i]]
+	to_return = {}
+	to_return['GC_SPC'] = GC[f'SpeciesConc_{species}'].values[t,:,j,i]
+	to_return['GC_M'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
-		to_return.append(GC[f'Met_AD'].values[t,:,j,i])
+		for metcoll in spc_config['HistoryStateMetToSave']:
+			to_return[metcoll] = GC[metcoll].values[t,:,j,i]
 	if GC_area is not None:
-		to_return.append(GC_area.values[j,i])
-	else:
-		to_return.append(None)
+		to_return['GC_area']=GC_area.values[j,i]
 	if returninds:
-		to_return = to_return + [i,j,t]
+		to_return['indices'] = [i,j,t]
 	return to_return
 
 #No index, puts loc at GC grid values

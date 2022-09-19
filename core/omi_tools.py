@@ -162,22 +162,22 @@ class OMI_Translator(obsop.Observation_Translator):
             omi_obs.append(read_omi(obs,species,filterinfo,includeObsError=includeObsError))
         met = {}
         for key in list(omi_obs[0].keys()):
-            met[key] = np.concatenate([metval[key] for metval in omi_obs])
+            #ScatteringWtPressure is constant; no need to concat
+            if key == 'ScatteringWtPressure':
+                if len(omi_obs)>0:
+                    met[key] = omi_obs[0][key]
+                else:
+                    met[key] = None
+            else:
+                met[key] = np.concatenate([metval[key] for metval in omi_obs])
         return met
-    def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+    def gcCompare(self,specieskey,OMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
         species = self.spc_config['OBSERVED_SPECIES'][specieskey]
-        if species=='CH4':
-            TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-            synthetic_partial_columns = False
-        elif species=='NO2':
-            TROP_PRIOR=None
-            synthetic_partial_columns = True
-        TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
         returnStateMet = self.spc_config['SaveStateMet']=='True'
         if returnStateMet:
-            GC_SPC,GC_P,GC_M,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+            GC_SPC,GC_P,GC_M,GC_area,i,j,t = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
         else:
-            GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+            GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
         if species=='CH4':
             GC_SPC*=1e9 #scale to mol/mol
         #TROPOMI_ALL setting extension must be on!!

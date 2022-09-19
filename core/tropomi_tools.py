@@ -133,7 +133,7 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 
 
 #This seems to be the memory bottleneck
-def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False,batchsize=None):
+def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
@@ -150,81 +150,27 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, GC_M = None,lowmem=False,batch
 	#This is accomplished by iterating over the nobs axis.
 	#Default, higher memory calculation exploits vectorization for speed
 	#But can result in enormous matrices for some experiments. 
-	if lowmem:
-		satshape = np.shape(sat_edges)
-		finalshape = (satshape[0],satshape[1]-1)
-		if GC_M is not None:
-			GC_M_on_sat = np.zeros(finalshape)
-		GC_on_sat = np.zeros(finalshape)
-		if (batchsize is not None) and (batchsize>1):
-			numiter = int(np.ceil(np.shape(GC_edges)[0]/batchsize))
-			for i in range(numiter):
-				startvalue = int(i*batchsize)
-				endvalue = int(np.min((np.shape(GC_edges)[0],(i+1)*batchsize)))
-				# Define vectors that give the "low" and "high" pressure
-				# values for each GEOS-Chem and satellite layer.
-				GC_lo = GC_edges[startvalue:endvalue, 1:][:, :, None]
-				GC_hi = GC_edges[startvalue:endvalue, :-1][:, :, None]
-				sat_lo = sat_edges[startvalue:endvalue, 1:][:, None, :]
-				sat_hi = sat_edges[startvalue:endvalue, :-1][:, None, :]
-				idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
-				GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
-				GC_to_sat[~idx] = 0
-				# Now map the GC CH4 to the satellite levels
-				GC_on_sat_subset = (GC_to_sat*GC_SPC[startvalue:endvalue, :, None]).sum(axis=1)
-				GC_on_sat_subset = GC_on_sat_subset/GC_to_sat.sum(axis=1)
-				GC_on_sat[startvalue:endvalue,:] = GC_on_sat_subset
-				if GC_M is not None:
-					GC_M_on_sat_subset = (GC_to_sat*GC_M[startvalue:endvalue, :, None]).sum(axis=1)
-					GC_M_on_sat_subset = GC_M_on_sat_subset/GC_to_sat.sum(axis=1)
-					GC_M_on_sat[startvalue:endvalue,:] = GC_M_on_sat_subset
-		else:
-			for i in range(np.shape(GC_edges)[0]):
-				# Define vectors that give the "low" and "high" pressure
-				# values for each GEOS-Chem and satellite layer.
-				GC_lo = GC_edges[i, 1:][:, None]
-				GC_hi = GC_edges[i, :-1][:, None]
-				sat_lo = sat_edges[i, 1:][None, :]
-				sat_hi = sat_edges[i, :-1][None, :]
-				idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
-				GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
-				GC_to_sat[~idx] = 0
-				# Now map the GC CH4 to the satellite levels
-				GC_on_sat_subset = (GC_to_sat*GC_SPC[i, :, None]).sum(axis=0)
-				GC_on_sat_subset = GC_on_sat_subset/GC_to_sat.sum(axis=0)
-				GC_on_sat[i,:] = GC_on_sat_subset
-				if GC_M is not None:
-					GC_M_on_sat_subset = (GC_to_sat*GC_M[i, :, None]).sum(axis=0)
-					GC_M_on_sat_subset = GC_M_on_sat_subset/GC_to_sat.sum(axis=0)
-					GC_M_on_sat[i,:] = GC_M_on_sat_subset
-	else:
-		# Define vectors that give the "low" and "high" pressure
-		# values for each GEOS-Chem and satellite layer.
-		GC_lo = GC_edges[:, 1:][:, :, None]
-		GC_hi = GC_edges[:, :-1][:, :, None]
-		sat_lo = sat_edges[:, 1:][:, None, :]
-		sat_hi = sat_edges[:, :-1][:, None, :]
-		# Get the indices where the GC-to-satellite mapping, which is
-		# a nobs x ngc x nsat matrix, is non-zero
-		idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
-		# Find the fraction of each GC level that contributes to each
-		# TROPOMI level. We should first divide (to normalize) and then
-		# multiply (to apply the map to the column) by the GC pressure
-		# difference, but we exclude this (since it's the same as x1).
-		GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
-		GC_to_sat[~idx] = 0
-		# Now map the GC CH4 to the satellite levels
-		GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
-		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
-		if GC_M is not None:
-			GC_M_on_sat = (GC_to_sat*GC_M[:, :, None]).sum(axis=1)
-			GC_M_on_sat = GC_M_on_sat/GC_to_sat.sum(axis=1)
-	if GC_M is not None:
-		return [GC_on_sat,GC_M_on_sat]
-	else:
-		return GC_on_sat
+	# Define vectors that give the "low" and "high" pressure
+	# values for each GEOS-Chem and satellite layer.
+	GC_lo = GC_edges[:, 1:][:, :, None]
+	GC_hi = GC_edges[:, :-1][:, :, None]
+	sat_lo = sat_edges[:, 1:][:, None, :]
+	sat_hi = sat_edges[:, :-1][:, None, :]
+	# Get the indices where the GC-to-satellite mapping, which is
+	# a nobs x ngc x nsat matrix, is non-zero
+	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+	# Find the fraction of each GC level that contributes to each
+	# TROPOMI level. We should first divide (to normalize) and then
+	# multiply (to apply the map to the column) by the GC pressure
+	# difference, but we exclude this (since it's the same as x1).
+	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+	GC_to_sat[~idx] = 0
+	# Now map the GC CH4 to the satellite levels
+	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
+	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
+	return GC_on_sat
 
-def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_sat=None,GC_area=None,filt=None):
+def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None):
 	'''
 	Apply the averaging kernel
 	Inputs:
@@ -238,11 +184,6 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,GC_M_on_s
 		filt = np.ones(sat_avker.shape[1])
 	else:
 		filt = filt.astype(int)
-	if GC_M_on_sat is not None: #Take partial columns, which also involves the area and air mass
-		GC_SPC = GC_SPC/0.02897 #convert to mol/kg air
-		GC_SPC = GC_SPC*GC_M_on_sat #Convert to mol of interest per box
-		GC_area = GC_area.reshape((len(GC_area),1)) #reshape to make conformable
-		GC_SPC = GC_SPC/GC_area #Convert to mol of interest per box per m2, which is TROPOMI dimensions
 	if sat_prior is None:
 		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
 	else:
@@ -310,24 +251,14 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			synthetic_partial_columns = True
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
-		if returnStateMet:
-			GC_SPC,GC_P,GC_M,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
-		else:
-			GC_SPC,GC_P,GC_area,i,j,t = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+		GC_col_data = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+		GC_SPC = GC_col_data['GC_SPC']
+		GC_P = GC_col_data['GC_P']
+		i,j,t = GC_col_data['indices']
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
-		#TROPOMI_ALL setting extension must be on!!
-		memsetting = self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC'] == 'True'
-		if memsetting:
-			batchsize = int(self.spc_config['LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE'])
-		else:
-			batchsize = None
-		if returnStateMet:
-			GC_on_sat,GC_M_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],GC_M = GC_M, lowmem=memsetting,batchsize=batchsize)
-		else:
-			GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],lowmem=memsetting,batchsize=batchsize)
-			GC_M_on_sat = None
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR,GC_M_on_sat,GC_area)
+		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
 		if self.spc_config['AV_TO_GC_GRID']=="True":
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
