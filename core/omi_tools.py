@@ -127,7 +127,7 @@ class OMI_Translator(obsop.Observation_Translator):
             sourcedir = sourcedirs[key]
             obs_list = glob(f'{sourcedir}/**/*.he5', recursive=True)
             obs_list.sort()
-            OMI_date_dict[key] = [datetime.strptime(obs[18:32], "%Ym%m%dt%H%M") for obs in obs_list]
+            OMI_date_dict[key] = [datetime.strptime(obs.split('/')[-1][18:32], "%Ym%m%dt%H%M") for obs in obs_list]
         with open(f"{self.scratch}/omi_dates.pickle", 'wb') as handle:
             pickle.dump(OMI_date_dict, handle)
         return OMI_date_dict
