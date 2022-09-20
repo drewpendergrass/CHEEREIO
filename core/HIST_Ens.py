@@ -132,7 +132,10 @@ class HIST_Ens(object):
 				prescribed_error = errval
 				prescribed_error_type = errtype
 			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
-			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,saveAlbedo=self.saveAlbedo,doErrCalc=True,useObserverError=useObserverError,prescribed_error=prescribed_error,prescribed_error_type=prescribed_error_type,transportError = transportError, errorCorr = errcorr,minError=minerror)
+			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
+			if self.saveAlbedo:
+				gccompare_kwargs["saveAlbedo"] = self.saveAlbedo
+			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,**gccompare_kwargs)
 			firstcol = obsdata_toreturn[species].getGCCol()
 			shape2D = np.zeros(2)
 			shape2D[0] = len(firstcol)
