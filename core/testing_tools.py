@@ -6,8 +6,14 @@ import settings_interface as si
 import xarray as xr
 
 #Makes an assimilator object
-def makeAssimilator():
-	a = Assimilator('20190108_0000',2,1) #we aren't using ens or core num here.
+def makeAssimilator(date=None):
+	if date is not None:
+		if date == 2016:
+			a = Assimilator('20160108_0000',2,1) #we aren't using ens or core num here.
+		else:
+			a = Assimilator(date,2,1)
+	else:
+		a = Assimilator('20190108_0000',2,1)
 	return a
 
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
