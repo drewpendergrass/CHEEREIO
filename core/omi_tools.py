@@ -192,7 +192,7 @@ class OMI_Translator(obsop.Observation_Translator):
                 GC_SPC[ind,int(troplev):] = np.nan
             # GEOS-Chem pressure at mid-level
             GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
-            GC_P_mid = GC_P_mid[0:-1] #last element can be dropped; now conformable.
+            GC_P_mid = GC_P_mid[:,0:-1] #last element can be dropped; now conformable.
             # NO2 number density (molecules/cm3)
             GC_SPC_nd=GC_SPC*self.p_to_nd/GC_col_data['Met_T']*GC_P_mid*1e-9
             # partial coumns (molecules/cm2)
