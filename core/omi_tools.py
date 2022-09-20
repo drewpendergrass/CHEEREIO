@@ -189,7 +189,7 @@ class OMI_Translator(obsop.Observation_Translator):
         if species == 'NO2':
             # Keep GC data only below the tropopause; replace everything else with nans since it won't count for partial columns. 
             for ind,troplev in enumerate(GC_col_data['Met_TropLev']):
-                GC_SPC[ind,troplev:] = np.nan
+                GC_SPC[ind,int(troplev):] = np.nan
             # GEOS-Chem pressure at mid-level
             GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
             # NO2 number density (molecules/cm3)
