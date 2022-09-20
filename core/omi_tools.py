@@ -181,7 +181,7 @@ class OMI_Translator(obsop.Observation_Translator):
     def gcCompare(self,specieskey,OMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
         species = self.spc_config['OBSERVED_SPECIES'][specieskey]
         returnStateMet = self.spc_config['SaveStateMet']=='True'
-        GC_col_data = obsop.getGCCols(GC,OMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+        GC_col_data = obsop.getGCCols(GC,OMI,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
         GC_SPC = GC_col_data['GC_SPC'] #Species columns at appropriate location/times
         GC_P = GC_col_data['GC_P'] #Species pressures at appropriate location/times
         i,j,t = GC_col_data['indices']

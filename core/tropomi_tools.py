@@ -251,7 +251,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			synthetic_partial_columns = True
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
-		GC_col_data = obsop.getGCCols(GC,TROPOMI,species,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+		GC_col_data = obsop.getGCCols(GC,TROPOMI,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		GC_SPC = GC_col_data['GC_SPC']
 		GC_P = GC_col_data['GC_P']
 		i,j,t = GC_col_data['indices']
