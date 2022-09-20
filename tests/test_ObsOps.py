@@ -6,6 +6,7 @@ import pandas as pd
 import json
 sys.path.append('../core/')
 import observation_operators as obsop
+import settings_interface as si
 import tropomi_tools as tt
 import testing_tools
 
@@ -25,9 +26,11 @@ def testGCindexing():
 
 #test that we get the correct GC columns for a given set of observations
 def testGetGCCols():
+	testing_tools.setupPytestSettings('methane')
 	GC = testing_tools.makeMiniFakeDataSet()
+	spc_config = si.getSpeciesConfig()
 	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
-	results,_,_ = obsop.getGCCols(GC,OBSDATA,'TEST')
+	results,_,_ = obsop.getGCCols(GC,OBSDATA,'TEST',spc_config)
 	results_level0 = results[:,0]
 	#on the lat/lon grid at level 0, time zero, we get 5 (latind = 1 ==> second row. lonind = 2 ==> third column). 
 	#Advance by 27 per timestep.
