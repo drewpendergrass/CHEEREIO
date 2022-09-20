@@ -67,7 +67,7 @@ class HIST_Ens(object):
 			elif self.spc_config['OBS_TYPE'][spec]=='OMI':
 				self.OBS_TRANSLATOR[spec] = ot.OMI_Translator(self.verbose)
 			else:
-				raise ValueError(f'Observer type {self.spc_config['OBS_TYPE'][spec]} not recongized')
+				raise ValueError(f'Observer type {self.spc_config["OBS_TYPE"][spec]} not recongized')
 			self.obsSpecies.append(spec)
 	def getObsData(self):
 		self.OBS_DATA = {}
