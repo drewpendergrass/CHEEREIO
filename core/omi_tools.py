@@ -200,7 +200,7 @@ class OMI_Translator(obsop.Observation_Translator):
             #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
             sw = np.zeros(np.shape(GC_P_mid))
             for i in range(np.shape(OMI['ScatteringWtPressure'])[0]):
-                f = interp1d(OMI['ScatteringWtPressure'][i,:],OMI['ScatteringWeight'])
+                f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:])
                 sw[i,:] = f(GC_P_mid[i,:])
             # GEOS-Chem VCD
             GC_VCD=np.nansum(NO2vCol,axis=1)
