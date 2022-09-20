@@ -36,7 +36,6 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
     data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Data Fields/')
     if species=="NO2":
         met['NO2'] = data['ColumnAmountNO2Trop'].values #Dimensions: time, Xtrack
-        met['NO2_slant'] = data['SlantColumnAmountNO2'].values #Dimensions: time, Xtrack
         met['AmfTrop'] = data['AmfTrop'].values
         met['ScatteringWeight'] = data['ScatteringWeight'].values #Dimension: time, Xtrack, pressure level
         met['ScatteringWtPressure'] = data['ScatteringWtPressure'].values #Dimension: pressure level
@@ -46,7 +45,6 @@ def read_omi(filename, species, filterinfo=None, includeObsError = False):
         met['XTrackQualityFlags'] = data['XTrackQualityFlags'].values
         if includeObsError:
             met['Error'] = data['ColumnAmountNO2TropStd'].values #Dimensions: time, Xtrack
-            met['Error_slant'] = data['SlantColumnAmountNO2Std'].values #Dimensions: time, Xtrack
     data.close()
 
     data = xr.open_dataset(filename, group='HDFEOS/SWATHS/ColumnAmountNO2/Geolocation Fields/')
@@ -207,9 +205,8 @@ class OMI_Translator(obsop.Observation_Translator):
             GC_SCD=np.nansum(NO2vCol*sw,axis=1)
             #GEOS=Chem AMF
             GC_AMF = GC_SCD / GC_VCD
-            #Recalculate OMI VCD with GC AMF
-            OMI_NO2_VCD = OMI['NO2_slant'] / GC_AMF
-            OMI_NO2_ERROR = OMI['Error_slant'] / GC_AMF
+            #OMI SCD in the troposphere we back out using the AMF
+            OMI_SCD = OMI['AmfTrop'] * OMI['NO2']
             if self.spc_config['AV_TO_GC_GRID']=="True":
                 superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
                 additional_args_avgGC = {}
@@ -224,9 +221,9 @@ class OMI_Translator(obsop.Observation_Translator):
                         additional_args_avgGC['minError'] = minError
                     if errorCorr is not None:
                         additional_args_avgGC['errorCorr'] = errorCorr
-                toreturn = obsop.averageByGC(i,j,t,GC,GC_VCD,OMI_NO2_VCD,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+                toreturn = obsop.averageByGC(i,j,t,GC,GC_SCD,OMI_SCD,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
             else:
-                toreturn = obsop.ObsData(GC_VCD,OMI_NO2_VCD,OMI['latitude'],OMI['longitude'],OMI['utctime'])
+                toreturn = obsop.ObsData(GC_SCD,OMI_SCD,OMI['latitude'],OMI['longitude'],OMI['utctime'])
                 if doErrCalc and useObserverError:
                     toreturn.addData(err_av=OMI_NO2_ERROR)
             return toreturn
