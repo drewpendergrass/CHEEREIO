@@ -199,9 +199,6 @@ class OMI_Translator(obsop.Observation_Translator):
             NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2
             #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
             sw = np.zeros(np.shape(GC_P_mid))
-            print(OMI['ScatteringWtPressure'])
-            print(OMI['ScatteringWeight'][0,:])
-            print(GC_P_mid[0,:])
             for i in range(np.shape(OMI['ScatteringWtPressure'])[0]):
                 f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:],bounds_error=False, fill_value=0)
                 sw[i,:] = f(GC_P_mid[i,:])
