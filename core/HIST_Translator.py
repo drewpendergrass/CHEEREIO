@@ -62,7 +62,7 @@ class HIST_Translator(object):
 	def reduceCombinedHistToSpecies(self,combinedHist,species):
 		for spc in self.spc_config['HistorySpeciesConcToSave']:
 			if spc != species:
-				combinedHist = combinedHist.drop_vars(spc)
+				combinedHist = combinedHist.drop_vars(f'SpeciesConc_{spc}')
 		return combinedHist
 	def getArea(self):
 		specconc_list=self.globSubDir(self.timeperiod,useLevelEdge=False,useStateMet=False)
