@@ -6,6 +6,7 @@ import xarray as xr
 import numpy as np
 import observation_operators as obsop
 import scipy.constants as const
+from scipy.interpolate import interp1d
 import functools
 
 def read_omi(filename, species, filterinfo=None, includeObsError = False):
@@ -186,10 +187,11 @@ class OMI_Translator(obsop.Observation_Translator):
         GC_SPC = GC_col_data['GC_SPC'] #Species columns at appropriate location/times
         GC_P = GC_col_data['GC_P'] #Species pressures at appropriate location/times
         i,j,t = GC_col_data['indices']
+        #Thanks to Viral Shah for his great help in the NO2 operator code.
         if species == 'NO2':
-            # Keep GC data only below the tropopause; replace everything else with 0s since it won't count for partial columns. 
+            # Keep GC data only below the tropopause; replace everything else with nans since it won't count for partial columns. 
             for ind,troplev in enumerate(GC_col_data['Met_TropLev']):
-                GC_SPC[ind,troplev::] = 0
+                GC_SPC[ind,troplev::] = np.nan
             # GEOS-Chem pressure at mid-level
             GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
             # NO2 number density (molecules/cm3)
@@ -197,7 +199,8 @@ class OMI_Translator(obsop.Observation_Translator):
             # partial coumns (molecules/cm2)
             NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2
             #Interpolate OMI scattering weights to GC pressure levels
-            #WRITE ME sw = 
+            f = interp1D(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'])
+            sw = f(GC_P_mid)
             # GEOS-Chem VCD
             GC_VCD=np.nansum(NO2vCol,axis=1)
             # GEOS-Chem SCD
