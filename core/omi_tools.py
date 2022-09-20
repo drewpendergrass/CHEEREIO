@@ -197,9 +197,11 @@ class OMI_Translator(obsop.Observation_Translator):
             GC_SPC_nd=GC_SPC*self.p_to_nd/GC_col_data['Met_T']*GC_P_mid*1e-9
             # partial coumns (molecules/cm2)
             NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2
-            #Interpolate OMI scattering weights to GC pressure levels
-            f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'])
-            sw = f(GC_P_mid)
+            #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
+            sw = np.zeros(np.shape(GC_P_mid))
+            for i in range(np.shape(OMI['ScatteringWtPressure'])[0]):
+                f = interp1d(OMI['ScatteringWtPressure'][i,:],OMI['ScatteringWeight'])
+                sw[i,:] = f(GC_P_mid[i,:])
             # GEOS-Chem VCD
             GC_VCD=np.nansum(NO2vCol,axis=1)
             # GEOS-Chem SCD
