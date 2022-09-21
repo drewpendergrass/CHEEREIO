@@ -1,4 +1,6 @@
 from Assimilator import Assimilator
+from HIST_Translator import HIST_Translator
+from datetime import date,datetime,timedelta
 import numpy as np
 import pandas as pd
 import json
@@ -81,6 +83,35 @@ def makeMiniFakeObsData(latlocs,lonlocs,ntime):
 		obsdata['longitude'] = np.append(obsdata['longitude'],np.repeat(lonloc,ntime))
 		obsdata['utctime'] = np.append(obsdata['utctime'],pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values)
 	return obsdata
+
+#Creates the necessary GC object and OBS dictionary to feed into GCCompare. Requires a species key and an ObsOp object. Defaults to current ensemble settings.
+def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge=None,useStateMet=None):
+	spc_config = si.getSpeciesConfig()
+	#HANDLE DEFAULTS
+	#Default to first directory in current ensemble
+	if directory is None:
+		directory = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs/{spc_config['RUN_NAME']}_0001/"
+	#Default to last time in INPUT_GEOS_TEMP
+	if timestamp is None:
+		with open(f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch/INPUT_GEOS_TEMP") as f:
+			for line in f:
+				pass
+			timestamp = line
+	#For useLevelEdge and useStateMet, just default to the settings file
+	if useLevelEdge is None:
+		useLevelEdge = spc_config['SaveLevelEdgeDiags']=='True'
+	if useStateMet is None:
+		useStateMet = spc_config['SaveStateMet']=='True'
+	endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
+	ASSIM_TIME = self.spc_config['ASSIM_TIME']
+	delta = timedelta(hours=int(ASSIM_TIME))
+	starttime = endtime-delta
+	timeperiod = (starttime,endtime)
+	ht = HIST_Translator(directory, timeperiod,verbose=1)
+	hist4D_allspecies = ht.combineHist(useLevelEdge,useStateMet)
+	hist4D = ht.reduceCombinedHistToSpecies(hist4D_allspecies,spc_config['OBSERVED_SPECIES'][specieskey])
+	OBS = obs_op.getObservations(specieskey,timeperiod)
+	return
 
 #Walks through with extensive print statements an assimilation cycle
 def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California for 2x2.5, arbitrary; if you're in 4x5, 30,19 puts you in the southeast US
