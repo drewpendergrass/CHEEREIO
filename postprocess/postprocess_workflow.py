@@ -22,13 +22,11 @@ postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
 emisvec = list(data['CONTROL_VECTOR_EMIS'].keys())
-START_DATE=datetime.strptime(data['START_DATE'], "%Y%m%d")
-ASSIM_START_DATE=datetime.strptime(data['ASSIM_START_DATE'], "%Y%m%d")
-endtime=datetime.strptime(data['END_DATE'], "%Y%m%d")
+POSTPROCESS_START_DATE=datetime.strptime(data['POSTPROCESS_START_DATE'], "%Y%m%d")
+POSTPROCESS_END_DATE=datetime.strptime(data['POSTPROCESS_END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
 delta = timedelta(hours=int(ASSIM_TIME))
-starttime = START_DATE
-timeperiod = (starttime,endtime)
+timeperiod = (POSTPROCESS_START_DATE,POSTPROCESS_END_DATE)
 avtogcgrid = data['AV_TO_GC_GRID']=="True"
 useLevelEdge=data['SaveLevelEdgeDiags']=="True"
 useStateMet=data['SaveStateMet']=="True"
@@ -38,13 +36,10 @@ useControl=data['DO_CONTROL_RUN']=="true"
 print('Starting scale factor postprocessing.')
 if len(emisvec) > 0:
 	if not exists(f'{pp_dir}/{emisvec[0]}_SCALEFACTOR.nc'):
-		pt.combineScaleFactors(ens_dir,pp_dir)
 		print('Scale factor postprocessing file not detected; generating now.')
+		pt.combineScaleFactors(ens_dir,pp_dir,timeperiod)
 	else:
-		print('Detected existing scale factor postprocessing file. Loading now.')
-	scalefactor_files = glob(f'{pp_dir}/*_SCALEFACTOR.nc')
-	for scalefactor in scalefactor_files:
-		sf_name = '_'.join(scalefactor.split('/')[-1].split('_')[0:-1])
+		print('Detected existing scale factor postprocessing file.')
 
 print('Scale factor postprocessing complete.')
 print('Starting HEMCO diagnostic (e.g. emissions) postprocessing.')
@@ -53,7 +48,7 @@ try:
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
 except FileNotFoundError:
 	print('HEMCO diagnostic postprocessing file not detected; generating now.')
-	pt.combineHemcoDiag(ens_dir,pp_dir)
+	pt.combineHemcoDiag(ens_dir,pp_dir,timeperiod)
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
 
 print('HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
@@ -71,7 +66,7 @@ print('Surface concentration data postprocessed and loaded.')
 
 if "histprocess" in sys.argv:
 	print('Starting simulated observation vs actual observation (Y) postprocessing.')
-	daterange = np.arange(ASSIM_START_DATE,endtime+timedelta(hours=1),delta).astype(datetime)
+	daterange = np.arange(POSTPROCESS_START_DATE,POSTPROCESS_END_DATE+timedelta(hours=1),delta).astype(datetime)
 	dates_string_array = [dateval.strftime("%Y%m%d_%H%M") for dateval in daterange]
 	try:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
@@ -87,10 +82,10 @@ if useControl:
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	except FileNotFoundError:
 		print('Control run HEMCO diagnostic postprocessing file not detected; generating now.')
-		pt.combineHemcoDiagControl(control_dir,pp_dir)
+		pt.combineHemcoDiagControl(control_dir,pp_dir,timeperiod)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
-		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,timeslice=[START_DATE,endtime], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
 if "calc850" in sys.argv:
