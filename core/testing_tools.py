@@ -83,7 +83,7 @@ def makeMiniFakeObsData(latlocs,lonlocs,ntime):
 	return obsdata
 
 #Walks through with extensive print statements an assimilation cycle
-def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California, arbitrary 
+def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California for 2x2.5, arbitrary; if you're in 4x5, 30,19 puts you in the southeast US
 	print('*************************************************')
 	print('*******ASSIMILATION WALKTHROUGH, VERBOSE*********')
 	print('*************************************************')
