@@ -5,7 +5,6 @@ import os.path
 import xarray as xr
 import numpy as np
 import observation_operators as obsop
-import scipy.constants as const
 from scipy.interpolate import interp1d
 import functools
 
@@ -124,11 +123,6 @@ def clearEdgesFilterByQAAndFlatten(met):
 class OMI_Translator(obsop.Observation_Translator):
     def __init__(self,verbose=1):
         super().__init__(verbose)
-        # pressure to number density conversion factor
-        self.p_to_nd = ( 1.0 / const.R *
-         10**2 * #hPa-> Pa
-         const.value('Avogadro constant') * # mol/m3 -> molec/m3
-         10**(-6)) # molec/m3 -> molec/cm3
     #Save dictionary of dates for later use
     def initialReadDate(self):
         sourcedirs = self.spc_config['OMI_dirs']
@@ -186,7 +180,7 @@ class OMI_Translator(obsop.Observation_Translator):
         returnStateMet = self.spc_config['SaveStateMet']=='True'
         GC_col_data = obsop.getGCCols(GC,OMI,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
         GC_SPC = GC_col_data['GC_SPC'] #Species columns at appropriate location/times
-        GC_P = GC_col_data['GC_P'] #Species pressures at appropriate location/times
+        GC_P = GC_col_data['GC_P'] #Species pressures at appropriate location/times, in hPa
         i,j,t = GC_col_data['indices']
         #Thanks to Viral Shah for his great help in the NO2 operator code.
         if species == 'NO2':
@@ -196,13 +190,13 @@ class OMI_Translator(obsop.Observation_Translator):
             # GEOS-Chem pressure at mid-level
             GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
             GC_P_mid = GC_P_mid[:,0:-1] #last element can be dropped; now conformable.
-            # NO2 number density (molecules/cm3)
-            GC_SPC_nd=GC_SPC*self.p_to_nd/GC_col_data['Met_T']*GC_P_mid*1e-9
+            # NO2 number density (molecules/cm3), we get there from mol/mol to molec/mol (avogadro) -> molec/J (RT) -> molec/m3 (pressure, in Pa) -> molec/cm3 (10^-6)
+            GC_SPC_nd=(((GC_SPC*6.022e23) / (GC_col_data['Met_T']*8.31))) *(GC_P_mid*100)*1e-6
             # partial coumns (molecules/cm2)
-            NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2
+            NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2 #convert from m to cm
             #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
             sw = np.zeros(np.shape(GC_P_mid))
-            for i in range(np.shape(OMI['ScatteringWtPressure'])[0]):
+            for i in range(np.shape(OMI['ScatteringWeight'])[0]):
                 f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:],bounds_error=False, fill_value=0)
                 sw[i,:] = f(GC_P_mid[i,:])
             # GEOS-Chem VCD
