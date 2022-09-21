@@ -1,6 +1,7 @@
 from Assimilator import Assimilator
 from HIST_Translator import HIST_Translator
 from datetime import date,datetime,timedelta
+import observation_operators as oo
 import numpy as np
 import pandas as pd
 import json
@@ -86,7 +87,7 @@ def makeMiniFakeObsData(latlocs,lonlocs,ntime):
 
 #Creates the necessary GC object and OBSDATA dictionary to feed into GCCompare, or test it line by line. 
 #Requires a species key and an ObsOp object. For other settings, defaults to current ensemble settings.
-def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge=None,useStateMet=None):
+def prepTestOfObsOp(specieskey,obs_op,getGCColOnObs=True,directory=None,timestamp=None,useLevelEdge=None,useStateMet=None,GC_area = None):
 	spc_config = si.getSpeciesConfig()
 	#HANDLE DEFAULTS
 	#Default to first directory in current ensemble
@@ -112,7 +113,11 @@ def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge
 	hist4D_allspecies = ht.combineHist(useLevelEdge,useStateMet)
 	hist4D = ht.reduceCombinedHistToSpecies(hist4D_allspecies,spc_config['OBSERVED_SPECIES'][specieskey])
 	OBS = obs_op.getObservations(specieskey,timeperiod)
-	return {'GC':hist4D,'OBSDATA':OBS}
+	to_return = {'GC':hist4D,'OBSDATA':OBS,'GC_col_data':GC_col_data}
+	if getGCColOnObs:
+		species = spc_config['OBSERVED_SPECIES'][specieskey]
+		to_return['GC_col_data'] = oo.getGCCols(hist4D,OBS,species,spc_config,returninds=True,returnStateMet=useStateMet,GC_area=GC_area)
+	return to_return
 
 #Walks through with extensive print statements an assimilation cycle
 def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California for 2x2.5, arbitrary; if you're in 4x5, 30,19 puts you in the southeast US
