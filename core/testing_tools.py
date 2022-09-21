@@ -97,7 +97,7 @@ def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge
 		with open(f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/scratch/INPUT_GEOS_TEMP") as f:
 			for line in f:
 				pass
-			timestamp = line
+			timestamp = f'{line[0:8]}_{line[9:13]}'
 	#For useLevelEdge and useStateMet, just default to the settings file
 	if useLevelEdge is None:
 		useLevelEdge = spc_config['SaveLevelEdgeDiags']=='True'
