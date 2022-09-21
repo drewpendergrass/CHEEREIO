@@ -103,6 +103,9 @@ def clearEdgesFilterByQAAndFlatten(met):
             temp[:,0:5] = np.nan #remove swath edges
             temp[:,55:60] = np.nan
             met_toreturn[key] = temp[to_keep_by_flag]
+            #For the cases of AmfTrop and NO2, negative values mean something went wrong so these we set to nan
+            if (key == 'AmfTrop') or (key == 'NO2'):
+                met_toreturn[key][met_toreturn[key] < 0 ] = np.nan
             #Now we are going to drop Nans across the data; to this end we collect the places where there are no nans
             #This doesn't work for time, so skip
             if key != 'utctime':
