@@ -207,7 +207,7 @@ class Observation_Translator(object):
 	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).
 	#Please note that the "specieskey" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#). Inherited function must have this signature and return an ObsData object.
-	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+	def gcCompare(self,specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		#Returns an ObsData object
 		raise NotImplementedError
 

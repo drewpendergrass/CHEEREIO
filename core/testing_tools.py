@@ -84,7 +84,8 @@ def makeMiniFakeObsData(latlocs,lonlocs,ntime):
 		obsdata['utctime'] = np.append(obsdata['utctime'],pd.date_range(start='2022-08-01',end='2022-08-08',periods=ntime).values)
 	return obsdata
 
-#Creates the necessary GC object and OBS dictionary to feed into GCCompare. Requires a species key and an ObsOp object. Defaults to current ensemble settings.
+#Creates the necessary GC object and OBSDATA dictionary to feed into GCCompare, or test it line by line. 
+#Requires a species key and an ObsOp object. For other settings, defaults to current ensemble settings.
 def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge=None,useStateMet=None):
 	spc_config = si.getSpeciesConfig()
 	#HANDLE DEFAULTS
@@ -111,7 +112,7 @@ def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge
 	hist4D_allspecies = ht.combineHist(useLevelEdge,useStateMet)
 	hist4D = ht.reduceCombinedHistToSpecies(hist4D_allspecies,spc_config['OBSERVED_SPECIES'][specieskey])
 	OBS = obs_op.getObservations(specieskey,timeperiod)
-	return
+	return {'GC':hist4D,'OBSDATA':OBS}
 
 #Walks through with extensive print statements an assimilation cycle
 def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in northern California for 2x2.5, arbitrary; if you're in 4x5, 30,19 puts you in the southeast US
