@@ -104,7 +104,7 @@ def prepTestOfObsOp(specieskey,obs_op,directory=None,timestamp=None,useLevelEdge
 	if useStateMet is None:
 		useStateMet = spc_config['SaveStateMet']=='True'
 	endtime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
-	ASSIM_TIME = self.spc_config['ASSIM_TIME']
+	ASSIM_TIME = spc_config['ASSIM_TIME']
 	delta = timedelta(hours=int(ASSIM_TIME))
 	starttime = endtime-delta
 	timeperiod = (starttime,endtime)
