@@ -113,7 +113,7 @@ def prepTestOfObsOp(specieskey,obs_op,getGCColOnObs=True,directory=None,timestam
 	hist4D_allspecies = ht.combineHist(useLevelEdge,useStateMet)
 	hist4D = ht.reduceCombinedHistToSpecies(hist4D_allspecies,spc_config['OBSERVED_SPECIES'][specieskey])
 	OBS = obs_op.getObservations(specieskey,timeperiod)
-	to_return = {'GC':hist4D,'OBSDATA':OBS,'GC_col_data':GC_col_data}
+	to_return = {'GC':hist4D,'OBSDATA':OBS}
 	if getGCColOnObs:
 		species = spc_config['OBSERVED_SPECIES'][specieskey]
 		to_return['GC_col_data'] = oo.getGCCols(hist4D,OBS,species,spc_config,returninds=True,returnStateMet=useStateMet,GC_area=GC_area)
