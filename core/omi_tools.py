@@ -191,14 +191,15 @@ class OMI_Translator(obsop.Observation_Translator):
             GC_P_mid=GC_P+np.diff(GC_P,axis=1,append=0)/2.0
             GC_P_mid = GC_P_mid[:,0:-1] #last element can be dropped; now conformable.
             # NO2 number density (molecules/cm3), we get there from mol/mol to molec/mol (avogadro) -> molec/J (RT) -> molec/m3 (pressure, in Pa) -> molec/cm3 (10^-6)
-            GC_SPC_nd=(((GC_SPC*6.022e23) / (GC_col_data['Met_T']*8.31))) *(GC_P_mid*100)*1e-6
+            GC_SPC_nd=(((GC_SPC*6.0221408e23) / (GC_col_data['Met_T']*8.31446261815324))) *(GC_P_mid*100)*1e-6
             # partial coumns (molecules/cm2)
             NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2 #convert from m to cm
             #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
             sw = np.zeros(np.shape(GC_P_mid))
             for i in range(np.shape(OMI['ScatteringWeight'])[0]):
-                f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:],bounds_error=False, fill_value=0)
+                f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:],bounds_error=False, fill_value=0) #Since much of this extrapolation is in stratosphere, fill value outside interpolation has minimal sensitivity
                 sw[i,:] = f(GC_P_mid[i,:])
+            #sw *= ( 1 - 0.003 * ( GC_col_data['Met_T'] - 220 ) ) #Correct with the temperature correction factor from Bucsela2013 eq 4
             # GEOS-Chem VCD
             GC_VCD=np.nansum(NO2vCol,axis=1)
             # GEOS-Chem SCD
@@ -212,7 +213,7 @@ class OMI_Translator(obsop.Observation_Translator):
                 additional_args_avgGC = {}
                 if doErrCalc:
                     if useObserverError:
-                        additional_args_avgGC['obsInstrumentError'] = OMI_NO2_ERROR
+                        additional_args_avgGC['obsInstrumentError'] = OMI['Error']*OMI['AmfTrop']
                         additional_args_avgGC['modelTransportError'] = transportError
                     elif prescribed_error is not None:
                         additional_args_avgGC['prescribed_error'] = prescribed_error
@@ -225,7 +226,7 @@ class OMI_Translator(obsop.Observation_Translator):
             else:
                 toreturn = obsop.ObsData(GC_SCD,OMI_SCD,OMI['latitude'],OMI['longitude'],OMI['utctime'])
                 if doErrCalc and useObserverError:
-                    toreturn.addData(err_av=OMI_NO2_ERROR)
+                    toreturn.addData(err_av=OMI['Error']*OMI['AmfTrop'])
             return toreturn
 
 
