@@ -61,6 +61,8 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None):
 			ds_files.append(xr.open_dataset(path))
 		ds = xr.concat(ds_files,'Ensemble')
 		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
+		if timeperiod is not None:
+			ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
 		ds.to_netcdf(output_dir+'/'+name)
 
 def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
@@ -75,6 +77,8 @@ def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
 		combined_ds.append(xr.concat(ds_files,'time'))
 	ds = xr.concat(combined_ds,'Ensemble')
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
+	if timeperiod is not None:
+		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
 	ds.to_netcdf(output_dir+'/combined_HEMCO_diagnostics.nc')
 
 def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
@@ -84,6 +88,8 @@ def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
 	for path in paths:
 		ds_files.append(xr.open_dataset(path))
 	ds = xr.concat(ds_files,'time')
+	if timeperiod is not None:
+		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
 	ds.to_netcdf(output_dir+'/control_HEMCO_diagnostics.nc')
 
 
