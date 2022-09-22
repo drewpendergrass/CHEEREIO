@@ -1112,6 +1112,7 @@ if "$SetupEnsembleRuns"; then
     else 
       printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
       bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
+      bash change_hemcodiag_freq.sh "ensemble" #update hemco diagnostics frequency for ensemble
     fi
 
     ### Navigate back to top-level directory
