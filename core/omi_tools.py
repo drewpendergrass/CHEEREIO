@@ -196,9 +196,9 @@ class OMI_Translator(obsop.Observation_Translator):
             NO2vCol=GC_SPC_nd*GC_col_data['Met_BXHEIGHT']*1e2 #convert from m to cm
             #Interpolate OMI scattering weights to GC pressure levels; loop so we don't create a massive unallocable matrix.
             sw = np.zeros(np.shape(GC_P_mid))
-            for i in range(np.shape(OMI['ScatteringWeight'])[0]):
-                f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][i,:],bounds_error=False, fill_value=0) #Since much of this extrapolation is in stratosphere, fill value outside interpolation has minimal sensitivity
-                sw[i,:] = f(GC_P_mid[i,:])
+            for ind in range(np.shape(OMI['ScatteringWeight'])[0]):
+                f = interp1d(OMI['ScatteringWtPressure'],OMI['ScatteringWeight'][ind,:],bounds_error=False, fill_value=0) #Since much of this extrapolation is in stratosphere, fill value outside interpolation has minimal sensitivity
+                sw[ind,:] = f(GC_P_mid[ind,:])
             #sw *= ( 1 - 0.003 * ( GC_col_data['Met_T'] - 220 ) ) #Correct with the temperature correction factor from Bucsela2013 eq 4
             # GEOS-Chem VCD
             GC_VCD=np.nansum(NO2vCol,axis=1)
