@@ -43,7 +43,7 @@ for ind1, date in enumerate(dates):
 		latdict = np.array(ydict['Latitude'])
 		londict = np.array(ydict['Longitude'])
 		countdict = np.array(ydict['Num_Averaged'])
-		trueobsdict = np.array(ydict['Satellite'])
+		trueobsdict = np.array(ydict['Observations'])
 		simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
 		if postprocess_save_albedo:
 			swirdict = np.array(ydict['Albedo_SWIR'])

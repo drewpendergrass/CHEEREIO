@@ -18,6 +18,7 @@ ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/control_run"
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
+observed_species = data['OBSERVED_SPECIES']
 postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
@@ -98,9 +99,10 @@ if "calc850" in sys.argv:
 
 
 for spec in controlvec:
-	if "histprocess" in sys.argv:
-		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='ppb',satellite_name='TROPOMI',outfile=f'{pp_dir}/satellite_ts_compare_{spec}.png')
 	pt.plotSurfaceMean(ds,spec,outfile=f'{pp_dir}/surfmean_ts_{spec}.png',includesNature=False)
 	if "calc850" in sys.argv:
 		 pt.plotSurfaceMean(ds850,spec,outfile=f'{pp_dir}/mean850hPa_ts_{spec}.png',includesNature=False)
 
+if "histprocess" in sys.argv:
+	for spec in observed_species:
+		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='ppb',observer_name=data['OBS_TYPE'][spec],outfile=f'{pp_dir}/observations_ts_compare_{spec}.png')

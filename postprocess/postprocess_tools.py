@@ -155,7 +155,7 @@ def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,
 			for i in range(colnum):
 				colnames.append(f"Ens{str(i+1).zfill(3)}")
 			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
-			df['Satellite'] = bigy[spec].getObsCol()
+			df['Observations'] = bigy[spec].getObsCol()
 			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
 			if use_numav:
 				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
@@ -244,10 +244,10 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outf
 	priortime = np.array(ds_prior['time'])
 	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
 
-def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',outfile=None):
+def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',outfile=None):
 	ensmeans = []
 	ensstds = []
-	satmeans = []
+	obsmeans = []
 	datestrs = list(bigY.keys())
 	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in datestrs]
 	for date in datestrs:
@@ -255,20 +255,20 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 		assimperiodensmean = np.mean(conc2D,axis=0) #One average for each ensemble member
 		ensmean = np.mean(assimperiodensmean) #Ensemble mean for total average
 		enssd = np.std(assimperiodensmean)
-		satcol=np.array(bigY[date][species]['Satellite'])
-		satmean = np.mean(satcol)
+		obscol=np.array(bigY[date][species]['Observations'])
+		obsmean = np.mean(obscol)
 		ensmeans.append(ensmean)
 		ensstds.append(enssd)
-		satmeans.append(satmean)
+		obsmeans.append(obsmean)
 	ensmeans = np.array(ensmeans)
 	ensstds = np.array(ensstds)
-	satmeans = np.array(satmeans)
+	obsmeans = np.array(obsmeans)
 	plt.rcParams.update({'font.size': 16})
 	plt.figure(figsize=(6,4))
 	plt.plot(datevals,ensmeans,color='b',label='Ensemble mean')
 	plt.plot(datevals,ensmeans+ensstds,':',color='b')
 	plt.plot(datevals,ensmeans-ensstds,':',color='b')
-	plt.plot(datevals,satmeans,color='g',label=satellite_name)
+	plt.plot(datevals,obsmeans,color='g',label=observer_name)
 	plt.legend()
 	plt.xlabel('Time')
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
@@ -282,34 +282,6 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',satellite_name='TROPOMI',out
 		plt.savefig(outfile)
 	else:
 		plt.show()
-
-
-def tsPlotSatCompareFullRange(df,species,numens,freq='H',unit='ppb',satellite_name='TROPOMI',outfile=None):
-	df = df.groupby(pd.Grouper(key='Time',freq=freq)).mean()
-	df.reset_index(inplace=True)
-	conc2D=np.array(df.iloc[:,0:numens])
-	satcol=np.array(df['Satellite'])
-	sattime=np.array(df['Time'])
-	ensmean = np.mean(conc2D,axis=1)
-	enssd = np.std(conc2D,axis=1)
-	plt.rcParams.update({'font.size': 16})
-	plt.figure(figsize=(6,4))
-	plt.plot(sattime,ensmean,color='b',label='Ensemble mean')
-	plt.plot(sattime,ensmean+enssd,':',color='b')
-	plt.plot(sattime,ensmean-enssd,':',color='b')
-	plt.plot(sattime,satcol,color='g',label=satellite_name)
-	plt.legend()
-	plt.xlabel('Time')
-	plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
-	plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=5))
-	plt.ylabel(f'{species} ({unit})')
-	plt.gcf().autofmt_xdate()
-	plt.gcf().tight_layout()
-	if outfile:
-		plt.savefig(outfile)
-	else:
-		plt.show()
-
 
 
 def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,outfile=None):
