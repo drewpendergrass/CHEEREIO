@@ -19,7 +19,13 @@ control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/control_run"
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
 observed_species = data['OBSERVED_SPECIES']
-postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+
+#Albedo postprocessing option available for TROPOMI CH4.
+if 'postprocess_save_albedo' in data:
+	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+else:
+	postprocess_save_albedo = False
+
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
 emisvec = list(data['CONTROL_VECTOR_EMIS'].keys())
