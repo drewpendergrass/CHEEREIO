@@ -23,7 +23,7 @@
 	"SPINUP_END" : "",
 	"DO_CONTROL_RUN" : "true",
 	"CONTROL_START" : "20160101",
-	"CONTROL_END" : "20160105",
+	"CONTROL_END" : "20160104",
 	"DO_ENS_SPINUP" : "false",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
 	"ENS_SPINUP_START" : "",
@@ -31,7 +31,7 @@
 	"START_DATE" : "20160101",
 	"ASSIM_START_DATE" : "20160102",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20160105",
+	"END_DATE" : "20160104",
 	"nEnsemble" : "8",
 	"SIMULATE_NATURE" : "false",
 	"verbose":"1",
@@ -202,8 +202,8 @@
 	"hemco_diags_to_process" : [
 		"Emis_NO2"
 	],
-	"POSTPROCESS_START_DATE":"20160101",
-	"POSTPROCESS_END_DATE":"20160105",
+	"POSTPROCESS_START_DATE":"20160102",
+	"POSTPROCESS_END_DATE":"20160104",
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN SETTING EXTENSIONS****************************",
 	"comment023" : "**********************************************************************************",
