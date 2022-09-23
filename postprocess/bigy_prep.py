@@ -17,7 +17,7 @@ gclat = np.array(gclat)
 gclon = np.array(gclon)
 
 #Saving albedo isn't a default option for all runs, so have to check if it is even in the ens config.
-if postprocess_save_albedo in data:
+if "postprocess_save_albedo" in data:
 	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 else:
 	postprocess_save_albedo = False

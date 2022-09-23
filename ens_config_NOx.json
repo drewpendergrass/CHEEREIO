@@ -200,10 +200,15 @@
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
 	"hemco_diags_to_process" : [
-		"Emis_NO2"
+		"EmisNO_Total",
+		"EmisNO_Anthro",
+		"EmisNO2_Anthro"
 	],
 	"POSTPROCESS_START_DATE":"20160102",
 	"POSTPROCESS_END_DATE":"20160104",
+	"OBSERVATION_UNITS":{
+		"NO2_OMI": "molec/cm2"
+	},
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN SETTING EXTENSIONS****************************",
 	"comment023" : "**********************************************************************************",

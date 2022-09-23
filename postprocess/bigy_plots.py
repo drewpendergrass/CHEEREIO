@@ -17,7 +17,11 @@ gclon = np.array(gclon)
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
 anim_fps = int(data['animation_fps_scalingfactor'])
-postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+
+if "postprocess_save_albedo" in data:
+	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+else:
+	postprocess_save_albedo = False
 
 with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)

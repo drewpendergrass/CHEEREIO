@@ -13,13 +13,12 @@ data = si.getSpeciesConfig()
 gclat,gclon = si.getLatLonVals(data)
 gclat = np.array(gclat)
 gclon = np.array(gclon)
-
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
 anim_fps = int(data['animation_fps_scalingfactor'])
 
 #Saving albedo isn't a default option for all runs, so have to check if it is even in the ens config.
-if postprocess_save_albedo in data:
+if "postprocess_save_albedo" in data:
 	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
 else:
 	postprocess_save_albedo = False
@@ -34,18 +33,23 @@ total_averaged_obs=pickledata["obscount_avg"]
 true_obs = pickledata["obs"]
 sim_obs = pickledata["sim_obs"]
 
+arraysbase=[total_obs_count,total_averaged_obs,true_obs,sim_obs]
+filenamesbase = [f'{pp_dir}/total_raw_observation_counts',f'{pp_dir}/total_aggregated_observation_counts',f'{pp_dir}/actual_observations',f'{pp_dir}/simulated_observations']
+labelnames = ['Count','Count','OBSUNIT', 'OBSUNIT']
+
 if postprocess_save_albedo:
 	total_swir = pickledata["swir_albedo"]
+	arraysbase.append(total_swir)
+	filenamesbase.append('{pp_dir}/averaged_albedo_SWIR')
+	labelnames.append('Albedo')
 	total_nir = pickledata["nir_albedo"]
+	arraysbase.append(total_nir)
+	filenamesbase.append('{pp_dir}/averaged_albedo_NIR')
+	labelnames.append('Albedo')
 	total_blended = pickledata["blended_albedo"]
-	arraysbase=[total_obs_count,total_averaged_obs,true_obs,sim_obs,total_swir,total_nir,total_blended]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/obs_countervations',f'{pp_dir}/simulated_observations',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
-	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)', 'Albedo','Albedo','Albedo']
-else:
-	arraysbase=[total_obs_count,total_averaged_obs,true_obs,sim_obs]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/obs_countervations',f'{pp_dir}/simulated_observations']
-	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)']
-
+	arraysbase.append(total_blended)
+	filenamesbase.append('{pp_dir}/averaged_blended_albedo')
+	labelnames.append('Albedo')
 
 
 for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
@@ -66,7 +70,11 @@ for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
 		m.drawcoastlines(color='lightgray')
 		mesh = m.pcolormesh(gclon, gclat, arrayval[0,ind,:,:],latlon=True,cmap=plt.cm.jet)
 		plt.clim(np.min(arrayval[:,ind,:,:]), np.max(arrayval[:,ind,:,:]))
-		plt.colorbar(label=labelname);
+		if labelname = 'OBSUNIT':
+			label = f"{data['OBSERVED_SPECIES'][species]} ({data['OBSERVATION_UNITS'][species]})"
+		else:
+			label = labelname
+		plt.colorbar(label=label);
 		anim = animation.FuncAnimation(fig, animate,len(dates), blit=False)
 		Writer = animation.writers['ffmpeg']
 		writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
