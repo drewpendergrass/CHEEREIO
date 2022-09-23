@@ -16,7 +16,12 @@ gclat,gclon = si.getLatLonVals(data)
 gclat = np.array(gclat)
 gclon = np.array(gclon)
 
-postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+#Saving albedo isn't a default option for all runs, so have to check if it is even in the ens config.
+if postprocess_save_albedo in data:
+	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+else:
+	postprocess_save_albedo = False
+
 useControl=data['DO_CONTROL_RUN']=="true"
 nEnsemble = int(data['nEnsemble'])
 
@@ -26,7 +31,7 @@ specieslist = list(bigy[dates[0]].keys())
 simulated_obs_mean_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
 true_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
 
-total_satellite_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+total_obs_count = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
 total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
 if postprocess_save_albedo:
 	total_swir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
@@ -63,16 +68,17 @@ for ind1, date in enumerate(dates):
 		for lonindval,latindval in zip(uniquelonind,uniquelatind):
 			dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
 			totalcount = np.sum(countdict[dictind])
-			total_satellite_obs[ind1,ind2,latindval,lonindval]=totalcount
+			total_obs_count[ind1,ind2,latindval,lonindval]=totalcount
 			true_obs_value[ind1,ind2,latindval,lonindval]=np.mean(trueobsdict[dictind])
 			simulated_obs_mean_value[ind1,ind2,latindval,lonindval]=np.mean(simobsdict[dictind])
-			control_obs_value[ind1,ind2,latindval,lonindval]=np.mean(controldict[dictind])
+			if useControl:
+				control_obs_value[ind1,ind2,latindval,lonindval]=np.mean(controldict[dictind])
 			if postprocess_save_albedo:	
 				total_swir[ind1,ind2,latindval,lonindval]=np.mean(swirdict[dictind])
 				total_nir[ind1,ind2,latindval,lonindval]=np.mean(nirdict[dictind])
 				total_blended[ind1,ind2,latindval,lonindval]=np.mean(blendeddict[dictind])
 
-arraysbase = {"obscount":total_satellite_obs,"obscount_avg":total_averaged_obs,"dates":dates,"species":specieslist,"obs":true_obs_value,"sim_obs":simulated_obs_mean_value}
+arraysbase = {"obscount":total_obs_count,"obscount_avg":total_averaged_obs,"dates":dates,"species":specieslist,"obs":true_obs_value,"sim_obs":simulated_obs_mean_value}
 if postprocess_save_albedo:
 	arraysbase['swir_albedo']=total_swir
 	arraysbase['nir_albedo']=total_nir

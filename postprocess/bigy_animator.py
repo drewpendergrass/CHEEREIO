@@ -17,14 +17,19 @@ gclon = np.array(gclon)
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 
 anim_fps = int(data['animation_fps_scalingfactor'])
-postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+
+#Saving albedo isn't a default option for all runs, so have to check if it is even in the ens config.
+if postprocess_save_albedo in data:
+	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
+else:
+	postprocess_save_albedo = False
 
 with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
 dates = pickledata["dates"]
 specieslist = pickledata["species"]
-total_satellite_obs=pickledata["obscount"]
+total_obs_count=pickledata["obscount"]
 total_averaged_obs=pickledata["obscount_avg"]
 true_obs = pickledata["obs"]
 sim_obs = pickledata["sim_obs"]
@@ -33,12 +38,12 @@ if postprocess_save_albedo:
 	total_swir = pickledata["swir_albedo"]
 	total_nir = pickledata["nir_albedo"]
 	total_blended = pickledata["blended_albedo"]
-	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs,total_swir,total_nir,total_blended]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
+	arraysbase=[total_obs_count,total_averaged_obs,true_obs,sim_obs,total_swir,total_nir,total_blended]
+	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/obs_countervations',f'{pp_dir}/simulated_observations',f'{pp_dir}/averaged_albedo_SWIR',f'{pp_dir}/averaged_albedo_NIR',f'{pp_dir}/averaged_blended_albedo']
 	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)', 'Albedo','Albedo','Albedo']
 else:
-	arraysbase=[total_satellite_obs,total_averaged_obs,true_obs,sim_obs]
-	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/satellite_observations',f'{pp_dir}/simulated_observations']
+	arraysbase=[total_obs_count,total_averaged_obs,true_obs,sim_obs]
+	filenamesbase = [f'{pp_dir}/total_raw_satellite_counts',f'{pp_dir}/total_averaged_satellite_counts',f'{pp_dir}/obs_countervations',f'{pp_dir}/simulated_observations']
 	labelnames = ['Count','Count','CH4 (ppb)', 'CH4 (ppb)']
 
 
