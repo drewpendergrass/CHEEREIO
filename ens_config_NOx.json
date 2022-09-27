@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO_no2",
-	"RUN_NAME" : "NOx_4x5",
+	"RUN_NAME" : "NOx_4x5_v02",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -23,7 +23,7 @@
 	"SPINUP_END" : "",
 	"DO_CONTROL_RUN" : "true",
 	"CONTROL_START" : "20160101",
-	"CONTROL_END" : "20160104",
+	"CONTROL_END" : "20160115",
 	"DO_ENS_SPINUP" : "false",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
 	"ENS_SPINUP_START" : "",
@@ -31,7 +31,7 @@
 	"START_DATE" : "20160101",
 	"ASSIM_START_DATE" : "20160102",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20160104",
+	"END_DATE" : "20160115",
 	"nEnsemble" : "8",
 	"SIMULATE_NATURE" : "false",
 	"verbose":"1",
@@ -43,7 +43,7 @@
 	"Partition" : "huce_intel",
 	"Memory" : "30000",
 	"EnsCtrlSpinupMemory" : "8000",
-	"WallTime" : "1-00\\:00",
+	"WallTime" : "1-12\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
 	"ControlWallTime" : "0-04\\:00",
 	"SpinupWallTime" : "",
@@ -140,7 +140,7 @@
 		"NOx":"True"
 	},
 	"corrDistances" : {
-		"NOx":"750"
+		"NOx":"500"
 	},
 	"speedyCorrelationApprox" : "True",
 	"MaskOceanScaleFactor" : {
@@ -169,7 +169,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NO2_OMI":"0.1"
+		"NO2_OMI":"0.01"
 	},
 	"OBS_ERROR": {
 		"NO2_OMI":"0.1"
@@ -204,8 +204,8 @@
 		"EmisNO_Anthro",
 		"EmisNO2_Anthro"
 	],
-	"POSTPROCESS_START_DATE":"20160102",
-	"POSTPROCESS_END_DATE":"20160104",
+	"POSTPROCESS_START_DATE":"20160101",
+	"POSTPROCESS_END_DATE":"20160115",
 	"OBSERVATION_UNITS":{
 		"NO2_OMI": "molec/cm2"
 	},
