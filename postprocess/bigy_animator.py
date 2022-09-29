@@ -70,7 +70,7 @@ for arrayval,filenamebase,labelname in zip(arraysbase,filenamesbase,labelnames):
 		m.drawcoastlines(color='lightgray')
 		mesh = m.pcolormesh(gclon, gclat, arrayval[0,ind,:,:],latlon=True,cmap=plt.cm.jet)
 		plt.clim(np.min(arrayval[:,ind,:,:]), np.max(arrayval[:,ind,:,:]))
-		if labelname = 'OBSUNIT':
+		if labelname == 'OBSUNIT':
 			label = f"{data['OBSERVED_SPECIES'][species]} ({data['OBSERVATION_UNITS'][species]})"
 		else:
 			label = labelname
