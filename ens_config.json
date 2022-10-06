@@ -120,7 +120,7 @@
 		"CH4":"True"
 	},
 	"corrDistances" : {
-		"CH4":"750"
+		"CH4":"500"
 	},
 	"speedyCorrelationApprox" : "True",
 	"MaskOceanScaleFactor" : {
@@ -128,7 +128,7 @@
 	},
 	"MaskCoastsGT25pctOcean" : "True",
 	"Mask60NScaleFactor" : {
-		"CH4":"True"
+		"CH4":"False"
 	},
 	"Mask60SScaleFactor" : {
 		"CH4":"True"
