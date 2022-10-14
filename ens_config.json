@@ -8,12 +8,12 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_corr_v06",
+	"RUN_NAME" : "METHANE_scale_v01",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.BoundaryConditions.20180501_0000z.nc4",
+	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.BoundaryConditions.20180701_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -26,12 +26,16 @@
 	"CONTROL_END" : "20200108",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "true",
-	"ENS_SPINUP_START" : "20180501",
-	"ENS_SPINUP_END" : "20180901",
-	"START_DATE" : "20180901",
-	"ASSIM_START_DATE" : "20180908",
+	"ENS_SPINUP_START" : "20180701",
+	"ENS_SPINUP_END" : "20181101",
+	"START_DATE" : "20181101",
+	"ASSIM_START_DATE" : "20181108",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20200101",
+	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
+	"BURN_IN_END" : "20181225",
+	"POSTPROCESS_START_DATE":"20190101",
+	"POSTPROCESS_END_DATE":"20200101",
 	"nEnsemble" : "24",
 	"SIMULATE_NATURE" : "false",
 	"verbose":"1",
@@ -134,22 +138,22 @@
 		"CH4":"True"
 	},
 	"MinimumScalingFactorAllowed" : {
-		"CH4":"0.05"
+		"CH4":"nan"
 	},
 	"MaximumScalingFactorAllowed" : {
-		"CH4":"20"
+		"CH4":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"CH4":"0.3"
+		"CH4":"nan"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
-		"CH4":"0.5"
+		"CH4":"nan"
 	},
 	"comment018" : "******************************************************************************",
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.02"
+		"CH4_TROPOMI":"0.1"
 	},
 	"OBS_ERROR": {
 		"CH4_TROPOMI":"15"
@@ -182,8 +186,6 @@
 	"hemco_diags_to_process" : [
 		"EmisCH4_Total"
 	],
-	"POSTPROCESS_START_DATE":"20190101",
-	"POSTPROCESS_END_DATE":"20200101",
 	"OBSERVATION_UNITS":{
 		"CH4_TROPOMI": "ppb"
 	},
