@@ -26,8 +26,10 @@ with open(f"{parent_dir}/scratch/CURRENT_DATE_TIME") as f:
 start_datetime = datetime.strptime(start_string, "%Y%m%d %H%M%S")
 if periodstr=="FIRST":
 	end_string = f"{ASSIM_START_DATE} 000000"
+	end_datetime = datetime.strptime(ASSIM_START_DATE, "%Y%m%d")
 elif periodstr=="SPINUP":
 	end_string = f"{ENS_SPINUP_END} 000000"
+	end_datetime = datetime.strptime(ENS_SPINUP_END, "%Y%m%d")
 else:
 	delta = timedelta(hours=int(ASSIM_TIME))
 	end_datetime = start_datetime+delta
