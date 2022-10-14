@@ -12,7 +12,8 @@ end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 
-if [ "${1}" = false ] || [ "${SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD}" = false ]; then
+#If we are not doing simple scaling, we need to do the actual work to combine columns.
+if [ "${1}" = false ]; then
 
 	source activate ${CONDA_ENV} #Activate conda environment.
 	python check_for_all_columns.py

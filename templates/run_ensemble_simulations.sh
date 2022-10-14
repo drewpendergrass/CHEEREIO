@@ -35,6 +35,9 @@ else
 fi
 
 firstrun=true
+scalefirst="$(jq -r ".SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
+trigger_burnin_scale=false
+scaleburnin="$(jq -r ".SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" {ASSIM}/ens_config.json)"
 
 ### Run GEOS-Chem in the directory corresponding to the cluster Id
 cd  {RunName}_${xstr}
@@ -79,19 +82,31 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   done
   #CD to core
   cd {ASSIM}/core
+  #Check if we are in the first assimilation cycle after burn in completes
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_PERIOD_PROCESSED ] && [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_SCALING_COMPLETE ]; then
+    trigger_burnin_scale=true
+  else
+    trigger_burnin_scale=false
+  fi
+  #Check if we are doing a simple scale or a full assimilation
+  if [[ ("${firstrun}" = "true" && "${scalefirst}" = "true") || ("${trigger_burnin_scale}" = "true" && "${scaleburnin}" = "true") ]]; then
+    simplescale=true
+  else
+    simplescale=false
+  fi
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
     if [ {MaxPar} -eq 1 ]; then
-      bash par_assim.sh ${x} 1 ${firstrun}
+      bash par_assim.sh ${x} 1 ${simplescale}
     else
-      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${firstrun}" ::: {1..{MaxPar}}
+      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${simplescale}" ::: {1..{MaxPar}}
     fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
   until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
     #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
     if [ $x -eq 1 ]; then
-      bash check_and_complete_assimilation.sh ${firstrun}
+      bash check_and_complete_assimilation.sh ${simplescale}
     fi
     #If there is a problem, the KILL_ENS file will be produced. Break then
     if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
