@@ -236,11 +236,17 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outf
 	if timeslice is not None:
 		ds_ensemble = ds_ensemble.sel(time=slice(timeslice[0],timeslice[1]))
 		ds_prior = ds_prior.sel(time=slice(timeslice[0],timeslice[1]))
-	da = ds_ensemble[collectionName].sum(axis=(2,3)) #sum up all emissions
+	if len(np.shape(ds_ensemble[collectionName])) == 5:
+		axis_to_average = (2,3,4) #Emit into higher levels (e.g. aircraft)
+		prior_axis_to_average = (1,2,3)
+	else:
+		axis_to_average = (2,3) #Surface emissions only
+		prior_axis_to_average = (1,2)
+	da = ds_ensemble[collectionName].sum(axis=axis_to_average) #sum up all emissions
 	enstime = np.array(ds_ensemble['time'])
 	ensmean = da.mean(axis=0)
 	enssd = da.std(axis=0)
-	da_prior = ds_prior[collectionName].sum(axis=(1,2)) #sum up all emissions from the control run
+	da_prior = ds_prior[collectionName].sum(axis=prior_axis_to_average) #sum up all emissions from the control run
 	priortime = np.array(ds_prior['time'])
 	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
 
