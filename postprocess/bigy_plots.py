@@ -15,7 +15,7 @@ gclat = np.array(gclat)
 gclon = np.array(gclon)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
-
+scalefactor_plot_freq = data['scalefactor_plot_freq']
 anim_fps = int(data['animation_fps_scalingfactor'])
 
 if "postprocess_save_albedo" in data:
@@ -65,5 +65,7 @@ for i,species in enumerate(specieslist):
 
 
 #Plot scale factor slices
-
-plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=True)
+if scalefactor_plot_freq == 'monthly':
+	plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=True)
+else:
+	plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=False)
