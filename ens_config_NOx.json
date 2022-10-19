@@ -45,7 +45,7 @@
 	"NumCores" : "8",
 	"NumCtrlCores" : "8",
 	"Partition" : "huce_intel",
-	"Memory" : "32000",
+	"Memory" : "40000",
 	"EnsCtrlSpinupMemory" : "8000",
 	"WallTime" : "1-12\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
