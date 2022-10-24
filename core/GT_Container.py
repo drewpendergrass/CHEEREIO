@@ -51,38 +51,6 @@ class GT_Container(object):
 		backgroundEnsemble = self.constructColStatevec(latind,lonind)
 		diff = saved_col-backgroundEnsemble
 		return [saved_col,backgroundEnsemble,diff]
-	def compareSpeciesConc(self,species,latind,lonind):
-		firstens = self.ensemble_numbers[0]
-		colind = self.gt[firstens].getSpeciesConcIndicesInColumn(species)
-		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
-		saved_col = saved_col[colind,:]
-		backgroundEnsemble = backgroundEnsemble[colind,:]
-		diff = diff[colind,:]
-		col1indvec = self.nature.getColumnIndicesFromFullStateVector(latind,lonind)
-		naturecol = self.nature.statevec[col1indvec][colind]
-		print(f'*********************************** {species} CONCENTRATION COLUMN AT INDEX {(latind,lonind)} ************************************')
-		for i in range(np.shape(saved_col)[1]):
-			print(f' ')
-			print(f'{species} in ensemble member {i+1} had background concentration of {100*(backgroundEnsemble[:,i]/naturecol)}% nature')
-			print(f'{species} in ensemble member {i+1} had analysis concentration of {100*(saved_col[:,i]/naturecol)}% nature')
-			print(f'This represents a percent difference of {100*(diff[:,i]/backgroundEnsemble[:,i])}%')
-			print(f' ')
-	def compareSpeciesEmis(self,species,latind,lonind):
-		firstens = self.ensemble_numbers[0]
-		colind = self.gt[firstens].getSpeciesEmisIndicesInColumn(species)
-		saved_col,backgroundEnsemble,diff = self.diffColumns(latind,lonind)
-		saved_col = saved_col[colind,:] #Now will just be a vector of length NumEnsemble
-		backgroundEnsemble = backgroundEnsemble[colind,:]
-		diff = diff[colind,:]
-		col1indvec = self.nature.getColumnIndicesFromFullStateVector(latind,lonind)
-		naturecol = self.nature.statevec[col1indvec][colind]
-		print(f'*********************************** {species} EMISSIONS SCALING AT INDEX {(latind,lonind)} ************************************')
-		for i in range(len(saved_col)):
-			print(f' ')
-			print(f'{species} in ensemble member {i+1} had background emissions scaling of {100*(backgroundEnsemble[i]/naturecol)}% nature')
-			print(f'{species} in ensemble member {i+1} had analysis emissions scaling of {100*(saved_col[i]/naturecol)}% nature')
-			print(f'This represents a percent difference of {100*(diff[i]/backgroundEnsemble[i])}%')
-			print(f' ')
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
 		for name, cols in zip(self.columns.keys(),self.columns.values()):
