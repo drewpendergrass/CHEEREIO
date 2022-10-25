@@ -75,6 +75,21 @@ class GC_Translator(object):
 			self.statevec = StateVector(StateVecType="3D",data=data,verbose=self.verbose,num=self.num)
 		return self.statevec.getStateVector(latind,lonind)
 	######    END FUNCTIONS THAT ALIAS STATEVECTOR    ########
+	def setSpeciesConcByColumn(self,species,column2d,useTrop):
+		conc3d = self.data.getSpecies3Dconc(species)
+		params = {}
+		for param in self.statevec.params_needed:
+			params[param] = self.data.getMetByCode(param)
+		original_column = self.statevec.StateVecFrom3D(conc3d,**params).reshape(np.shape(column2d))
+		ratio = column2d/original_column #values by which we scale
+		assim3d = conc3d * ratio #scale by ratio
+		if useTrop:
+			nlev,nlat,nlon = np.shape(conc3D)
+			level = np.arange(0,nlev)
+			levcube = np.transpose(np.tile(level,nlat*nlon).reshape((nlat,nlon,nlev)),(2,0,1)) #cube of dim lev,lat,lon with value of level index 
+			mask = levcube>=params["trop"] #Make mask where levcube is above tropopause level,
+			assim3d[mask] = conc3d[mask] # use mask to select strat/meso values from assimilated 3d matrix, and set them to pre-assimilated value (not updating).		
+		self.setSpecies3Dconc(species,assim3d)
 	#Randomize the restart for purposes of testing. Perturbation is 1/2 of range of percent change selected from a uniform distribution.
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
@@ -107,11 +122,11 @@ class GC_Translator(object):
 				else:
 					analysis_2d = np.reshape(analysis_subset,restart_shape[1::]) #We are in 2D, so unfurl accordingly
 					if self.StateVecType == 'surface':
-						raise NotImplementedError('asdf')
+						self.data.setSpeciesConcByLayer(spec_conc, analysis_2d, layer=0) #overwrite surface layer only.
 					elif self.StateVecType == 'column_sum':
-						raise NotImplementedError('asdf')
+						self.setSpeciesConcByColumn(spec_conc,analysis_2d,useTrop=False) #scale all column values evenly using column update.
 					elif self.StateVecType == 'trop_sum':
-						raise NotImplementedError('asdf')
+						self.setSpeciesConcByColumn(spec_conc,analysis_2d,useTrop=True) #scale all column values within troposphere evenly using column update.
 			counter+=1
 		for spec_emis in species_config['CONTROL_VECTOR_EMIS'].keys(): #Emissions scaling factors are all in the control vector
 			index_start = np.sum(self.statevec_lengths[0:counter])
@@ -154,6 +169,10 @@ class DataBundle(object):
 		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} set 3D conc for species {species} which are of dimension {np.shape(conc4d)}.")
 		self.restart_ds[f'SpeciesRst_{species}'] = (["time","lev","lat","lon"],conc4d,{"long_name":f"Dry mixing ratio of species {species}","units":"mol mol-1 dry","averaging_method":"instantaneous"})
+	def setSpeciesConcByLayer(self, species, conc2d, layer):
+		da = self.getSpecies3Dconc(species)
+		da[layer,:,:] = conc2d #overwrite layer
+		self.setSpecies3Dconc(species,da)
 	def getTemp(self):
 		return np.array(self.restart_ds['Met_TMPU1']).squeeze() #lev, lat ,lon
 	def getHeight(self):
