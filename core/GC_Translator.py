@@ -17,18 +17,18 @@ class GC_Translator(object):
 		self.timestring = f'minutes since {timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[9:11]}:{timestamp[11:13]}:00'
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
 		self.verbose=verbose
-		self.StateVecType = "3D"
+		self.species_config = si.getSpeciesConfig()
+		self.StateVecType = self.species_config['STATE_VECTOR_CONC_REPRESENTATION'] #How concentrations are stored in state vector: 3D, surface, column_sum, or trop_sum
 		if self.verbose>=3:
 			self.num = path_to_rundir.split('_')[-1][0:4]
 			print(f"GC_translator number {self.num} has been called for directory {path_to_rundir} and restart {self.filename}; construction beginning")
 		else:
 			self.num=None
-		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.verbose,self.num)
+		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.verbose,self.num)
 		if computeStateVec:
-			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,verbose=self.verbose,num=self.num)
+			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,species_config=self.species_config,verbose=self.verbose,num=self.num)
 		else:
 			self.statevec = None
-			self.statevec_lengths = None #Until state vector is initialized this variable is None
 		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} construction complete.")
 	######    BEGIN FUNCTIONS THAT ALIAS DATA BUNDLE    ########
@@ -72,7 +72,7 @@ class GC_Translator(object):
 		return self.statevec.localizeFromFull(latind,lonind,'intersect')
 	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
-			self.statevec = StateVector(StateVecType="3D",data=data,verbose=self.verbose,num=self.num)
+			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,species_config = self.species_config,verbose=self.verbose,num=self.num)
 		return self.statevec.getStateVector(latind,lonind)
 	######    END FUNCTIONS THAT ALIAS STATEVECTOR    ########
 	def setSpeciesConcByColumn(self,species,column2d,useTrop):
@@ -94,7 +94,7 @@ class GC_Translator(object):
 	#E.g. 0.1 would range from 90% to 110% of initial values. Bias adds that percent on top of the perturbed fields (0.1 raises everything 10%).
 	#Repeats this procedure for every species in the state vector (excluding emissions).
 	def randomizeRestart(self,perturbation=0.1,bias=0):
-		statevec_species = si.getSpeciesConfig()['STATE_VECTOR_CONC']
+		statevec_species = self.species_config['STATE_VECTOR_CONC']
 		offset = 1-perturbation
 		scale = perturbation*2
 		for spec in statevec_species:
@@ -106,15 +106,14 @@ class GC_Translator(object):
 	#Also construct new scaling factors and add them as a separate array at the new timestep in each of the scaling factor netCDFs.
 	#However, only do so for species in the control vectors of emissions and concentrations.
 	def reconstructArrays(self,analysis_vector):
-		species_config = si.getSpeciesConfig()
-		restart_shape = np.shape(self.getSpecies3Dconc(species_config['STATE_VECTOR_CONC'][0]))
-		emislist=list(species_config['CONTROL_VECTOR_EMIS'].keys())
+		restart_shape = np.shape(self.getSpecies3Dconc(self.species_config['STATE_VECTOR_CONC'][0]))
+		emislist=list(self.species_config['CONTROL_VECTOR_EMIS'].keys())
 		emis_shape = np.shape(self.getEmisSF(emislist[0]))
 		counter =  0
-		for spec_conc in species_config['STATE_VECTOR_CONC']:
-			if spec_conc in species_config['CONTROL_VECTOR_CONC']: #Only overwrite if in the control vector; otherwise just increment.
-				index_start = np.sum(self.statevec_lengths[0:counter])
-				index_end = np.sum(self.statevec_lengths[0:(counter+1)])
+		for spec_conc in self.species_config['STATE_VECTOR_CONC']:
+			if spec_conc in self.species_config['CONTROL_VECTOR_CONC']: #Only overwrite if in the control vector; otherwise just increment.
+				index_start = np.sum(self.statevec.statevec_lengths[0:counter])
+				index_end = np.sum(self.statevec.statevec_lengths[0:(counter+1)])
 				analysis_subset = analysis_vector[index_start:index_end]
 				if self.StateVecType == '3D': #case 1: analysis subset is 3D concentrations. Just unfurl and overwrite
 					analysis_3d = np.reshape(analysis_subset,restart_shape) #Unflattens with 'C' order in python
@@ -128,12 +127,12 @@ class GC_Translator(object):
 					elif self.StateVecType == 'trop_sum':
 						self.setSpeciesConcByColumn(spec_conc,analysis_2d,useTrop=True) #scale all column values within troposphere evenly using column update.
 			counter+=1
-		for spec_emis in species_config['CONTROL_VECTOR_EMIS'].keys(): #Emissions scaling factors are all in the control vector
-			index_start = np.sum(self.statevec_lengths[0:counter])
-			index_end = np.sum(self.statevec_lengths[0:(counter+1)])
+		for spec_emis in self.species_config['CONTROL_VECTOR_EMIS'].keys(): #Emissions scaling factors are all in the control vector
+			index_start = np.sum(self.statevec.statevec_lengths[0:counter])
+			index_end = np.sum(self.statevec.statevec_lengths[0:(counter+1)])
 			analysis_subset = analysis_vector[index_start:index_end]
 			analysis_emis_2d = np.reshape(analysis_subset,emis_shape) #Unflattens with 'C' order in python
-			self.addEmisSF(spec_emis,analysis_emis_2d,species_config['ASSIM_TIME'])
+			self.addEmisSF(spec_emis,analysis_emis_2d,self.species_config['ASSIM_TIME'])
 			counter+=1
 	def saveRestart(self):
 		self.data.restart_ds["time"] = (["time"], np.array([0]), {"long_name": "Time", "calendar": "gregorian", "axis":"T", "units":self.timestring})
@@ -146,8 +145,9 @@ class GC_Translator(object):
 #Handles data getting and setting for emissions and concentrations.
 #Class exists to prevent mutual dependencies.
 class DataBundle(object):
-	def __init__(self,rst_filename,emis_sf_filenames,verbose,num=None):
+	def __init__(self,rst_filename,emis_sf_filenames,species_config,verbose,num=None):
 		self.restart_ds = xr.load_dataset(rst_filename)
+		self.species_config = species_config
 		self.verbose = verbose
 		if verbose >= 3:
 			self.num = num
@@ -225,12 +225,12 @@ class DataBundle(object):
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
 		tstr = f'{self.timestamp[0:4]}-{self.timestamp[4:6]}-{self.timestamp[6:8]}T{self.timestamp[9:11]}:{self.timestamp[11:13]}:00.000000000'
 		new_last_time = np.datetime64(tstr)
-		if si.getSpeciesConfig()['DO_ENS_SPINUP']=='true':
-			START_DATE = si.getSpeciesConfig()['ENS_SPINUP_START']
+		if self.species_config['DO_ENS_SPINUP']=='true':
+			START_DATE = self.species_config['ENS_SPINUP_START']
 		else:
-			START_DATE = si.getSpeciesConfig()['START_DATE']
+			START_DATE = self.species_config['START_DATE']
 		orig_timestamp = f'{START_DATE[0:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}' #Start date from  JSON
-		END_DATE = si.getSpeciesConfig()['END_DATE']
+		END_DATE = self.species_config['END_DATE']
 		end_timestamp = f'{END_DATE[0:4]}-{END_DATE[4:6]}-{END_DATE[6:8]}'
 		#Create dataset with this timestep's scaling factors
 		ds = xr.Dataset(
@@ -257,7 +257,7 @@ class DataBundle(object):
 
 
 class StateVector(object):
-	def __init__(self,StateVecType,data,verbose,num=None):
+	def __init__(self,StateVecType,data,species_config,verbose,num=None):
 		self.StateVecType = StateVecType
 		self.StateVecFrom3D = MakeStateVecFrom3D(self.StateVecType)
 		if self.StateVecType == "3D":
@@ -282,19 +282,19 @@ class StateVector(object):
 		if self.verbose>=3:
 			print("*****************************************************************")
 			print(f"GC_Translator number {self.num} is starting build of statevector!")
-		species_config = si.getSpeciesConfig()
+		self.species_config = species_config
 		statevec_components = []
 		params = {}
 		for param in self.params_needed:
 			params[param] = data.getMetByCode(param)
-		for spec_conc in species_config['STATE_VECTOR_CONC']:
+		for spec_conc in self.species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.StateVecFrom3D(self.data.getSpecies3Dconc(spec_conc),**params))
 		#If no scaling factor files, append 1s because this is a nature directory
 		if len(self.emis_sf_filenames)==0:
-			lenones = len(self.data.getLat())*len(self.data.getLon())*len(species_config['CONTROL_VECTOR_EMIS'])
+			lenones = len(self.data.getLat())*len(self.data.getLon())*len(self.species_config['CONTROL_VECTOR_EMIS'])
 			statevec_components.append(np.ones(lenones))
 		else:
-			for spec_emis in species_config['CONTROL_VECTOR_EMIS'].keys():
+			for spec_emis in self.species_config['CONTROL_VECTOR_EMIS'].keys():
 				statevec_components.append(self.data.getEmisSF(spec_emis).flatten())
 		self.statevec_lengths = np.array([len(vec) for vec in statevec_components])
 		self.statevec = np.concatenate(statevec_components)
@@ -348,9 +348,8 @@ class StateVector(object):
 	#old getColumnIndicesFromLocalizedStateVector is getSurroundings = 'intersect'
 	def localizeFromFull(self,latind,lonind,getSurroundings):
 		conc_index,conc_incrementor,emis_index,emis_incrementor = getIndices(latind,lonind,getSurroundings = getSurroundings)
-		species_config = si.getSpeciesConfig()
-		conccount = len(species_config['STATE_VECTOR_CONC'])
-		emcount = len(species_config['CONTROL_VECTOR_EMIS'])
+		conccount = len(self.species_config['STATE_VECTOR_CONC'])
+		emcount = len(self.species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
 		cur_offset = 0
 		for i in range(conccount):

@@ -75,6 +75,7 @@
 		"MPAN",
 		"N2O5"
 	],
+	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
 		"NOx":["NO","NO2"]
 	},
