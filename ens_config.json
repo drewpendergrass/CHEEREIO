@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_scale_v01",
+	"RUN_NAME" : "METHANE_scale_v02",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -156,7 +156,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1"
+		"CH4_TROPOMI":"1"
 	},
 	"OBS_ERROR": {
 		"CH4_TROPOMI":"15"
