@@ -38,6 +38,9 @@ class Assimilator(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.nature = None
+		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
+		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
+			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
 		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
 		self.MINNUMOBS = int(spc_config['MINNUMOBS'])
 		self.MinimumScalingFactorAllowed = spc_config["MinimumScalingFactorAllowed"]
@@ -110,14 +113,14 @@ class Assimilator(object):
 		firstens = self.ensemble_numbers[0]
 		first3D = self.gt[firstens].getSpecies3Dconc(species)
 		shape4D = np.zeros(4)
-		shape4D[0:3] = np.shape(first3D)
-		shape4D[3]=len(self.ensemble_numbers)
+		shape4D[1:4] = np.shape(first3D)
+		shape4D[0]=len(self.ensemble_numbers)
 		shape4D = shape4D.astype(int)
 		conc4D = np.zeros(shape4D)
-		conc4D[:,:,:,firstens-1] = first3D
+		conc4D[firstens-1,:,:,:] = first3D
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				conc4D[:,:,:,i-1] = self.gt[i].getSpecies3Dconc(species)
+				conc4D[i-1,:,:,:] = self.gt[i].getSpecies3Dconc(species)
 		return conc4D
 	def prepareMeansAndPerts(self,latval,lonval):
 		if self.verbose>=2:
@@ -316,6 +319,7 @@ class Assimilator(object):
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
+	#Simple scaling of restart concentrations to match observed values
 	def scaleRestarts(self):
 		if self.verbose>=1:
 			print(f"Scaling all restarts to match observations.")
@@ -342,7 +346,17 @@ class Assimilator(object):
 			for i in self.ensemble_numbers:
 				scaled_species = self.gt[i].getSpecies3Dconc(species)*scaling_factor
 				self.gt[i].setSpecies3Dconc(species, scaled_species)
-		#Save out the resarts
+	def amplifySpreads(self):
+		if self.verbose>=1:
+			print(f"Amplifying ensemble spread of concentrations.")
+		for species in self.STATE_VECTOR_CONC:
+			conc4D = self.combineEnsembleForSpecies(species)
+			conc_mean = np.mean(conc4D,axis=0)
+			#Subtract the mean, multiply by new_std/old_std (just the amplification factor), add the mean back in
+			conc4D_amplifiedSpread = ((conc4D-conc_mean)*self.SPREAD_AMPLIFICATION_FACTOR) + conc_mean
+			for i in self.ensemble_numbers: 
+				self.gt[i].setSpecies3Dconc(species, conc4D_amplifiedSpread[i-1,:,:,:])
+	def saveRestarts(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].saveRestart()
 	def LETKF(self):

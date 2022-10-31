@@ -38,6 +38,7 @@ firstrun=true
 scalefirst="$(jq -r ".SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
 trigger_burnin_scale=false
 scaleburnin="$(jq -r ".SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" {ASSIM}/ens_config.json)"
+amplifyspread="$(jq -r ".AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
 
 ### Run GEOS-Chem in the directory corresponding to the cluster Id
 cd  {RunName}_${xstr}
@@ -94,12 +95,18 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   else
     simplescale=false
   fi
+  #Check if we are amplifying concentration spreads
+  if [[ ("${firstrun}" = "true" && "${amplifyspread}" = "true") ]]; then
+    doamplification=true
+  else
+    doamplification=false
+  fi
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
     if [ {MaxPar} -eq 1 ]; then
-      bash par_assim.sh ${x} 1 ${simplescale}
+      bash par_assim.sh ${x} 1 ${simplescale} ${doamplification}
     else
-      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${simplescale}" ::: {1..{MaxPar}}
+      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${simplescale} ${doamplification}" ::: {1..{MaxPar}}
     fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)

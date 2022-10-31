@@ -9,6 +9,7 @@ timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM
 ensnum = int(sys.argv[2])
 corenum = int(sys.argv[3])
 just_scale = str(sys.argv[4])=='true' #If this is the first run AND user specifies, we'll just scale (no assimilation); this is calculated in the run_ensemble_simulations script now.
+do_amplification = str(sys.argv[5])=='true' #If this is the first run AND user specifies, we'll amplify the spreads of the ensemble member concentrations.
 if just_scale:
 	label_str = 'scaling'
 else:
@@ -25,7 +26,10 @@ if just_scale:
 		end = time.time()
 		print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
 		start = time.time()
+		if do_amplification:
+			a.amplifySpreads()
 		a.scaleRestarts()
+		a.saveRestarts()
 		with open(f"{path_to_scratch}/ASSIMILATION_COMPLETE", "w") as f:
 			f.write("Done.\n") #If so, save flag file to ensemble folder
 		end = time.time()
@@ -41,6 +45,8 @@ else:
 	end = time.time()
 	print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
 	start = time.time()
+	if do_amplification:
+		a.amplifySpreads()
 	a.LETKF()
 	end = time.time()
 	print(f'Core ({ensnum},{corenum}) completed computation for {dateval} and saved columns in {end - start} seconds.')
