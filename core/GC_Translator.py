@@ -26,7 +26,7 @@ class GC_Translator(object):
 			self.num=None
 		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.verbose,self.num)
 		if computeStateVec:
-			self.statevec = StateVector(StateVecType=self.StateVecType,data=self.data,species_config=self.species_config,verbose=self.verbose,num=self.num)
+			self.statevec = StateVector(StateVecType=self.StateVecType,data=self.data,species_config=self.species_config,emis_sf_filenames=self.emis_sf_filenames,verbose=self.verbose,num=self.num)
 		else:
 			self.statevec = None
 		if self.verbose>=3:
@@ -72,7 +72,7 @@ class GC_Translator(object):
 		return self.statevec.localizeFromFull(latind,lonind,'intersect')
 	def getStateVector(self,latind=None,lonind=None):
 		if self.statevec is None:
-			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,species_config = self.species_config,verbose=self.verbose,num=self.num)
+			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,species_config = self.species_config,emis_sf_filenames=self.emis_sf_filenames,verbose=self.verbose,num=self.num)
 		return self.statevec.getStateVector(latind,lonind)
 	######    END FUNCTIONS THAT ALIAS STATEVECTOR    ########
 	def setSpeciesConcByColumn(self,species,column2d,useTrop):
@@ -257,7 +257,7 @@ class DataBundle(object):
 
 
 class StateVector(object):
-	def __init__(self,StateVecType,data,species_config,verbose,num=None):
+	def __init__(self,StateVecType,data,species_config,emis_sf_filenames,verbose,num=None):
 		self.StateVecType = StateVecType
 		self.StateVecFrom3D = MakeStateVecFrom3D(self.StateVecType)
 		if self.StateVecType == "3D":
@@ -293,7 +293,7 @@ class StateVector(object):
 		for spec_conc in self.species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.StateVecFrom3D(self.data.getSpecies3Dconc(spec_conc),**params))
 		#If no scaling factor files, append 1s because this is a nature directory
-		if len(self.emis_sf_filenames)==0:
+		if len(emis_sf_filenames)==0:
 			lenones = len(self.data.getLat())*len(self.data.getLon())*len(self.species_config['CONTROL_VECTOR_EMIS'])
 			statevec_components.append(np.ones(lenones))
 		else:
