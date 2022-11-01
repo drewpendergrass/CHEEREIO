@@ -122,7 +122,7 @@ class GC_Translator(object):
 					analysis_2d = np.reshape(analysis_subset,restart_shape[1::]) #We are in 2D, so unfurl accordingly
 					if self.StateVecType == 'surface':
 						self.data.setSpeciesConcByLayer(spec_conc, analysis_2d, layer=0) #overwrite surface layer only.
-					elif self.StateVecType == 'column_sum':
+					elif (self.StateVecType == 'column_sum') or (self.StateVecType == 'column_sum_noheight'):
 						self.setSpeciesConcByColumn(spec_conc,analysis_2d,useTrop=False) #scale all column values evenly using column update.
 					elif self.StateVecType == 'trop_sum':
 						self.setSpeciesConcByColumn(spec_conc,analysis_2d,useTrop=True) #scale all column values within troposphere evenly using column update.
@@ -269,6 +269,9 @@ class StateVector(object):
 		elif self.StateVecType == "column_sum":
 			self.ConcInterp = "2D" #One layer of concentrations effectively present, interpret state vector appropriately.
 			self.params_needed = ["temp","pres","height"]
+		elif self.StateVecType == "column_sum_noheight":
+			self.ConcInterp = "2D" #One layer of concentrations effectively present, interpret state vector appropriately.
+			self.params_needed = ["temp","pres"]
 		elif self.StateVecType == "trop_sum":
 			self.ConcInterp = "2D" #One layer of concentrations effectively present, interpret state vector appropriately.
 			self.params_needed = ["temp","pres","height","trop"]
@@ -386,6 +389,12 @@ def MakeStateVecFrom3D(StateVecType):
 			# partial coumns (molecules/cm2)
 			partial_cols=nd3D*height*1e2 #convert from m to cm
 			colsum = np.sum(partial_cols,axis=0) #sum up 
+			return colsum.flatten()
+	elif StateVecType == "column_sum_noheight": #Not all restarts have BXHEIGHT; if this case, we don't weight by height.
+		def StateVecFrom3D(conc3D,temp,pres):
+			#number density (molecules/cm3), we get there from mol/mol to molec/mol (avogadro) -> molec/J (RT) -> molec/m3 (pressure, in Pa) -> molec/cm3 (10^-6)
+			nd3D=(((conc3D*6.0221408e23) / (temp*8.31446261815324))) *pres*1e-6
+			colsum = np.sum(nd3D,axis=0) #sum up 
 			return colsum.flatten()
 	elif StateVecType == "trop_sum":
 		def StateVecFrom3D(conc3D,temp,pres,height,trop):

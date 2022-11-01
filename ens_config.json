@@ -65,7 +65,7 @@
 	"CONTROL_VECTOR_CONC" : [
 		"CH4"
 	],
-	"STATE_VECTOR_CONC_REPRESENTATION" : "column_sum",
+	"STATE_VECTOR_CONC_REPRESENTATION" : "column_sum_noheight",
 	"CONTROL_VECTOR_EMIS" : {
 		"CH4":"CH4"
 	},
