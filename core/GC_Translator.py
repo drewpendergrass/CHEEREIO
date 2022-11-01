@@ -351,7 +351,7 @@ class StateVector(object):
 	#old getColumnIndicesFromFullStateVector is getSurroundings = False; 
 	#old getColumnIndicesFromLocalizedStateVector is getSurroundings = 'intersect'
 	def localizeFromFull(self,latind,lonind,getSurroundings):
-		conc_index,conc_incrementor,emis_index,emis_incrementor = getIndices(latind,lonind,getSurroundings = getSurroundings)
+		conc_index,conc_incrementor,emis_index,emis_incrementor = self.getIndices(latind,lonind,getSurroundings = getSurroundings)
 		conccount = len(self.species_config['STATE_VECTOR_CONC'])
 		emcount = len(self.species_config['CONTROL_VECTOR_EMIS'])
 		ind_collector = []
