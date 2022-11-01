@@ -318,13 +318,13 @@ class StateVector(object):
 		dummyEmis,emis_incrementor = makeDummy("2D")
 		if getSurroundings != False:
 			surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
-			if self.ConcInterp == '3D'
+			if self.ConcInterp == '3D':
 				dummy_conc_flat = dummyConc[:,surr_latinds,surr_loninds].flatten()
 			else:
 				dummy_conc_flat = dummyConc[surr_latinds,surr_loninds].flatten()
 			dummy_emis_flat = dummyEmis[surr_latinds,surr_loninds].flatten()
 			if getSurroundings == 'intersect':
-				if self.ConcInterp == '3D'
+				if self.ConcInterp == '3D':
 					dummy_conc_flat_column = dummyConc[:,latind,lonind].flatten()
 				else:
 					dummy_conc_flat_column = dummyConc[latind,lonind]
@@ -337,7 +337,7 @@ class StateVector(object):
 				conc_index = dummy_conc_flat
 				emis_index = dummy_emis_flat
 		else: #no surroundings
-			if self.ConcInterp == '3D'
+			if self.ConcInterp == '3D':
 				conc_index = dummyConc[:,latind,lonind].flatten()
 			else:
 				conc_index = np.array([dummyConc[latind,lonind]])
