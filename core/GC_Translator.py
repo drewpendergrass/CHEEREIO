@@ -318,8 +318,8 @@ class StateVector(object):
 		return [dummy,incrementor]
 	#getSurroundings: True, False, or intersect (for column within localized statevec)
 	def getIndices(self,latind,lonind,getSurroundings):
-		dummyConc,conc_incrementor = makeDummy(self.ConcInterp) #Concentrations can be 3D or 2D depending on user settings
-		dummyEmis,emis_incrementor = makeDummy("2D")
+		dummyConc,conc_incrementor = self.makeDummy(self.ConcInterp) #Concentrations can be 3D or 2D depending on user settings
+		dummyEmis,emis_incrementor = self.makeDummy("2D")
 		if getSurroundings != False:
 			surr_latinds, surr_loninds = tx.getIndsOfInterest(latind,lonind)
 			if self.ConcInterp == '3D':
