@@ -24,7 +24,7 @@ class GC_Translator(object):
 			print(f"GC_translator number {self.num} has been called for directory {path_to_rundir} and restart {self.filename}; construction beginning")
 		else:
 			self.num=None
-		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.verbose,self.num)
+		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.timestamp_as_date,self.verbose,self.num)
 		if computeStateVec:
 			self.statevec = StateVector(StateVecType=self.StateVecType,data=self.data,species_config=self.species_config,emis_sf_filenames=self.emis_sf_filenames,verbose=self.verbose,num=self.num)
 		else:
@@ -145,10 +145,11 @@ class GC_Translator(object):
 #Handles data getting and setting for emissions and concentrations.
 #Class exists to prevent mutual dependencies.
 class DataBundle(object):
-	def __init__(self,rst_filename,emis_sf_filenames,species_config,verbose,num=None):
+	def __init__(self,rst_filename,emis_sf_filenames,species_config,timestamp_as_date,verbose,num=None):
 		self.restart_ds = xr.load_dataset(rst_filename)
 		self.species_config = species_config
 		self.verbose = verbose
+		self.timestamp_as_date = timestamp_as_date
 		if verbose >= 3:
 			self.num = num
 		self.emis_ds_list = {}
