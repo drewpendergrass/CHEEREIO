@@ -383,8 +383,8 @@ def MakeStateVecFrom3D(StateVecType):
 		def StateVecFrom3D(conc3D,temp,pres,height):
 			#number density (molecules/cm3), we get there from mol/mol to molec/mol (avogadro) -> molec/J (RT) -> molec/m3 (pressure, in Pa) -> molec/cm3 (10^-6)
 			nd3D=(((conc3D*6.0221408e23) / (temp*8.31446261815324))) *pres*1e-6
-            # partial coumns (molecules/cm2)
-            partial_cols=nd3D*height*1e2 #convert from m to cm
+			# partial coumns (molecules/cm2)
+			partial_cols=nd3D*height*1e2 #convert from m to cm
 			colsum = np.sum(partial_cols,axis=0) #sum up 
 			return colsum.flatten()
 	elif StateVecType == "trop_sum":
@@ -395,8 +395,8 @@ def MakeStateVecFrom3D(StateVecType):
 			conc3D[levcube>=trop] = 0 #Make mask where levcube is above tropopause level, use it to select strat/meso values from conc3D, and set them to 0.
 			#number density (molecules/cm3), we get there from mol/mol to molec/mol (avogadro) -> molec/J (RT) -> molec/m3 (pressure, in Pa) -> molec/cm3 (10^-6)
 			nd3D=(((conc3D*6.0221408e23) / (temp*8.31446261815324))) *pres*1e-6
-            # partial coumns (molecules/cm2)
-            partial_cols=nd3D*height*1e2 #convert from m to cm
+			# partial coumns (molecules/cm2)
+			partial_cols=nd3D*height*1e2 #convert from m to cm
 			colsum = np.sum(partial_cols,axis=0) #sum up 
 			return colsum.flatten()
 	else:
