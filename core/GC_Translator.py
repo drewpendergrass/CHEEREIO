@@ -26,7 +26,7 @@ class GC_Translator(object):
 			self.num=None
 		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.verbose,self.num)
 		if computeStateVec:
-			self.statevec = StateVector(StateVecType=self.StateVecType,data=data,species_config=self.species_config,verbose=self.verbose,num=self.num)
+			self.statevec = StateVector(StateVecType=self.StateVecType,data=self.data,species_config=self.species_config,verbose=self.verbose,num=self.num)
 		else:
 			self.statevec = None
 		if self.verbose>=3:
