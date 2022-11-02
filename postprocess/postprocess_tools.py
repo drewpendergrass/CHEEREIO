@@ -53,7 +53,6 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None):
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
 	sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
-	files_split_by_sf = []
 	for name in sf_names:
 		pathstocombine = [path+name for path in subdirs]
 		ds_files = []
