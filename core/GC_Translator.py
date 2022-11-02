@@ -55,11 +55,11 @@ class GC_Translator(object):
 	def getEmisTime(self):
 		return self.data.getEmisTime()
 	def getEmisSF(self, species): #Get the emissions from the timestamp nearest to the one supplied by the user.
-		return self.data.getEmisSF()
+		return self.data.getEmisSF(species)
 	def getEmisLat(self, species):
-		return self.data.getEmisLat()
+		return self.data.getEmisLat(species)
 	def getEmisLon(self, species):
-		return self.data.getEmisLon()
+		return self.data.getEmisLon(species)
 	def addEmisSF(self, species, emis2d, assim_time): #Add 2d emissions scaling factors to the end of the emissions scaling factor
 		self.data.addEmisSF(species, emis2d, assim_time)
 	######    END FUNCTIONS THAT ALIAS DATA BUNDLE    ########
