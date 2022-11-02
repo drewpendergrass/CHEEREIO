@@ -60,8 +60,8 @@ class GC_Translator(object):
 		return self.data.getEmisLat(species)
 	def getEmisLon(self, species):
 		return self.data.getEmisLon(species)
-	def addEmisSF(self, species, emis2d, assim_time): #Add 2d emissions scaling factors to the end of the emissions scaling factor
-		self.data.addEmisSF(species, emis2d, assim_time)
+	def addEmisSF(self, species, emis2d): #Add 2d emissions scaling factors to the end of the emissions scaling factor
+		self.data.addEmisSF(species, emis2d)
 	######    END FUNCTIONS THAT ALIAS DATA BUNDLE    ########
 	######    BEGIN FUNCTIONS THAT ALIAS STATEVECTOR    ########
 	def getLocalizedStateVectorIndices(self,latind,lonind):
@@ -221,7 +221,7 @@ class DataBundle(object):
 	def getEmisLon(self, species):
 		return np.array(self.emis_ds_list[species]['lon'])
 	#Add 2d emissions scaling factors to the end of the emissions scaling factor
-	def addEmisSF(self, species, emis2d, assim_time):
+	def addEmisSF(self, species, emis2d):
 		timelist = self.getEmisTime()
 		last_time = timelist[-1]
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
