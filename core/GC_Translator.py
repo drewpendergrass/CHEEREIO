@@ -290,7 +290,7 @@ class StateVector(object):
 		statevec_components = []
 		params = {}
 		for param in self.params_needed:
-			params[param] = data.getMetByCode(param)
+			params[param] = self.data.getMetByCode(param)
 		for spec_conc in self.species_config['STATE_VECTOR_CONC']:
 			statevec_components.append(self.StateVecFrom3D(self.data.getSpecies3Dconc(spec_conc),**params))
 		#If no scaling factor files, append 1s because this is a nature directory
