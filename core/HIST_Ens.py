@@ -121,6 +121,7 @@ class HIST_Ens(object):
 			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
 			minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
 			errtype = self.spc_config['OBS_ERROR_TYPE'][species]
+			additional_err_params = self.spc_config['OTHER_OBS_ERROR_PARAMETERS'][species]
 			if errtype=='product':
 				useObserverError = True
 				transportError = errval
@@ -131,6 +132,10 @@ class HIST_Ens(object):
 				transportError = None
 				prescribed_error = errval
 				prescribed_error_type = errtype
+			if "transport_error" in additional_err_params.keys():
+				transportError = float(additional_err_params["transport_error"])
+			else:
+				transportError = None
 			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
 			if self.saveAlbedo:

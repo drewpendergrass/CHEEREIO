@@ -190,6 +190,11 @@
 	"MIN_OBS_ERROR":{
 		"NO2_OMI":"0"
 	},
+	"OTHER_OBS_ERROR_PARAMETERS":{
+		"NO2_OMI":{
+			"transport_error":"0"
+		}
+	},
 	"AV_TO_GC_GRID" : "True",
 	"SUPER_OBSERVATION_FUNCTION":{
 		"NO2_OMI":"default"
