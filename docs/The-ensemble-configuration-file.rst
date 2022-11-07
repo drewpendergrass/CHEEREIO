@@ -266,14 +266,26 @@ The other "std" option, where ``correlatedInitialScalings`` is ``True``, means t
 LETKF settings
 ~~~~~~~~~~~~~
 
-* REGULARIZING_FACTOR_GAMMA: An array of regularization factors, corresponding with ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`. 
-* OBS_COVARIANCE: An array of error information, interpreted as one of three categories: relative, absolute, or "product." This information represents uncertainty in observations. If error is relative, it is given as a decimal (0.1 means 10% relative error). If error is absolute, it is given in the square of whatever units the observations are in (please note this; if you are using absolute errors you have to square them before putting them in the configuration file). If error is "product," then CHEEREIO uses the error from the observation product. In the product case, the number recorded under OBS_COVARIANCE is only used if observations are averaged to the GEOS-Chem grid. If observations are averaged, then observation error decreases like :math:`\sqrt{n}` where n is the number of observations averaged; the number recorded in this entry is then added to that reduced error to account for model transport error. The order of numbers here is the same as ``OBSERVED_SPECIES``. For clarity, only diagonal observational covariance matrices are supported at this time.
-* OBS_COVARIANCE_TYPE: An array of error types, given as strings reading "relative",  "absolute", or "product", corresponding to each error value in ``OBS_COVARIANCE``. This tells CHEEREIO how to interpret the covariance data type (described above).
+* REGULARIZING_FACTOR_GAMMA: A dictionary of regularization factors, with a key corresponding with each key in ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`.
+* OBS_ERROR: An dictionary of error information, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. The value is interpreted as one of three categories: "relative", "absolute", or "product". This information represents uncertainty in observations. If error is relative, it is given as a decimal (0.1 means 10% relative error). If error is absolute, it is given as the same units as the observations are in (CHEEREIO will square these values for the covariance matrix). If error is "product," then CHEEREIO uses the error from the observation product. In the product case, the number recorded under OBS_ERROR will not be used. For clarity, only diagonal observational covariance matrices are supported at this time.
+* OBS_ERROR_TYPE: A dictionary of error types, with values given as strings reading "relative",  "absolute", or "product", and with keys corresponding to each key in ``OBSERVED_SPECIES``. This tells CHEEREIO how to interpret the error data types, as described above.
+* OBS_ERROR_SELF_CORRELATION: A dictionary of correlations between errors in data samples, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. This value is used to reduce error if the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"). More on this below in the ``AV_TO_GC_GRID`` entry. 
+* MIN_OBS_ERROR: A dictionary of minimum possible errors, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. If the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"), this value gives the minimum possible error allowable upon error reduction. More on this below in the ``AV_TO_GC_GRID`` entry. 
+*OTHER_OBS_ERROR_PARAMETERS: A dictionary of dictionaries, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a value that itself is a dictionary with additional settings and their values. At this time, the only setting that is applied using this entry is called ``transport_error``, which is used to account for perfectly correlated model transport errors when the user aggregates multiple observations together onto the GEOS-Chem grid ("super-observations"). More information on this in the the ``AV_TO_GC_GRID`` entry. Below is valid syntax for this setting:
+::
+
+	"OTHER_OBS_ERROR_PARAMETERS":{
+		"CH4_TROPOMI":{
+			"transport_error":"6.1"
+		}
+	},
+
+* AV_TO_GC_GRID: "True" or "False", should observations be averaged to the GEOS-Chem grid? *Note that errors are not currently updated after averaging; this is a top development priority*. UPDATE ME
+* SUPER_OBSERVATION_FUNCTION: UPDATE ME
 * INFLATION_FACTOR: :math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
 * ASSIM_TIME: Length in hours of assimilation window. The assimilation window refers to the period in which GEOS-Chem is run and observations are accumulated; the data assimilation update is calculated in one go within this window. The data assimilation literature contains extensive discussion of this concept.
 * MAXNUMOBS: Maximum number of observations used in a column assimilation calculation. If the number of observations available is greater than this value, then CHEEREIO will randomly throw out observations until only ``MAXNUMOBS`` remain.
 * MINNUMOBS: Minimum number of observations for a column assimilation calculation to be performed. If the number of observations is below this number, no assimilation is calculated and the posterior is set to the prior.
-* AV_TO_GC_GRID: "True" or "False", should observations be averaged to the GEOS-Chem grid? *Note that errors are not currently updated after averaging; this is a top development priority*.
 * LOCALIZATION_RADIUS_km: When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
 * AveragePriorAndPosterior: "True" or "False", should the posterior be set to a weighted average of the prior and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinPriorPosteriorAverage`` in the next setting.
 * PriorWeightinPriorPosteriorAverage: The prior weight if averaging with the posterior from the LETKF. A value between 0 and 1.
@@ -283,10 +295,20 @@ Postprocessing settings
 
 * animation_fps_scalingfactor: Frames per second for movies of scaling factors and emissions made by the postprocessing workflow.
 * animation_fps_concentrations: Frames per second for movies of concentrations made by the postprocessing workflow.
-* postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
+* hemco_diags_to_process: An array of entries from HEMCO Diagnostics that you would like processed into movies. This is usually emissions totals. See below for an example entry:
+:: 
+
+	"hemco_diags_to_process" : [
+		"EmisCH4_Total"
+	],
+
+* OBSERVATION_UNITS: a dictionary with keys from ``OBSERVED_SPECIES`` and values representing the units will be plotted. This is governed by how the observation operator is defined. 
+* scalefactor_plot_freq: The CHEEREIO postprocessing routine will save out maps of scale at this temporal resolution: either "all" for save out an image for every assimilation window, or "monthly" to save out one per month.
 
 Extensions
 ~~~~~~~~~~~~~
+
+Additional settings can be loaded in through extensions. UPDATE ME
 
 * TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
 * TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
@@ -296,3 +318,4 @@ Extensions
 * TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
 * TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
 
+* postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
