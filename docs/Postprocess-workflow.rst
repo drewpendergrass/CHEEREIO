@@ -1,3 +1,5 @@
+.. _Postprocessing workflow:
+
 The default postprocessing workflow  
 ==========
 

@@ -18,6 +18,14 @@ Users should pay attention to collections saved in ``HISTORY.rc`` and modify if 
 
 Aside from these subtleties, the user should modify the template run directory as freely as they would any GEOS-Chem run directory they are customizing for their own research.
 
+.. _HEMCO verification:
+
+Verifying HEMCO Config after initialization
+~~~~~~~~~~~~~~
+
+In particular, while CHEEREIO does support multiple emissions updates within the same species (for example, updating NO agricultural emissions separately from the rest of NO emissions), it is not capable of distinguishing these kinds of species on its own. Instead, it will just add scaling factor references wherever the species of interest emerges. In this case, user must delete the correct duplicated scaling factor. The user should also pay special attention that scaling factors are not applied to inapplicable sources, such as negative emissions from soil uptake. See the  `GEOS-Chem Wiki Page for HEMCO_Config.rc <http://wiki.seas.harvard.edu/geos-chem/index.php/The_HEMCO_Config.rc_file>`__ for more information. 
+
+
 The Spinup Run Directory
 -------------
 

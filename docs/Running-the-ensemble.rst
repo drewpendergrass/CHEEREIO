@@ -1,3 +1,5 @@
+.. _Run the ensemble:
+
 Running the ensemble
 ==========
 
@@ -20,6 +22,19 @@ Information about the ensemble state is continuously recorded during run time, a
 * Overall run status for the entire job array (one job per ensemble member) is available from the SLURM scheduler. A good command is ``sacct``, which will display run status (it is especially useful as jobs are pending while resources become available). Each run of GEOS-Chem will be recorded as a separate entry under the ``time`` sub-job label, as each GEOS-Chem run (initialized by the outcome of the previous assimilation step) is submitted with a separate (timed) ``srun`` command. 
 * GEOS-Chem run status for individual ensemble members are available in the ``GC.log`` file in each ensemble member run directory.
 * Additional log files, including shell-level ``.err`` and ``.out`` files and log files containing data about assimilation, are all available in the ``log`` folder described in :ref:`Ensemble Runs`.
+
+.. _Run Ensemble Spinup Simulations:
+
+The two ensemble spinup approaches
+-------------
+
+Method 1: Extending the first assimilation period
+~~~~~~~~~~~~~
+
+After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.
+
+Method 2: Using a seperate ensemble spinup run
+~~~~~~~~~~~~~
 
 .. _Run Ensemble Simulations:
 

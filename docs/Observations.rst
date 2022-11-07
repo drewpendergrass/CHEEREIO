@@ -35,6 +35,8 @@ Supplementing an existing observation type
 
 TKTKTK
 
+.. _New observation:
+
 Adding a new observation type
 ~~~~~~~~~~~~~
 
