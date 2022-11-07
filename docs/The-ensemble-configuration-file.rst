@@ -210,31 +210,21 @@ HISTORY.rc settings
 Observation settings
 ~~~~~~~~~~~~~
 
-* OBSERVED_SPECIES: A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. Unlike elsewhere, here the order matters. Later in the configuration file, arrays of errors and regularization factors will be associated with these species according to the order they are stored. More in the next section. 
-* OBS_4D: *Deprecated: until removed, make an array of "True" of length OBSERVED_SPECIES*.
-* OBS_TYPE_TROPOMI: Array of length ``OBSERVED_SPECIES``, with a value of "True" or "False" if the observation is from TROPOMI.
-* TROPOMI_dirs: Dictionary linking observed TROPOMI species to the directory containing the observations. Here is an example, along with the corresponding ``OBSERVED_SPECIES`` settings:
+* OBSERVED_SPECIES: A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. 
+* OBS_TYPE: A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
+* TROPOMI_dirs: Dictionary linking observed TROPOMI species to the directory containing the observations. If you aren't using TROPOMI, this can be left blank. Here is an example, along with the corresponding ``OBSERVED_SPECIES`` settings:
 ::
 
 	"OBSERVED_SPECIES" : {
-		"NO2_TROPOMI": "NO2"
+		"CH4_TROPOMI": "NO2"
 	},
 	"TROPOMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019"
 	},
 
-* OMI_dirs: As in TROPOMI_dirs, but for OMI.
-* SaveDOFS: Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior.
+* OMI_dirs: As in TROPOMI_dirs, but for OMI. Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page. 
+* SaveDOFS: Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. *Note: this option is functional but DOFS values are not easily interpretable; hold off use for now while we think of alternative definitions in our rank-deficient space (DP, 2022/11/07).*
 * DOFS_filter: What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
-* LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_CALC: For TROPOMI observations, should CHEEREIO use the "low memory" algorithm to apply the averaging kernel ("True") or the default fast algorithm ("False"). For highly dense observations like TROPOMI NO\ :sub:`2` set to "True", otherwise leave as "False"
-* LOW_MEMORY_TROPOMI_AVERAGING_KERNEL_BATCH_SIZE: Batch size for the low memory TROPOMI averaging kernel algorithm. Users should probably leave as default, but the user can increase this value to speed up the algorithm at the cost of memory, or vice versa.
-* TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
-* TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_albedo_low: Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_albedo_high: Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_winter_lat: Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
 
 Scaling factor settings
 ~~~~~~~~~~~~~
@@ -264,9 +254,21 @@ LETKF settings
 * AveragePriorAndPosterior: "True" or "False", should the posterior be set to a weighted average of the prior and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinPriorPosteriorAverage`` in the next setting.
 * PriorWeightinPriorPosteriorAverage: The prior weight if averaging with the posterior from the LETKF. A value between 0 and 1.
 
-Miscellaneous settings
+Postprocessing settings
 ~~~~~~~~~~~~~
 
 * animation_fps_scalingfactor: Frames per second for movies of scaling factors and emissions made by the postprocessing workflow.
 * animation_fps_concentrations: Frames per second for movies of concentrations made by the postprocessing workflow.
 * postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
+
+Extensions
+~~~~~~~~~~~~~
+
+* TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
+* TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
+* TROPOMI_CH4_filter_swir_albedo_low: Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
+* TROPOMI_CH4_filter_swir_albedo_high: Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
+* TROPOMI_CH4_filter_winter_lat: Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
+* TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
+* TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
+
