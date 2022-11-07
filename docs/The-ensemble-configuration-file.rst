@@ -1,11 +1,11 @@
 .. _Configuration:
 
-The ensemble configuration file
+Configuring your simulation
 ==========
 
-Because CHEEREIO requires many of the ensemble settings to be globally available to many different types of scripts and programs, written in different languages and stored in in different directories, it expects a very particular kind of installation process and for user settings to be made available in a strict format (so that they can be read by scripts in multiple languages). The overall install process is not too different from the way GEOS-Chem run directories are created as of version 13.0.0, but it does require some care on the part of the user. This page explains how to customize the ensemble to meet your needs. This isn't merely a technical process: the user makes important scientific assumptions in this step!
-
 All ensemble configuration is set by the ``ens_config.json`` file in the main CHEEREIO code directory. This file contains all the information that the user would normally input in the process of making a GEOS-Chem run directory, in addition to other settings like cluster configuration, global assimilation variables (like the localization radius), the composition of the state and control vectors, links to observations, and details about which emissions can be assimilated. This file is in JSON format, which is a format that is human readable but enforces a strict syntax. 
+
+Because CHEEREIO requires many of the ensemble settings to be globally available to many different types of scripts and programs, written in different languages and stored in in different directories, it expects a very particular kind of installation and run process and for user settings to be made available in a strict JSON format (so that they can be read by scripts in multiple languages). This page explains how to customize the ensemble to meet your needs. This isn't merely a technical process: the user makes important scientific assumptions in this step!
 
 **Important:** CHEEREIO constantly references the ``ens_config.json`` file throughout runtime. Changes to this file during runtime will change the settings of the ongoing assimilation calculation. However, there are some settings that are applied at the time of template run directory creation (e.g. cluster settings like memory usage) and cannot be adjusted at runtime via the ``ens_config.json`` file. **To be safe, you should redeploy the ensemble when you make changes to the configuration file and avoid making any changes during runtime.**
 
@@ -35,7 +35,7 @@ JSON stores data in a form very similar to a Python dictionary. To have a basic 
 		"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
 		"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20190101_0000z.nc4",
 
-The first line of the file is a left angle bracket, while the final line is a right angle bracket; inside are a set of keys associated (left side of the colon) associated with values (right side of the colon) by the colon operator.  CHEEREIO only obtains values by key reference. For example, it will always obtain the resolution of the run (in this case 4x5) by searching for the value associated with the "RES" key. Line number does not matter, but each line must end in a comma.
+The first line of the file is a left curly bracket, while the final line is a right curly bracket; inside are a set of keys associated (left side of the colon) associated with values (right side of the colon) by the colon operator.  CHEEREIO only obtains values by key reference. For example, it will always obtain the resolution of the run (in this case 4x5) by searching for the value associated with the "RES" key. Line number does not matter, but each line must end in a comma.
 
 JSON does not support comments. The first three key-value pairs were chosen to approximate a comment, but make no difference at run time.
 
@@ -60,7 +60,9 @@ However, CHEEREIO does expect all values in ``ens_config.json`` as strings. If a
 
 **Important**: There is one subtlety in this particular configuration file: colons in the ``WallTime`` and ``SpinupWallTime`` entries (covered later) must be escaped with two backslashes (``\\``). The first backslash escapes the second backslash in JSON; the second backslash escapes the colon in the SED unix utility which is used in the CHEEREIO installation process. For example, to allow a one day eight hour simulation, you would write ``"WallTime" : "1-08\\:00",``.
 
-More details on the JSON format are available on the JSON `website <https://www.json.org>`__. When in doubt, follow the template ``ens_config.json`` file!
+**Important**: Follow the capitalization conventions in the template ``ens_config.json`` file! CHEEREIO is case sensitive.
+
+More details on the JSON format are available on the JSON `website <https://www.json.org>`__. When in doubt, follow the conventions in the template ``ens_config.json`` file!
 
 A line-by-line guide to ensemble configuration
 -------------
@@ -73,34 +75,44 @@ Basic GEOS-Chem and ensemble settings
 
 The first section of the ``ens_config.json`` file (i.e. between the first two comments) mostly controls settings analagous to those set during normal GEOS-Chem run directory creation. However, there are a few unique options in this setting particular to CHEEREIO. We'll consider these one-by-one.
 
-* RES: The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user.
+* RES: The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user. If there is enough interest I will add more automated support in a later CHEEREIO update.
 * met_name: Meteorology (chosen from MERRA2, GEOSFP, or ModelE2.1).
 * LEVS: Number of levels (47 or 72).
 * NEST: Is this a nested grid simulation? "T" or "F".
 * REGION: Two letter region code for nested grid, or empty string ("") if not.
-* ASSIM_PATH: **Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.**
-* RUN_NAME: The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on.
+* ASSIM_PATH: **Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.** Again, when in doubt follow the provided templates.
+* RUN_NAME: The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on).
 * MY_PATH: Path to the directory where ensembles will be created. A folder with name ``RUN_NAME`` will be created inside.
 * DATA_PATH: Path to where external GEOS-Chem data is located. This can be an empty string if GEOS-Chem has already been configured on your machine (it is automatically overwritten).
 * CH4_HEMCO_ROOT: If the subsequent option, "USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config", is set to "True", then this is the root folder where emissions and other input files for the methane specialty simulation are located. In this case, a special CHEEREIO ``HEMCO_Config.rc`` template from the ``templates/`` folder in the code directory is used. *Note: this option is functional but currently causes GEOS-Chem crashes with an unknown cause (DP, 2022/03/09).*
-* RESTART_FILE: Full path to the restart file for the simulation.
-* BC_FILES: Full path to the boundary condition files for the simulation if a nested grid (empty string otherwise).
+* RESTART_FILE: Full path to the restart file for the simulation. If in the initialization process you selected ``SetupSpinupRun=true``, then this restart file will be used for the classic spin up routine (getting realistic atmospheric conditions for the entire ensemble). Otherwise, this will be the restart file used to initialize all ensemble members.
+* BC_FILES: Full path to the boundary condition files for the simulation if you are using a nested grid (empty string otherwise).
 * sim_name: Simulation type. Valid options are "fullchem", "aerosol", "CH4", "CO2", "Hg", "POPs", "tagCH4", "tagCO", "tagO3", and "TransportTracers".
 * chemgrid: Options are "trop+strat" and "trop_only".
 * sim_extra_option: Options are "none", "benchmark", "complexSOA", "complexSOA_SVPOA", "marinePOA", "aciduptake", "TOMAS15", "TOMAS40", "APM", "RRTMG", "BaP", "PHE", and "PYR". Depending on the simulation type only some will be available. Consult the GEOS-Chem documation for more information.
-* DO_SPINUP: Would you like CHEEREIO to set up a spinup directory for you? "true" or "false". The ensemble will automatically start from the end restart file produced by this run. Note this option is for the standard GEOS-Chem spinup (run once for the whole ensemble).
+* DO_SPINUP: Would you like CHEEREIO to set up a spinup directory for you? "true" or "false". The ensemble will automatically start from the end restart file produced by this run. Note this option is for the standard GEOS-Chem spinup (run once for the whole ensemble). Note that if this is activated, you have to run the ``setup_ensemble.sh`` utility with the ``SetupSpinupRun`` switch set to ``true``.
 * SPINUP_START: Start date for spinup (YYYYMMDD). Empty string if no spinup.
 * SPINUP_END: End date for spinup (YYYYMMDD).
-* DO_ENS_SPINUP: Do you want to use a separate job array to spin up your GEOS-Chem ensemble with randomized scaling factors applied to each ensemble member? "true" or "false". If set to "true", shell scripts entitled ``run_ensemble_spinup_simulations.sh`` and ``run_ensspin.sh`` are installed in the ``ensemble_runs/`` folder. The user should then execute ``run_ensspin.sh`` to spin up the ensemble and create variability between ensemble members before executing ``run_ens.sh`` in the normal run procedure. 
+* DO_CONTROL_RUN: The control run is a normal GEOS-Chem simulation without any assimilation. The output of this simulation can be compared with the LETKF results in the postprocessing workflow. Set to "true" if using a control run. Note that if this is activated, you have to run the ``setup_ensemble.sh`` utility with the ``SetupControlRun`` switch set to ``true``.
+* CONTROL_START: Start date for the control run (YYYYMMDD).
+* CONTROL_END: End date for the control run (YYYYMMDD).
+* DO_ENS_SPINUP: Do you want to use a separate job array to spin up your GEOS-Chem ensemble with randomized scaling factors applied to each ensemble member? "true" or "false". If set to "true", shell scripts entitled ``run_ensemble_spinup_simulations.sh`` and ``run_ensspin.sh`` are installed in the ``ensemble_runs/`` folder. The user should then execute ``run_ensspin.sh`` to spin up the ensemble and create variability between ensemble members before executing ``run_ens.sh`` in the normal run procedure. For more information on the ensemble spinup process, see :ref:`Run Ensemble Spinup Simulations`.
 * ENS_SPINUP_FROM_BC_RESTART: It is possible to start the ensemble spinup procedure using a boundary condition file, rather than a traditional restart file. Set to "true" if using a BC file, and "false" if using a normal restart file to start the ensemble spinup.
 * ENS_SPINUP_START: Start date for ensemble spinup run (YYYYMMDD).
 * ENS_SPINUP_END: End date for ensemble spinup run (YYYYMMDD).
 * START_DATE: Start date for main ensemble data assimilation run (YYYYMMDD).
-* ASSIM_START_DATE: Date where assimilation begins (YYYYMMDD). After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.  
+* ASSIM_START_DATE: Date where assimilation begins (YYYYMMDD). This option allows you to run the first assimilation period for an extra long time (although the assimilation window remains the same), effectively providing an ensemble-wide spinup. For more information on this ensemble spinup option, see :ref:`Run Ensemble Spinup Simulations`. If you have set ``DO_ENS_SPINUP`` to ``true``, then you should set this date to be one assimilation window later than ``START_DATE``.
+* SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : At the end of the first assimilation period, rather than doing the full LETKF calculation, CHEEREIO can scale the ensemble mean so that it matches the observational mean. This is done because if the model is biased relative to observations the LETKF will perform suboptimal updates. Set to "true" to do this scaling (recommended) or "false" to do the usual LETKF calculation. 
 * END_DATE: End date for ensemble run (YYYYMMDD).
-* nEnsemble: Number of ensemble members. 32 is usually a good number. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
-* pPERT: Setting for initial emissions scaling factor creation, where the number provided :math:`p` is used to generate random scaling factors from the distribution :math:`p^u,\\ u{\sim}U(-1,1)`, meaning that u is a uniform random variable ranging from -1 to 1. For example, if ``pPERT`` is "4" then scalings will range from 0.25 to 4, centered on 1.
-* SIMULATE_NATURE: *Deprecated: will be removed before official release (DP, 2022/03/09)*. End users should leave this set to "false", as this was used for testing in early CHEEREIO development.  
+* AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD: At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough. If this option is set to "true", then CHEEREIO will multiply the standard deviation of the ensemble after ensemble spinup is complete by the factor given in ``SPREAD_AMPLIFICATION_FACTOR``. This spread amplification is done after the first assimilation period, so it will work with either spinup method.
+* SPREAD_AMPLIFICATION_FACTOR: If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period.
+* SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected.
+* BURN_IN_END: If ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` is set to ``true``, then this is the date (YYYYMMDD) when the burn-in period ends
+* POSTPROCESS_START_DATE: The date when the postprocessing script should start (YYYYMMDD). This should always be at least one assimilation window away from ``START_DATE``. If you are using a burn-in period, you can set this for after the burn-in period ends to ensure that all your analysis discards this period.
+* POSTPROCESS_END_DATE: The date when the postprocessing script should end (YYYYMMDD). Usually the same as ``END_DATE``, though the user can change the postprocess start and end dates to fit whatever application they are interested in.
+* nEnsemble: Number of ensemble members. 32 or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
+* SIMULATE_NATURE: *Deprecated: will be removed before official release (DP, 2022/03/09)*. End users should leave this set to "false", as this was used for testing in early CHEEREIO development. 
+* verbose: Amount of information to print out as the ensemble runs. 1 is the default. 0 supresses most output, 2 is useful for basic debugging, and 3 for intense debugging. 
 
 Cluster settings
 ~~~~~~~~~~~~~
@@ -118,6 +130,8 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 
 Species in state/control vectors
 ~~~~~~~~~~~~~
+
+A key feature of CHEEREIO is its distinction between "control" and "state" vectors, following work by `Kazuyuki Miyazaki <https://science.jpl.nasa.gov/people/Miyazaki/>`__. The state vector should consist of all concentrations relevant to the problem at hand as well as the emissions of interest (e.g. large chemical families). The control vector should be a subset of the state vector, and represents concentrations and the same emissions of interest that the user believes can reasonably be updated on the basis of observations. In many cases the control vector and state vector are identical, but removing some species from the control vector can help CHEEREIO handle ensemble behavior. Although the entire state vector is used to calculate the concentration and emissions update, **only the control vector is actually updated.** In practice, this distinction helps tamp down on noise and create well-behaved assimilations.
 
 * STATE_VECTOR_CONC: Species from the restart files to be included in the state vector. It is generally recommended to include a fairly wide range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array. This is an example for NO\ :sub:`x` data assimilation: 
 ::
@@ -213,6 +227,7 @@ Observation settings
 Scaling factor settings
 ~~~~~~~~~~~~~
 
+* pPERT: Setting for initial emissions scaling factor creation, where the number provided :math:`p` is used to generate random scaling factors from the distribution :math:`p^u,\\ u{\sim}U(-1,1)`, meaning that u is a uniform random variable ranging from -1 to 1. For example, if ``pPERT`` is "4" then scalings will range from 0.25 to 4, centered on 1.
 * MaskOceanScaleFactor: Should scaling factors be allowed to vary over the oceans? An array of "True" or "False" of length ``OBSERVED_SPECIES`` where each boolean corresponds with the species in the same index in ``OBSERVED_SPECIES``. If "True", scaling factors for that species over the ocean are always set to 1 across all ensemble members.
 * MaskCoastsGT25pctOcean: Should we use a looser definition of ocean, including grid cells with at least 25% ocean within the definition? "True" or "False". If oceans are masked, setting this to "True" eliminates many coastal cells which can have problematic satellite retrievals for some products.
 * Mask60NScaleFactor: Should scaling factors above 60 N always be set to 1? An array of "True" or "False" of length ``OBSERVED_SPECIES`` where each boolean corresponds with the species in the same index in ``OBSERVED_SPECIES``.
