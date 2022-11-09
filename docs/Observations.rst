@@ -49,3 +49,8 @@ Adding a new super observation error function
 
 TKTKTK
 
+Adding filters to a new observation
+~~~~~~~~~~~~~
+
+TKTKTK
+

@@ -273,7 +273,7 @@ LETKF settings
 * OBS_ERROR_TYPE: A dictionary of error types, with values given as strings reading "relative",  "absolute", or "product", and with keys corresponding to each key in ``OBSERVED_SPECIES``. This tells CHEEREIO how to interpret the error data types, as described above.
 * OBS_ERROR_SELF_CORRELATION: A dictionary of correlations between errors in data samples, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. This value is used to reduce error if the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"). More on this below in the ``AV_TO_GC_GRID`` entry. 
 * MIN_OBS_ERROR: A dictionary of minimum possible errors, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. If the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"), this value gives the minimum possible error allowable upon error reduction. More on this below in the ``AV_TO_GC_GRID`` entry. 
-*OTHER_OBS_ERROR_PARAMETERS: A dictionary of dictionaries, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a value that itself is a dictionary with additional settings and their values. At this time, the only setting that is applied using this entry is called ``transport_error``, which is used to account for perfectly correlated model transport errors when the user aggregates multiple observations together onto the GEOS-Chem grid ("super-observations"). More information on this in the the ``AV_TO_GC_GRID`` entry. Below is valid syntax for this setting:
+* OTHER_OBS_ERROR_PARAMETERS: A dictionary of dictionaries, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a value that itself is a dictionary with additional settings and their values. At this time, the only setting that is applied using this entry is called ``transport_error``, which is used to account for perfectly correlated model transport errors when the user aggregates multiple observations together onto the GEOS-Chem grid ("super-observations"). More information on this in the the ``AV_TO_GC_GRID`` entry. Below is valid syntax for this setting:
 ::
 
 	"OTHER_OBS_ERROR_PARAMETERS":{
@@ -315,14 +315,40 @@ Postprocessing settings
 Extensions
 ~~~~~~~~~~~~~
 
-Additional settings can be loaded in through extensions. UPDATE ME
+Additional CHEEREIO settings, usually for specific observation types, can be loaded in through extensions. Extensions in CHEEREIO are extra JSON files that store additional settings in order to prevent clutter in the ``ens_config.json`` file. Extensions can easily be added by saving a file with name ``NAME_extension.json`` within the ``templates/`` folder. To load in the settings within the ``NAME_extension.json`` file, add the key NAME to the "Extensions" dictionary in ``ens_config.json`` with value "True". Below is an example where we load in the settings in the ``TROPOMI_ALL_extension.json``, ``TROPOMI_CH4_extension.json``, and ``CH4_extension.json`` files. 
+::
 
-* TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
-* TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_albedo_low: Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_albedo_high: Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_winter_lat: Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
-* TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
+	"Extensions": {
+		"TROPOMI_ALL":"True",
+		"TROPOMI_CH4":"True",
+		"CH4":"True"
+	}
 
-* postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
+Below we list the settings that you can set with extensions.
+
+* TROPOMI_CH4 extension.
+
+   * TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
+   * TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
+   * TROPOMI_CH4_filter_swir_albedo_low: Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
+   * TROPOMI_CH4_filter_swir_albedo_high: Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
+   * TROPOMI_CH4_filter_winter_lat: Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
+   * TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
+   * TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
+
+* TROPOMI_ALL extension.
+
+   * postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
+
+* CH4 extension.
+
+   * USE_CUSTOM_CH4_OH_ENTRY: Should we overwrite the OH field setting in ``HEMCO_Config.rc`` for the specialty CH4 simulation with a user-specified entry (given below)? "True" or "False".
+   * CUSTOM_CH4_OH_ENTRY: If USE_CUSTOM_CH4_OH_ENTRY is True, then we overwrite the OH field line in ``HEMCO_Config.rc`` with this entry. Note that backslashes need to be escaped with a front slash. Here is an example entry: ``* GLOBAL_OH  $ROOT\/OH\/v2014-09\/v5-07-08\/OH_3Dglobal.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1`` 
+
+* OMI_NO2 extension.
+
+   * OMI_NO2_FILTERS: Apply specialized filters for OMI NO2? Set to "True" if doing an OMI NO2 inversion, otherwise set to "False".
+   * OMI_NO2_filter_sza: Filter out OMI NO2 observations with a solar zenith angle above this value. Set to "nan" to ignore.
+   * OMI_NO2_filter_cloud_radiance_frac: Filter out OMI NO2 observations with a cloud radiance fraction above this value. Set to "nan" to ignore.
+   * OMI_NO2_filter_surface_albedo: Filter out OMI NO2 observations with a surface albedo above this value. Set to "nan" to ignore.
+
