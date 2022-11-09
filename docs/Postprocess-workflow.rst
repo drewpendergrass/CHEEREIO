@@ -3,10 +3,16 @@
 The default postprocessing workflow  
 ==========
 
-Generating default postprocessing output
+How to run the default postprocessing workflow
 -------------
 
 TKTKTK
+
+What the postprocessing workflow does
+-------------
+
+TKTKTK
+
 
 The postprocessed figures
 -------------
@@ -14,6 +20,11 @@ The postprocessed figures
 TKTKTK
 
 The postprocessed data files
+-------------
+
+TKTKTK
+
+A partial guide to the postprocessing API
 -------------
 
 TKTKTK
