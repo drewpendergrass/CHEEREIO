@@ -42,3 +42,10 @@ Adding a new observation type
 
 TKTKTK
 
+.. _New superobservation:
+
+Adding a new super observation error function
+~~~~~~~~~~~~~
+
+TKTKTK
+
