@@ -15,6 +15,8 @@ To execute the testing suite, navigate to the ``tests`` folder in the CHEEREIO c
 To add new tests to the testing suite, add functions with no input that with names that follow the format ``test_*()``. You can make use of the ``testing_tools.py`` module within the ``core/`` folder to ensure stable testing environments and to generate useful data structures. Every testing function should end with an ``assert`` command that takes a boolean. See the `Pytest documentation <https://docs.pytest.org/en/7.1.x/contents.html>`__ for more information.
 
 
+.. _Fix Kill Ens:
+
 Help! CHEEREIO killed my ensemble
 -------------
 
