@@ -1,6 +1,20 @@
 Debugging CHEEREIO
 ==========
 
+The testing suite
+-------------
+
+CHEEREIO comes with a testing suite that can be run using the pytest package. This testing workflow verifies that the most important aspects of the assimilation module are working properly. For example, it checks that state vectors are formed and subsetted properly, and that assimilation calculations are correct. It also verifies that satellite operators are working as expected and that data is being passed across modules correctly.
+
+However, not every scenario can be tested by this workflow, so please be careful! This workflow also does not test the full CHEEREIO run, which involves running GEOS-Chem. It only works on assimilation. Run this workflow every time you make modifications to the assimilation workflow, just to make sure you didn't break it!
+
+To ensure that testing results are reproducible in different computing environments, CHEEREIO includes data for testing in the ``data_for_tests/`` folder. CHEEREIO also will temporarily override the existing ``ens_config.json`` file with standardized settings for test stability. Within the ``data_for_tests/`` folder, there is are several files ending with ``_settings_to_override.json`` that list the settings that will be used to override ``ens_config.json`` for various test types. CHEEREIO comes with a cleanup routine to ensure that the code directory is returned to its previous state after testing is complete.
+
+To execute the testing suite, navigate to the ``tests`` folder in the CHEEREIO code directory and activate your CHEEREIO conda environment. Then, run the command 'pytest' at the command line within this directory. Test results will be printed to the terminal.
+
+To add new tests to the testing suite, add functions with no input that with names that follow the format ``test_*()``. You can make use of the ``testing_tools.py`` module within the ``core/`` folder to ensure stable testing environments and to generate useful data structures. Every testing function should end with an ``assert`` command that takes a boolean. See the `Pytest documentation <https://docs.pytest.org/en/7.1.x/contents.html>`__ for more information.
+
+
 Help! CHEEREIO killed my ensemble
 -------------
 
