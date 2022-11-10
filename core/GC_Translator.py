@@ -132,7 +132,7 @@ class GC_Translator(object):
 			index_end = np.sum(self.statevec.statevec_lengths[0:(counter+1)])
 			analysis_subset = analysis_vector[index_start:index_end]
 			analysis_emis_2d = np.reshape(analysis_subset,emis_shape) #Unflattens with 'C' order in python
-			self.addEmisSF(spec_emis,analysis_emis_2d,self.species_config['ASSIM_TIME'])
+			self.addEmisSF(spec_emis,analysis_emis_2d)
 			counter+=1
 	def saveRestart(self):
 		self.data.restart_ds["time"] = (["time"], np.array([0]), {"long_name": "Time", "calendar": "gregorian", "axis":"T", "units":self.timestring})
