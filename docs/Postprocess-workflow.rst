@@ -1,6 +1,6 @@
 .. _Postprocessing workflow:
 
-The default postprocessing workflow  
+The postprocessing workflow  
 ==========
 
 How to run the default postprocessing workflow

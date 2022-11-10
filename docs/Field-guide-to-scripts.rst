@@ -100,7 +100,7 @@ If the script ``check_and_complete_assimilation.sh`` finds that all expected ``.
 letkf_utils.py
 ~~~~~~~~~~~~~
 
-This long Python file is the core of CHEEREIO, and is described in detail in the :ref:`LETKF Utility module` page. It contains complex classes and associated methods that do the IO and associated calculations required for the LETKF algorithm.
+This long Python file is the core of CHEEREIO, and is described in detail in the REMOVED, UPDATE page. It contains complex classes and associated methods that do the IO and associated calculations required for the LETKF algorithm.
 
 par_assim.sh
 ~~~~~~~~~~~~~

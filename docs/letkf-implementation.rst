@@ -1,9 +1,9 @@
-.. _LETKF Utility module:
+.. _LETKF modules:
 
-The LETKF Utility module
+The CHEEREIO LETKF implementation
 ==========
 
-The 4D localized ensemble transform Kalman filter (4D-LETKF) algorithm lies at the heart of CHEEREIO. Everything else merely supports the assimilation operations conducted by this module.
+The 4D localized ensemble transform Kalman filter (4D-LETKF) algorithm lies at the heart of CHEEREIO. Everything else merely supports the assimilation operations conducted by this workflow.
 
 Overview of the 4D-LETKF implementation
 -------------
