@@ -8,9 +8,11 @@ Welcome to CHEEREIO!
 
 Welcome to the **CHEEREIO** website and documentation! The GEOS-Chem CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a tool that allows scientists to use observations of pollutants or gases in the atmosphere, such as from satellites or surface stations, to update supercomputer models that simulate the Earth. Other scientists have assembled estimates of emissions of various pollutants from around the world, but our emissions estimates are very uncertain. CHEEREIO uses a model called GEOS-Chem to simulate what the atmosphere would look like if those emissions estimates were correct, and then compares those estimates to the real atmosphere as observed by satellites or equipment on the Earth's surface. CHEEREIO uses the difference between the model simulation and the real world to update our maps of emissions.
 
-More formally, CHEEREIO is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint). 
+More formally, CHEEREIO is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint).
 
 This site provides a manual for the installation, use, and modification of CHEEREIO for a variety of scientific applications. You can download CHEEREIO from the `Github page <https://github.com/drewpendergrass/CHEEREIO/>`__ and install by following the instructions on the :ref:`Installation` page later in the documentation.
+
+**CHEEREIO development status**: We will officially release a CHEEREIO beta when we publish our model description paper, which is currently in prep. We are not yet on a formal release schedule because CHEEREIO is still in active initial development --- though again, we are close (aiming for January 2023). In plain English, you are welcome to download CHEEREIO now but at this time the main branch is not guaranteed to be functional. This documentation is also not yet fully written but will be complete by the time we submit the model description paper. Check back often, or email me at pendergrass [AT] g [DOT] harvard [DOT] edu to be notified when CHEEREIO is released. 
 
 CHEEREIO follows four design principles:
 
