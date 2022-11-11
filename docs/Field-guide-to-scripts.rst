@@ -145,15 +145,16 @@ GT_Container.py
 
 Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`GT Container` entry.
 
-HIST_Ens.py
-~~~~~~~~~~~~~
-UPDATE ME
-Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`HIST Ensemble` entry.
-
 HIST_Translator.py
 ~~~~~~~~~~~~~
-UPDATE ME
-Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`HIST Translator` entry.
+
+Contains the HIST_Translator class, which wraps around GEOS-Chem history output (concentrations saved out over time) and passes them on to the HIST_Ensemble object. More details in the :ref:`HIST Translator` entry.
+
+HIST_Ens.py
+~~~~~~~~~~~~~
+
+Contains the HIST_Ensemble class, which combines GEOS-Chem history data from HIST_Translator objects and passes it to observation operators to create vectors of simulated observations for use in the LETKF algorithm. More details in the :ref:`HIST Ensemble` entry.
+
 
 Observation operators
 -------------
@@ -179,12 +180,12 @@ Utilities for the user
 testing_tools.py
 ~~~~~~~~~~~~~
 
-UPDATE ME
+A suite of utilities used by CHEEREIO's ``pytest`` suite, as well as some utility functions for generating some assimilation objects for debugging CHEEREIO. See commentary in the script for details.
 
 cleanup_after_kill_ens.sh
 ~~~~~~~~~~~~~
 
-UPDATE ME
+If the ensemble fails at runtime for a relatively simple reason, like a cluster hiccup or a minor bug, then you can use this script to clean up the ensemble and prepare it for resubmission. See the :ref:`Fix Kill Ens` entry for more information.
 
 Deprecated scripts
 -------------
