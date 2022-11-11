@@ -3,11 +3,34 @@
 Running the ensemble
 ==========
 
-In this section, we will discuss in detail the implementation of the CHEEREIO runtime workflow. See below for a diagram of key scripts and processes that manage this core functionality of CHEEREIO:
+In this section, we will discuss in detail the implementation of the CHEEREIO runtime workflow. CHEEREIO is implemented as an array of jobs managed by the SLURM job manager; each job switches between GEOS-Chem and LETKF assimilation mode as coordinated the "job manager" script, as will be explained in detail by this page. See below for a diagram of key scripts and processes that manage this core functionality of CHEEREIO, which we will be referencing throughout this page:
 
 .. image:: runtime_detail.png
   :width: 600
   :alt: Figure showing the CHEEREIO runtime workflow process. 
+
+However, before we detail how the ensemble is run for the main assimilation workflow, we first cover the practical details of the ensemble spinup process. All CHEEREIO simulations must undergo ensemble spinup before assimilation can begin (i.e. before the ``run_ens.sh`` script can be submitted in the above diagram).
+
+.. _Run Ensemble Spinup Simulations:
+
+The two ensemble spinup approaches
+-------------
+
+DESCRIPTION UPDATE ME
+
+Method 1: Extending the first assimilation period
+~~~~~~~~~~~~~
+
+UPDATE ME
+
+After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.
+
+Method 2: Using a seperate ensemble spinup run
+~~~~~~~~~~~~~
+
+UPDATE ME
+
+Mention automatic backup.
 
 Starting the run
 -------------
@@ -22,19 +45,7 @@ Information about the ensemble state is continuously recorded during run time, a
 * Overall run status for the entire job array (one job per ensemble member) is available from the SLURM scheduler. A good command is ``sacct``, which will display run status (it is especially useful as jobs are pending while resources become available). Each run of GEOS-Chem will be recorded as a separate entry under the ``time`` sub-job label, as each GEOS-Chem run (initialized by the outcome of the previous assimilation step) is submitted with a separate (timed) ``srun`` command. 
 * GEOS-Chem run status for individual ensemble members are available in the ``GC.log`` file in each ensemble member run directory.
 * Additional log files, including shell-level ``.err`` and ``.out`` files and log files containing data about assimilation, are all available in the ``log`` folder described in :ref:`Ensemble Runs`.
-
-.. _Run Ensemble Spinup Simulations:
-
-The two ensemble spinup approaches
--------------
-
-Method 1: Extending the first assimilation period
-~~~~~~~~~~~~~
-
-After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.
-
-Method 2: Using a seperate ensemble spinup run
-~~~~~~~~~~~~~
+* You can see the current assimilation window that CHEEREIO is processing by viewing the contents of the ``CURRENT_DATE_TIME`` file within the ``scratch/`` folder. 
 
 .. _Run Ensemble Simulations:
 

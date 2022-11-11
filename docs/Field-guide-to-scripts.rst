@@ -1,4 +1,4 @@
-Field guide to all core CHEEREIO scripts
+Guide to CHEEREIO core files
 ==========
 
 The ``core/`` folder of the main CHEEREIO code directory is where the, well, core of CHEEREIO resides. All the main code utilities, assimilation tools, and observation integration scripts live here. This page gives an overview of all the files in the ``core`` folder; the most important files and files which users might interact with are explored on other pages in the documentation, and are linked to when appropriate.
