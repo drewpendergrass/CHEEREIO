@@ -282,7 +282,11 @@ Once this parallelized assimilation is complete, a fair amount of clean up must 
 	  until [ -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ] || [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE ]; do
 	    #If this is ensemble member 1, check if assimilation is complete; if it is, do the final overwrites.
 	    if [ $x -eq 1 ]; then
-	      bash check_and_complete_assimilation.sh ${TESTING}
+	      bash check_and_complete_assimilation.sh ${simplescale}
+	    fi
+	    #If there is a problem, the KILL_ENS file will be produced. Break then
+	    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+	      break 2
 	    fi
 	    sleep 1
 	  done
@@ -291,23 +295,41 @@ Next, we do our usual check for the ``KILL_ENS`` file, which will be generated i
 
 .. code-block:: bash
 
+  #If there is a problem, the KILL_ENS file will be produced. Break then
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+    break
+  fi
+  #If this is ensemble member 1, and this is the first run, switch to main assimilation mode with regular intervals.
+  if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
+    bash change_histrst_durfreq.sh
+  fi
+  #For all runs, switch off the first run marker.
+  if [ "${firstrun}" = true ]; then
+    firstrun=false
+  fi
+  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
+  if [ $x -eq 1 ]; then
+    bash cleanup.sh #This also will break us out of this loop when assimilation complete.
+  fi
+  #Hang until cleanup complete, as determined by temp file deletion.
+  until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
+    #If there is a problem, the KILL_ENS file will be produced. Break then
+    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+      break 2
+    fi
+    sleep 1
+  done
+	  #CD back to run directory
+	  cd ${ENSDIR}/{RunName}_${xstr}
+
 	  #If there is a problem, the KILL_ENS file will be produced. Break then
 	  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
 	    break
 	  fi
-	  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
-	  if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
-	    bash change_histrst_durfreq.sh
-	    firstrun=false
-	  fi
-	  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
-	  if [ $x -eq 1 ]; then
-	    bash cleanup.sh ${TESTING} #This also will break us out of this loop when assimilation complete.
-	  fi
-	  #Hang until cleanup complete, as determined by temp file deletion.
-	  until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
-	    sleep 1
-	  done
+
+	  #Everything cleaned up; we can head back to the beginning.
+	done
+
 
 If, after clean-up completes, our current date now exceeds the ensemble end date stored in the ``ens_config.json`` file, then the file ``ENSEMBLE_COMPLETE`` will appear in the Scratch directory and the while loop will terminate. However, the loop will also terminate if the ``KILL_ENS`` file is created due to a script failure. CHEEREIO picks the exit code for the job accordingly.
 
