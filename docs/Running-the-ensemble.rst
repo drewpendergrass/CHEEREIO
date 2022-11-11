@@ -48,20 +48,35 @@ Users indicate that they would like to use this ensemble spinup method by settin
 
 If you are using this approach, set the ``ASSIM_START_DATE`` entry in ``ens_config.json`` to time ``START_DATE`` plus ``ASSIM_TIME``. This is to avoid accidentally combining the two ensemble spinup methods, which would waste computational resources.
 
-.. _Burn in period:
+.. _Spread amplification:
 
-The burn in period
+Amplifying the ensemble spread 
 -------------
 
-UPDATE ME
+At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough. If there is insufficient ensemble spread, then the prior error covariance matrix will be underestimated and observation information will be discarded, leading to filter divergence. However, it may not be feasible to run the ensemble spinup simulations for an appropriate amount of time to create a fully appropriate ensemble spread. CHEEREIO includes an option to amplify the standard deviation of the ensemble by a user-specified factor at the end of the ensemble spinup process, improving the specification of the prior error covariance matrix. Think of this as a shortcut users can use for ensemble spinup.
+
+To activate the ensemble spread amplification option, set ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` to ``true`` and specify the factor by which the standard deviation will be multiplied with the ``SPREAD_AMPLIFICATION_FACTOR`` within ``ens_config.json``. This spread amplification is done after the first assimilation period, so it will work with either ensemble spinup method, and will also work if users are scaling GEOS-Chem to match observations as described in the next section.
 
 .. _Simple scale:
 
 Scaling GEOS-Chem to match observations 
 -------------
 
-at the ends of ensemble spinup and burn in periods. Also talk about scaling the ensemble spread
-UPDATE ME
+Biases between the model and observations (i.e. a systematic model under or overestimate) can lead to suboptimal emissions updates in the LETKF framework. CHEEREIO allows users to handle this problem by scaling the ensemble mean of a given species so that it matches the observational mean, removing overall biases (but not other biases, such as latitudinal issues, which must be handled as appropriate by the user). CHEEREIO implements this scaling by comparing model simulated observation means to observation means within a single assimilation window, and performs this scaling rather than LETKF assimilation for this window. 
+
+There are two assimilation windows currently where CHEEREIO gives users the option to perform this scaling: (1) after ensemble spinup completes, during the first assimilation window of the standard assimilation workflow; and (2) after the burn-in period completes (the burn-in period is described below in :ref:`Burn in period` section). To perform scalings after ensemble spinup completes, set ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` to ``true`` in ``ens_config.json``. To perform scalings after the burn-in period completes, set ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` to ``true`` in ``ens_config.json``. **This procedure is always strongly recommended.**  
+
+.. _Burn in period:
+
+The burn in period
+-------------
+
+A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
+
+	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
+	"BURN_IN_END" : "20181225",
+	"POSTPROCESS_START_DATE":"20190101",
+	"POSTPROCESS_END_DATE":"20200101",
 
 
 Starting the run
