@@ -71,13 +71,9 @@ There are two assimilation windows currently where CHEEREIO gives users the opti
 The burn in period
 -------------
 
-A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
+A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. Burn in periods are somewhat common in Kalman filter applications and are not unique to CHEEREIO. The reason why burn in periods can be necessary is that the data assimilation system has a certain inertia, and takes several assimilation windows to update emissions so that they are more consistent with observations. During the period when emissions rapidly updating from the prior to match observations, it would be incorrect to interpret the results as a timeseries of real changing emissions. Moreover, biases can emerge between modeled concentrations and observations during the burn-in window, as emissions are not yet consistent with observations. 
 
-	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
-	"BURN_IN_END" : "20181225",
-	"POSTPROCESS_START_DATE":"20190101",
-	"POSTPROCESS_END_DATE":"20200101",
-
+CHEEREIO allows for a burn-in period, which does two things (1) assimilations that take place during the burn-in period are removed from postprocessing results, and (2) the CHEEREIO ensemble mean is scaled to match the observational mean at the end of the burn-in period, as described in :ref:`:Simple scale`. To enable a burn-in period, set ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` to ``true`` in ``ens_config.json`` and specify the burn-in period end date with the ``BURN_IN_END`` entry. Note that the burn-in period takes place during the normal LETKF run cycle, so the ``BURN_IN_END`` time has to be after ensemble spinup completes and after ``START_TIME``. You also have to specify the postprocessing dates so that they exclude the burn-in period, and can do so with the ``POSTPROCESS_START_DATE`` and ``POSTPROCESS_END_DATE`` entries. 
 
 Starting the run
 -------------
@@ -99,7 +95,7 @@ Information about the ensemble state is continuously recorded during run time, a
 About the Run Ensemble Simulations script
 -------------
 
-Although the user will not ever execute the ``run_ensemble_simulations.sh`` script manually, it is very useful in terms of debugging to understand how the script works. We'll walk through it step-by-step. UPDATE ME
+Although the user will not ever execute the ``run_ensemble_simulations.sh`` script manually, it is very useful in terms of debugging to understand how the script works. We'll walk through it step-by-step.
 
 SBATCH header
 ~~~~~~~~~~~~~
@@ -130,12 +126,11 @@ Before GEOS-Chem is run or assimilation can be calculated, a few global settings
 	source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
 	eval "$(conda shell.bash hook)"
 
-Next, a few global variables are set. CHEEREIO's testing suite is deprecated, so the variable ``TESTING`` is set to false automatically. A few key directories are stored in the variables ``$ENSDIR`` (the Ensemble Runs directory), ``$MY_PATH`` (path to the directory containing all CHEEREIO ensembles), and ``$RUN_NAME`` (the name of this ensemble). The latter two are grabbed from the ``ens_config.json`` file using the ``jq`` command, which allows shell scripts to access data stored in JSON format on the disk. The variable ``$x`` includes the ensemble member ID (ranging from 1 to the total number of ensemble members).  
+Next, a few global variables are set. A few key directories are stored in the variables ``$ENSDIR`` (the Ensemble Runs directory), ``$MY_PATH`` (path to the directory containing all CHEEREIO ensembles), and ``$RUN_NAME`` (the name of this ensemble). The latter two are grabbed from the ``ens_config.json`` file using the ``jq`` command, which allows shell scripts to access data stored in JSON format on the disk. The variable ``$x`` includes the ensemble member ID (ranging from 1 to the total number of ensemble members).  
 
 .. code-block:: bash
 
 	### Run directory
-	TESTING={TESTBOOL}
 	ENSDIR=$(pwd -P)
 
 	if [ "${TESTING}" = true ]; then
