@@ -30,12 +30,14 @@ If ensemble spinup is not run, or not run for a sufficient amount of time, then 
 
 There are two ways to do ensemble spinup in CHEEREIO, which we will now discuss.
 
-Method 1: Extending the first assimilation period
+Method 1: Longer run during the first assimilation period
 ~~~~~~~~~~~~~
 
-UPDATE ME
+The first and simplest method for ensemble spinup is having GEOS-Chem run for a longer period before the first assimilation period begins. This is implemented via the ``ASSIM_START_DATE`` entry in ``ens_config.json``. The idea is that, during this first GEOS-Chem run, CHEEREIO will run GEOS-Chem from time ``START_DATE`` to time ``ASSIM_START_DATE``. After all ensemble member GEOS-Chem runs reach the ``ASSIM_START_DATE`` time, the LETKF will begin processing an assimilation window beginning at date ``ASSIM_START_DATE`` minus ``ASSIM_TIME`` through ``ASSIM_START_DATE``. 
 
-After GEOS-Chem version 13.4 this option can be used in lieu of ``DO_ENS_SPINUP``; just set this date to be sufficiently far away from ``START_DATE``. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. For these versions, the separate ensemble spinup script installed by ``DO_ENS_SPINUP`` is a good work-around.
+For example, if ``START_DATE`` is set to January 1, 2019, ``ASSIM_START_DATE`` is set to February 2, 2019, and ``ASSIM_TIME`` is 24 hours, then CHEEREIO will allow every ensemble member to run GEOS-Chem with emissions perturbations applied from January 1, 2019 through February 2, 2019. After all models reach the date February 2, 2019, then CHEEREIO will run LETKF assimilation with assimilation window February 1, 2019 through February 2, 2019. After this point, the model/assimilation loop continues normally with a 24 hour assimilation window. 
+
+Benefits of this approach are its simplicity and lack of additional attention by the user beyond setting an appropriate ``ASSIM_START_DATE``. Note that this option is only recommended for users using GEOS-Chem versions after 13.4. Prior to version 13.4, it is buggy to run GEOS-Chem for a non-standard length of time (e.g. 4 months and a week) which is usually desired for the ensemble spinup. Drawbacks are that GEOS-Chem will save out detailed history data during this run, which can be an inefficient use of memory, and that ensemble spinup simulations must be redone for every additional CHEEREIO simulation using these settings. While for species with short lifetimes (and therefore requiring a short ensemble spinup) these inefficiencies are  insignificant, they can be tedious for longer ensemble spinup simulations.  These inefficiencies can be avoided by using method 2 below.
 
 Method 2: Using a seperate ensemble spinup run
 ~~~~~~~~~~~~~
@@ -43,6 +45,22 @@ Method 2: Using a seperate ensemble spinup run
 UPDATE ME
 
 Mention automatic backup.
+
+.. _Burn in period:
+
+The burn in period
+-------------
+
+UPDATE ME
+
+.. _Simple scale:
+
+Scaling GEOS-Chem to match observations 
+-------------
+
+at the ends of ensemble spinup and burn in periods. Also talk about scaling the ensemble spread
+UPDATE ME
+
 
 Starting the run
 -------------
@@ -64,7 +82,7 @@ Information about the ensemble state is continuously recorded during run time, a
 About the Run Ensemble Simulations script
 -------------
 
-Although the user will not ever execute the ``run_ensemble_simulations.sh`` script manually, it is very useful in terms of debugging to understand how the script works. We'll walk through it step-by-step.
+Although the user will not ever execute the ``run_ensemble_simulations.sh`` script manually, it is very useful in terms of debugging to understand how the script works. We'll walk through it step-by-step. UPDATE ME
 
 SBATCH header
 ~~~~~~~~~~~~~
