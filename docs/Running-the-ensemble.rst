@@ -133,13 +133,8 @@ Next, a few global variables are set. A few key directories are stored in the va
 	### Run directory
 	ENSDIR=$(pwd -P)
 
-	if [ "${TESTING}" = true ]; then
-	  MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/testing/test_config.json)"
-	  RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/testing/test_config.json)"
-	else
-	  MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
-	  RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
-	fi
+	MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
+	RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
 
 	### Get current task ID
 	x=${SLURM_ARRAY_TASK_ID}
@@ -155,12 +150,20 @@ Next, a few global variables are set. A few key directories are stored in the va
 	  xstr="${x}"
 	fi
 
-After all these variables are set, then CHEEREIO navigates to the particular ensemble run directory it has been assigned and exports the proper number of OpenMP threads so that GEOS-Chem can exploit parallelization. Since we are about to start are first run of the main program loop, we set a boolean tag ``firstrun`` to ``true``. This is to facilitate ensemble spinup.
+Next, CHEEREIO initializes a few boolean flags so that it can track whether or not we are in one of two special assimilation windows. If we are in the first assimilation window (``firstrun=true``), as we are at this point in the run script, and the user indicates that we are scaling the ensemble mean to match the observational mean (``scalefirst=true``), then these tags indicate that CHEEREIO should follow the scaling process rather than the LETKF workflow at the appropriate time later in this script. Similarly, if we are in the first assimilation window after burn in completes, the boolean tags will trigger the scaling process. Finally, CHEEREIO also checks if the user indicates that we will amplify the ensemble spread during the first assimilation window.
+
+.. code-block:: bash
+
+	firstrun=true
+	scalefirst="$(jq -r ".SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
+	trigger_burnin_scale=false
+	scaleburnin="$(jq -r ".SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" {ASSIM}/ens_config.json)"
+	amplifyspread="$(jq -r ".AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
+
+After all these variables are set, then CHEEREIO navigates to the particular ensemble run directory it has been assigned and exports the proper number of OpenMP threads so that GEOS-Chem can exploit parallelization.
 
 .. code-block:: bash
 	
-	firstrun=true
-
 	### Run GEOS-Chem in the directory corresponding to the cluster Id
 	cd  {RunName}_${xstr}
 
@@ -179,30 +182,29 @@ With global settings taken care of, we can now proceed to the while loop that re
 	#This will loop until a file appears in scratch signalling assimilation is complete.
 	while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
 
-This means that the while loop will continue until a file named ``ENSEMBLE_COMPLETE`` appears in the Scratch folder. The first thing that happens in the while loop is that GEOS-Chem is submitted. Again, since ``$TESTING`` will always be ``false`` for end users, we can consider only this part of the code block.
+This means that the while loop will continue until a file named ``ENSEMBLE_COMPLETE`` appears in the Scratch folder. The first thing that happens in the while loop is that GEOS-Chem is submitted.
 
 .. code-block:: bash
 
-	  # Run GEOS_Chem.  The "time" command will return CPU and wall times.
-	  # Stdout and stderr will be directed to the "GC.log" log file
-	  # If just testing assimilation, skip all this
-	  if [ "${TESTING}" = false ]; then
-	    srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
-	    wait
+	# Run GEOS_Chem.  The "time" command will return CPU and wall times.
+	# Stdout and stderr will be directed to the "GC.log" log file
+	  srun -c $OMP_NUM_THREADS time -p ./gcclassic >> GC.log
+	  wait
 
 This runs GEOS-Chem for one assimilation period (often just 24 hours). The ``wait`` command means that the job will hang until the ``srun`` job managing GEOS-Chem is complete. When ``srun`` terminates, CHEEREIO looks at the last line of the ``GC.log`` file and checks if it indicates that GEOS-Chem terminated successfully.
 
 .. code-block:: bash
 
-	    taillog="$(tail -n 1 GC.log)"
-	    #Check if GC finished.
-	    if [[ ${taillog:0:1} != "*" ]]; then
-	      printf "GEOS-Chem did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS #This file's presence will break loop
-	    fi
-	      #If there is a problem, the KILL_ENS file will be produced. Break then
-	    if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
-	      break
-	    fi
+	  taillog="$(tail -n 1 GC.log)"
+	  #Check if GC finished.
+	  if [[ "${taillog:0:1}" != "*" ]]; then
+	    #This file's presence breaks loop loop
+	    printf "GEOS-Chem in ensemble member ${xstr} did not complete successfully\n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS 
+	  fi
+	    #If there is a problem, the KILL_ENS file will be produced. Break then
+	  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+	    break
+	  fi
 
 If GEOS-Chem fails, then the file ``KILL_ENS`` is created and stored in the Scratch directory. Other ensemble members will detect this file and terminate themselves as well, because the ensemble can only continue if all GEOS-Chem runs terminate successfully. However, if everything works, the ensemble member 1 takes on the role as the "job coordinator." This ensemble member checks every second if a restart with the appropriate time stamp is present in each ensemble run directory. If everything is present, then a file labeled ``ALL_RUNS_COMPLETE`` is created and stored in the Scratch directory and we can continue to the assimilation phase (as it breaks the until loop). The rest of the ensemble members just check for the ``KILL_ENS`` file repeatedly and terminate themselves if necessary.
 
@@ -226,36 +228,48 @@ If GEOS-Chem fails, then the file ``KILL_ENS`` is created and stored in the Scra
 	      sleep 1
 	    done
 
-If testing mode is active, GEOS-Chem is not run and we proceed to assimilation immediately. Again, this is not relevant to the end-user.
-
-.. code-block:: bash
-
-	  else
-	    #Create done signal
-	    if [ $x -eq 1 ]; then
-	      echo "Done" > ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE
-	    fi
-	  fi
-
 While loop part 2: Execute parallelized assimilation
 ~~~~~~~~~~~~~
 
-With all GEOS-Chem runs completed successfully, we can now begin the assimilation process. All ensemble members navigate to the CHEEREIO code directory in order to submit the ``par_assim.sh`` script via GNU Parallel.
+With all GEOS-Chem runs completed successfully, we can now begin the assimilation process. All ensemble members navigate to the CHEEREIO code directory. Before the LETKF procedure begins, however, we have to see if we are in a special assimilation window which requires a different processing procedure. The ``trigger_burnin_scale`` variable will indicate that we are in the first assimilation window after burn in completes. The ``simplescale`` variable will be set to ``true`` if CHEEREIO is instructed to scale the ensemble mean to match the observational mean, and occurs if we are in either of the two time periods mentioned in the :ref:`Burn in period` entry. The ``doamplification`` variable is set to ``true`` if the user indicates that they would like to amplify ensemble spread after ensemble spinup completes, and we are in the appropriate time period. The ``simplescale`` and ``doamplification`` variables are passed to Python scripts later within this workflow, adjusting the CHEEREIO processes appropriately.  
 
 .. code-block:: bash
 
 	  #CD to core
 	  cd {ASSIM}/core
+	  #Check if we are in the first assimilation cycle after burn in completes
+	  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_PERIOD_PROCESSED ] && [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_SCALING_COMPLETE ]; then
+	    trigger_burnin_scale=true
+	  else
+	    trigger_burnin_scale=false
+	  fi
+	  #Check if we are doing a simple scale or a full assimilation
+	  if [[ ("${firstrun}" = "true" && "${scalefirst}" = "true") || ("${trigger_burnin_scale}" = "true" && "${scaleburnin}" = "true") ]]; then
+	    simplescale=true
+	  else
+	    simplescale=false
+	  fi
+	  #Check if we are amplifying concentration spreads
+	  if [[ ("${firstrun}" = "true" && "${amplifyspread}" = "true") ]]; then
+	    doamplification=true
+	  else
+	    doamplification=false
+	  fi
+
+Now we submit the ``par_assim.sh`` script via GNU Parallel, triggering the LETKF process.
+
+.. code-block:: bash
+
 	  #Use GNU parallel to submit parallel sruns, except nature
 	  if [ $x -ne 0 ]; then
 	    if [ {MaxPar} -eq 1 ]; then
-	      bash par_assim.sh ${TESTING} ${x} 1
+	      bash par_assim.sh ${x} 1 ${simplescale} ${doamplification}
 	    else
-	      parallel -j {MaxPar} "bash par_assim.sh ${TESTING} ${x} {1}" ::: {1..{MaxPar}}
+	      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${simplescale} ${doamplification}" ::: {1..{MaxPar}}
 	    fi 
 	  fi
 
-The GNU parallel line works as follows. Up to ``MaxPar`` jobs in a single ensemble member will run the command ``bash par_assim.sh ${TESTING} ${x} {1}`` simultaneously. The ``par_assim.sh`` takes three command line inputs: a boolean signal for whether or not we are in testing mode; and ensemble ID number; and a core ID number. The first two inputs are supplied by global settings, while the third is supplied by a special GNU Parallel substitution line. Each core will then compute the LETKF data assimilation for each of its assigned columns and save them in ``.npy`` format to the scratch directory. If ``MaxPar`` equals 1 then we can just submit the ``par_assim.sh`` script as a normal bash script.
+The GNU parallel line works as follows. Up to ``MaxPar`` jobs in a single ensemble member will run the command ``bash par_assim.sh ${x} {1} ${simplescale} ${doamplification}"`` simultaneously. The ``par_assim.sh`` takes four command line inputs: an ensemble ID number; a core ID number; and flags for whether we are doing simple scaling to match observations (rather than LETKF) and whether we will amplify the ensemble spread. The first and last two inputs are supplied by global settings, while the second is supplied by a special GNU Parallel substitution line. Each core will then compute the LETKF data assimilation for each of its assigned columns and save them in ``.npy`` format to the scratch directory. If ``MaxPar`` equals 1 then we can just submit the ``par_assim.sh`` script as a normal bash script.
 
 While loop part 3: Clean-up and ensemble completion 
 ~~~~~~~~~~~~~
