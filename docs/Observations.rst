@@ -25,10 +25,6 @@ OMI tools
 
 TKTKTK
 
-Adding new observations
--------------
-
-TKTKTK
 
 Supplementing an existing observation type
 ~~~~~~~~~~~~~
@@ -37,10 +33,10 @@ TKTKTK
 
 .. _New observation:
 
-Adding a new observation type
-~~~~~~~~~~~~~
+Adding new observations
+-------------
 
-TKTKTK
+TKTKTK. Adding a new observation type. Mention how to get it to appear on the ens config.
 
 .. _New superobservation:
 

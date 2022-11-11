@@ -6,6 +6,11 @@ The ``core/`` folder of the main CHEEREIO code directory is where the, well, cor
 Installation and spinup scripts
 -------------
 
+change_hemcodiag_freq.sh
+~~~~~~~~~~~~~
+
+A shell script, called in the course of running ``run_ensemble_spinup_simulations.sh`` in the ensemble spinup process or ``setup_ensemble.sh`` in the installation process depending on user settings, that updates the duration and frequency by which HEMCO Diagnostic output (e.g. emissions) is saved from spinup mode (less output) to assimilation mode (much more frequent output).
+
 change_histcollections_durfreq.sh
 ~~~~~~~~~~~~~
 
@@ -45,6 +50,11 @@ prepare_template_hemco_config.sh
 ~~~~~~~~~~~~~
 
 A simple wrapper shell script, called by ``setup_ensemble.sh`` in the template run directory creation stage, that in turn calls ``hemco_config_updater.py`` within an appropriate conda environment.
+
+setup_obs_dates.py
+~~~~~~~~~~~~~
+
+To save time during assimilation, CHEEREIO produces a Python dictionary linking each observational file to the time period it covers. This script produces that dictionary and saves it to the ``scratch/`` folder. 
 
 update_history.py
 ~~~~~~~~~~~~~
@@ -89,18 +99,13 @@ update_input_geos.sh
 
 A shell script which (1) calls ``advance_timestep.py`` to update the internal time stored in the ``scratch/`` directory, and (2) uses that updated internal time to update the ``input.geos`` file across the ensemble.
 
-Assimilation scripts
+Assimilation support scripts
 -------------
 
 combine_columns_and_update.py
 ~~~~~~~~~~~~~
 
 If the script ``check_and_complete_assimilation.sh`` finds that all expected ``.npy`` files containing assimilated columns are present in ``scratch/``, then this Python script is called. This script gathers the assimilated columns and loads in all the ensemble restarts and scaling factors, uses the contents of the columns to update restarts and scaling factors, and then writes the updated data to disk.
-
-letkf_utils.py
-~~~~~~~~~~~~~
-
-This long Python file is the core of CHEEREIO, and is described in detail in the REMOVED, UPDATE page. It contains complex classes and associated methods that do the IO and associated calculations required for the LETKF algorithm.
 
 par_assim.sh
 ~~~~~~~~~~~~~
@@ -110,33 +115,81 @@ A wrapper shell script that calls ``par_letkf.py`` within the appropriate conda 
 par_letkf.py
 ~~~~~~~~~~~~~
 
-A short Python script, many instantiations of which are run in parallel, that creates relevant objects and calls methods from ``letkf_utils.py`` to assimilate the set of columns assigned to a particular core or set of cores.
+A short Python script, many instantiations of which are run in parallel, that creates relevant objects and calls methods from ``Assimilator.py`` to assimilate the set of columns assigned to a particular core or set of cores.
 
 toolbox.py
 ~~~~~~~~~~~~~
 
-Basic utilities including distance calculations, JSON file I/O, and indexing support that are used across CHEEREIO Python scripts. 
+Basic mathematical tools and utilities that are used across CHEEREIO Python scripts, including distance calculations, indexing support, and prior error covariance sampling. 
 
-Observation scripts
+settings_interface.py
+~~~~~~~~~~~~~
+
+Basic utilities that interact with user settings and other global parameters and pass them to other Python scripts. 
+
+LETKF classes
 -------------
+
+Assimilator.py
+~~~~~~~~~~~~~
+
+Contains the Assimilator class, which actually performs the LETKF operation. More details in the :ref:`Assimilator` entry.
+
+GC_Translator.py
+~~~~~~~~~~~~~
+
+Contains the GC_Translator class and a few other support classes, which wraps around GEOS-Chem restarts and scaling factors and translates them into state vectors for use in CHEEREIO, and vice versa. More details in the :ref:`GC Translator` entry.
+
+GT_Container.py
+~~~~~~~~~~~~~
+
+Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`GT Container` entry.
+
+HIST_Ens.py
+~~~~~~~~~~~~~
+UPDATE ME
+Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`HIST Ensemble` entry.
+
+HIST_Translator.py
+~~~~~~~~~~~~~
+UPDATE ME
+Contains the GT_Container class, which is used to combine assimilated columns and update GEOS-Chem after the LETKF operations complete. More details in the :ref:`HIST Translator` entry.
+
+Observation operators
+-------------
+
+observation_operators.py
+~~~~~~~~~~~~~
+
+This Python file contains tools used to create observation operators. It also includes the parent class for all observation operators. Use of this file is described in detail in the :ref:`New observation` entry.
 
 omi_tools.py
 ~~~~~~~~~~~~~
 
-This long Python file includes tools and classes necessary for interfacing with OMI satellite products, and is described in detail in the :ref:`OMI tools` entry.
+This Python file includes tools and classes necessary for interfacing with OMI satellite products, and is described in detail in the :ref:`OMI tools` entry.
 
 tropomi_tools.py
 ~~~~~~~~~~~~~
 
-This long Python file includes tools and classes necessary for interfacing with TROPOMI satellite products, and is described in detail in the :ref:`TROPOMI tools` entry.
+This Python file includes tools and classes necessary for interfacing with TROPOMI satellite products, and is described in detail in the :ref:`TROPOMI tools` entry.
+
+Utilities for the user
+-------------
+
+testing_tools.py
+~~~~~~~~~~~~~
+
+UPDATE ME
+
+cleanup_after_kill_ens.sh
+~~~~~~~~~~~~~
+
+UPDATE ME
 
 Deprecated scripts
 -------------
 
 The following scripts have been deprecated and will be removed before the official release of CHEEREIO:
 
-* diff_col.py
-* observation_operators.py
-* randomize_restarts.py
 * regrid_landmask_fraction.py
-* tropomi_loader.py
+
