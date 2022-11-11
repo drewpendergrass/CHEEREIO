@@ -16,7 +16,13 @@ However, before we detail how the ensemble is run for the main assimilation work
 The two ensemble spinup approaches
 -------------
 
-DESCRIPTION UPDATE ME
+As described in the :ref:`Workflow overview` entry, CHEEREIO requires a form of spinup, called "ensemble spinup", which is distinct from the usual form of spinup in chemical transport modeling. The usual spinup (which CHEEREIO also requires) is designed to produce realistic atmospheric conditions that initialize the model. CHEEREIO's ensemble spinup is designed to ensure that each ensemble member has initial atmospheric conditions that are representative of their assigned emissions perturbations. Recall that the LETKF algorithm is an ensemble approach, where each ensemble member is assigned an initially randomized set of emissions scaling factors. These emissions scaling factors are updated throughout assimilation.
+
+The LETKF algorithm requires each ensemble member to have different atmospheric conditions, reflecting the randomized set of emissions scaling factors applied to each ensemble member. This is because the ensemble spread is used to emulate the prior error covariance matrix, a key component of any inversion or data assimilation problem. In practice, this means that before the LETKF process can begin each ensemble member must be run for a period of time with the randomized set of emissions scaling factors applied. This ensemble spinup process creates a diversity of atmospheric concentrations across the ensemble, which leads to a better estimate of the prior error covariance matrix. 
+
+If ensemble spinup is not run, or not run for a sufficient amount of time, then there will not be a sufficient spread in concentrations across the ensemble. This leads to an erroneously small prior error covariance matrix, and in practice will result in CHEEREIO ignoring observation information ("filter divergence"). Again, the spread in concentrations across ensemble members must adequately reflect the spread in emissions perturbations across ensemble members in order for the LETKF to give reliable results. 
+
+There are two ways to do ensemble spinup in CHEEREIO, which we will now discuss.
 
 Method 1: Extending the first assimilation period
 ~~~~~~~~~~~~~

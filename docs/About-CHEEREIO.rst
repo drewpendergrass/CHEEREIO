@@ -19,6 +19,8 @@ Although the mathematics of CHEEREIO is complex (see :ref:`Further Reading` for 
 
 One way to think about this is that the ensemble emulates the error matrix for the model, giving us a kind of low rank approximation of model uncertainty. Since we know the error matrix for the observations (or at least can make an educated guess), then we should consider the LETKF as a Bayesian method that updates a prior distribution of concentrations and emissions to create a posterior ensemble that better reflects reality. With each update, the LETKF accumulates information about the true atmospheric state.
 
+.. _Workflow overview:
+
 An overview of the CHEEREIO workflow
 -----------------------------
 
