@@ -42,9 +42,11 @@ Benefits of this approach are its simplicity and lack of additional attention by
 Method 2: Using a seperate ensemble spinup run
 ~~~~~~~~~~~~~
 
-UPDATE ME
+The second method for ensemble spinup involves running an entirely separate ensemble spinup ensemble of GEOS-Chem simulations. The ensemble spinup is executed by submitting the ``run_ensspin.sh`` script with the command ``nohup bash run_ensspin.sh &``; after the process completes, then the user can submit the regular ``run_ens.sh`` script as described later on this page. Using a separate job array allows ensemble spinup jobs to have different properties than the regular assimilation process, such as reduced history output frequency. At the end of this array of ensemble spinup jobs, CHEEREIO automatically updates the ensemble to prepare for the regular assimilation process. CHEEREIO also backs up your ensemble automatically in a directory entitled ``RUNNAME_BACKUP``. This enables users to run the ensemble multiple times without repeating the ensemble spinup process. If you would like to use the backup, delete the ensemble directories and copy the backup, renaming the directory appropriately.
 
-Mention automatic backup.
+Users indicate that they would like to use this ensemble spinup method by setting ``DO_ENS_SPINUP`` to ``true`` within the ``ens_config.json`` file, and also specify the start and end times of ensemble spinup with the ``ENS_SPINUP_START`` and ``ENS_SPINUP_END`` entries. History frequency and duration settings for ensemble spinup are set with the ``SPINUP_HISTORY_freq`` and ``SPINUP_HISTORY_dur`` entries, and in particular can be set to be much more coarse than the regular ensemble, saving disk space. Simulation wall time and memory are set with ``EnsSpinupWallTime`` and ``EnsCtrlSpinupMemory``; because assimilation is turned off for ensemble spinup, users can request much less memory (instead requesting an amount appropriate for a normal GEOS-Chem simulation)
+
+If you are using this approach, set the ``ASSIM_START_DATE`` entry in ``ens_config.json`` to time ``START_DATE`` plus ``ASSIM_TIME``. This is to avoid accidentally combining the two ensemble spinup methods, which would waste computational resources.
 
 .. _Burn in period:
 
