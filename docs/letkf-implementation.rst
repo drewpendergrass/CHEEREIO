@@ -3,10 +3,14 @@
 The CHEEREIO LETKF implementation
 ==========
 
+This page is under construction, check back later!
+
 The 4D localized ensemble transform Kalman filter (4D-LETKF) algorithm lies at the heart of CHEEREIO. Everything else merely supports the assimilation operations conducted by this workflow.
 
 Overview of the 4D-LETKF implementation
 -------------
+
+UPDATE ME
 
 LETKF assimilation is implemented in CHEEREIO using a structure of nested Python objects, designed primarily to ensure that new observation operators can immediately plug into CHEEREIO and work automatically, without requiring users to have deep knowledge of the CHEEREIO code structure. We use Python because of its familiarity to a broader user base and because the object-oriented structure of the language makes it ideally suited to the modular design of CHEEREIO. Here we sketch the objects involved in the CHEEREIO implementation of the LETKF.
 State vectors x_i^b are handled by an array of GC_Translator objects, one per ensemble member, which wrap around the GEOS-Chem restart file and scaling factors. These objects translate between gridded NetCDF files used by GEOS-Chem and the one-dimensional vectors needed by the LETKF process. The Assimilator object contains an array of GC_Translator objects and uses them to form the background perturbation matrix X_i^b, a key input into the LETKF algorithm.
