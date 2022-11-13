@@ -1,4 +1,5 @@
 import json
+from importlib import import_module
 
 #Load in settings from ens_config.json. If settings_to_override is active (entry override is True)
 #the overwrite entries provided
@@ -27,6 +28,14 @@ def addExtension(data,file):
 		data[key] = extdata[key]
 	return data
 
+def importObsTranslators():
+	with open('../operators.json') as f:
+		data = json.load(f)
+	result = {}
+	for key in data:
+		module = import_module(data[key]['module_name'])
+		result[key] = getattr(module, data[key]['translator_name'])
+	return result
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
 def getLatLonList(ensnum,corenum):

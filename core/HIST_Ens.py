@@ -1,6 +1,5 @@
 import numpy as np
 from glob import glob
-#USER: if you have implemented a new observation operator, import the Python file here (must be stored in core folder). Then scroll down to "makeObsTrans" and add the operator.
 import tropomi_tools as tt
 import omi_tools as ot
 import scipy.linalg as la
@@ -8,6 +7,9 @@ import toolbox as tx
 import settings_interface as si 
 from datetime import date,datetime,timedelta
 from HIST_Translator import HIST_Translator
+
+#USER: if you have implemented a new observation operator, add it to the operators.json file following the instructions on the Observations page in the documentation
+translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
@@ -62,12 +64,11 @@ class HIST_Ens(object):
 		self.obsSpecies = []
 		#USER: if you have implemented a new observation operator, plug it in here following the pattern established already.
 		for spec in list(self.observed_species.keys()):
-			if self.spc_config['OBS_TYPE'][spec]=='TROPOMI':
-				self.OBS_TRANSLATOR[spec] = tt.TROPOMI_Translator(self.verbose)
-			elif self.spc_config['OBS_TYPE'][spec]=='OMI':
-				self.OBS_TRANSLATOR[spec] = ot.OMI_Translator(self.verbose)
+			obstype = self.spc_config['OBS_TYPE'][spec]
+			if obstype in translators:
+				self.OBS_TRANSLATOR[spec] = translators[obstype](self.verbose)
 			else:
-				raise ValueError(f'Observer type {self.spc_config["OBS_TYPE"][spec]} not recongized')
+				raise ValueError(f'Observer type {obstype} not recongized. Make sure it is listed correctly in operators.json.')
 			self.obsSpecies.append(spec)
 	def getObsData(self):
 		self.OBS_DATA = {}

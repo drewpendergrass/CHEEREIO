@@ -1,0 +1,10 @@
+{
+	"TROPOMI" : {
+		"module_name" : "tropomi_tools",
+		"translator_name" : "TROPOMI_Translator"
+	},
+	"OMI" : {
+		"module_name" : "omi_tools",
+		"translator_name" : "OMI_Translator"
+	}
+}

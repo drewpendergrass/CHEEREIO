@@ -1,7 +1,6 @@
 import numpy as np
 import xarray as xr
 from glob import glob
-import tropomi_tools as tt
 import scipy.linalg as la
 import settings_interface as si 
 from datetime import date,datetime,timedelta
