@@ -7,7 +7,7 @@ This page is under construction, check back later!
 The observation operator toolkit
 -------------
 
-TKTKTK
+TKTKTK. Mention parent class and tools.
 
 Existing observation toolkits
 -------------
@@ -36,19 +36,44 @@ TKTKTK
 
 .. _New observation:
 
-Adding new observations
+Workflow to add a new observation operator
 -------------
 
-TKTKTK. Adding a new observation type. Mention how to get it to appear on the ens config.
+TKTKTKT
 
-.. _New superobservation:
+(1) Create a class inheriting from Observation_Translator 
+~~~~~~~~~~~~~
 
-Adding a new super observation error function
+TKTKTK.
+
+(2) Implement getObservations() function 
 ~~~~~~~~~~~~~
 
 TKTKTK
 
-Adding filters to a new observation
+(3) Implement gcCompare() function 
+~~~~~~~~~~~~~
+
+TKTKTK
+
+(4) Update operators.json
+~~~~~~~~~~~~~
+
+TKTKTK
+
+(5) Link observational files from ens_config.json
+~~~~~~~~~~~~~
+
+TKTKTK
+
+(6) [optional] Add observation filters via an extension
+~~~~~~~~~~~~~
+
+TKTKTK
+
+.. _New superobservation:
+
+(7) [optional] Add a new super observation error function
 ~~~~~~~~~~~~~
 
 TKTKTK
