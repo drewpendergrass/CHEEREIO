@@ -30,7 +30,7 @@ def produceSuperObservationFunction(fname):
 # ISO 8601 represents date and time by starting with the year, followed by the month, the day, 
 #the hour, the minutes, seconds and milliseconds. For example, 2020-07-10 15:00:00.000, 
 #represents the 10th of July 2020 at 3 p.m. Timezone is assumed to be UTC
-def apply_filters(OBSDATA,filterinfo):
+def apply_filters(OBSDATA,filterinfo,filterinfo):
 	to_keep = []
 	filter_families = list(filterinfo.keys())
 	if "MAIN" in filter_families:
