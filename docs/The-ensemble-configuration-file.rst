@@ -315,7 +315,7 @@ Postprocessing settings
 Extensions
 ~~~~~~~~~~~~~
 
-Additional CHEEREIO settings, usually for specific observation types, can be loaded in through extensions. Extensions in CHEEREIO are extra JSON files that store additional settings in order to prevent clutter in the ``ens_config.json`` file. Extensions can easily be added by saving a file with name ``NAME_extension.json`` within the ``templates/`` folder. To load in the settings within the ``NAME_extension.json`` file, add the key NAME to the "Extensions" dictionary in ``ens_config.json`` with value "True". Below is an example where we load in the settings in the ``TROPOMI_ALL_extension.json``, ``TROPOMI_CH4_extension.json``, and ``CH4_extension.json`` files. 
+Additional CHEEREIO settings, usually for specific observation types, can be loaded in through extensions. Extensions in CHEEREIO are extra JSON files that store additional settings in order to prevent clutter in the ``ens_config.json`` file. Extensions can easily be added by saving a file with name ``NAME_extension.json`` within the ``extensions/`` folder. To load in the settings within the ``NAME_extension.json`` file, add the key NAME to the "Extensions" dictionary in ``ens_config.json`` with value "True". Below is an example where we load in the settings in the ``TROPOMI_ALL_extension.json``, ``TROPOMI_CH4_extension.json``, and ``CH4_extension.json`` files. 
 ::
 
 	"Extensions": {

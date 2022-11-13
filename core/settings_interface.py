@@ -9,7 +9,7 @@ def getSpeciesConfig():
 	extensions = data['Extensions']
 	for key in list(extensions.keys()):
 		if extensions[key] == 'True':
-			data = addExtension(data,f'../templates/{key}_extension.json')
+			data = addExtension(data,f'../extensions/{key}_extension.json')
 	#Override settings --- mostly used by the automated testing utility.
 	with open('../settings_to_override.json') as f:
 		over_data = json.load(f)
