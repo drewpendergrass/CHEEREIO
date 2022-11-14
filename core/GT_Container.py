@@ -23,12 +23,9 @@ class GT_Container(object):
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
 		self.gt = {}
-		self.nature = None
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens==0:
-				self.nature = GC_Translator(directory, timestamp, constructStateVecs)
-			else:
+			if ens!=0:
 				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
