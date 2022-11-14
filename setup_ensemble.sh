@@ -381,7 +381,15 @@ grid_lev="$(jq -r ".LEVS" ens_config.json)"
 # Ensemble settings
 nEnsemble=$(jq -r ".nEnsemble" ens_config.json)
 pPERT="$(jq -r ".pPERT" ens_config.json)"
-SIMULATE_NATURE=$(jq -r ".SIMULATE_NATURE" ens_config.json) #if true, we make a run directory to simulate nature. This is for theoretical experimentation and testing
+dcr=$(jq -r ".DO_CONTROL_RUN" ens_config.json)
+dcer=$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ens_config.json) #if true, we make a run directory without assimilation within the ensemble runs structure.
+
+  if [[ ("${dcr}" = "true" && "${dcer}" = "true") ]]; then
+    DO_CONTROL_WITHIN_ENSEMBLE_RUNS=true
+  else
+    DO_CONTROL_WITHIN_ENSEMBLE_RUNS=false
+  fi
+
 
 # Names of emissions species that we are assimilating, loaded from configuration file
 EMIS_TO_ASSIM=( $(jq -r ".CONTROL_VECTOR_EMIS[]" ens_config.json) )
@@ -431,7 +439,7 @@ sed -i -e "s:{RunName}:${RUN_NAME}:g" \
        -e "s:{MaxPar}:${MaxPar}:g" \
        -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_simulations.sh
 
-if [ "${SIMULATE_NATURE}" = true ]; then
+if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = true ]; then
   sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
 else
   sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ens.sh
@@ -449,7 +457,7 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
          -e "s:{MaxPar}:${MaxPar}:g" \
          -e "s:{ASSIM}:${ASSIM_PATH}:g" ensemble_runs/run_ensemble_spinup_simulations.sh
 
-  if [ "${SIMULATE_NATURE}" = true ]; then
+  if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = true ]; then
     sed -i -e "s:{START}:0:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ensspin.sh
   else
     sed -i -e "s:{START}:1:g" -e "s:{END}:${nEnsemble}:g" ensemble_runs/run_ensspin.sh
@@ -937,7 +945,9 @@ fi # SetupSpinupRun
 ##=======================================================================
 if  "$SetupControlRun"; then
 
-    printf "${thickline}CHEERIO CONTROL (no assimilation) RUN DIRECTORY CREATION${thickline}"
+  printf "${thickline}CHEERIO CONTROL (no assimilation) RUN DIRECTORY CREATION${thickline}"
+
+  if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = false ]; then 
 
     cd ${MY_PATH}/${RUN_NAME}
     
@@ -1000,6 +1010,15 @@ if  "$SetupControlRun"; then
     
     ### Navigate back to top-level directory
     cd ${MY_PATH}/${RUN_NAME}
+
+  else
+
+    printf "ens_config indicates you are running the control run within the ensemble runs directory.\n"
+    printf "In your case, the control directory will be created in the SetupEnsembleRuns phase.\n"
+    printf "See the documentation for more information.\n"
+    printf "${thinline}SKIPPED CONTROL RUN DIRECTORY CREATION${thinline}"
+
+  fi #DO_CONTROL_WITHIN_ENSEMBLE_RUNS
     
 fi # SetupConrolRun
 
@@ -1012,7 +1031,7 @@ if "$SetupEnsembleRuns"; then
     printf "${thickline}CHEERIO ENSEMBLE RUN DIRECTORY CREATION${thickline}"
     
     # Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
-    if [ "${SIMULATE_NATURE}" = true ]; then
+    if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = true ]; then
       x=0
     else
       x=1
