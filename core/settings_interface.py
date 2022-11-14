@@ -28,14 +28,17 @@ def addExtension(data,file):
 		data[key] = extdata[key]
 	return data
 
-def importObsTranslators():
+def importObsTranslators(return_obsop_list = False):
 	with open('../operators.json') as f:
 		data = json.load(f)
 	result = {}
 	for key in data:
 		module = import_module(data[key]['module_name'])
 		result[key] = getattr(module, data[key]['translator_name'])
-	return result
+	if return_obsop_list:
+		return [result,data]
+	else:
+		return result
 
 #Get the latitude and longitude list for a particular core (indexed by ensemble and core)
 def getLatLonList(ensnum,corenum):
