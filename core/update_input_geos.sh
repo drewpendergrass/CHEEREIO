@@ -11,14 +11,21 @@ MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 ASSIM_TIME=$(jq -r ".ASSIM_TIME" ../ens_config.json)
 nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
-SIMULATE_NATURE=$(jq -r ".SIMULATE_NATURE" ../ens_config.json)
 
+dcr=$(jq -r ".DO_CONTROL_RUN" ens_config.json)
+dcer=$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ens_config.json) #if true, we make a run directory without assimilation within the ensemble runs structure.
+
+if [[ ("${dcr}" = "true" && "${dcer}" = "true") ]]; then
+  DO_CONTROL_WITHIN_ENSEMBLE_RUNS=true
+else
+  DO_CONTROL_WITHIN_ENSEMBLE_RUNS=false
+fi
 
 counter=1
 while IFS=' ' read -r date time
 do 
     # Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
-    if [ "$SIMULATE_NATURE" = true ]; then
+    if [ "$DO_CONTROL_WITHIN_ENSEMBLE_RUNS" = true ]; then
            x=0
     else
            x=1
