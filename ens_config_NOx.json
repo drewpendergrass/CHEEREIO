@@ -138,7 +138,7 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"pPERT" : {
-		"NOx":"0.1"
+		"NOx":"0.08"
 	},
 	"pertType" : {
 		"NOx":"std"
@@ -161,7 +161,7 @@
 		"NOx":"True"
 	},
 	"MinimumScalingFactorAllowed" : {
-		"NOx":"nan"
+		"NOx":"0.01"
 	},
 	"MaximumScalingFactorAllowed" : {
 		"NOx":"nan"
