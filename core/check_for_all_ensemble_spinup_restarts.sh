@@ -8,8 +8,8 @@ nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
 end_timestamp=$(jq -r ".ENS_SPINUP_END" ../ens_config.json)
 rst_filename="GEOSChem.Restart.${end_timestamp}_0000z.nc4"
 
-dcr=$(jq -r ".DO_CONTROL_RUN" ens_config.json)
-dcer=$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ens_config.json) #if true, we make a run directory without assimilation within the ensemble runs structure.
+dcr="$(jq -r ".DO_CONTROL_RUN" ../ens_config.json)"
+dcer="$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ../ens_config.json)" #if true, we make a run directory without assimilation within the ensemble runs structure.
 
 if [[ ("${dcr}" = "true" && "${dcer}" = "true") ]]; then
   DO_CONTROL_WITHIN_ENSEMBLE_RUNS=true

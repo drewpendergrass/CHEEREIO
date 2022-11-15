@@ -10,8 +10,8 @@ RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 ASSIM_TIME=$(jq -r ".ASSIM_TIME" ../ens_config.json)
 nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
 
-dcr=$(jq -r ".DO_CONTROL_RUN" ens_config.json)
-dcer=$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ens_config.json) #if true, we make a run directory without assimilation within the ensemble runs structure.
+dcr="$(jq -r ".DO_CONTROL_RUN" ../ens_config.json)"
+dcer="$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ../ens_config.json)" #if true, we make a run directory without assimilation within the ensemble runs structure.
 
 if [[ ("${dcr}" = "true" && "${dcer}" = "true") ]]; then
   DO_CONTROL_WITHIN_ENSEMBLE_RUNS=true
