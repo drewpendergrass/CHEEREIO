@@ -12,6 +12,10 @@ spc_config = si.getSpeciesConfig()
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
 subdirs.remove(f"{parent_dir}/logs/")
+control_name = f"{parent_dir}/{spc_config['RUN_NAME']}_0000/"
+if control_name in subdirs:
+	subdirs.remove(control_name)
+
 dirnames = [d.split('/')[-2] for d in subdirs]
 subdir_numstring = [n.split('_')[-1] for n in dirnames]
 subdir_nums = [int(n.split('_')[-1]) for n in dirnames]
@@ -51,7 +55,6 @@ for emis in emis_scaling_factors:
 	p = float(perturbation[emis])
 	corrbool = correlatedInitialScalings[emis]
 	if (corrbool == 'True') and (pt != "std"):
-		pt = "std"
 		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
 	if pt == "exp":
 		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
@@ -74,9 +77,7 @@ speciescount = 0
 if ('True' in list(correlatedInitialScalings.values())) and (not speedyCorrelationApprox):
 	distmat = tx.getDistMat(gridlabel)
 
-for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
-	if num == 0:
-		continue
+for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-control/nature directories
 	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
 		maskoceanboolval=mask_ocean_bool[emis_name]
 		maskarcticboolval=mask_arctic_bool[emis_name]
