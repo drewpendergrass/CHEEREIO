@@ -7,12 +7,6 @@ import settings_interface as si
 from glob import glob
 import sys
 
-teststr = str(sys.argv[1])
-if (teststr=="TESTING") or (teststr == "TESTPROD"):
-	testbool = True
-else:
-	testbool = False
-
 spc_config = si.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
@@ -41,7 +35,7 @@ speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
 
 
-timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
+timestamp = str(sys.argv[1]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 if len(spc_config["REGION"])==0:
@@ -93,27 +87,20 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		maxval=float(maxsf[emis_name])
 		corrbool=correlatedInitialScalings[emis_name]
 		corrdist=float(corrDistances[emis_name])
-		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
-		if testbool:
-			offset = 1
-			scale = 0
-			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
-			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
-		else:
-			if corrbool == "True": #Will sample a normal with correlation
-				if speedyCorrelationApprox:
-					scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
-				else:
-					cov = tx.makeCovMat(distmat,corrdist)
-					scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
+		if corrbool == "True": #Will sample a normal with correlation
+			if speedyCorrelationApprox:
+				scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
 			else:
-				if pt == "exp":
-					scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
-					scaling_factors = p**scaling_factor_exp
-				elif pt == "percent":
-					scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
-				elif pt == "std":
-					scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+				cov = tx.makeCovMat(distmat,corrdist)
+				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
+		else:
+			if pt == "exp":
+				scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
+				scaling_factors = p**scaling_factor_exp
+			elif pt == "percent":
+				scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
+			elif pt == "std":
+				scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
 		if ~np.isnan(minval): #Enforce minimum sf.
 			scaling_factors[scaling_factors<minval] = minval
 		if ~np.isnan(maxval): #Enforce maximum sf.

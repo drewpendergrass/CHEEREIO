@@ -1117,9 +1117,9 @@ if "$SetupEnsembleRuns"; then
     #Create initial scaling factors
     cd core
     if [ "${DO_ENS_SPINUP}" = true ]; then
-      python initialize_scaling_factors.py "PRODUCTION" "${ENS_SPINUP_START}" 
+      python initialize_scaling_factors.py "${ENS_SPINUP_START}" 
     else
-      python initialize_scaling_factors.py "PRODUCTION" "${START_DATE}" 
+      python initialize_scaling_factors.py "${START_DATE}" 
     fi
     python prep_par.py "PRODUCTION" #Figure out who should assimilate which cores. 
     python setup_obs_dates.py #Create date dictionaries for rapid reference at assimilation time.
