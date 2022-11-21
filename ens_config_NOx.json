@@ -77,7 +77,7 @@
 		"MPAN",
 		"N2O5"
 	],
-	"STATE_VECTOR_CONC_REPRESENTATION" : "trop_su ",
+	"STATE_VECTOR_CONC_REPRESENTATION" : "trop_sum",
 	"CONTROL_VECTOR_EMIS" : {
 		"NOx":["NO","NO2"]
 	},
