@@ -40,7 +40,7 @@ class HIST_Ens(object):
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens==0:
+			if (ens==0) and self.useControl:
 				if fullperiod:
 					self.control_ht = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
 				else:

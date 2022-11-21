@@ -10,7 +10,6 @@ import pickle
 import pandas as pd
 sys.path.append('../core')
 from HIST_Ens import HIST_Ens 
-import tropomi_tools as tt 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 	subdirs = glob(f"{ensemble_dir}/*/")
@@ -108,32 +107,11 @@ def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6
 	return ds
 
 def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE',fullpath_output_name = None):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,includeOutputDir=True)
+	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,includeOutputDir=True,removeNature=True)
 	array_list = []
 	for subdir in subdirs:
 		print(f'Processing {subdir}')
 		array_list.append(makeDatasetForDirectory(subdir,species_names,timeperiod,hourlysub,subset_rule))
-	ds = xr.concat(array_list,'Ensemble')
-	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
-	if fullpath_output_name:
-		ds.to_netcdf(fullpath_output_name)
-	return ds
-
-def makeDatasetForDirectoryLevelEdge(hist_dir,timeperiod=None,hourlysub = 6, fullpath_output_name = None, average_levels = True):
-	edgeconc_list = globSubDirLevelEdge(hist_dir,timeperiod,hourlysub)
-	concstring = 'Met_PEDGE'
-	ds = xr.open_mfdataset(edgeconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
-	ds = ds[concstring]
-	if fullpath_output_name:
-		ds.to_netcdf(fullpath_output_name)
-	return ds
-
-def makeDatasetForEnsembleLevelEdge(ensemble_dir,timeperiod=None,hourlysub = 6,fullpath_output_name = None):
-	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,includeOutputDir=True)
-	array_list = []
-	for subdir in subdirs:
-		print(f'Processing {subdir}')
-		array_list.append(makeDatasetForDirectoryLevelEdge(subdir,timeperiod,hourlysub))
 	ds = xr.concat(array_list,'Ensemble')
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	if fullpath_output_name:

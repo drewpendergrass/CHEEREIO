@@ -15,7 +15,14 @@ data = si.getSpeciesConfig()
 hemco_diags_to_process = data['hemco_diags_to_process']
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
-control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/control_run"
+useControl=data['DO_CONTROL_RUN']=="true"
+controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
+
+if useControl and controlInEns:
+	control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/{data['RUN_NAME']}_0000"
+elif useControl and not controlInEns:
+	control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/control_run"
+
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
 observed_species = data['OBSERVED_SPECIES']
@@ -38,7 +45,6 @@ avtogcgrid = data['AV_TO_GC_GRID']=="True"
 useLevelEdge=data['SaveLevelEdgeDiags']=="True"
 useStateMet=data['SaveStateMet']=="True"
 useArea=data['SaveArea']=="True"
-useControl=data['DO_CONTROL_RUN']=="true"
 
 print('Starting scale factor postprocessing.')
 if len(emisvec) > 0:
