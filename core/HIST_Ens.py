@@ -45,6 +45,8 @@ class HIST_Ens(object):
 					self.control_ht = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
 				else:
 					self.control_ht = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
+			elif (ens==0) and (not self.useControl): # we don't want to use this directory (because we aren't processing control), but must explicitly omit from processing
+				pass #do nothing
 			else:
 				if fullperiod:
 					self.ht[ens] = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
