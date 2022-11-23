@@ -361,6 +361,8 @@ class Assimilator(object):
 	def saveRestarts(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].saveRestart()
+		if self.control is not None: #save control if we are using.
+			self.control.saveRestart()
 	def LETKF(self):
 		if self.verbose>=2:
 			print(f"LETKF called! Beginning loop.")
