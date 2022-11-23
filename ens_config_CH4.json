@@ -8,7 +8,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_scale_v02",
+	"RUN_NAME" : "METHANE_scale_v03",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -23,8 +23,8 @@
 	"SPINUP_END" : "",
 	"DO_CONTROL_RUN" : "true",
 	"DO_CONTROL_WITHIN_ENSEMBLE_RUNS" : "true",
-	"CONTROL_START" : "20180701",
-	"CONTROL_END" : "20200108",
+	"CONTROL_START" : "",
+	"CONTROL_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "true",
 	"ENS_SPINUP_START" : "20180701",
@@ -179,7 +179,7 @@
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
 	},
-	"INFLATION_FACTOR": "0.01",
+	"INFLATION_FACTOR": "0.03",
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
