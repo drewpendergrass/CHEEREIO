@@ -8,8 +8,8 @@ from GC_Translator import GC_Translator
 from HIST_Ens import HIST_Ens
 
 #Contains a dictionary referencing GC_Translators for every run directory.
-#In the special case where there is a nature run present (with number 0)
-#store the nature run in GC_Translator object nature.
+#In the case where there is a control run present (with number 0)
+#store the control run in GC_Translator object control.
 #Also contains an observation operator (pass in the class you would like to use) for each species to assimilate.
 #Class contains function to calculate relvant assimilation variables.
 #SPECIAL NOTE ON FILES: we will be assuming that geos-chem stopped and left a restart at assimilation time in each run directory.
@@ -36,7 +36,7 @@ class Assimilator(object):
 			print(f"The following ensemble directories were detected: {dirnames}")
 		subdir_numbers = [int(n.split('_')[-1]) for n in dirnames]
 		ensemble_numbers = []
-		self.nature = None
+		self.control = None
 		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
 		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
 			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
@@ -64,7 +64,7 @@ class Assimilator(object):
 			print(f"Begin creating GC Translators with state vectors.")
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.nature = GC_Translator(directory, timestamp, False,self.verbose)
+				self.control = GC_Translator(directory, timestamp, False,self.verbose)
 			else: 
 				self.gt[ens] = GC_Translator(directory, timestamp, True,self.verbose)
 				ensemble_numbers.append(ens)
@@ -345,6 +345,9 @@ class Assimilator(object):
 			for i in self.ensemble_numbers:
 				scaled_species = self.gt[i].getSpecies3Dconc(species)*scaling_factor
 				self.gt[i].setSpecies3Dconc(species, scaled_species)
+			if self.control is not None: #scale control if we are using.
+				scaled_species = self.control.getSpecies3Dconc(species)*scaling_factor 
+				self.control.setSpecies3Dconc(species, scaled_species)
 	def amplifySpreads(self):
 		if self.verbose>=1:
 			print(f"Amplifying ensemble spread of concentrations.")

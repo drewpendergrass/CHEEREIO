@@ -36,16 +36,24 @@ class HIST_Ens(object):
 			delta = timedelta(hours=int(ASSIM_TIME))
 			starttime = endtime-delta
 		self.timeperiod = (starttime,endtime)
+		self.control_ht = None
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
 		for ens, directory in zip(subdir_numbers,subdirs):
-			if ens!=0:
+			if (ens==0) and self.useControl:
+				if fullperiod:
+					self.control_ht = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
+				else:
+					self.control_ht = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
+			elif (ens==0) and (not self.useControl): # we don't want to use this directory (because we aren't processing control), but must explicitly omit from processing
+				pass #do nothing
+			else:
 				if fullperiod:
 					self.ht[ens] = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)
 				else:
 					self.ht[ens] = HIST_Translator(directory, self.timeperiod,verbose=self.verbose)
 				ensemble_numbers.append(ens)
-		if self.useControl:
+		if self.useControl and (self.control_ht is None): #Separate control directory
 			directory = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/control_run/"
 			if fullperiod:
 				self.control_ht = HIST_Translator(directory, self.timeperiod,interval,verbose=self.verbose)

@@ -84,7 +84,7 @@ class GC_Translator(object):
 		ratio = column2d/original_column #values by which we scale
 		assim3d = conc3d * ratio #scale by ratio
 		if useTrop:
-			nlev,nlat,nlon = np.shape(conc3D)
+			nlev,nlat,nlon = np.shape(conc3d)
 			level = np.arange(0,nlev)
 			levcube = np.transpose(np.tile(level,nlat*nlon).reshape((nlat,nlon,nlev)),(2,0,1)) #cube of dim lev,lat,lon with value of level index 
 			mask = levcube>=params["trop"] #Make mask where levcube is above tropopause level,

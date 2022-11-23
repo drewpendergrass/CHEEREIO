@@ -7,17 +7,15 @@ import settings_interface as si
 from glob import glob
 import sys
 
-teststr = str(sys.argv[1])
-if (teststr=="TESTING") or (teststr == "TESTPROD"):
-	testbool = True
-else:
-	testbool = False
-
 spc_config = si.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/ensemble_runs"
 subdirs = glob(f"{parent_dir}/*/")
 subdirs.remove(f"{parent_dir}/logs/")
+control_name = f"{parent_dir}/{spc_config['RUN_NAME']}_0000/"
+if control_name in subdirs:
+	subdirs.remove(control_name)
+
 dirnames = [d.split('/')[-2] for d in subdirs]
 subdir_numstring = [n.split('_')[-1] for n in dirnames]
 subdir_nums = [int(n.split('_')[-1]) for n in dirnames]
@@ -41,7 +39,7 @@ speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
 
 
-timestamp = str(sys.argv[2]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
+timestamp = str(sys.argv[1]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
 
 if len(spc_config["REGION"])==0:
@@ -57,7 +55,6 @@ for emis in emis_scaling_factors:
 	p = float(perturbation[emis])
 	corrbool = correlatedInitialScalings[emis]
 	if (corrbool == 'True') and (pt != "std"):
-		pt = "std"
 		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
 	if pt == "exp":
 		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
@@ -80,9 +77,7 @@ speciescount = 0
 if ('True' in list(correlatedInitialScalings.values())) and (not speedyCorrelationApprox):
 	distmat = tx.getDistMat(gridlabel)
 
-for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-nature directories
-	if num == 0:
-		continue
+for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-control/nature directories
 	for emis_name in emis_scaling_factors: #Loop through the species we want scaling factors for
 		maskoceanboolval=mask_ocean_bool[emis_name]
 		maskarcticboolval=mask_arctic_bool[emis_name]
@@ -93,27 +88,20 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-na
 		maxval=float(maxsf[emis_name])
 		corrbool=correlatedInitialScalings[emis_name]
 		corrdist=float(corrDistances[emis_name])
-		#Generate random uniform scaling factors. If testing, just generate uniform field of same percentage below/above mean as restarts, offset by configurable parameter
-		if testbool:
-			offset = 1
-			scale = 0
-			scaling_factors = (scale*np.random.rand(1,len(lat),len(lon)))+offset
-			scaling_factors *= ((num/meanval)+float(spc_config['TESTBIAS']))
-		else:
-			if corrbool == "True": #Will sample a normal with correlation
-				if speedyCorrelationApprox:
-					scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
-				else:
-					cov = tx.makeCovMat(distmat,corrdist)
-					scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
+		if corrbool == "True": #Will sample a normal with correlation
+			if speedyCorrelationApprox:
+				scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
 			else:
-				if pt == "exp":
-					scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
-					scaling_factors = p**scaling_factor_exp
-				elif pt == "percent":
-					scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
-				elif pt == "std":
-					scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+				cov = tx.makeCovMat(distmat,corrdist)
+				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
+		else:
+			if pt == "exp":
+				scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
+				scaling_factors = p**scaling_factor_exp
+			elif pt == "percent":
+				scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
+			elif pt == "std":
+				scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
 		if ~np.isnan(minval): #Enforce minimum sf.
 			scaling_factors[scaling_factors<minval] = minval
 		if ~np.isnan(maxval): #Enforce maximum sf.
