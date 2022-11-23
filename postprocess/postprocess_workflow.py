@@ -26,6 +26,7 @@ elif useControl and not controlInEns:
 savelevel = data['SaveLevelEdgeDiags']
 controlvec = data['CONTROL_VECTOR_CONC']
 observed_species = data['OBSERVED_SPECIES']
+obs_units = data['OBSERVATION_UNITS']
 
 #Albedo postprocessing option available for TROPOMI CH4.
 if 'postprocess_save_albedo' in data:
@@ -117,4 +118,5 @@ for spec in controlvec:
 
 if "histprocess" in sys.argv:
 	for spec in observed_species:
-		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit='ppb',observer_name=data['OBS_TYPE'][spec],outfile=f'{pp_dir}/observations_ts_compare_{spec}.png')
+		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=False,outfile=f'{pp_dir}/observations_ts_compare_{spec}.png')
+		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=True,outfile=f'{pp_dir}/observations_ts_compare_{spec}_w_control.png')

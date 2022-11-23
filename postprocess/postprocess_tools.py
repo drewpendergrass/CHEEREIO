@@ -227,10 +227,12 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outf
 	priortime = np.array(ds_prior['time'])
 	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
 
-def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',outfile=None):
+def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
 	ensmeans = []
 	ensstds = []
 	obsmeans = []
+	if useControl:
+		ctrlmeans = []
 	datestrs = list(bigY.keys())
 	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in datestrs]
 	for date in datestrs:
@@ -240,6 +242,10 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations'
 		enssd = np.std(assimperiodensmean)
 		obscol=np.array(bigY[date][species]['Observations'])
 		obsmean = np.mean(obscol)
+		if useControl:
+			ctrlcol=np.array(bigY[date][species]['Control'])
+			ctrlmean = np.mean(ctrlcol)
+			ctrlmeans.append(ctrlmean)
 		ensmeans.append(ensmean)
 		ensstds.append(enssd)
 		obsmeans.append(obsmean)
@@ -252,6 +258,9 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations'
 	plt.plot(datevals,ensmeans+ensstds,':',color='b')
 	plt.plot(datevals,ensmeans-ensstds,':',color='b')
 	plt.plot(datevals,obsmeans,color='g',label=observer_name)
+	if useControl:
+		ctrlmeans = np.array(ctrlmeans)
+		plt.plot(datevals,ctrlmeans,color='r',label='Control')
 	plt.legend()
 	plt.xlabel('Time')
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
