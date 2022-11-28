@@ -3,6 +3,7 @@ import settings_interface as si
 import sys 
 from GT_Container import GT_Container
 import time
+import numpy as np
 import os
 
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
