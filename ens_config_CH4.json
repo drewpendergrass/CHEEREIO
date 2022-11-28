@@ -112,7 +112,7 @@
 	"filter_obs_poleward_of_n_degrees" : {
 		"CH4_TROPOMI":"60"
 	},
-	"SaveDOFS" : "True",
+	"SaveDOFS" : "False",
 	"DOFS_filter" : "1",
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
