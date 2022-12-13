@@ -11,6 +11,14 @@ MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 ASSIM_TIME=$(jq -r ".ASSIM_TIME" ../ens_config.json)
 nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
+GC_VERSION="$(jq -r ".GC_VERSION" ../ens_config.json)"
+gc_major_version="${GC_VERSION:0:2}"
+
+  if [ gc_major_version = "13" ]; then
+    filename='input.geos'
+  elif [ gc_major_version = "14" ]; then
+    filename='geoschem_config.yml'
+    fi
 
 dcr="$(jq -r ".DO_CONTROL_RUN" ../ens_config.json)"
 dcer="$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ../ens_config.json)" #if true, we make a run directory without assimilation within the ensemble runs structure.
@@ -44,14 +52,14 @@ do
          fi
          name="${RUN_NAME}_${xstr}"
          if [ $counter -eq 1 ]; then
-            cp ${MY_PATH}/${RUN_NAME}/template_run/input.geos ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/input.geos
+            cp ${MY_PATH}/${RUN_NAME}/template_run/${filename} ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}
          fi
          sed -i -e "s:{DATE${counter}}:${date}:g" \
-                -e "s:{TIME${counter}}:${time}:g" ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/input.geos
+                -e "s:{TIME${counter}}:${time}:g" ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}
          x=$[$x+1]
        done
        #Increment so we do end time
        counter=$[$counter+1]
 done <${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP
 
-printf "\ninput.geos updated for ensemble.\n"
+printf "\n${filename} updated for ensemble.\n"
