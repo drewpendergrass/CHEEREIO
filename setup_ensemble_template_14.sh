@@ -14,6 +14,257 @@ printf "${thickline}CHEERIO TEMPLATE RUN DIRECTORY CREATION${thickline}"
 
 source setup_ensemble_template_shared.sh
 
+# Initialize run directory variables
+RUNDIR_VARS=""
+RUNDIR_VARS+="RUNDIR_GC_MODE='GCClassic'\n"
+RUNDIR_VARS+="RUNDIR_DATA_ROOT=$GC_DATA_ROOT\n"
+RUNDIR_VARS+="RUNDIR_SIM_NAME=$sim_name\n"
+RUNDIR_VARS+="RUNDIR_SIM_EXTRA_OPTION=$sim_extra_option\n"
+
+# Determine settings based on simulation type
+SettingsDir="${gcdir}/run/shared/settings"
+if [[ ${sim_extra_option} == "BaP" ]]; then
+    RUNDIR_VARS+="$(cat ${SettingsDir}/POPs_BaP.txt)\n"
+elif [[ ${sim_extra_option} == "PHE" ]]; then
+    RUNDIR_VARS+="$(cat ${SettingsDir}/POPs_PHE.txt)\n"
+elif [[ ${sim_extra_option} == "PYR" ]]; then
+    RUNDIR_VARS+="$(cat ${SettingsDir}/POPs_PYR.txt)\n"
+fi
+
+if [[ ${sim_extra_option} == "benchmark"  ]] || \
+   [[ ${sim_extra_option} =~ "complexSOA" ]] || \
+   [[ ${sim_extra_option} == "APM"        ]]; then
+    RUNDIR_VARS+="RUNDIR_COMPLEX_SOA='true '\n"
+    if [[ ${sim_extra_option} == "complexSOA_SVPOA" ]]; then
+  RUNDIR_VARS+="RUNDIR_SVPOA='true '\n"
+    else
+  RUNDIR_VARS+="RUNDIR_SVPOA='false'\n"
+    fi
+else
+    RUNDIR_VARS+="RUNDIR_COMPLEX_SOA='false'\n"
+    RUNDIR_VARS+="RUNDIR_SVPOA='false'\n"
+fi
+
+if [[ ${sim_extra_option} == "aciduptake" ]]; then
+    RUNDIR_VARS+="RUNDIR_DUSTALK_EXT='on '\n"
+    RUNDIR_VARS+="RUNDIR_ACID_UPTAKE='true '\n"
+else
+    RUNDIR_VARS+="RUNDIR_DUSTALK_EXT='off'\n"
+    RUNDIR_VARS+="RUNDIR_ACID_UPTAKE='false'\n"
+fi
+
+if [[ ${sim_extra_option} == "marinePOA" ]]; then
+    RUNDIR_VARS+="RUNDIR_MARINE_POA='true '\n"
+else
+    RUNDIR_VARS+="RUNDIR_MARINE_POA='false'\n"
+fi
+
+if [[ ${sim_extra_option} == "RRTMG" ]]; then
+    RUNDIR_VARS+="RUNDIR_RRTMG_OPTS='true '\n"
+    RUNDIR_VARS+="RUNDIR_USE_RRTMG='true '\n"
+else
+    RUNDIR_VARS+="RUNDIR_RRTMG_OPTS='false'\n"
+    RUNDIR_VARS+="RUNDIR_USE_RRTMG='false'\n"
+fi
+
+if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
+    RUNDIR_VARS+="RUNDIR_USE_NLPBL='false'\n"
+    RUNDIR_VARS+="RUNDIR_USE_ONLINE_O3='false'\n"
+else
+    RUNDIR_VARS+="RUNDIR_USE_NLPBL='true '\n"
+    RUNDIR_VARS+="RUNDIR_USE_ONLINE_O3='true '\n"
+fi
+
+if [[ ${met_name_lc} = "merra2" ]]; then
+  met="merra2"
+        shared_met_settings=${gcdir}/run/shared/settings/merra2.txt
+  RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gmao_metfields'\n"
+    elif [[ ${met_name_lc} = "geosfp" ]]; then
+    met="geosfp"
+        shared_met_settings=${gcdir}/run/shared/settings/geosfp.txt
+  RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gmao_metfields'\n"
+    elif [[ ${met_name} = "ModelE2.1" ]]; then
+  met="ModelE2.1"
+        shared_met_settings=${gcdir}/run/shared/settings/modele2.1.txt
+  RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gcap2_metfields'\n"
+
+
+#If you're using ModelE, you'll need to modify this.
+
+    RUNDIR_VARS+="RUNDIR_GCAP2_SCENARIO='not_used'\n"
+    RUNDIR_VARS+="RUNDIR_GISS_RES='not_used'\n"
+    RUNDIR_VARS+="RUNDIR_GCAP2_VERTRES='not_used'\n"
+    RUNDIR_VARS+="RUNDIR_GCAP2_RUNID='not_used'\n"
+    RUNDIR_VARS+="RUNDIR_MET_AVAIL='# 1980-2021'\n"
+
+    RUNDIR_VARS+="RUNDIR_USE_AEIC='true'\n"
+
+    # Define the volcano paths for the HEMCO_Config.rc file
+    # NOTE: Benchmark simulations always use the climatological emissions!
+    if [[ "x${sim_name}" == "xfullchem" ]]  ||  \
+       [[ "x${sim_name}" == "xaerosol"  ]]; then
+  RUNDIR_VARS+="RUNDIR_VOLC_CLIMATOLOGY='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
+
+  if [[ "x${sim_extra_option}" == "xbenchmark" ]]; then
+      RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
+  else
+      RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/\$YYYY/\$MM/so2_volcanic_emissions_Carns.\$YYYY\$MM\$DD.rc'\n"
+  fi
+    fi
+
+if [[ ${grid_res} = "4x5" ]]; then
+  RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/4x5.txt)\n"
+elif [[ ${grid_res} = "2x25" ]]; then
+  RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/2x25.txt)\n"
+elif [[ ${grid_res} = "05x0625" ]]; then
+  RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/05x0625.txt)\n"
+elif [[ ${res_num} = "025x03125" ]]; then
+  RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/025x03125.txt)\n"
+fi
+
+if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
+  if [[ ${NEST} = "T" ]]; then
+    RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/nested_grid.txt)\n"
+    if [[ ${domain_name} = "AS" ]]; then
+      RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='AS'\n"
+      grid_nest="AS"
+            if [[ ${grid_res} = "05x0625" ]]; then
+                RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 60.0, 150.0]'\n"
+          RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[-11.0,  55.0]'\n"
+      elif [[ ${grid_res} = "025x03125" ]]; then
+                RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 70.0, 140.0]'\n"
+          RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 15.0,  55.0]'\n"
+      fi
+    elif [[ ${domain_name} = "EU" ]]; then
+      RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='EU'\n"
+            grid_nest="EU"
+            if [[ ${grid_res} = "05x0625" ]]; then
+                RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-30.0, 50.0]'\n"
+                RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 30.0, 70.0]'\n"
+            elif [[ ${grid_res} = "025x03125" ]]; then
+                      RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-15.0,  40.0 ]'\n"
+                RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 32.75, 61.25]'\n"
+            fi
+      elif [[ ${domain_name} = "NA" ]]; then
+        RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='NA'\n"
+        grid_nest+="NA"
+              if [[ ${grid_res} = "05x0625" ]]; then
+                  RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-140.0, -40.0]'\n"
+                RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[  10.0,  70.0]'\n"
+              elif [[ ${grid_res} = "025x03125" ]]; then
+                        RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-130.0,  -60.0]'\n"
+                  RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[   9.75,  60.0]'\n"
+              fi
+      elif [[ ${domain_name} = "custom" ]]; then
+            grid_nest="CU"
+            RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='custom'\n"
+                  RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='MinLon MaxLon'\n"
+                  RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='MinLat MaxLat'\n"
+                  printf "\n  -- You will need to manually set longitude and latitude"
+            printf "\n     bounds in the Grid Menu of geoschem_config.yml!\n"
+      else
+        printf "Invalid horizontal grid domain option.\n"
+  else
+    RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/global_grid.txt)\n"
+    if [[ ${met} = "ModelE2.1" ]] || [[ ${met} = "ModelE2.2" ]]; then
+        if [[ "$grid_res" == "4x5" ]]; then
+            RUNDIR_VARS+="RUNDIR_GRID_HALF_POLAR='true '\n"
+        else
+            RUNDIR_VARS+="RUNDIR_GRID_HALF_POLAR='false'\n"
+        fi
+    else
+      RUNDIR_VARS+="RUNDIR_GRID_HALF_POLAR='true '\n"
+    fi
+  fi
+fi
+
+
+RUNDIR_VARS+="$(cat ${shared_met_settings})\n"   # shared_met_settings needs to be included after RUNDIR_GRID_DIR is defined
+
+# Set timesteps according to grid resolution
+if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
+    RUNDIR_VARS+="RUNDIR_TRANSPORT_TS='300'\n"
+    RUNDIR_VARS+="RUNDIR_CHEMISTRY_TS='600'\n"
+else
+    if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
+  RUNDIR_VARS+="RUNDIR_TRANSPORT_TS='1800'\n"
+  RUNDIR_VARS+="RUNDIR_CHEMISTRY_TS='3600'\n"
+    else
+  RUNDIR_VARS+="RUNDIR_TRANSPORT_TS='600'\n"
+  RUNDIR_VARS+="RUNDIR_CHEMISTRY_TS='1200'\n"
+    fi
+fi
+
+
+#-----------------------------------------------------------------
+# Is International Date Line an edge or midpoint?
+#-----------------------------------------------------------------
+
+if [[ ${met} = "ModelE2.1" ]] || [[ ${met} = "ModelE2.2" ]] ; then
+    if [[ "$grid_res" == "2x25" ]]; then
+  # Native GISS fine resolution
+  RUNDIR_VARS+="RUNDIR_CENTER_LON_180='false'\n"
+    else
+        # FlexGrid re-gridded resolutions
+  RUNDIR_VARS+="RUNDIR_CENTER_LON_180='true '\n"
+    fi
+else
+    # All GMAO products
+    RUNDIR_VARS+="RUNDIR_CENTER_LON_180='true '\n"
+fi
+
+
+#----------------------------------------------------------------
+# Horizontal resolution-dependent settings
+#-----------------------------------------------------------------
+
+if [[ ${met} = "ModelE2.1" ]]; then
+    if [[ "$runid" == "E213f10aF40oQ40nudge" ]]; then
+        if [[ "$grid_res" ==  "4x5" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00474046'\n"
+        elif [[ "$grid_res" == "2x25" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00243979'\n"
+        elif [[ "$grid_res" == "05x0625" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00276896'\n"
+        elif [[ "$grid_res" == "025x03125" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00254319'\n"
+  else
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+    fi
+    else
+        if [[ "$grid_res" ==  "4x5" ]]; then
+            RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.03564873'\n"
+        elif [[ "$grid_res" == "2x25" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01050036'\n"
+        elif [[ "$grid_res" == "05x0625" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01340854'\n"
+        elif [[ "$grid_res" == "025x03125" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01066495'\n"
+  else
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+  fi
+    fi
+else
+    RUNDIR_VARS+="RUNDIR_GISS_RES='not_used'\n"
+    if [[ "x${sim_name}" == "xfullchem" || "x${sim_name}" == "xaerosol" ]]; then
+  if [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x4x5" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='8.3286e-4'\n"
+  elif [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x2x25" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='5.0416e-4'\n"
+  elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x4x5" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='7.8533e-4'\n"
+  elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x2x25" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='4.7586e-4'\n"
+  else
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+  fi
+    else
+  RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+    fi
+fi
+
+RUNDIR_VARS+="RUNDIR_GRID_NLEV='$grid_lev'\n"
+
 cp ${gcdir}/run/shared/cleanRunDir.sh ${RUN_TEMPLATE}
 cp ${gcdir}/run/shared/download_data.py ${RUN_TEMPLATE}
 cp ${GCC_RUN_FILES}/getRunInfo ${RUN_TEMPLATE}

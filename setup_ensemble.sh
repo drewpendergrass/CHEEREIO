@@ -28,7 +28,7 @@ source setup_ensemble_prelims.sh #get the relevant variables.
 ##=======================================================================
 if "$SetupTemplateRundir"; then
 
-  bash setup_ensemble_template_13.sh
+  source setup_ensemble_template_13.sh
 
   #Modify HEMCO_Config so that GEOS-Chem will read in assimilated scaling factors.
   cd ${ASSIM_PATH}/core
@@ -84,7 +84,7 @@ fi
 ##=======================================================================
 if  "$SetupSpinupRun"; then
 
-  bash setup_ensemble_spinup.sh
+  source setup_ensemble_spinup.sh
 
 fi # SetupSpinupRun
 
@@ -93,7 +93,7 @@ fi # SetupSpinupRun
 ##=======================================================================
 if  "$SetupControlRun"; then
 
-  bash setup_ensemble_control.sh
+  source setup_ensemble_control.sh
     
 fi # SetupConrolRun
 
@@ -103,7 +103,7 @@ fi # SetupConrolRun
 ##=======================================================================
 if "$SetupEnsembleRuns"; then
 
-    bash setup_ensemble_make_ensemble.sh
+    source setup_ensemble_make_ensemble.sh
 
 fi  # SetupEnsembleRuns
 
