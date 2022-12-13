@@ -14,9 +14,9 @@ nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
 GC_VERSION="$(jq -r ".GC_VERSION" ../ens_config.json)"
 gc_major_version="${GC_VERSION:0:2}"
 
-  if [ gc_major_version = "13" ]; then
+  if [ $gc_major_version = "13" ]; then
     filename='input.geos'
-  elif [ gc_major_version = "14" ]; then
+  elif [ $gc_major_version = "14" ]; then
     filename='geoschem_config.yml'
     fi
 
