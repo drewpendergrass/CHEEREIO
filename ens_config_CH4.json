@@ -98,7 +98,7 @@
 		"Met_PS1DRY",
 		"Met_TMPU1",
 		"Met_BXHEIGHT",
-		"Met_TropLev",
+		"Met_TropLev"
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD"
