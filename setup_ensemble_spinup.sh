@@ -54,5 +54,3 @@ printf "${thinline}CREATED: ${runDir}${thinline}"
 
 ### Navigate back to top-level directory
 cd ${MY_PATH}/${RUN_NAME}
-
-exit 0

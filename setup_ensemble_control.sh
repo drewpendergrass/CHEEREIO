@@ -82,6 +82,3 @@ else
     printf "${thinline}SKIPPED CONTROL RUN DIRECTORY CREATION${thinline}"
 
 fi #DO_CONTROL_WITHIN_ENSEMBLE_RUNS
-
-
-exit 0

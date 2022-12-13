@@ -424,4 +424,3 @@ echo -e "$RUNDIR_VARS" > ${rundir_config_log}
 # Initialize run directory
 ${srcrundir}/init_rd.sh ${rundir_config_log}
 
-exit 0

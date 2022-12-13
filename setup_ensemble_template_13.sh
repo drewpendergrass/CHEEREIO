@@ -383,6 +383,3 @@ if [[ ${met_name} = "ModelE2.1" ]]; then
     replace_colon_sep_val "--> CMIP6_SHIP"            true  HEMCO_Config.rc
     replace_colon_sep_val "--> BB4MIPS"               true  HEMCO_Config.rc
 fi
-
-
-exit 0

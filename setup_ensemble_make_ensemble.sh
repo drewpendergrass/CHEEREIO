@@ -120,5 +120,3 @@ fi
 cd ${MY_PATH}/${RUN_NAME}
 
 printf "${thickline}DONE CREATING ENSEMBLE MEMBER RUN DIRECTORIES${thickline}"
-
-exit 0

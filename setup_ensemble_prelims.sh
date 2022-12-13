@@ -388,5 +388,3 @@ wrapperdir="${ASSIM_PATH}/GCClassic"
 # Define separator lines
 thickline="\n===========================================================\n"
 thinline="\n-----------------------------------------------------------\n"
-
-exit 0
