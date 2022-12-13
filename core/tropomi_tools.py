@@ -132,6 +132,55 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	return met
 
 
+#Read the ACMG version of TROPOMI CH4
+def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False):
+
+	if species !='CH4':
+		raise ValueError('Species not supported.')
+	# Initialize list for TROPOMI data
+	met = {}
+	
+	# Store species, QA, lat, lon, time, averaging kernel
+	data = xr.open_dataset(filename)
+	qa = data['qa_value'].values
+	goodvals=np.where(qa>0.5)[0]
+
+	met['qa_value'] = qa[goodvals]
+	met[species] = data['xch4_corrected'].values[goodvals] #nobs
+
+	if includeObsError:
+		met['Error'] = data['xch4_precision'].values[goodvals] #nobs
+	
+	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
+	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
+	met['utctime'] = data['time_utc'].values[goodvals,:] #nobs, scanline
+
+	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
+	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
+	met['albedo_nir'] = data['surface_albedo'].values[goodvals,0]
+	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
+	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
+
+	#no surface elevation std, make sure it is set to nan in ens_config.
+	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer
+	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer
+	pressure_interval = data['dp'].values[goodvals]/100 #nobs
+	surface_pressure = data['surface_pressure'].values[goodvals]/100 #nobs				# Pa -> hPa
+		
+	data.close()
+
+	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
+	pressures.fill(np.nan)
+	for i in range(13):
+		pressures[:,i]=surface_pressure-(i*pressure_interval)
+	
+	met['pressures'] = pressures
+	
+	if filterinfo is not None:
+		met = obsop.apply_filters(met,filterinfo)
+
+	return met
+
 #This seems to be the memory bottleneck
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
@@ -236,7 +285,10 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
+			if self.spc_config['USE_ACMG_PRODUCT'] == 'True':
+				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
+			else:
+				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
