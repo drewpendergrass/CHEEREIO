@@ -4,6 +4,8 @@
 
 eval "$(conda shell.bash hook)"
 
+GC_VERSION="$(jq -r ".GC_VERSION" ens_config.json)"
+
 # Path to assimilation setup
 ASSIM_PATH="$(jq -r ".ASSIM_PATH" ens_config.json)"
 

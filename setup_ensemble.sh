@@ -28,7 +28,15 @@ source setup_ensemble_prelims.sh #get the relevant variables.
 ##=======================================================================
 if "$SetupTemplateRundir"; then
 
-  source setup_ensemble_template_13.sh
+  gc_major_version="${GC_VERSION:0:2}"
+  if [ gc_major_version = "13" ]; then
+    source setup_ensemble_template_13.sh
+  elif [ gc_major_version = "14" ]; then
+    source setup_ensemble_template_14.sh
+  else
+    printf "\n ERROR: CANNOT WORK WITH GEOS-CHEM VERSION SUPPLIED; must be 13 or later."
+    exit 1
+  fi
 
   #Modify HEMCO_Config so that GEOS-Chem will read in assimilated scaling factors.
   cd ${ASSIM_PATH}/core
