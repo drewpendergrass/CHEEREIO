@@ -112,16 +112,10 @@ class HISTORY_Translator():
 				startstring = "                              "
 			secondstring = "'SpeciesConc_"
 			endwhitespacecount=18-len(species)
-		elif sectionname=='LevelEdgeDiags':
+		else:
 			if isFirst:
-				startstring = "  LevelEdgeDiags.fields:      "
-			else:
-				startstring = "                              "
-			secondstring = "'"
-			endwhitespacecount=30-len(species)
-		elif sectionname=='StateMet':
-			if isFirst:
-				startstring = "  StateMet.fields:            "
+				startstring = f"  {sectionname}.fields:"
+				startstring += (' '*(20-len(sectionname)))
 			else:
 				startstring = "                              "
 			secondstring = "'"
@@ -143,6 +137,13 @@ class HISTORY_Translator():
 			self.customizeSection('LevelEdgeDiags')
 		if self.spc_config['SaveStateMet']=='True':
 			self.customizeSection('StateMet')
+		#Handle any other customizations
+		for collection in self.spc_config['HISTORY_collections_to_customize']:
+			if collection in ['SpeciesConc','StateMet','SpeciesConc']:
+				continue #already handled
+			else:
+				if f"History{collection}ToSave" in list(self.spc_config.keys()):
+					self.customizeSection(collection)
 	def writeHistoryConfig(self):
 		with open(self.historyrc_path+'HISTORY.rc', 'w') as f:
 			for line in self.lines:

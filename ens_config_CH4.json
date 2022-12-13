@@ -77,7 +77,8 @@
 		"SpeciesConc",
 		"CH4",
 		"LevelEdgeDiags",
-		"StateMet"
+		"StateMet",
+		"Restart"
 	],
 	"HISTORY_freq" : "00000000 040000",
 	"HISTORY_dur" : "00000001 000000",
@@ -91,6 +92,13 @@
 	],
 	"HistoryLevelEdgeDiagsToSave" : [
 		"Met_PEDGE"
+	],
+	"HistoryRestartToSave" : [
+		"SpeciesRst_?ALL?",
+		"Met_PS1DRY",
+		"Met_TMPU1",
+		"Met_BXHEIGHT",
+		"Met_TropLev",
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD"
