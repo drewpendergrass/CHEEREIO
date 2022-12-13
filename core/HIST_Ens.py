@@ -4,7 +4,8 @@ import tropomi_tools as tt
 import omi_tools as ot
 import scipy.linalg as la
 import toolbox as tx 
-import settings_interface as si 
+import settings_interface as si
+import os.path
 from datetime import date,datetime,timedelta
 from HIST_Translator import HIST_Translator
 
@@ -112,9 +113,21 @@ class HIST_Ens(object):
 				err_av = err_av[inds]
 				to_return = np.diag(err_av**2)
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
-		invgamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][species])**-1
+		invgamma = self.getGamma(species)**-1
 		to_return*=invgamma
 		return to_return
+	def getGamma(self,species):
+		diffburnin = self.spc_config['USE_DIFFERENT_GAMMA_FOR_BURN_IN'][species] == "True"
+		doburnin = self.spc_config['SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD'][species] == "true"
+		if diffburnin and doburnin: #Check that we are (1) doing burnin and (2) adjusting gamma for the given species
+			scalingcompleteflag = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch/BURN_IN_SCALING_COMPLETE"
+			if os.path.isfile(scalingcompleteflag):
+				gamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][species]) #Burn in complete, use regular gamma
+			else:
+				gamma = float(self.spc_config['GAMMA_FOR_BURN_IN'][species]) #In the burn in period, use special gamma.
+		else:
+			gamma = float(self.spc_config['REGULARIZING_FACTOR_GAMMA'][species])
+		return gamma
 	def makeR(self,latind,lonind):
 		errmats = []
 		for spec in self.obsSpecies:

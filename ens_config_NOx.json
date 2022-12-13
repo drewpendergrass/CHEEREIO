@@ -179,6 +179,12 @@
 	"REGULARIZING_FACTOR_GAMMA": {
 		"NO2_OMI":"0.01"
 	},
+	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
+		"NO2_OMI":"False"
+	},
+	"GAMMA_FOR_BURN_IN" : {
+		"NO2_OMI":""
+	},
 	"OBS_ERROR": {
 		"NO2_OMI":"0.1"
 	},
