@@ -1,13 +1,6 @@
 #!/bin/bash
 
-# This script will set up asynchronous localized ensemble transform kalman filter (4D-LETKF assimilations/inversions) with GEOS-Chem.
-# This involves creating an ensemble of run directories configured for the specific needs of the user and the 4D-LETKF procedure.
-# Organization and much of the code are heavily inspired or directly lifted from both the createRunDir utility and the excellent 
-# CH4 analytical inversion workflow repository; both were initially written by M. Sulprizio.
-#
-# Usage: bash setup_ensemble.sh. Be sure to customize the switches below and prepare ens_config.json before running.
-#
-# See README.md for details (dcp, 29/06/2021)
+# This creates the template run directory for version 13.
 
 ##=======================================================================
 ## Read user settings. Modify ens_config.json (not this script) if at all possible!
