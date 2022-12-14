@@ -222,15 +222,16 @@ fi
 if [[ ${met} = "ModelE2.1" ]]; then
     if [[ "$runid" == "E213f10aF40oQ40nudge" ]]; then
         if [[ "$grid_res" ==  "4x5" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00474046'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00474046'\n"
         elif [[ "$grid_res" == "2x25" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00243979'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00243979'\n"
         elif [[ "$grid_res" == "05x0625" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00276896'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00276896'\n"
         elif [[ "$grid_res" == "025x03125" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00254319'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00254319'\n"
         else
           RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+        fi
     else
         if [[ "$grid_res" ==  "4x5" ]]; then
             RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.03564873'\n"
