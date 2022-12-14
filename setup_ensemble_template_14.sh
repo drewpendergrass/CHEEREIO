@@ -128,15 +128,15 @@ if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
     if [[ ${domain_name} = "AS" ]]; then
       RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='AS'\n"
       grid_nest="AS"
-            if [[ ${grid_res} = "05x0625" ]]; then
-                RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 60.0, 150.0]'\n"
-          RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[-11.0,  55.0]'\n"
-      elif [[ ${grid_res} = "025x03125" ]]; then
-                RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 70.0, 140.0]'\n"
-          RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 15.0,  55.0]'\n"
-      fi
+        if [[ ${grid_res} = "05x0625" ]]; then
+            RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 60.0, 150.0]'\n"
+            RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[-11.0,  55.0]'\n"
+        elif [[ ${grid_res} = "025x03125" ]]; then
+            RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[ 70.0, 140.0]'\n"
+            RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 15.0,  55.0]'\n"
+        fi
     elif [[ ${domain_name} = "EU" ]]; then
-      RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='EU'\n"
+            RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='EU'\n"
             grid_nest="EU"
             if [[ ${grid_res} = "05x0625" ]]; then
                 RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-30.0, 50.0]'\n"
@@ -145,25 +145,26 @@ if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
                       RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-15.0,  40.0 ]'\n"
                 RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[ 32.75, 61.25]'\n"
             fi
-      elif [[ ${domain_name} = "NA" ]]; then
+    elif [[ ${domain_name} = "NA" ]]; then
         RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='NA'\n"
         grid_nest+="NA"
               if [[ ${grid_res} = "05x0625" ]]; then
                   RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-140.0, -40.0]'\n"
-                RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[  10.0,  70.0]'\n"
+                  RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[  10.0,  70.0]'\n"
               elif [[ ${grid_res} = "025x03125" ]]; then
-                        RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-130.0,  -60.0]'\n"
+                  RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='[-130.0,  -60.0]'\n"
                   RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='[   9.75,  60.0]'\n"
               fi
-      elif [[ ${domain_name} = "custom" ]]; then
+    elif [[ ${domain_name} = "custom" ]]; then
             grid_nest="CU"
             RUNDIR_VARS+="RUNDIR_GRID_DOMAIN_NAME='custom'\n"
-                  RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='MinLon MaxLon'\n"
-                  RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='MinLat MaxLat'\n"
-                  printf "\n  -- You will need to manually set longitude and latitude"
+            RUNDIR_VARS+="RUNDIR_GRID_LON_RANGE='MinLon MaxLon'\n"
+            RUNDIR_VARS+="RUNDIR_GRID_LAT_RANGE='MinLat MaxLat'\n"
+            printf "\n  -- You will need to manually set longitude and latitude"
             printf "\n     bounds in the Grid Menu of geoschem_config.yml!\n"
-      else
+    else
         printf "Invalid horizontal grid domain option.\n"
+    fi
   else
     RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/global_grid.txt)\n"
     if [[ ${met} = "ModelE2.1" ]] || [[ ${met} = "ModelE2.2" ]]; then
