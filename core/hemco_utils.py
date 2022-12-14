@@ -266,7 +266,7 @@ def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
 
 
 def fullWorkflow(useString, foldername=None):
-	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc = HEMCOsetup(foldername,returnStartEndDict=False)
+	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc,startlinedict,endlinedict,linenums = HEMCOsetup(foldername,returnStartEndDict=True)
 	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
 	lines = ensureRestartsInTLD(lines,startlinedict,endlinedict) #make sure we are reading restart from TLD, not Restarts folder.
 	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
