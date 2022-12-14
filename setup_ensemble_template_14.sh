@@ -422,6 +422,8 @@ rundir_config_log=${rundir_config}/rundir_vars.txt
 echo -e "$RUNDIR_VARS" > ${rundir_config_log}
 #sort -o ${rundir_config_log} ${rundir_config_log}
 
+cd ${rundir}
+
 # Initialize run directory
 bash ${srcrundir}/init_rd.sh ${rundir_config_log}
 
