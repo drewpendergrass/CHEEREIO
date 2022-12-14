@@ -101,6 +101,7 @@ fi
 ##=======================================================================
 if  "$SetupSpinupRun"; then
 
+  cd ${ASSIM_PATH}
   source setup_ensemble_spinup.sh
 
 fi # SetupSpinupRun
@@ -110,6 +111,7 @@ fi # SetupSpinupRun
 ##=======================================================================
 if  "$SetupControlRun"; then
 
+  cd ${ASSIM_PATH}
   source setup_ensemble_control.sh
     
 fi # SetupConrolRun
@@ -120,6 +122,7 @@ fi # SetupConrolRun
 ##=======================================================================
 if "$SetupEnsembleRuns"; then
 
+    cd ${ASSIM_PATH}
     source setup_ensemble_make_ensemble.sh
 
 fi  # SetupEnsembleRuns
