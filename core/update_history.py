@@ -139,7 +139,7 @@ class HISTORY_Translator():
 			self.customizeSection('StateMet')
 		#Handle any other customizations
 		for collection in self.spc_config['HISTORY_collections_to_customize']:
-			if collection in ['SpeciesConc','StateMet','SpeciesConc']:
+			if collection in ['SpeciesConc','StateMet','LevelEdgeDiags']:
 				continue #already handled
 			else:
 				if f"History{collection}ToSave" in list(self.spc_config.keys()):
