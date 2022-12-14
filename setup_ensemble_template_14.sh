@@ -167,6 +167,9 @@ if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
     fi
   else
     RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/global_grid.txt)\n"
+  fi
+else
+    RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/global_grid.txt)\n"
     if [[ ${met} = "ModelE2.1" ]] || [[ ${met} = "ModelE2.2" ]]; then
         if [[ "$grid_res" == "4x5" ]]; then
             RUNDIR_VARS+="RUNDIR_GRID_HALF_POLAR='true '\n"
@@ -176,7 +179,6 @@ if [[ ${grid_res} = "05x0625" ]] || [[ ${grid_res} = "025x03125" ]]; then
     else
       RUNDIR_VARS+="RUNDIR_GRID_HALF_POLAR='true '\n"
     fi
-  fi
 fi
 
 
