@@ -370,6 +370,7 @@ fi
 EMIS_TO_ASSIM=( $(jq -r ".CONTROL_VECTOR_EMIS[]" ens_config.json) )
 
 GCC_RUN_FILES="${ASSIM_PATH}/GCClassic/src/GEOS-Chem/run/GCClassic" #Called srcrundir in createRunDir.sh
+srcrundir=$GCC_RUN_FILES
 gcdir="${ASSIM_PATH}/GCClassic/src/GEOS-Chem"
 wrapperdir="${ASSIM_PATH}/GCClassic"
 

@@ -277,10 +277,10 @@ mkdir -p ${rundir_config}
 cp ${gcdir}/run/shared/cleanRunDir.sh       ${rundir}
 cp ${gcdir}/run/shared/download_data.py     ${rundir}
 cp ${gcdir}/run/shared/download_data.yml    ${rundir}
-cp ./getRunInfo                             ${rundir}
-cp ./archiveRun.sh                          ${rundir}
-cp ./README.md                              ${rundir}
-cp ./gitignore                              ${rundir}/.gitignore
+cp ${GCC_RUN_FILES}/getRunInfo              ${rundir}
+cp ${GCC_RUN_FILES}/archiveRun.sh           ${rundir}
+cp ${GCC_RUN_FILES}/README.md               ${rundir}
+cp ${GCC_RUN_FILES}/gitignore               ${rundir}/.gitignore
 
 # Use data downloader that points to GCAP2 restart files
 if [[ ${met} = "ModelE2.1" ]] || [[ ${met} = "ModelE2.2" ]]; then
@@ -322,7 +322,7 @@ fi
 
 # If benchmark simulation, put run script in directory
 if [[ "x${sim_extra_option}" == "xbenchmark" ]]; then
-    cp ./runScriptSamples/geoschem.benchmark.run ${rundir}
+    cp ${GCC_RUN_FILES}/runScriptSamples/geoschem.benchmark.run ${rundir}
     chmod 744 ${rundir}/geoschem.benchmark.run
 fi
 
@@ -423,5 +423,5 @@ echo -e "$RUNDIR_VARS" > ${rundir_config_log}
 #sort -o ${rundir_config_log} ${rundir_config_log}
 
 # Initialize run directory
-${srcrundir}/init_rd.sh ${rundir_config_log}
+bash ${srcrundir}/init_rd.sh ${rundir_config_log}
 
