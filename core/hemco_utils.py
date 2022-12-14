@@ -238,10 +238,19 @@ def updateBoundaryConds(spc_config,lines,linenums,startlinedict,endlinedict):
 		print('Skipping boundary condition update in HEMCO_Config.')
 	return lines
 
-def ensureRestartsInTLD(lines,linenums,startlinedict,endlinedict):
-	restart_lines = linenums[(startlinedict['GC_RESTART']+1):(endlinedict['GC_RESTART'])]
-	for i in restart_lines:
-		lines[i] = lines[i].replace("./Restarts/","./")
+def ensureRestartsInTLD(lines):
+	inRestart = False
+	for i in range(len(lines)):
+		if inRestart:
+			if lines[i].startswith(')))GC_RESTART'): #done processing
+				break
+			else:
+				lines[i] = lines[i].replace("./Restarts/","./") #do replacements
+		else:
+			if lines[i].startswith('(((GC_RESTART'):
+				inRestart = True #in the right zone, start overwriting
+			else:
+				continue #not to restarts yet.
 	return lines
 
 def updateOHforCH4(spc_config,lines):
@@ -266,9 +275,9 @@ def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
 
 
 def fullWorkflow(useString, foldername=None):
-	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc,startlinedict,endlinedict,linenums = HEMCOsetup(foldername,returnStartEndDict=True)
+	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc = HEMCOsetup(foldername,returnStartEndDict=False)
 	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
-	lines = ensureRestartsInTLD(lines,linenums,startlinedict,endlinedict) #make sure we are reading restart from TLD, not Restarts folder.
+	lines = ensureRestartsInTLD(lines) #make sure we are reading restart from TLD, not Restarts folder.
 	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
 	if useString == 'ENSEMBLE':
 		#Add updates for scaling factors
