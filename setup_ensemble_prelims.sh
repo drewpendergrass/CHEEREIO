@@ -50,14 +50,6 @@ MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
 SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
 
-printf " \n"
-printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
-printf "  / __|  | || |   | __|   | __|   | _ \   | __|   |_ _|   / _ \  \n"
-printf " | (__   | __ |   | _|    | _|    |   /   | _|     | |   | (_) | \n"
-printf "  \___|  |_||_|   |___|   |___|   |_|_\   |___|   |___|   \___/  \n"
-printf '_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| \n'
-printf '"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-` \n'
-printf " \n"
 
 # Path to find non-emissions input data; will use if no default found
 if [[ -f ${HOME}/.geoschem/config ]]; then
@@ -68,7 +60,6 @@ if [[ -f ${HOME}/.geoschem/config ]]; then
         DATA_PATH="$(jq -r ".DATA_PATH" ens_config.json)"
         export GC_DATA_ROOT=${DATA_PATH}
     else
-        printf "\nOverriding ens_config.json with default root data directory."
         DATA_PATH=${GC_DATA_ROOT}
     fi
 else

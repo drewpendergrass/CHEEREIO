@@ -21,6 +21,15 @@ SetupSpinupRun=false
 SetupControlRun=false
 SetupEnsembleRuns=true
 
+printf " \n"
+printf "   ___    _  _     ___     ___     ___     ___     ___     ___   \n"
+printf "  / __|  | || |   | __|   | __|   | _ \   | __|   |_ _|   / _ \  \n"
+printf " | (__   | __ |   | _|    | _|    |   /   | _|     | |   | (_) | \n"
+printf "  \___|  |_||_|   |___|   |___|   |_|_\   |___|   |___|   \___/  \n"
+printf '_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| \n'
+printf '"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-`"`-0-0-` \n'
+printf " \n"
+
 source setup_ensemble_prelims.sh #get the relevant variables.
 
 ##=======================================================================
