@@ -79,37 +79,37 @@ if [[ ${met_name_lc} = "merra2" ]]; then
   met="merra2"
         shared_met_settings=${gcdir}/run/shared/settings/merra2.txt
   RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gmao_metfields'\n"
-    elif [[ ${met_name_lc} = "geosfp" ]]; then
+elif [[ ${met_name_lc} = "geosfp" ]]; then
     met="geosfp"
         shared_met_settings=${gcdir}/run/shared/settings/geosfp.txt
   RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gmao_metfields'\n"
-    elif [[ ${met_name} = "ModelE2.1" ]]; then
+elif [[ ${met_name} = "ModelE2.1" ]]; then
   met="ModelE2.1"
         shared_met_settings=${gcdir}/run/shared/settings/modele2.1.txt
   RUNDIR_VARS+="RUNDIR_MET_FIELD_CONFIG='HEMCO_Config.rc.gcap2_metfields'\n"
-
+fi
 
 #If you're using ModelE, you'll need to modify this.
 
-    RUNDIR_VARS+="RUNDIR_GCAP2_SCENARIO='not_used'\n"
-    RUNDIR_VARS+="RUNDIR_GISS_RES='not_used'\n"
-    RUNDIR_VARS+="RUNDIR_GCAP2_VERTRES='not_used'\n"
-    RUNDIR_VARS+="RUNDIR_GCAP2_RUNID='not_used'\n"
-    RUNDIR_VARS+="RUNDIR_MET_AVAIL='# 1980-2021'\n"
+RUNDIR_VARS+="RUNDIR_GCAP2_SCENARIO='not_used'\n"
+RUNDIR_VARS+="RUNDIR_GISS_RES='not_used'\n"
+RUNDIR_VARS+="RUNDIR_GCAP2_VERTRES='not_used'\n"
+RUNDIR_VARS+="RUNDIR_GCAP2_RUNID='not_used'\n"
+RUNDIR_VARS+="RUNDIR_MET_AVAIL='# 1980-2021'\n"
 
-    RUNDIR_VARS+="RUNDIR_USE_AEIC='true'\n"
+RUNDIR_VARS+="RUNDIR_USE_AEIC='true'\n"
 
     # Define the volcano paths for the HEMCO_Config.rc file
     # NOTE: Benchmark simulations always use the climatological emissions!
     if [[ "x${sim_name}" == "xfullchem" ]]  ||  \
        [[ "x${sim_name}" == "xaerosol"  ]]; then
-  RUNDIR_VARS+="RUNDIR_VOLC_CLIMATOLOGY='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
+          RUNDIR_VARS+="RUNDIR_VOLC_CLIMATOLOGY='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
 
-  if [[ "x${sim_extra_option}" == "xbenchmark" ]]; then
-      RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
-  else
-      RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/\$YYYY/\$MM/so2_volcanic_emissions_Carns.\$YYYY\$MM\$DD.rc'\n"
-  fi
+          if [[ "x${sim_extra_option}" == "xbenchmark" ]]; then
+              RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/so2_volcanic_emissions_CARN_v202005.degassing_only.rc'\n"
+          else
+              RUNDIR_VARS+="RUNDIR_VOLC_TABLE='\$ROOT/VOLCANO/v2021-09/\$YYYY/\$MM/so2_volcanic_emissions_Carns.\$YYYY\$MM\$DD.rc'\n"
+          fi
     fi
 
 if [[ ${grid_res} = "4x5" ]]; then
@@ -229,38 +229,37 @@ if [[ ${met} = "ModelE2.1" ]]; then
       RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00276896'\n"
         elif [[ "$grid_res" == "025x03125" ]]; then
       RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.00254319'\n"
-  else
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
-    fi
+        else
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
     else
         if [[ "$grid_res" ==  "4x5" ]]; then
             RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.03564873'\n"
         elif [[ "$grid_res" == "2x25" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01050036'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01050036'\n"
         elif [[ "$grid_res" == "05x0625" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01340854'\n"
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01340854'\n"
         elif [[ "$grid_res" == "025x03125" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01066495'\n"
-  else
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
-  fi
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='0.01066495'\n"
+        else
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+        fi
     fi
 else
     RUNDIR_VARS+="RUNDIR_GISS_RES='not_used'\n"
     if [[ "x${sim_name}" == "xfullchem" || "x${sim_name}" == "xaerosol" ]]; then
-  if [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x4x5" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='8.3286e-4'\n"
-  elif [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x2x25" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='5.0416e-4'\n"
-  elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x4x5" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='7.8533e-4'\n"
-  elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x2x25" ]]; then
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='4.7586e-4'\n"
-  else
-      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
-  fi
+      if [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x4x5" ]]; then
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='8.3286e-4'\n"
+      elif [[ "x${met}" == "xgeosfp" && "x${grid_res}" == "x2x25" ]]; then
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='5.0416e-4'\n"
+      elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x4x5" ]]; then
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='7.8533e-4'\n"
+      elif [[ "x${met}" == "xmerra2" && "x${grid_res}" == "x2x25" ]]; then
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='4.7586e-4'\n"
+      else
+          RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+      fi
     else
-  RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_TF='-999.0e0'\n"
     fi
 fi
 
@@ -374,41 +373,41 @@ if [[ ${met} = "ModelE2.1" ]]; then
     RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/gcap2_hemco.txt)\n"
 else
     if [[ "${sim_extra_option}" == "benchmark" ]]; then
-  RUNDIR_VARS+="RUNDIR_DUSTDEAD_EXT='on '\n"
-  RUNDIR_VARS+="RUNDIR_SEASALT_EXT='on '\n"
-  RUNDIR_VARS+="RUNDIR_SOILNOX_EXT='on '\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_DUST='false'\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_BIOVOC='false'\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_SOILNOX='false'\n"
-  RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
-  RUNDIR_VARS+="RUNDIR_TOMAS_DUSTDEAD='off'\n"
-    else
-  if [[ "${sim_extra_option}" == "marinePOA" ]]; then
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_EXT='on '\n"
       RUNDIR_VARS+="RUNDIR_SEASALT_EXT='on '\n"
-      RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
-      RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
-  else
-      RUNDIR_VARS+="RUNDIR_SEASALT_EXT='off'\n"
-      if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
-    RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='on '\n"
-    RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
-      else
-    RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
-    RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='true '\n"
-      fi
-  fi
-  if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
-      RUNDIR_VARS+="RUNDIR_TOMAS_DUSTDEAD='on '\n"
+      RUNDIR_VARS+="RUNDIR_SOILNOX_EXT='on '\n"
       RUNDIR_VARS+="RUNDIR_OFFLINE_DUST='false'\n"
-  else
+      RUNDIR_VARS+="RUNDIR_OFFLINE_BIOVOC='false'\n"
+      RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
+      RUNDIR_VARS+="RUNDIR_OFFLINE_SOILNOX='false'\n"
+      RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
       RUNDIR_VARS+="RUNDIR_TOMAS_DUSTDEAD='off'\n"
-      RUNDIR_VARS+="RUNDIR_OFFLINE_DUST='true '\n"
-  fi
-  RUNDIR_VARS+="RUNDIR_DUSTDEAD_EXT='off'\n"
-  RUNDIR_VARS+="RUNDIR_SOILNOX_EXT='off'\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_BIOVOC='true '\n"
-  RUNDIR_VARS+="RUNDIR_OFFLINE_SOILNOX='true '\n"
+    else
+      if [[ "${sim_extra_option}" == "marinePOA" ]]; then
+          RUNDIR_VARS+="RUNDIR_SEASALT_EXT='on '\n"
+          RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
+          RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
+      else
+          RUNDIR_VARS+="RUNDIR_SEASALT_EXT='off'\n"
+          if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
+            RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='on '\n"
+            RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='false'\n"
+          else
+            RUNDIR_VARS+="RUNDIR_TOMAS_SEASALT='off'\n"
+            RUNDIR_VARS+="RUNDIR_OFFLINE_SEASALT='true '\n"
+          fi
+      fi
+      if [[ ${sim_extra_option} =~ "TOMAS" ]]; then
+          RUNDIR_VARS+="RUNDIR_TOMAS_DUSTDEAD='on '\n"
+          RUNDIR_VARS+="RUNDIR_OFFLINE_DUST='false'\n"
+      else
+          RUNDIR_VARS+="RUNDIR_TOMAS_DUSTDEAD='off'\n"
+          RUNDIR_VARS+="RUNDIR_OFFLINE_DUST='true '\n"
+      fi
+      RUNDIR_VARS+="RUNDIR_DUSTDEAD_EXT='off'\n"
+      RUNDIR_VARS+="RUNDIR_SOILNOX_EXT='off'\n"
+      RUNDIR_VARS+="RUNDIR_OFFLINE_BIOVOC='true '\n"
+      RUNDIR_VARS+="RUNDIR_OFFLINE_SOILNOX='true '\n"
     fi
     RUNDIR_VARS+="$(cat ${gcdir}/run/shared/settings/gmao_hemco.txt)\n"
 fi
