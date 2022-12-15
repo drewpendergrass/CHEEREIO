@@ -131,6 +131,12 @@ class HISTORY_Translator():
 			print(f'Adding {species} to the {sectionname} collection in HISTORY.rc.')
 			self.lines.insert(startstop[0]+count, self.makeSectionString(species,isFirst,sectionname))
 			isFirst = False
+	def ensureRestartInTLD(self):
+		print(f'Ensuring restarts are saved in the top level directory in HISTORY.rc.')
+		for i in range(len(self.lines)):
+			if self.lines[i].startswith('  Restart.filename:'):
+				self.lines[i] = self.lines[i].replace("./Restarts/","./") #do replacements
+				break
 	def customizeAllSections(self):
 		self.customizeSection('SpeciesConc')
 		if self.spc_config['SaveLevelEdgeDiags']=='True':
