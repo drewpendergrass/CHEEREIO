@@ -67,6 +67,8 @@ class HISTORY_Translator():
 			durstr = self.spc_config['HISTORY_dur']
 		for num,line in enumerate(self.lines):
 			for collection in self.spc_config["HISTORY_collections_to_customize"]:
+				if collection=='Restart':
+					continue #We handle restarts separately.
 				if line.startswith(f'  {collection}.frequency'):
 					whitespace = " "*(17-len(collection))
 					self.lines[num] = f'  {collection}.frequency:{whitespace}{freqstr}\n'
@@ -162,6 +164,8 @@ if settingsstr=="SETCONTROL":
 	trans = HISTORY_Translator(foldername='CONTROL')
 else:
 	trans = HISTORY_Translator()
+
+trans.ensureRestartInTLD() #we always want to ensure that the restarts are saving to the top level directory
 
 if settingsstr=="TEMPLATEDIR":
 	trans.prepLevelEdgeDiags()
