@@ -118,7 +118,7 @@ class HIST_Ens(object):
 		return to_return
 	def getGamma(self,species):
 		diffburnin = self.spc_config['USE_DIFFERENT_GAMMA_FOR_BURN_IN'][species] == "True"
-		doburnin = self.spc_config['SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD'][species] == "true"
+		doburnin = self.spc_config['SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD'] == "true"
 		if diffburnin and doburnin: #Check that we are (1) doing burnin and (2) adjusting gamma for the given species
 			scalingcompleteflag = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch/BURN_IN_SCALING_COMPLETE"
 			if os.path.isfile(scalingcompleteflag):
