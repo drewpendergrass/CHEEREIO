@@ -153,7 +153,10 @@ def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = Fals
 	
 	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
 	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
-	met['utctime'] = data['time_utc'].values[goodvals,:] #nobs, scanline
+	timeraw = data['time'].values[goodvals,:] #nobs, ntime. Seven entries in format year', 'month', 'day', 'hour','minute', 'second'
+	#format as CHEEREIO-compliant string
+	timestring = [f'{str(timestamp[0])}-{str(timestamp[1]).zfill(2)}-{str(timestamp[2]).zfill(2)}T{str(timestamp[3]).zfill(2)}:{str(timestamp[4]).zfill(2)}:{str(timestamp[5]).zfill(2)}Z' for timestamp in timeraw]
+	met['utctime'] =  np.array(timestring)
 
 	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
 	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
