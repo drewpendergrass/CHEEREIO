@@ -113,7 +113,7 @@
 		"CH4_TROPOMI":"TROPOMI"
 	},
 	"TROPOMI_dirs" : {
-		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/CH4"
+		"CH4" : "/n/jacob_lab/Lab/seasasfs02/CH4_inversion/InputData/Obs/TROPOMI"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
