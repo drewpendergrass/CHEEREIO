@@ -94,8 +94,8 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	# Store methane prior profile, dry air subcolumns. Not needed for NO2, though surface pressure is
 	if species=='CH4':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
-		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1]
-		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1]
+		met['methane_profile_apriori']=data['methane_profile_apriori'].values[0,sl,gp,::-1] #in mol/m2
+		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[0,sl,gp,::-1] #in mol/m2
 		met['surface_elevation_sd'] = data['surface_altitude_precision'].values[0,sl,gp]
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
 		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
@@ -165,10 +165,10 @@ def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = Fals
 	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
 
 	#no surface elevation std, make sure it is set to nan in ens_config.
-	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer
-	pressure_interval = data['dp'].values[goodvals]/100 #nobs
-	surface_pressure = data['surface_pressure'].values[goodvals]/100 #nobs				# Pa -> hPa
+	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
+	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
+	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
+	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
 		
 	data.close()
 
