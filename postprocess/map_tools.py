@@ -59,10 +59,10 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process, plotcontrol=True,plot
 			clim  = [np.min(hemcofield), np.max(hemcofield)]
 		cmap = plt.cm.jet
 		for i,dateval in enumerate(timelabels):
-			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim=clim,useLog=True)
-			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim=clim_std,useLog=True)
+			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',useLog=True)
+			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',useLog=True)
 			if plotcontrol:
-				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim=clim,useLog=True)
+				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',useLog=True)
 
 
 def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
