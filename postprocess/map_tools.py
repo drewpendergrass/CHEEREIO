@@ -25,6 +25,46 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False):
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process, plotcontrol=True,plotMonthStartOnly=True):
+	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
+	if plotcontrol:
+		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
+	dates = hemcodiag['time'].values
+	for diag in hemco_diags_to_process:
+		hemcofield = hemcodiag[diag].values
+		if plotcontrol:
+			ctrlfield = hemcocontroldiag[diag].values
+		if len(np.shape(hemcofield)) == 5: #we have emissions at higher levels (e.g. aircraft)
+			hemcofield = np.sum(hemcofield,axis=2) #ensemble gone, dim 0 is ens, dim 1 is time, dim 2 is lev. Sum up.
+			if plotcontrol:
+				ctrlfield = np.sum(hemcofield,axis=1) #dim 0 is time, dim 1 is lev.
+		if plotMonthStartOnly:
+			years = dates.astype('datetime64[Y]').astype(int) + 1970
+			months = dates.astype('datetime64[M]').astype(int) % 12 + 1
+			ym = (years*100) + months
+			_, ind = np.unique(ym,return_index = True)
+			dates = dates[ind]
+			hemcofield = hemcofield[:,ind,:,:]
+			if plotcontrol:
+				ctrlfield = ctrlfield[ind,:,:]
+		hemcofield_std = np.std(hemcofield,axis=0) #standard deviation across ensemble
+		hemcofield = np.mean(hemcofield,axis=0) #average across ensemble
+		#Now hemcofield is of dim time, lat, lon
+		timelabels = [str(timeval)[0:13] for timeval in dates]
+		#Do the plotting.
+		clim_std = [0,np.max(hemcofield_std)]
+		if plotcontrol:
+			clim  = [0.0, np.max([np.max(hemcofield),np.max(ctrlfield)])]
+		else:
+			clim  = [0.0, np.max(hemcofield)]
+		cmap = plt.cm.jet
+		for i,dateval in enumerate(timelabels):
+			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim=clim,cmap=cmap)
+			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim=clim_std,cmap=cmap)
+			if plotcontrol:
+				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim=clim,cmap=cmap)
+
+
 def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
 	files = glob(f'{ppdir}/*_SCALEFACTOR.nc')
 	files.sort()

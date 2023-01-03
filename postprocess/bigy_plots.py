@@ -16,6 +16,8 @@ gclon = np.array(gclon)
 
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 scalefactor_plot_freq = data['scalefactor_plot_freq']
+hemco_diags_to_process = data['hemco_diags_to_process']
+useControl=data['DO_CONTROL_RUN']=="true"
 anim_fps = int(data['animation_fps_scalingfactor'])
 
 if "postprocess_save_albedo" in data:
@@ -50,7 +52,8 @@ for i,species in enumerate(specieslist):
 			if np.sum(total_satellite_obs[:,i,j,k]) == 0:
 				total_weighted_mean_true_obs[i,j,k] = np.nan
 			else:
-				total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[:,i,j,k],weights=total_satellite_obs[:,i,j,k])
+				indices = np.where(np.logical_not(np.isnan(true_obs[:,i,j,k])))[0]
+				total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[indices,i,j,k],weights=total_satellite_obs[indices,i,j,k])
 
 #Plot observation means and counts
 #Plot assimilation minus obs and ctrl minus obs
@@ -64,8 +67,13 @@ for i,species in enumerate(specieslist):
 	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(ctrl_minus_obs[i,:,:])}')
 
 
-#Plot scale factor slices
 if scalefactor_plot_freq == 'monthly':
-	plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=True)
+	plotMonthStartOnly=True
 else:
-	plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=False)
+	plotMonthStartOnly=False 
+
+#Plot scale factor slices
+plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=plotMonthStartOnly)
+#Plot emission slices
+plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
+
