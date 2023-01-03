@@ -28,7 +28,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False):
 def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process, plotcontrol=True,plotMonthStartOnly=True):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
-		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
+		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
 	dates = hemcodiag['time'].values
 	for diag in hemco_diags_to_process:
 		hemcofield = hemcodiag[diag].values
