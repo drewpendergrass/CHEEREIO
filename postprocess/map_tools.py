@@ -65,7 +65,7 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process, plotcontrol=True,plot
 		cmap = plt.cm.jet
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim = clim, useLog=True,minval = 1e-14)
-			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim = clim, useLog=True,minval = 1e-15)
+			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim = clim_std, useLog=True,minval = 1e-15)
 			if plotcontrol:
 				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=True,minval = 1e-14)
 
