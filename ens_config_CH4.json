@@ -150,7 +150,7 @@
 		"CH4":"True"
 	},
 	"MinimumScalingFactorAllowed" : {
-		"CH4":"nan"
+		"CH4":"0"
 	},
 	"MaximumScalingFactorAllowed" : {
 		"CH4":"nan"
