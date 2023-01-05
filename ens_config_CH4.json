@@ -209,6 +209,8 @@
 	"hemco_diags_to_process" : [
 		"EmisCH4_Total"
 	],
+	"min_emis_value_to_plot" : "1e-14",
+	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
 		"CH4_TROPOMI": "ppb"
 	},

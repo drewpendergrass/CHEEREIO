@@ -17,6 +17,22 @@ gclon = np.array(gclon)
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 scalefactor_plot_freq = data['scalefactor_plot_freq']
 hemco_diags_to_process = data['hemco_diags_to_process']
+min_emis_value_to_plot = data['min_emis_value_to_plot'] 
+if len(min_emis_value_to_plot) > 0: #If it's not none
+	min_emis_value_to_plot = float(min_emis_value_to_plot) #parse to float
+	if np.isnan(min_emis_value_to_plot): #If it's a nan, store as None for plotting function
+		min_emis_value_to_plot = None
+else:
+	min_emis_value_to_plot = None
+
+min_emis_std_value_to_plot = data['min_emis_std_value_to_plot'] 
+if len(min_emis_std_value_to_plot) > 0: #If it's not none
+	min_emis_std_value_to_plot = float(min_emis_std_value_to_plot) #parse to float
+	if np.isnan(min_emis_std_value_to_plot): #If it's a nan, store as None for plotting function
+		min_emis_std_value_to_plot = None
+else:
+	min_emis_std_value_to_plot = None
+
 useControl=data['DO_CONTROL_RUN']=="true"
 anim_fps = int(data['animation_fps_scalingfactor'])
 
@@ -75,5 +91,5 @@ else:
 #Plot scale factor slices
 plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=plotMonthStartOnly)
 #Plot emission slices
-plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
+plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, min_emis=min_emis_value_to_plot,min_emis_std=min_emis_std_value_to_plot, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
 
