@@ -139,6 +139,7 @@
 		"CH4":"500"
 	},
 	"speedyCorrelationApprox" : "True",
+	"lognormalErrors" : "True",
 	"MaskOceanScaleFactor" : {
 		"CH4":"True"
 	},

@@ -37,6 +37,7 @@ maxsf = spc_config['MaximumScalingFactorAllowed']
 correlatedInitialScalings = spc_config['correlatedInitialScalings']
 speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
+useLognormal = spc_config['lognormalErrors'] == 'True'
 
 
 timestamp = str(sys.argv[1]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
@@ -56,6 +57,8 @@ for emis in emis_scaling_factors:
 	corrbool = correlatedInitialScalings[emis]
 	if (corrbool == 'True') and (pt != "std"):
 		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
+	if useLognormal and (pt != "std"):
+		print(f'WARNING: Lognormal errors require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
 	if pt == "exp":
 		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
 			raise ValueError('Exponential perturbation must be at least 1.')
@@ -90,18 +93,23 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 		corrdist=float(corrDistances[emis_name])
 		if corrbool == "True": #Will sample a normal with correlation
 			if speedyCorrelationApprox:
-				scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p, (len(lat),len(lon)))
+				scaling_factors = tx.speedySample(corrdist,lat[10]-lat[9],p,useLognormal, (len(lat),len(lon)))
 			else:
 				cov = tx.makeCovMat(distmat,corrdist)
-				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p, (len(lat),len(lon)))
+				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p,useLognormal, (len(lat),len(lon)))
 		else:
-			if pt == "exp":
-				scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
-				scaling_factors = p**scaling_factor_exp
-			elif pt == "percent":
-				scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
-			elif pt == "std":
-				scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+			if useLognormal: #override everything else
+				scaling_factors = np.random.normal(loc=0,scale=p,size=[len(lat),len(lon)])
+			else:
+				if pt == "exp":
+					scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
+					scaling_factors = p**scaling_factor_exp
+				elif pt == "percent":
+					scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
+				elif pt == "std":
+					scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+		if useLognormal: #Sampled normal initially; if lognormal, use exp to transform sample
+			scaling_factors = np.exp(scaling_factors)
 		if ~np.isnan(minval): #Enforce minimum sf.
 			scaling_factors[scaling_factors<minval] = minval
 		if ~np.isnan(maxval): #Enforce maximum sf.

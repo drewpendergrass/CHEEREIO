@@ -130,7 +130,7 @@ def makeCovMat(instruction_or_distmat,corrdist):
 	cov = np.exp(-distmat**2/(2*corrdist)) # This will do as a covariance matrix
 	return cov
 
-def speedySample(corrdist,lat_spacing,std, outshape):
+def speedySample(corrdist,lat_spacing,std,zerocenter, outshape):
 	lat_km = calcDist_km(0,100,lat_spacing,100)
 	correlation_scale = int(np.round(corrdist/lat_km))
 	x = np.arange(-correlation_scale, correlation_scale)
@@ -140,11 +140,16 @@ def speedySample(corrdist,lat_spacing,std, outshape):
 	filter_kernel = np.exp(-dist**2/(2*correlation_scale))
 	field = std/np.sqrt(corrdist/lat_km)*np.random.randn(outshape[0], outshape[1]) #scale std by a number that scales like the sqrt of corrdist, capturing how the filter "sucks up" other numbers
 	field = scipy.signal.fftconvolve(field, filter_kernel, mode='same')
-	field+=1
+	if not zerocenter:
+		field+=1
 	return field
 
-def sampleCorrelatedStructure(corrdist,cov,std, outshape):
-	return ss.multivariate_normal.rvs(mean = np.ones(np.shape(cov)[0]),cov = (std**2)*cov).reshape(outshape)
+def sampleCorrelatedStructure(corrdist,cov,std, zerocenter, outshape):
+	if zerocenter:
+		meanvals = np.ones(np.shape(cov)[0])
+	else:
+		meanvals = np.zeros(np.shape(cov)[0])
+	return ss.multivariate_normal.rvs(mean = meanvals,cov = (std**2)*cov).reshape(outshape)
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
