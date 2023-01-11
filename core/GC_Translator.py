@@ -18,13 +18,14 @@ class GC_Translator(object):
 		self.emis_sf_filenames = glob(f'{path_to_rundir}*_SCALEFACTOR.nc')
 		self.verbose=verbose
 		self.species_config = si.getSpeciesConfig()
+		self.useLognormal = self.species_config['lognormalErrors'] == "True"
 		self.StateVecType = self.species_config['STATE_VECTOR_CONC_REPRESENTATION'] #How concentrations are stored in state vector: 3D, surface, column_sum, or trop_sum
 		if self.verbose>=3:
 			self.num = path_to_rundir.split('_')[-1][0:4]
 			print(f"GC_translator number {self.num} has been called for directory {path_to_rundir} and restart {self.filename}; construction beginning")
 		else:
 			self.num=None
-		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.timestamp,self.timestamp_as_date,self.verbose,self.num)
+		self.data = DataBundle(self.filename,self.emis_sf_filenames,self.species_config,self.timestamp,self.timestamp_as_date,self.useLognormal,self.verbose,self.num)
 		if computeStateVec:
 			self.statevec = StateVector(StateVecType=self.StateVecType,data=self.data,species_config=self.species_config,emis_sf_filenames=self.emis_sf_filenames,verbose=self.verbose,num=self.num)
 		else:
@@ -138,23 +139,30 @@ class GC_Translator(object):
 	def saveEmissions(self):
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
+			if useLognormal:
+				self.data.emis_ds_list[name]['Scalar'] = np.exp(self.data.emis_ds_list[name]['Scalar']) #Right before saving, transform back to lognormal space if we are using lognormal errors
 			self.data.emis_ds_list[name].to_netcdf(file)
 
 #Handles data getting and setting for emissions and concentrations.
 #Class exists to prevent mutual dependencies.
 class DataBundle(object):
-	def __init__(self,rst_filename,emis_sf_filenames,species_config,timestamp_as_string,timestamp_as_date,verbose,num=None):
+	def __init__(self,rst_filename,emis_sf_filenames,species_config,timestamp_as_string,timestamp_as_date,useLognormal,verbose,num=None):
 		self.restart_ds = xr.load_dataset(rst_filename)
 		self.species_config = species_config
 		self.verbose = verbose
 		self.timestamp = timestamp_as_string
 		self.timestamp_as_date = timestamp_as_date
+		self.useLognormal = useLognormal
 		if verbose >= 3:
 			self.num = num
 		self.emis_ds_list = {}
 		for file in emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
 			self.emis_ds_list[name] = xr.load_dataset(file)
+			if self.useLognormal:
+				self.emis_ds_list[name]['Scalar'] = np.log(self.emis_ds_list[name]['Scalar']) #If we are using lognormal errors, convert to gaussian space immediately on import.
+				if self.verbose>=3:
+					print(f"GC_translator number {self.num} has log transformed scaling factors for {name}")
 			if self.verbose>=3:
 				print(f"GC_translator number {self.num} has loaded scaling factors for {name}")
 	#Since only one timestamp, returns in format lev,lat,lon
