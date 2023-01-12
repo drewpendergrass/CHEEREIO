@@ -53,6 +53,7 @@ class Assimilator(object):
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
+		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
@@ -223,6 +224,9 @@ class Assimilator(object):
 		#Get scalefactors off the end of statevector
 		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
 		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
+		if self.lognormalErrors: #For corrections transform back to lognormal space.
+			analysisScalefactor = np.exp(analysisScalefactor)
+			backgroundScalefactor = np.exp(backgroundScalefactor)
 		if self.verbose>=2:
 			print(f"Analysis scale factor has dimension {np.shape(analysisScalefactor)} and value {analysisScalefactor}.")
 			print(f"The analysis ensemble mean is {np.mean(analysisScalefactor,axis=1)}.")
@@ -303,6 +307,8 @@ class Assimilator(object):
 		#Done with the scalings
 		if self.verbose>=2:
 			print(f'Old scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')
+		if self.lognormalErrors:
+			analysisScalefactor  = np.log(analysisScalefactor) #Transform back to gaussian space.
 		analysisSubset[(-1*self.emcount)::,:] = analysisScalefactor
 		if self.verbose>=2:
 			print(f'New scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')
