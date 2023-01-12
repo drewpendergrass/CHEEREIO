@@ -30,7 +30,6 @@ mask_ocean_bool = spc_config['MaskOceanScaleFactor']
 mask_coast_bool = spc_config['MaskCoastsGT25pctOcean']
 mask_arctic_bool = spc_config['Mask60NScaleFactor']
 mask_antarctic_bool = spc_config['Mask60SScaleFactor']
-perttype = spc_config["pertType"]
 perturbation = spc_config["pPERT"]
 minsf = spc_config['MinimumScalingFactorAllowed']
 maxsf = spc_config['MaximumScalingFactorAllowed']
@@ -52,26 +51,9 @@ lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel)
 
 #Check that the user-inputed perturbations are sensible given user-supplied interpretation rule
 for emis in emis_scaling_factors:
-	pt = perttype[emis]
 	p = float(perturbation[emis])
-	corrbool = correlatedInitialScalings[emis]
-	if (corrbool == 'True') and (pt != "std"):
-		print(f'WARNING: Correlated initial scalings require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
-	if useLognormal and (pt != "std"):
-		print(f'WARNING: Lognormal errors require the "std" setting. Overriding your setting of {pt} for emission {emis}.')
-	if pt == "exp":
-		if (p <= 1): #perturbation, max positive amount. i.e. if it is 4 scaling factors will range between 0.25 and 4. Uniform distribution used, no correlation.
-			raise ValueError('Exponential perturbation must be at least 1.')
-	elif pt == "percent":
-		if (p <= 0): #perturbation, fraction. i.e. if it is 0.5 scaling factors will range between 0.5 and 1.5. Uniform distribution used, no correlation.
-			raise ValueError('Percent perturbation must be positive.')
-		elif (p > 1): #perturbation, fraction. i.e. if it is 0.5 scaling factors will range between 0.5 and 1.5. Uniform distribution used, no correlation.
-			raise ValueError('Percent perturbation must be 1 or less.')
-	elif pt == "std":
-		if (p <= 0): #perturbation, standard deviation from a normal distribution. i.e. if it is 0.5 scaling factors will be centered at 1 with standard deviation 0.5.
-			raise ValueError('Standard deviation perturbation must be positive.')
-	else:
-		raise ValueError("Perturbation type unrecognized.")
+	if (p <= 0): #perturbation, standard deviation from a normal distribution. i.e. if it is 0.5 scaling factors will be centered at 1 with standard deviation 0.5.
+		raise ValueError('Standard deviation perturbation must be positive.')
 
 scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors),len(lat),len(lon)))
 subdircount = 0
@@ -85,7 +67,6 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 		maskoceanboolval=mask_ocean_bool[emis_name]
 		maskarcticboolval=mask_arctic_bool[emis_name]
 		maskantarcticboolval=mask_antarctic_bool[emis_name]
-		pt=perttype[emis_name]
 		p=float(perturbation[emis_name])
 		minval=float(minsf[emis_name])
 		maxval=float(maxsf[emis_name])
@@ -98,16 +79,10 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 				cov = tx.makeCovMat(distmat,corrdist)
 				scaling_factors = tx.sampleCorrelatedStructure(corrdist,cov,p,useLognormal, (len(lat),len(lon)))
 		else:
-			if useLognormal: #override everything else
+			if useLognormal: #center on 0
 				scaling_factors = np.random.normal(loc=0,scale=p,size=[len(lat),len(lon)])
-			else:
-				if pt == "exp":
-					scaling_factor_exp = (2*np.random.rand(len(lat),len(lon)))-1
-					scaling_factors = p**scaling_factor_exp
-				elif pt == "percent":
-					scaling_factors = (2*p*np.random.rand(len(lat),len(lon)))-p+1
-				elif pt == "std":
-					scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+			else: #center on 1
+				scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
 		if useLognormal: #Sampled normal initially; if lognormal, use exp to transform sample
 			scaling_factors = np.exp(scaling_factors)
 		if ~np.isnan(minval): #Enforce minimum sf.

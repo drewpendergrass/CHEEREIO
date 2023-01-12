@@ -129,9 +129,6 @@
 	"pPERT" : {
 		"CH4":"0.1"
 	},
-	"pertType" : {
-		"CH4":"std"
-	},
 	"correlatedInitialScalings" : {
 		"CH4":"True"
 	},
