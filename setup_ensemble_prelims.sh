@@ -354,7 +354,6 @@ grid_lev="$(jq -r ".LEVS" ens_config.json)"
 
 # Ensemble settings
 nEnsemble=$(jq -r ".nEnsemble" ens_config.json)
-pPERT="$(jq -r ".pPERT" ens_config.json)"
 
 dcr=$(jq -r ".DO_CONTROL_RUN" ens_config.json)
 dcer=$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" ens_config.json) #if true, we make a run directory without assimilation within the ensemble runs structure.
