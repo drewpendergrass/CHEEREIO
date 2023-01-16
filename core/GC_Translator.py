@@ -139,7 +139,7 @@ class GC_Translator(object):
 	def saveEmissions(self):
 		for file in self.emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
-			if useLognormal:
+			if self.useLognormal:
 				self.data.emis_ds_list[name]['Scalar'] = np.exp(self.data.emis_ds_list[name]['Scalar']) #Right before saving, transform back to lognormal space if we are using lognormal errors
 			self.data.emis_ds_list[name].to_netcdf(file)
 
