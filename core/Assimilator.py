@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import xarray as xr
 from glob import glob
 import scipy.linalg as la
@@ -73,7 +74,20 @@ class Assimilator(object):
 		if self.verbose>=2:
 			print(f"GC Translators created. Ensemble number list: {self.ensemble_numbers}")
 		self.inflation = float(spc_config['INFLATION_FACTOR'])
-		self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
+		if (ensnum==1) and (corenum == 1): #This assimilator will save out the hist ens value for postprocessing later.
+			#Get postprocessing flags for saving out BigY
+			self.useControl=spc_config['DO_CONTROL_RUN']=="true"
+			self.avtogcgrid = spc_config['AV_TO_GC_GRID']=="True"
+			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
+			self.bigYpostprocess = True
+			if 'postprocess_save_albedo' in spc_config:
+				self.postprocess_save_albedo = spc_config['postprocess_save_albedo']=="True"
+			else:
+				self.postprocess_save_albedo = False
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
+		else:
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
+			self.bigYpostprocess = False
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -369,6 +383,32 @@ class Assimilator(object):
 			self.gt[i].saveRestart()
 		if self.control is not None: #save control if we are using.
 			self.control.saveRestart()
+	def saveBigY(self):
+		bigy = self.histens.bigYDict
+		for spec in list(bigy.keys()):
+			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec].getTime()]
+			t = np.array(t,dtype='datetime64[us]')
+			colnum = np.shape(bigy[spec].getGCCol())[1]
+			colnames = []
+			for i in range(colnum):
+				colnames.append(f"Ens{str(i+1).zfill(3)}")
+			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
+			df['Observations'] = bigy[spec].getObsCol()
+			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
+			if self.avtogcgrid:
+				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
+			else:
+				df['Num_Averaged'] = None
+			if self.postprocess_save_albedo:
+				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
+			if self.useControl:
+				df['Control'] = bigy[spec].getDataByKey('control')
+			df['time'] = t
+			bigy[spec] = df
+		#save out the file to postprocessing for later.
+		f = open(self.bigy_filename,"wb")
+		pickle.dump(bigy,f)
+		f.close()
 	def LETKF(self):
 		if self.verbose>=2:
 			print(f"LETKF called! Beginning loop.")
@@ -404,6 +444,8 @@ class Assimilator(object):
 					else: #DOFS too low, not enough information to optimize
 						analysisSubset=backgroundSubset #set analysis equal to background
 			self.saveColumn(latval,lonval,analysisSubset)
+			if self.bigYpostprocess:
+				self.saveBigY()
 			if self.SaveDOFS:
 				dofsmat[latval,lonval] = dofs
 		if self.SaveDOFS:

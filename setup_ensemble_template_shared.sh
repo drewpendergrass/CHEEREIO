@@ -7,7 +7,8 @@ cd ${MY_PATH}/${RUN_NAME}
 mkdir -p ensemble_runs
 mkdir -p ensemble_runs/logs
 mkdir -p scratch
-mkdir -p postprocess
+mkdir -p postprocess 
+mkdir -p postprocess/bigy
 
 if [ "${SaveDOFS}" = "True" ]; then
   mkdir -p ensemble_runs/logs/dofs_scratch
