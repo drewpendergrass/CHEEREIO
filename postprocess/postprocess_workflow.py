@@ -80,14 +80,12 @@ print('Surface concentration data postprocessed and loaded.')
 
 if "histprocess" in sys.argv:
 	print('Starting simulated observation vs actual observation (Y) postprocessing.')
-	daterange = np.arange(POSTPROCESS_START_DATE,POSTPROCESS_END_DATE+timedelta(hours=1),delta).astype(datetime)
-	dates_string_array = [dateval.strftime("%Y%m%d_%H%M") for dateval in daterange]
 	try:
 		with open(f"{pp_dir}/bigY.pkl",'rb') as f:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
 		print('Observation postprocessing files not detected; generating now.')
-		bigy = pt.makeYEachAssimPeriod(dates_string_array,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,use_numav=avtogcgrid,use_albedo=postprocess_save_albedo,useControl = useControl, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy", fullpath_output_name=f"{pp_dir}/bigY.pkl")
 	print('Simulated observation vs actual observation (Y) postprocessed and loaded.')
 
 if useControl:

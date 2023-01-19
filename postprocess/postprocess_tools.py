@@ -118,32 +118,15 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(timestamp_list, useLevelEdge=False,useStateMet = False,useArea=False, use_numav = True, use_albedo=True, useControl=False,fullpath_output_name = None):
+def makeYEachAssimPeriod(path_to_bigy_subsets,fullpath_output_name = None):
 	masterY = {}
-	for timestamp in timestamp_list:
+	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
+	bigy_list.sort()
+	timestamps = [by.split('/')[-1].split('.')[0] for by in bigy_list]
+	for bigy_file,timestamp in zip(bigy_list,timestamps):
 		print(f'Processing the Y dictionary for time {timestamp}')
-		hist = HIST_Ens(timestamp=timestamp,useLevelEdge=useLevelEdge,useStateMet = useStateMet,useArea=useArea,saveAlbedo=use_albedo,useControl=useControl)
-		bigy = hist.bigYDict 
-		for spec in list(bigy.keys()):
-			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec].getTime()]
-			t = np.array(t,dtype='datetime64[us]')
-			colnum = np.shape(bigy[spec].getGCCol())[1]
-			colnames = []
-			for i in range(colnum):
-				colnames.append(f"Ens{str(i+1).zfill(3)}")
-			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
-			df['Observations'] = bigy[spec].getObsCol()
-			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
-			if use_numav:
-				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
-			else:
-				df['Num_Averaged'] = None
-			if use_albedo:
-				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
-			if useControl:
-				df['Control'] = bigy[spec].getDataByKey('control')
-			df['time'] = t
-			bigy[spec] = df
+		with open(bigy_file,'rb') as f:
+			bigy=pickle.load(f)
 		masterY[timestamp] = bigy
 	if fullpath_output_name:
 		f = open(fullpath_output_name,"wb")
