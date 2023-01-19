@@ -4,6 +4,7 @@ import xarray as xr
 from glob import glob
 import scipy.linalg as la
 import settings_interface as si 
+import pickle
 from datetime import date,datetime,timedelta
 from GC_Translator import GC_Translator
 from HIST_Ens import HIST_Ens
