@@ -118,12 +118,15 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(path_to_bigy_subsets,fullpath_output_name = None):
+def makeYEachAssimPeriod(path_to_bigy_subsets,startdate,enddate,fullpath_output_name = None):
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
 	bigy_list.sort()
 	timestamps = [by.split('/')[-1].split('.')[0] for by in bigy_list]
-	for bigy_file,timestamp in zip(bigy_list,timestamps):
+	timestamps_datetime = [datetime.strptime(timestamp, "%Y%m%d_%H%M") for timestamp in timestamps]
+	for bigy_file,timestamp,timedate in zip(bigy_list,timestamps,timestamps_datetime):
+		if (timedate<startdate) or (timedate>enddate): #Don't process values during burn in period
+			continue
 		print(f'Processing the Y dictionary for time {timestamp}')
 		with open(bigy_file,'rb') as f:
 			bigy=pickle.load(f)
