@@ -445,9 +445,10 @@ class Assimilator(object):
 					else: #DOFS too low, not enough information to optimize
 						analysisSubset=backgroundSubset #set analysis equal to background
 			self.saveColumn(latval,lonval,analysisSubset)
-			if self.bigYpostprocess:
-				self.saveBigY()
 			if self.SaveDOFS:
 				dofsmat[latval,lonval] = dofs
+		#Loop is complete. If applicable, save final items.
+		if self.bigYpostprocess:
+			self.saveBigY()
 		if self.SaveDOFS:
 			np.save(f'{self.path_to_logs}/dofs_scratch/{self.parfilename}_dofsgrid.npy',dofsmat)
