@@ -47,14 +47,16 @@ The DataBundle and StateVector classes are only used by the GC_Translator object
 The HIST Translator class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO uses the HIST_Translator object to read in GEOS-Chem output data, specifically the time-evolution of chemical species of interest in 3D, and pass them on to :ref:`HIST Ensemble` where they will be used to form the simulated observation perturbation matrix :math:`Y_i^b`. One HIST_Translator object is produced for each ensemble member at assimilation time and reads data from the OutputDir folder in the run directory. This class is very simple; it mainly just concatenates files using xarray and contains some utilities for subsetting data. :ref:`HIST Ensemble` does all the hard work.
 
 .. _HIST Ensemble:
 
 The HIST Ensemble class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO uses HIST_Ensemble object to (1) gather the raw GEOS-Chem output data as aggregated by :ref:`HIST Translator`, (2) gather raw observation data, via the objects detailed in the :ref:`Observations` article, and (3) use all the input data and objects supplied in the first two steps to transform GEOS-Chem output data into observation space. The HIST_Ensemble object then uses this data aggregated to form a variety of quantities that are necessary for the LETKF calculation, including the simulated observation mean :math:`\bar{y}^b`, the simulated observation perturbation matrix :math:`Y^b`, the difference between actual and (mean) simulated observations :math:`y-\bar{y}^b`, and the observational error covariance matrix :math:`R`. HIST_Ensemble also takes care of localizing these quantities in the LETKF calculation and applying user-supplied corrections as they are relevant, such as the regularization factor :math:`\gamma`. 
+
+All this data is calculated and supplied as requested by :ref:`Assimilator`. There is only one HIST_Ensemble class produced per assimilator; it holds and processes the data for the entire ensemble.
 
 The Observation Translator class type
 ~~~~~~~~~~~~~
