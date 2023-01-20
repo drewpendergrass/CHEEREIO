@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO_no2",
-	"RUN_NAME" : "NOx_4x5_v07",
+	"RUN_NAME" : "NOx_4x5_v08",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -110,6 +110,22 @@
 	"HistoryLevelEdgeDiagsToSave" : [
 		"Met_PEDGE"
 	],
+	"HistoryRestartToSave" : [
+		"SpeciesRst_?ALL?",
+		"Chem_H2O2AfterChem",
+		"Chem_SO2AfterChem",
+		"Chem_DryDepNitrogen",
+		"Chem_WetDepNitrogen",
+		"Chem_KPPHvalue",
+		"Chem_StatePSC",
+		"Met_DELPDRY",
+		"Met_PS1WET",
+		"Met_PS1DRY",
+		"Met_SPHU1",
+		"Met_TMPU1",
+		"Met_BXHEIGHT",
+		"Met_TropLev"
+	],
 	"HistoryStateMetToSave" : [
 		"Met_TropLev",
 		"Met_BXHEIGHT",
@@ -138,11 +154,8 @@
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
-	"pPERT" : {
+	"init_std_dev" : {
 		"NOx":"0.1"
-	},
-	"pertType" : {
-		"NOx":"std"
 	},
 	"correlatedInitialScalings" : {
 		"NOx":"True"
@@ -151,6 +164,7 @@
 		"NOx":"500"
 	},
 	"speedyCorrelationApprox" : "True",
+	"lognormalErrors" : "True",
 	"MaskOceanScaleFactor" : {
 		"NOx":"True"
 	},
@@ -162,7 +176,7 @@
 		"NOx":"True"
 	},
 	"MinimumScalingFactorAllowed" : {
-		"NOx":"0.01"
+		"NOx":"nan"
 	},
 	"MaximumScalingFactorAllowed" : {
 		"NOx":"nan"
@@ -171,7 +185,7 @@
 		"NOx":"nan"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
-		"NOx":"0.5"
+		"NOx":"nan"
 	},
 	"comment018" : "******************************************************************************",
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
@@ -211,7 +225,7 @@
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "500",
-	"AveragePriorAndPosterior" : "True",
+	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
@@ -223,6 +237,8 @@
 		"EmisNO_Anthro",
 		"EmisNO2_Anthro"
 	],
+	"min_emis_value_to_plot" : "1e-14",
+	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
 		"NO2_OMI": "molec/cm2"
 	},
