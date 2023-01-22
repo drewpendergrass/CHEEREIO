@@ -27,6 +27,13 @@ The postprocessed data files
 
 TKTKTK
 
+.. _New field in postprocessing:
+
+Adding a new observation field to the postprocessing workflow
+-------------
+
+TKTKTK
+
 A partial guide to the postprocessing API
 -------------
 
