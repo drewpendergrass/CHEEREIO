@@ -50,7 +50,7 @@
 	"Partition" : "huce_intel",
 	"Memory" : "40000",
 	"EnsCtrlSpinupMemory" : "8000",
-	"WallTime" : "1-12\\:00",
+	"WallTime" : "7-00\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
 	"ControlWallTime" : "0-04\\:00",
 	"SpinupWallTime" : "",
