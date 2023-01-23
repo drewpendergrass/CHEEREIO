@@ -323,7 +323,7 @@ class Assimilator(object):
 			print(f'Old scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')
 		if self.lognormalErrors:
 			analysisScalefactor  = np.log(analysisScalefactor) #Transform back to gaussian space.
-		if self.AverageScaleFactorPosteriorWithPrior
+		if self.AverageScaleFactorPosteriorWithPrior:
 			priorweight = self.PriorWeightinSFAverage
 			if (priorweight<0) or (priorweight>1):
 				raise ValueError('Invalid prior weight; must be between 0 and 1.') 
