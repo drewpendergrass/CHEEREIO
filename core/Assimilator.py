@@ -54,6 +54,7 @@ class Assimilator(object):
 			self.InitEmisSTD[name] = stds
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
+		self.AverageScaleFactorPosteriorWithPrior = spc_config["AverageScaleFactorPosteriorWithPrior"] == "True"
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
@@ -61,6 +62,7 @@ class Assimilator(object):
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
+		self.PriorWeightinSFAverage = float(spc_config["PriorWeightinSFAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		if self.verbose>=2:
@@ -247,8 +249,7 @@ class Assimilator(object):
 			print(f"The analysis ensemble mean is {np.mean(analysisScalefactor,axis=1)}.")
 			print(f"Background scale factor has dimension {np.shape(backgroundScalefactor)} and value {backgroundScalefactor}.")
 			print(f"The background ensemble mean is {np.mean(backgroundScalefactor,axis=1)}.")
-		#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
-		if self.verbose>=2:
+			#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
 			print('BEGIN section InflateScalingsToXOfInitialStandardDeviation')
 		for i,emis in enumerate(self.emis_names):
 			inflator = float(self.InflateScalingsToXOfInitialStandardDeviation[emis])
@@ -280,7 +281,6 @@ class Assimilator(object):
 							print(f'Ratio {ratio} is greater than inflator standard {inflator}, so doing nothing.')
 		if self.verbose>=2:
 			print('END section InflateScalingsToXOfInitialStandardDeviation')
-		if self.verbose>=2:
 			print('BEGIN section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
 		#Apply maximum relative change per assimilation period:
 		for i,emis in enumerate(self.emis_names):
@@ -299,7 +299,6 @@ class Assimilator(object):
 					print(f'New {emis} analysis scale factors are {analysisScalefactor[i,:]}.')
 		if self.verbose>=2:
 			print('END section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
-		if self.verbose>=2:
 			print('BEGIN section Minimum/MaximumScalingFactorAllowed')
 		#Set min/max scale factor:
 		for i,emis in enumerate(self.emis_names):
@@ -324,6 +323,19 @@ class Assimilator(object):
 			print(f'Old scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')
 		if self.lognormalErrors:
 			analysisScalefactor  = np.log(analysisScalefactor) #Transform back to gaussian space.
+		if self.AverageScaleFactorPosteriorWithPrior
+			priorweight = self.PriorWeightinSFAverage
+			if (priorweight<0) or (priorweight>1):
+				raise ValueError('Invalid prior weight; must be between 0 and 1.') 
+			posteriorweight = 1-priorweight
+			if self.verbose>=2:
+				print(f'Averaging prior and posterior scale factors, with prior weight of {priorweight} and posterior weight of {posteriorweight}.')
+			#Prior scale factor is 1 or 0 depending on which error form we are using.
+			if self.lognormalErrors:
+				priorval = 0
+			else:
+				priorval = 1
+			analysisScalefactor = (priorval*priorweight)+(analysisScalefactor*posteriorweight)
 		analysisSubset[(-1*self.emcount)::,:] = analysisScalefactor
 		if self.verbose>=2:
 			print(f'New scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')

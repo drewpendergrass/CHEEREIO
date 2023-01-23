@@ -227,6 +227,8 @@
 	"LOCALIZATION_RADIUS_km" : "500",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
+	"AverageScaleFactorPosteriorWithPrior" : "False",
+	"PriorWeightinSFAverage" : "0.5",
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment023" : "**********************************************************************************",
