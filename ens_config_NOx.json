@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO_no2",
-	"RUN_NAME" : "NOx_log_v01",
+	"RUN_NAME" : "NOx_log_v02",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -40,7 +40,7 @@
 	"BURN_IN_END" : "20160112",
 	"POSTPROCESS_START_DATE":"20160113",
 	"POSTPROCESS_END_DATE":"20160201",
-	"nEnsemble" : "16",
+	"nEnsemble" : "24",
 	"verbose":"1",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
@@ -191,7 +191,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NO2_OMI":"0.01"
+		"NO2_OMI":"1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"NO2_OMI":"False"
@@ -220,7 +220,7 @@
 	"SUPER_OBSERVATION_FUNCTION":{
 		"NO2_OMI":"default"
 	},
-	"INFLATION_FACTOR": "0.03",
+	"INFLATION_FACTOR": "0.04",
 	"ASSIM_TIME": "24",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
