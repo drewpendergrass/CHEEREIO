@@ -3,8 +3,7 @@
 Observations
 ==========
 
-This page is under construction, check back later!
-
+This section is under construction, check back later!
 
 The observation operator toolkit
 -------------
@@ -16,74 +15,74 @@ CHEEREIO handles observations by using objects inheriting from the Observation_T
 The ObsData class
 -------------
 
-TKTKTK
+This section is under construction, check back later!
 
 Existing observation toolkits
 -------------
 
-TKTKTK
+This section is under construction, check back later!
 
 .. _TROPOMI tools:
 
 TROPOMI tools
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 .. _OMI tools:
 
 OMI tools
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 
 Supplementing an existing observation type
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 .. _New observation:
 
 Workflow to add a new observation operator
 -------------
 
-TKTKTKT
+This section is under construction, check back later!
 
 (1) Create a class inheriting from Observation_Translator 
 ~~~~~~~~~~~~~
 
-TKTKTK.
+This section is under construction, check back later!
 
 (2) Implement getObservations() function 
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 (3) Implement gcCompare() function 
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 (4) Update operators.json
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 (5) Link observational files from ens_config.json
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 (6) [optional] Add observation filters via an extension
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
 .. _New superobservation:
 
 (7) [optional] Add a new super observation error function
 ~~~~~~~~~~~~~
 
-TKTKTK
+This section is under construction, check back later!
 
