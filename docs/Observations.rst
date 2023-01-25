@@ -22,13 +22,15 @@ In the below entries, we will briefly describe the functions and classes supplie
 The produceSuperObservationFunction function
 ~~~~~~~~~~~~~
 
+This section is under construction, check back later!
+
 In CHEEREIO, users can opt to aggregate observations together to the GEOS-Chem grid, rather than ingesting observations individually even if several separate observations are made in a GEOS-Chem grid cell for a given point in time. Using "super-observations" is helpful because it reduces the complexity of the LETKF calculation and can help control ensemble behavior in areas where there are dense observations.
 
 .. py:function:: produceSuperObservationFunction(fname)
 
    Takes as input a string for the function name. Users supply this string in ``ens_config.json`` via the ``SUPER_OBSERVATION_FUNCTION`` entry. Returns a function as output which will then be used to do the super-observation aggregation.
 
-   :param str fname: The name of the function. Currently supported values are "default", "sqrt", and "constant". 
+   :param str fname: The name of the function. Currently supported values are "default", "sqrt", and "constant". The details of these functions are described in the ``AV_TO_GC_GRID`` entry on the :ref:`Configuration` page.
    :return: The super observation function super_obs
    :rtype: function
    :raises ValueError: if the function name is unrecognized
