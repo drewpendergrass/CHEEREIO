@@ -17,9 +17,6 @@ def produceSuperObservationFunction(fname):
 	elif fname == "constant":
 		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return mean_error
-	elif fname == "empirical_ch4_tropomi":
-		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
-			return np.max([mean_error*(1.02 - (0.02*num_obs)),min_error])
 	else:
 		raise ValueError('Superobservation error reduction function not recognized.')
 	return super_obs
