@@ -5,6 +5,8 @@ The CHEEREIO LETKF implementation
 
 The 4D localized ensemble transform Kalman filter (4D-LETKF) algorithm lies at the heart of CHEEREIO. Everything else merely supports the assimilation operations conducted by this workflow.
 
+.. _LETKF technical:
+
 Technical overview of the 4D-LETKF implementation
 -------------
 
@@ -92,4 +94,7 @@ The most important method in the GT Container class is ``reconstructAnalysisEnse
 The Assimilator class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO puts all the pieces together for the LETKF algorithm in the Assimilator class. The Assimilator class contains (1) an array of GC Translator objects, which it uses to produce state vectors (:math:`X^b`); (2) a HIST Ensemble object, which it uses to interface with observations and GEOS-Chem history files to produce arrays of simulated observations (:math:`Y^b`), the difference between the mean simulated observations and actual observations (:math:`\bar{y}-y`), and observational error (:math:`R`); and (3) the code, in the ``LETKF()`` method, to put all the pieces together and conduct the LETKF assimilation.
+
+The bulk of the description of what the ``LETKF()`` method does is outlined here: :ref:`parallelization`. Most of the other methods in the Assimilator class just support the LETKF method, such as assembling the matrices mentioned in the previous paragraph. In addition, the Assimilator class contains methods to do corrections to the assimilated output beyond the LETKF scope. These include (1) enforcing minimum or maximum scale factors (e.g. a non-negativity constraint); and (2) limiting the change allowed in each assimilation calculation, such as by nudging towards the prior or amplifying the ensemble spread more flexibly than the :math:`\Delta` parameter allows. The user specifies all these settings in the ensemble configuration file.
+
