@@ -31,7 +31,7 @@ In CHEEREIO, users can opt to aggregate observations together to the GEOS-Chem g
    Takes as input a string for the function name. Users supply this string in ``ens_config.json`` via the ``SUPER_OBSERVATION_FUNCTION`` entry. Returns a function as output which will then be used to do the super-observation aggregation.
 
    :param str fname: The name of the function. Currently supported values are "default", "sqrt", and "constant". The details of these functions are described in the ``AV_TO_GC_GRID`` entry on the :ref:`Configuration` page.
-   :return: The super observation function super_obs
+   :return: The super observation function ``super_obs()``
    :rtype: function
    :raises ValueError: if the function name is unrecognized
 
