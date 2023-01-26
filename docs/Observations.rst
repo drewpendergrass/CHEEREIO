@@ -24,19 +24,35 @@ The produceSuperObservationFunction function
 
 This section is under construction, check back later!
 
-In CHEEREIO, users can opt to aggregate observations together to the GEOS-Chem grid, rather than ingesting observations individually even if several separate observations are made in a GEOS-Chem grid cell for a given point in time. Using "super-observations" is helpful because it reduces the complexity of the LETKF calculation and can help control ensemble behavior in areas where there are dense observations.
+In CHEEREIO, users can opt to aggregate observations together to the GEOS-Chem grid, rather than ingesting observations individually even if several separate observations are made in a GEOS-Chem grid cell for a given point in time. Using "super-observations" is helpful because it reduces the complexity of the LETKF calculation and can help control ensemble behavior in areas where there are dense observations. The one tricky bit is handling error -- errors are reduced when aggregating observations. That's where the produceSuperObservationFunction function comes in.
 
 .. py:function:: produceSuperObservationFunction(fname)
 
-   Takes as input a string for the function name. Users supply this string in ``ens_config.json`` via the ``SUPER_OBSERVATION_FUNCTION`` entry. Returns a function as output which will then be used to do the super-observation aggregation.
+   Takes as input a string for the function name. Users supply this string in ``ens_config.json`` via the ``SUPER_OBSERVATION_FUNCTION`` entry. Returns a function as output which will then be used to calculate errors after super-observation aggregation.
 
    :param str fname: The name of the function. Currently supported values are "default", "sqrt", and "constant". The details of these functions are described in the ``AV_TO_GC_GRID`` entry on the :ref:`Configuration` page.
    :return: The super observation function ``super_obs()``
    :rtype: function
    :raises ValueError: if the function name is unrecognized
 
+Users never use the super observation function that is output by the ``produceSuperObservationFunction`` function directly, but CHEEREIO does. Therefore it is important that the super observation function has a standardized call signature and output. Details on how to right your own function are given in the :ref:`New superobservation` section.
+
 .. py:function:: super_obs(mean_error,num_obs,errorCorr=0,min_error=0,[transportError=0])
 
+   A function which takes the mean error for a set of observations, the number of observations that are averaged, and a few other parameters, and outputs the new error resulting from the aggregation (which is always less than or equal to the mean error input).
+
+   :param mean_error: The mean error for the observations which have been aggregated together. Like all parameters, CHEEREIO supplies this number, calculated based on user settings.
+   :type: float
+   :param num_obs: The number of observations which have been aggregated together.
+   :type: int
+   :param errorCorr: The correlation (between 0 and 1) between individual observations. The function must always have this argument in the call signature even if it is not used.
+   :type: float
+   :param min_error: The error floor for the super observation. Error will never fall below this number. The function must always have this argument in the call signature even if it is not used.
+   :type: float
+   :param transportError: Irreducible error attributable to model transport. Only some super observation functions use this quantity.
+   :type: float
+   :return: The reduced error which will be associated with the super observation in the LETKF calculation
+   :rtype: float
 
 The apply_filters function
 ~~~~~~~~~~~~~
