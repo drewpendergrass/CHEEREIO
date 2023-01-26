@@ -42,15 +42,15 @@ Users never use the super observation function that is output by the ``produceSu
    A function which takes the mean error for a set of observations, the number of observations that are averaged, and a few other parameters, and outputs the new error resulting from the aggregation (which is always less than or equal to the mean error input).
 
    :param mean_error: The mean error for the observations which have been aggregated together. Like all parameters, CHEEREIO supplies this number, calculated based on user settings.
-   :type: float
+   :ptype: float
    :param num_obs: The number of observations which have been aggregated together.
-   :type: int
+   :ptype: int
    :param errorCorr: The correlation (between 0 and 1) between individual observations. The function must always have this argument in the call signature even if it is not used.
-   :type: float
+   :ptype: float
    :param min_error: The error floor for the super observation. Error will never fall below this number. The function must always have this argument in the call signature even if it is not used.
-   :type: float
+   :ptype: float
    :param transportError: Irreducible error attributable to model transport. Only some super observation functions use this quantity.
-   :type: float
+   :ptype: float
    :return: The reduced error which will be associated with the super observation in the LETKF calculation
    :rtype: float
 
