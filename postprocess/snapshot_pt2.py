@@ -61,7 +61,7 @@ for sf in sfs:
 	def animate(i):
 		daystring = timestr[i]
 		titlestring = f'Scaling factor for {daystring}'
-		plt.title(f'{sf}')
+		plt.title(titlestring)
 		temp = ensmean[i,:,:]
 		temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
 		#mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
