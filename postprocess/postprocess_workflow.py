@@ -117,4 +117,5 @@ for spec in controlvec:
 if "histprocess" in sys.argv:
 	for spec in observed_species:
 		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=False,outfile=f'{pp_dir}/observations_ts_compare_{spec}.png')
-		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=True,outfile=f'{pp_dir}/observations_ts_compare_{spec}_w_control.png')
+		if useControl:
+			pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=True,outfile=f'{pp_dir}/observations_ts_compare_{spec}_w_control.png')

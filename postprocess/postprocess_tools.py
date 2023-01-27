@@ -47,11 +47,13 @@ def globSubDirLevelEdge(hist_dir,timeperiod=None,hourlysub = 6):
 	edgeconc_list = [edge for edge,t in zip(edgeconc_list,ts) if t.hour % hourlysub == 0]
 	return edgeconc_list
 
-def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None):
+def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,return_not_write=False):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
 	sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
+	if return_not_write:
+		to_return = {}
 	for name in sf_names:
 		pathstocombine = [path+name for path in subdirs]
 		ds_files = []
@@ -61,7 +63,12 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None):
 		ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 		if timeperiod is not None:
 			ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
-		ds.to_netcdf(output_dir+'/'+name)
+		if return_not_write:
+			to_return[name] = ds
+		else:
+			ds.to_netcdf(output_dir+'/'+name)
+	if return_not_write:
+		return to_return
 
 def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
@@ -118,15 +125,20 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(path_to_bigy_subsets,startdate,enddate,fullpath_output_name = None):
+def makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpath_output_name = None):
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
 	bigy_list.sort()
 	timestamps = [by.split('/')[-1].split('.')[0] for by in bigy_list]
 	timestamps_datetime = [datetime.strptime(timestamp, "%Y%m%d_%H%M") for timestamp in timestamps]
 	for bigy_file,timestamp,timedate in zip(bigy_list,timestamps,timestamps_datetime):
-		if (timedate<startdate) or (timedate>enddate): #Don't process values during burn in period
-			continue
+		#Don't process values during burn in period
+		if startdate is not None:
+			if (timedate<startdate):
+				continue
+		if enddate is not None:
+			if (timedate>enddate): 
+				continue
 		print(f'Processing the Y dictionary for time {timestamp}')
 		with open(bigy_file,'rb') as f:
 			bigy=pickle.load(f)
@@ -286,3 +298,70 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 		plt.savefig(outfile)
 	else:
 		plt.show()
+
+def makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=False):
+	dates = list(bigy.keys())
+	specieslist = list(bigy[dates[0]].keys())
+	#Make obs/simulated obs arrays
+	simulated_obs_mean_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	true_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	#Make obs count arrays
+	total_obs_count = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+	total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
+	#Make optional arrays
+	if postprocess_save_albedo:
+		total_swir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+		total_nir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+		total_blended = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	if useControl:
+		control_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
+	#Loop through to fill arrays
+	for ind1, date in enumerate(dates):
+		daydict = bigy[date]
+		for ind2, species in enumerate(specieslist):
+			ydict = daydict[species]
+			latdict = np.array(ydict['Latitude'])
+			londict = np.array(ydict['Longitude'])
+			countdict = np.array(ydict['Num_Averaged'])
+			trueobsdict = np.array(ydict['Observations'])
+			simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
+			if postprocess_save_albedo:
+				swirdict = np.array(ydict['Albedo_SWIR'])
+				nirdict = np.array(ydict['Albedo_NIR'])
+				blendeddict = np.array(ydict['Blended_Albedo'])
+			if useControl:
+				controldict = np.array(ydict['Control'])
+			latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
+			latind = latind.argmin(axis=0)
+			lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
+			lonind = lonind.argmin(axis=0)
+			pairedind = ((latind+1)*10000)+(lonind+1)
+			uniqueind,countind = np.unique(pairedind,return_counts=True)
+			uniquelonind = (uniqueind % 10000)-1
+			uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
+			total_averaged_obs[ind1,ind2,uniquelatind,uniquelonind]=countind
+			for lonindval,latindval in zip(uniquelonind,uniquelatind):
+				dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
+				totalcount = np.sum(countdict[dictind])
+				total_obs_count[ind1,ind2,latindval,lonindval]=totalcount
+				true_obs_value[ind1,ind2,latindval,lonindval]=np.mean(trueobsdict[dictind])
+				simulated_obs_mean_value[ind1,ind2,latindval,lonindval]=np.mean(simobsdict[dictind])
+				if useControl:
+					control_obs_value[ind1,ind2,latindval,lonindval]=np.mean(controldict[dictind])
+				if postprocess_save_albedo:	
+					total_swir[ind1,ind2,latindval,lonindval]=np.mean(swirdict[dictind])
+					total_nir[ind1,ind2,latindval,lonindval]=np.mean(nirdict[dictind])
+					total_blended[ind1,ind2,latindval,lonindval]=np.mean(blendeddict[dictind])
+	#save arrays in dictionary form
+	arraysbase = {"obscount":total_obs_count,"obscount_avg":total_averaged_obs,"dates":dates,"species":specieslist,"obs":true_obs_value,"sim_obs":simulated_obs_mean_value}
+	if postprocess_save_albedo:
+		arraysbase['swir_albedo']=total_swir
+		arraysbase['nir_albedo']=total_nir
+		arraysbase['blended_albedo']=total_blended
+	if useControl:
+		arraysbase['control']=control_obs_value
+	#Return dictionary
+	return arraysbase
+
+
+
