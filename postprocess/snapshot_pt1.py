@@ -22,12 +22,20 @@ args = parser.parse_args()
 gg_mode = args.gossipgirl
 
 if gg_mode:
+	print('')
+	print('')
 	print('Hello Upper East Siders. Gossip Girl here. And I have the biggest news ever.')
 	print('One of my many sources, SLURM, sends us this: “Spotted on the computational cluster, bags in hand: CHEEREIO.”')
 	print('Was it only a year ago our It Girl mysteriously disappeared for "data assimilation”? And just as suddenly, she’s back.')
 	print('Don’t believe me? See for yourselves. We will now be showing a snapshot of CHEEREIO at runtime, saving a few figures and movies to postprocessing.')
+	print('')
+	print('')
 else:
+	print('')
+	print('')
 	print('Begin CHEEREIO runtime snapshot. A few diagnostic figures and movies will be saved to postprocessing.')
+	print('')
+	print('')
 
 data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"

@@ -83,7 +83,7 @@ for sf in sfs:
 
 	mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=cmap)
 	plt.clim(clim[0],clim[1])
-	plt.colorbar(label=variable);
+	plt.colorbar(label='Scalar');
 	anim = animation.FuncAnimation(fig, animate,len(time), blit=False)
 
 	#SAVE 
@@ -96,10 +96,13 @@ for sf in sfs:
 print('Done generating movies of scaling factors.')
 
 if gg_mode:
+	print('')
+	print('')
 	print('Hey Upper East Siders. Gossip Girl here.')
 	print('Grab your shades and your sunblock. This one looks like a scorcher.')
 	print('Our snapshot of CHEEREIO at runtime is complete. They are absolutely scandalous!')
 	print(f"Don't believe me? See for yourself. View the snapshot figures and movies at {pp_dir}.")
 	print('Until next time. You know you love me. XOXO —Gossip Girl.')
+	print('')
 else:
 	print(f'Snapshot complete. Please view the figures and movies at {pp_dir}.')
