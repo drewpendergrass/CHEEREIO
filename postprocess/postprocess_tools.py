@@ -47,7 +47,7 @@ def globSubDirLevelEdge(hist_dir,timeperiod=None,hourlysub = 6):
 	edgeconc_list = [edge for edge,t in zip(edgeconc_list,ts) if t.hour % hourlysub == 0]
 	return edgeconc_list
 
-def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,return_not_write=False):
+def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,flag_snapshot=False,return_not_write=False):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True)
 	path_to_sfs = glob(f'{subdirs[0]}*_SCALEFACTOR.nc')
 	path_to_sfs.sort()
@@ -66,7 +66,10 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,return_not_write
 		if return_not_write:
 			to_return[name] = ds
 		else:
-			ds.to_netcdf(output_dir+'/'+name)
+			if flag_snapshot:
+				ds.to_netcdf(output_dir+'/SNAPSHOT_'+name)
+			else:
+				ds.to_netcdf(output_dir+'/'+name)
 	if return_not_write:
 		return to_return
 

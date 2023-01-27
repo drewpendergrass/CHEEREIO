@@ -1,7 +1,7 @@
-import postprocess_tools as pt 
 import argparse
 import numpy as np
 import xarray as xr
+from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
@@ -28,7 +28,6 @@ gg_mode = args.gossipgirl
 
 data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
-ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
 
@@ -37,22 +36,17 @@ if useControl and controlInEns:
 else:
 	control_dir = None
 
-print('Aggregating scale factors from across the ensemble...')
-sfs = pt.combineScaleFactors(ens_dir,pp_dir,return_not_write=True)
-print('Scale factor aggregation complete.')
-
 print('Starting to generate movies of scaling factors.')
-m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 
-def animate(i):
-	daystring = timestr[i]
-	titlestring = f'Scaleing factor for {daystring}'
-	plt.title(f'{sf} scaling factor snapshot')
-	temp = ensmean[i,:,:]
-	temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-	#mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-	mesh.set_array(temp.ravel())
-	return mesh
+path_to_sfs = glob(f'{pp_dir}/SNAPSHOT_*_SCALEFACTOR.nc')
+path_to_sfs.sort()
+sf_names = [pts.split('/')[-1] for pts in path_to_sfs]
+sfs = {}
+
+for name,path in zip(sf_names,path_to_sfs):
+	sfs[name] = xr.open_dataset(path)
+
+m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 
 for sf in sfs:
 	ds = sfs[sf]
@@ -62,6 +56,16 @@ for sf in sfs:
 	lon = np.array(ds['lon'])
 	da = ds['Scalar']
 	ensmean = np.mean(da,axis=0)
+
+	def animate(i):
+		daystring = timestr[i]
+		titlestring = f'Scaling factor for {daystring}'
+		plt.title(f'{sf}')
+		temp = ensmean[i,:,:]
+		temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
+		#mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
+		mesh.set_array(temp.ravel())
+		return mesh
 
 	#####GLOBAL#########
 	# call the animator.  blit=True means only re-draw the parts that have changed.

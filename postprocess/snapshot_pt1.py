@@ -31,6 +31,7 @@ else:
 
 data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
+ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 
 print('Loading simulated observation and observation dictionaries...')
 bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy")
@@ -60,6 +61,9 @@ for spec in observed_species:
 
 print('Timeseries plots complete.')
 
+print('Aggregating scale factors from across the ensemble...')
+pt.combineScaleFactors(ens_dir,pp_dir,flag_snapshot=True)
+print('Scale factor aggregation complete.')
 
 
 
