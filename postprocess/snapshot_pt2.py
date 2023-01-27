@@ -55,7 +55,7 @@ for sf in sfs:
 	timestr = [str(t)[0:16] for t in time]
 	lat = np.array(ds['lat'])
 	lon = np.array(ds['lon'])
-	da = ds['Scalar']
+	da = np.array(ds['Scalar'])
 	ensmean = np.mean(da,axis=0)
 
 	def animate(i):
@@ -92,7 +92,12 @@ for sf in sfs:
 	writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
 	file_out = f'{pp_dir}/{sf}_scalefactor_mean_SNAPSHOT.mp4'
 	anim.save(file_out, writer=writer)
+	print('')
+	print('')
 	print(f'Saved {sf} movie of ensemble mean scalefactors out at {file_out}')
+	print('')
+	print('')
+
 
 print('Done generating movies of scaling factors.')
 
