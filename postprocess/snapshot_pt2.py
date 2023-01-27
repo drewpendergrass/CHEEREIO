@@ -30,6 +30,7 @@ data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
+anim_fps = int(data['animation_fps_scalingfactor'])
 
 if useControl and controlInEns:
 	control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/{data['RUN_NAME']}_0000"

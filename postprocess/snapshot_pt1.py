@@ -59,6 +59,8 @@ else:
 print('Plotting timeseries of observations against assimilation')
 
 for spec in observed_species:
+	print('')
+	print('')
 	if control_dir is not None:
 		outfile = f'{pp_dir}/SNAPSHOT_observations_ts_compare_{spec}_w_control.png'
 		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=True,outfile=f'{pp_dir}/SNAPSHOT_observations_ts_compare_{spec}_w_control.png')
@@ -66,6 +68,9 @@ for spec in observed_species:
 		outfile = f'{pp_dir}/SNAPSHOT_observations_ts_compare_{spec}.png'
 		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=False,outfile=outfile)
 	print(f'Saved a snapshot at {outfile}')
+
+print('')
+print('')
 
 print('Timeseries plots complete.')
 
