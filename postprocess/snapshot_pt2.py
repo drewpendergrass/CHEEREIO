@@ -7,6 +7,7 @@ import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 import pickle
+import sys
 sys.path.append('../core')
 import settings_interface as si 
 
