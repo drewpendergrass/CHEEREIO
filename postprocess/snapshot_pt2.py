@@ -91,7 +91,7 @@ for sf in sfs:
 	Writer = animation.writers['ffmpeg']
 	writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
 	sf_nodot = sf.split('.')[0]
-	file_out = f'{pp_dir}/{sf_nodot}_scalefactor_mean_SNAPSHOT.mp4'
+	file_out = f'{pp_dir}/{sf_nodot}_mean_SNAPSHOT.mp4'
 	anim.save(file_out, writer=writer)
 	print('')
 	print('')
