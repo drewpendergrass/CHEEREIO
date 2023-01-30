@@ -6,6 +6,7 @@ eval "$(conda shell.bash hook)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 animation_fps_scalingfactor="$(jq -r ".animation_fps_scalingfactor" ../ens_config.json)"
 animation_fps_concentrations="$(jq -r ".animation_fps_concentrations" ../ens_config.json)"
+lognormalErrors="$(jq -r ".lognormalErrors" ../ens_config.json)"
 # Path where you want to set up assimilation code and run directories
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 pp_dir="${MY_PATH}/${RUN_NAME}/postprocess" 
@@ -20,17 +21,17 @@ conda activate $(jq -r ".AnimationEnv" ../ens_config.json)
 ## now loop through the control vector array
 for i in "${controlvec[@]}"
 do
-	python animator.py "${concpp}" "SpeciesConc_${i}" "all" "${pp_dir}/SpeciesConc_${i}" "${animation_fps_concentrations}"
+	python animator.py "${concpp}" "SpeciesConc_${i}" "all" "${pp_dir}/SpeciesConc_${i}" "${animation_fps_concentrations}" "${lognormalErrors}"
 done
 
 for i in "${emisvec[@]}"
 do
-	python animator.py "${pp_dir}/${i}_SCALEFACTOR.nc" "Scalar" "all" "${pp_dir}/SCALEFACTOR_${i}" "${animation_fps_scalingfactor}"
+	python animator.py "${pp_dir}/${i}_SCALEFACTOR.nc" "Scalar" "all" "${pp_dir}/SCALEFACTOR_${i}" "${animation_fps_scalingfactor}" "${lognormalErrors}"
 done
 
 for i in "${hemco_diags_to_process[@]}"
 do
-	python animator.py "${pp_dir}/combined_HEMCO_diagnostics.nc" "${i}" "all" "${pp_dir}/HEMCOdiag_${i}" "${animation_fps_scalingfactor}"
+	python animator.py "${pp_dir}/combined_HEMCO_diagnostics.nc" "${i}" "all" "${pp_dir}/HEMCOdiag_${i}" "${animation_fps_scalingfactor}" "${lognormalErrors}"
 done
 
 conda deactivate

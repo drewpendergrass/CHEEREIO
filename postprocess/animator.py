@@ -14,6 +14,7 @@ func=str(sys.argv[3])
 #if doing all, leave off ending; will append _FUNCTION.mp4
 file_out=str(sys.argv[4])
 anim_fps=int(sys.argv[5])
+lognormalErrors=str(sys.argv[6])=="True"
 ds = xr.open_dataset(file_in)
 time = np.array(ds['time'])
 timestr = [str(t)[0:16] for t in time]
@@ -71,13 +72,19 @@ for i in range(length):
     if looping:
         func = funcs[i]
     if func=='mean':
-    	ensmean = np.mean(da,axis=0)
+        if lognormalErrors and (variable=='Scalar'):
+            ensmean = np.exp(np.mean(np.log(da),axis=0))
+        else:
+            ensmean = np.mean(da,axis=0)
     elif func=='sd':
-    	ensmean = np.std(da,axis=0)
+        if lognormalErrors and (variable=='Scalar'):
+            ensmean = np.std(np.log(da),axis=0)
+        else:
+            ensmean = np.std(da,axis=0)
     elif func=='max':
-    	ensmean = np.max(da,axis=0)
+        ensmean = np.max(da,axis=0)
     elif func=='min':
-    	ensmean = np.min(da,axis=0)
+        ensmean = np.min(da,axis=0)
     elif func=='range':
         ensmean = np.max(da,axis=0)-np.min(da,axis=0)
 
