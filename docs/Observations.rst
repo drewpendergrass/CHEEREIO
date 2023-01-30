@@ -66,7 +66,7 @@ CHEEREIO supports real-time filtering of input observations based on user settin
 The nearest_loc function
 ~~~~~~~~~~~~~
 
-CHEEREIO uses the ``nearest_loc()`` function to match observation data with the GEOS-Chem grid. The corresponding index lists are used for (1) aggregating observation data to the GEOS-Chem grid, and (2) observation operator calculations.
+CHEEREIO uses the ``nearest_loc()`` function to match observation data with the GEOS-Chem grid. The corresponding index lists are used to (1) get GEOS-Chem columns corresponding with observations, and (2) aggregate observation data to the GEOS-Chem grid.
 
 .. py:function:: nearest_loc(GC,OBSDATA)
 
