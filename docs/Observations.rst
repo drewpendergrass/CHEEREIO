@@ -52,7 +52,16 @@ Users never use the super observation function that is output by the ``produceSu
 The apply_filters function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. For a tutorial on how to add filters for your own observation operator, or on how to add additional filters to existing observation operators, see :ref:`Observation filters`.
+
+.. py:function:: apply_filters(OBSDATA,filterinfo)
+
+   Takes raw observations as read from file and a dictionary-based description of how to filter out bad observations, and returns the filtered raw observations with bad data removed.
+
+   :param dict OBSDATA: Raw observation data The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude" and one labeled "utctime". The "utctime" entry must be formatted by ISO 8601 data time format. ISO 8601 represents date and time by starting with the year, followed by the month, the day, the hour, the minutes, seconds and milliseconds. For example, 2020-07-10 15:00:00.000, represents the 10th of July 2020 at 3 p.m. Timezone is assumed to be UTC. For a good example on how to format OBSDATA, see the ``read_tropomi()`` or ``read_omi()`` functions in tropomi_tools and omi_tools respectively. 
+   :param dict filterinfo: A dictionary describing the filters to be applied. The keys of the dictionary are called filter families and describe the observation type (e.g. OMI_NO2), while the value is a list with filter values specific to that observation type. For example, in the OMI_NO2 filter family, the solar zenith angle filter value is the first entry in the list.
+   :return: The post-filtering version of the input dictionary ``OBSDATA``.
+   :rtype: dict
 
 The nearest_loc function
 ~~~~~~~~~~~~~
@@ -139,6 +148,8 @@ This section is under construction, check back later!
 ~~~~~~~~~~~~~
 
 This section is under construction, check back later!
+
+.. _Observation filters:
 
 (6) [optional] Add observation filters via an extension
 ~~~~~~~~~~~~~
