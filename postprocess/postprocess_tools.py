@@ -152,22 +152,6 @@ def makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpa
 		f.close()
 	return masterY
 
-def plotSurfaceCellEnsMeanNorm(ds,species_name,latind,lonind,outfile=None,unit='ppm'):
-	if unit=='ppm':
-		multiplier = 1e6
-	elif unit=='ppb':
-		multiplier = 1e9
-	elif unit=='ppt':
-		multiplier = 1e12
-	else:
-		raise ValueError('Unit not recognized.')
-	da = np.array(ds[f'SpeciesConc_{species_name}'])
-	time = np.array(ds['time'])
-	ens = da[:,:,latind,lonind]*multiplier
-	ensmean = np.mean(ens,axis=0)
-	enssd = np.std(ens,axis=0)
-	tsPlot(time,ensmean-ensmean,enssd,species_name,unit,outfile=outfile)
-
 def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
 	if unit=='ppm':
 		multiplier = 1e6
@@ -210,7 +194,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outfile=None):
+def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None):
 	if timeslice is not None:
 		ds_ensemble = ds_ensemble.sel(time=slice(timeslice[0],timeslice[1]))
 		ds_prior = ds_prior.sel(time=slice(timeslice[0],timeslice[1]))
@@ -222,8 +206,12 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,timeslice=None,outf
 		prior_axis_to_average = (1,2)
 	da = ds_ensemble[collectionName].sum(axis=axis_to_average) #sum up all emissions
 	enstime = np.array(ds_ensemble['time'])
-	ensmean = da.mean(axis=0)
-	enssd = da.std(axis=0)
+	if useLognormal:
+		ensmean = np.exp(np.mean(np.log(da),axis=0))
+		enssd = np.exp(np.std(np.log(da),axis=0))
+	else:
+		ensmean = da.mean(axis=0)
+		enssd = da.std(axis=0)
 	da_prior = ds_prior[collectionName].sum(axis=prior_axis_to_average) #sum up all emissions from the control run
 	priortime = np.array(ds_prior['time'])
 	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)

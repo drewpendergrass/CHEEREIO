@@ -28,7 +28,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
-def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis_std=None, plotcontrol=True,plotMonthStartOnly=True):
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, plotMonthStartOnly=True):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
 		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
@@ -50,8 +50,12 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis
 			hemcofield = hemcofield[:,ind,:,:]
 			if plotcontrol:
 				ctrlfield = ctrlfield[ind,:,:]
-		hemcofield_std = np.std(hemcofield,axis=0) #standard deviation across ensemble
-		hemcofield = np.mean(hemcofield,axis=0) #average across ensemble
+		if useLognormal: 
+			hemcofield_std = np.exp(np.std(np.log(hemcofield),axis=0)) #std of log will give the lognormal shape parameter; exponentiate back into emissions space. 
+			hemcofield = np.exp(np.mean(np.log(hemcofield),axis=0)) #average across ensemble
+		else:
+			hemcofield_std = np.std(hemcofield,axis=0) #standard deviation across ensemble
+			hemcofield = np.mean(hemcofield,axis=0) #average across ensemble
 		#Now hemcofield is of dim time, lat, lon
 		timelabels = [str(timeval)[0:13] for timeval in dates]
 		#Do the plotting.
@@ -77,7 +81,7 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis
 				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=True,minval = min_emis)
 
 
-def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
+def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, plotMonthStartOnly=True):
 	files = glob(f'{ppdir}/*_SCALEFACTOR.nc')
 	files.sort()
 	sf_names = [pts.split('/')[-1][0:-15] for pts in files]
@@ -92,7 +96,10 @@ def plotScaleFactor(m,lat,lon,ppdir, plotMonthStartOnly=True):
 			_, ind = np.unique(ym,return_index = True)
 			dates = dates[ind]
 			scalar = scalar[:,ind,:,:]
-		scalar = np.mean(scalar,axis=0) #average across ensemble
+		if useLognormal:
+			scalar = np.exp(np.mean(np.log(scalar),axis=0)) #average across ensemble
+		else:
+			scalar = np.mean(scalar,axis=0) #average across ensemble
 		timelabels = [str(timeval)[0:13] for timeval in dates]
 		#Make custom blue-white-red colorbar centered at one
 		cvals  = [0.0, 1.0, np.max([np.max(scalar),1.1])]

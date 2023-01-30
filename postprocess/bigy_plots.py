@@ -35,6 +35,7 @@ else:
 	min_emis_std_value_to_plot = None
 
 useControl=data['DO_CONTROL_RUN']=="true"
+lognormalErrors=data['lognormalErrors']=="true"
 anim_fps = int(data['animation_fps_scalingfactor'])
 
 if "postprocess_save_albedo" in data:
@@ -94,7 +95,7 @@ else:
 	plotMonthStartOnly=False 
 
 #Plot scale factor slices
-plotScaleFactor(m,gclat,gclon,pp_dir, plotMonthStartOnly=plotMonthStartOnly)
+plotScaleFactor(m,gclat,gclon,pp_dir, useLognormal = lognormalErrors, plotMonthStartOnly=plotMonthStartOnly)
 #Plot emission slices
 plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, min_emis=min_emis_value_to_plot,min_emis_std=min_emis_std_value_to_plot, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
 
