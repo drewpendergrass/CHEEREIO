@@ -58,7 +58,7 @@ CHEEREIO supports real-time filtering of input observations based on user settin
 
    Takes raw observations as read from file and a dictionary-based description of how to filter out bad observations, and returns the filtered raw observations with bad data removed.
 
-   :param dict OBSDATA: Raw observation data The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude" and one labeled "utctime". The "utctime" entry must be formatted by ISO 8601 data time format. ISO 8601 represents date and time by starting with the year, followed by the month, the day, the hour, the minutes, seconds and milliseconds. For example, 2020-07-10 15:00:00.000, represents the 10th of July 2020 at 3 p.m. Timezone is assumed to be UTC. For a good example on how to format OBSDATA, see the ``read_tropomi()`` or ``read_omi()`` functions in tropomi_tools and omi_tools respectively. 
+   :param dict OBSDATA: Raw observation data in dictionary form. The OBSDATA dictionary must have a numpy array labeled "longitude", one labeled "latitude" and one labeled "utctime". The "utctime" entry must be formatted by ISO 8601 data time format. ISO 8601 represents date and time by starting with the year, followed by the month, the day, the hour, the minutes, seconds and milliseconds. For example, 2020-07-10 15:00:00.000, represents the 10th of July 2020 at 3 p.m. Timezone is assumed to be UTC. For a good example on how to format OBSDATA, see the ``read_tropomi()`` or ``read_omi()`` functions in tropomi_tools and omi_tools respectively. 
    :param dict filterinfo: A dictionary describing the filters to be applied. The keys of the dictionary are called filter families and describe the observation type (e.g. OMI_NO2), while the value is a list with filter values specific to that observation type. For example, in the OMI_NO2 filter family, the solar zenith angle filter value is the first entry in the list.
    :return: The post-filtering version of the input dictionary ``OBSDATA``.
    :rtype: dict
@@ -66,7 +66,16 @@ CHEEREIO supports real-time filtering of input observations based on user settin
 The nearest_loc function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO uses the ``nearest_loc()`` function to match observation data with the GEOS-Chem grid. The corresponding index lists are used for (1) aggregating observation data to the GEOS-Chem grid, and (2) observation operator calculations.
+
+.. py:function:: nearest_loc(GC,OBSDATA)
+
+   Find the GEOS-Chem grid box and time indices which best correspond with real observation data.
+
+   :param DataSet GC: An xarray dataset which contains the combined GEOS-Chem model output. GC is provided by other CHEEREIO translators; users creating new observation operators can take it as a given. 
+   :param dict OBSDATA: Observation data in dictionary form. See :py:func:`apply_filters` for more details.
+   :return: Three NumPy arrays ``iGC``, ``jGC``, and ``tGC`` containing the spatial and temporal indices on the GEOS-Chem grid which match observations.
+   :rtype: List of NumPy arrays
 
 The getGCCols function
 ~~~~~~~~~~~~~
