@@ -200,7 +200,7 @@
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "True",
-	"PriorWeightinSFAverage" : "0.01",
+	"PriorWeightinSFAverage" : "0.03",
 	"comment021" : "**********************************************************************************",
 	"comment022" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment023" : "**********************************************************************************",
