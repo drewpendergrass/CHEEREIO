@@ -216,7 +216,7 @@
 			"transport_error":"0"
 		}
 	},
-	"AV_TO_GC_GRID" : "True",
+	"AV_TO_GC_GRID" : "False",
 	"SUPER_OBSERVATION_FUNCTION":{
 		"NO2_OMI":"default"
 	},
