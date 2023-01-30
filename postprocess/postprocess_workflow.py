@@ -37,6 +37,7 @@ else:
 nEnsemble = int(data['nEnsemble'])
 statevec = data['STATE_VECTOR_CONC']
 emisvec = list(data['CONTROL_VECTOR_EMIS'].keys())
+lognormalErrors=data['lognormalErrors']=="true"
 POSTPROCESS_START_DATE=datetime.strptime(data['POSTPROCESS_START_DATE'], "%Y%m%d")
 POSTPROCESS_END_DATE=datetime.strptime(data['POSTPROCESS_END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
@@ -97,7 +98,7 @@ if useControl:
 		pt.combineHemcoDiagControl(control_dir,pp_dir,timeperiod)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
-		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,useLognormal = lognormalErrors,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
 if "calc850" in sys.argv:

@@ -97,5 +97,5 @@ else:
 #Plot scale factor slices
 plotScaleFactor(m,gclat,gclon,pp_dir, useLognormal = lognormalErrors, plotMonthStartOnly=plotMonthStartOnly)
 #Plot emission slices
-plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, min_emis=min_emis_value_to_plot,min_emis_std=min_emis_std_value_to_plot, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
+plotEmissions(m,gclat,gclon,pp_dir,hemco_diags_to_process=hemco_diags_to_process, min_emis=min_emis_value_to_plot,min_emis_std=min_emis_std_value_to_plot, useLognormal = lognormalErrors, plotcontrol=useControl, plotMonthStartOnly=plotMonthStartOnly)
 
