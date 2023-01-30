@@ -28,7 +28,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
-def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, plotMonthStartOnly=True):
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, plotMonthStartOnly=True):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
 		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
@@ -75,10 +75,10 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,min_emis=None,min_emis
 				clim  = [np.min(hemcofield), np.max(hemcofield)]
 		cmap = plt.cm.jet
 		for i,dateval in enumerate(timelabels):
-			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim = clim, useLog=True,minval = min_emis)
-			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim = clim_std, useLog=True,minval = min_emis_std)
+			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim = clim, useLog=plotWithLogScale,minval = min_emis)
+			plotMap(m,lat,lon,hemcofield_std[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_std.png',clim = clim_std, useLog=plotWithLogScale,minval = min_emis_std)
 			if plotcontrol:
-				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=True,minval = min_emis)
+				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=plotWithLogScale,minval = min_emis)
 
 
 def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, plotMonthStartOnly=True):

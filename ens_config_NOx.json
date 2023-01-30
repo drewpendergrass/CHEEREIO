@@ -240,6 +240,7 @@
 		"EmisNO_Anthro",
 		"EmisNO2_Anthro"
 	],
+	"useLogScaleForEmissionsMaps" : "False",
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
