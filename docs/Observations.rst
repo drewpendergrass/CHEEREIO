@@ -22,8 +22,6 @@ In the below entries, we will briefly describe the functions and classes supplie
 The produceSuperObservationFunction function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
-
 In CHEEREIO, users can opt to aggregate observations together to the GEOS-Chem grid, rather than ingesting observations individually even if several separate observations are made in a GEOS-Chem grid cell for a given point in time. Using "super-observations" is helpful because it reduces the complexity of the LETKF calculation and can help control ensemble behavior in areas where there are dense observations. The one tricky bit is handling error -- errors are reduced when aggregating observations. That's where the produceSuperObservationFunction function comes in.
 
 .. py:function:: produceSuperObservationFunction(fname)
@@ -100,7 +98,34 @@ Observation operators commonly use the getGCCols function to grab GEOS-Chem colu
 The averageByGC function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO allows users to specify if they want observations to be aggregated to the GEOS-Chem grid (specified by setting ``AV_TO_GC_GRID`` to ``True`` in ``ens_config.json``). The :py:func:`averageByGC` function ensures that observational data are aggregated onto the GEOS-Chem grid; it also returns results in an ObsData object, which is the expected return type for the gcCompare() function in an observation operator.  
+
+The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed errors (relative or absolute) or individual observational errors supplied with observation files. 
+
+.. py:function:: averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,albedo_swir=None,albedo_nir=None,blended_albedo=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None)
+
+   Average observational data and other parameters onto the GEOS-Chem grid. Returns an ObsData object, which is compatible with the rest of the CHEEREIO workflow (i.e. expected output of gcCompare()).
+
+   :param array iGC: Index array output by :py:func:`nearest_loc`
+   :param array jGC: Index array output by :py:func:`nearest_loc`
+   :param array tGC: Index array output by :py:func:`nearest_loc`
+   :param DataSet GC: An xarray dataset which contains the combined GEOS-Chem model output. GC is provided by other CHEEREIO translators; users creating new observation operators can take it as a given.
+   :param array GCmappedtoobs: An array of simulated observations, output from an observation operator, of the same length as the observation data.
+   :param array obsvals: An array of observation data.
+   :param bool doSuperObs: True or False, should we reduce error when we aggregate observations together. Supplied by user settings. 
+   :param superObsFunction str: Name of the super observation function, fed into :py:func:`produceSuperObservationFunction`. Supplied by user settings.
+   :param array albedo_swir: An optional array of short wave infrared albedo from observations, of the same length as obsvals.
+   :param array albedo_nir: As with albedo_swir, but for near wave infrared albedo.
+   :param array blended_albedo: As with albedo_swir, but for blended albedo.
+   :param float prescribed_error: If working with prescribed errors, then this is either the percent or absolute error associated with the observational data.
+   :param str prescribed_error_type: If using prescribed errors, a string for "relative" or "absolute" denoting how ``prescribed_error`` should be interpreted (as percent or an absolute value). Supplied by user configuration settings.
+   :param array obsInstrumentError: If working with observational errors, an array of errors associated with each observation.
+   :param float modelTransportError: If using a super-observation function that accounts for model transport error, the transport error. Supplied by the user configuration settings.
+   :param array errorCorr: : If using a super-observation function that accounts for correlation between errors, the error correlation. Supplied by the user configuration settings.
+   :param array minError: If using a super-observation function that accounts for minimum error, the minimum error allowed for a specific observation. Supplied by the user configuration settings.
+   :return: An ObsData object containing the aggregated observations.
+   :rtype: ObsData
+   :raises ValueError: if the error information is specified incorrectly.
 
 .. _Observation_Translator:
 
