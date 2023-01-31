@@ -80,7 +80,22 @@ CHEEREIO uses the ``nearest_loc()`` function to match observation data with the 
 The getGCCols function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+Observation operators commonly use the getGCCols function to grab GEOS-Chem columns corresponding in space and time with observations. It returns data as a set of 2D arrays (with dimension index of observation, column) which can be used by subsequent observation operator functions. 
+
+.. py:function:: getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=False,GC_area=None)
+
+   Takes aggregated GEOS-Chem data and grabs columns corresponding with observations in space and time, stored as 2D arrays (with dimension index of observation, column). These GEOS-Chem columns are commonly used by observation operators for calculating simulated observations.
+
+   :param DataSet GC: An xarray dataset which contains the combined GEOS-Chem model output. GC is provided by other CHEEREIO translators; users creating new observation operators can take it as a given. 
+   :param dict OBSDATA: Observation data in dictionary form. See :py:func:`apply_filters` for more details.
+   :param str species: The species of interest, e.g. "CH4"
+   :param dict spc_config: The CHEEREIO ensemble configuration data, stored as a dictionary. This is provided by CHEEREIO.
+   :param bool returninds: True or False, should we return the three index fectors from :py:func:`nearest_loc` in addition to the GEOS-Chem columns.
+   :param bool returnStateMet: True or False, are we also going to subset meteorological data accompanying GEOS-Chem.
+   :param array GC_area: If we are using the grid cell areas, we supply them here (rare)
+   :return: A dictionary containing (1) GC_SPC, a 2D array containing GEOS-Chem columns of the species of interest corresponding with observations; (2) GC_P, a 2D array with GEOS-Chem pressure levels; (3) additional entries depending on if returnStateMet is True and/or GC_area is supplied. Indices can also be returned as a list if returninds is True.
+   :rtype: dict
+
 
 The averageByGC function
 ~~~~~~~~~~~~~
