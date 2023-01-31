@@ -28,7 +28,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
-def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, plotMonthStartOnly=True):
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, aggToMonthly=True):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
 		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
@@ -41,15 +41,9 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 			hemcofield = np.sum(hemcofield,axis=2) #ensemble gone, dim 0 is ens, dim 1 is time, dim 2 is lev. Sum up.
 			if plotcontrol:
 				ctrlfield = np.sum(hemcofield,axis=1) #dim 0 is time, dim 1 is lev.
-		if plotMonthStartOnly:
-			years = dates.astype('datetime64[Y]').astype(int) + 1970
-			months = dates.astype('datetime64[M]').astype(int) % 12 + 1
-			ym = (years*100) + months
-			_, ind = np.unique(ym,return_index = True)
-			dates = dates[ind]
-			hemcofield = hemcofield[:,ind,:,:]
-			if plotcontrol:
-				ctrlfield = ctrlfield[ind,:,:]
+		if aggToMonthly:
+			dates,scalar = agg_to_monthly(dates, hemcofield)
+			_,ctrlfield = agg_to_monthly(dates, ctrlfield)
 		if useLognormal: 
 			hemcofield_std = np.exp(np.std(np.log(hemcofield),axis=0)) #std of log will give the lognormal shape parameter; exponentiate back into emissions space. 
 			hemcofield = np.exp(np.mean(np.log(hemcofield),axis=0)) #average across ensemble
@@ -81,7 +75,7 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=plotWithLogScale,minval = min_emis)
 
 
-def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, plotMonthStartOnly=True):
+def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True):
 	files = glob(f'{ppdir}/*_SCALEFACTOR.nc')
 	files.sort()
 	sf_names = [pts.split('/')[-1][0:-15] for pts in files]
@@ -89,13 +83,8 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, plotMonthStartOnly=Tr
 		ds = xr.load_dataset(file)
 		dates = ds['time'].values
 		scalar = ds['Scalar'].values
-		if plotMonthStartOnly:
-			years = dates.astype('datetime64[Y]').astype(int) + 1970
-			months = dates.astype('datetime64[M]').astype(int) % 12 + 1
-			ym = (years*100) + months
-			_, ind = np.unique(ym,return_index = True)
-			dates = dates[ind]
-			scalar = scalar[:,ind,:,:]
+		if aggToMonthly:
+			dates,scalar = agg_to_monthly(dates, scalar)
 		if useLognormal:
 			scalar = np.exp(np.mean(np.log(scalar),axis=0)) #average across ensemble
 		else:
@@ -110,3 +99,30 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, plotMonthStartOnly=Tr
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=[0,np.max([np.max(scalar),1.1])],cmap=cmap)
 
+def agg_to_monthly(dates, to_agg):
+	agg_dim = len(np.shape(to_agg))
+	years = dates.astype('datetime64[Y]').astype(int) + 1970
+	months = dates.astype('datetime64[M]').astype(int) % 12 + 1
+	ym = (years*100) + months
+	_, ind = np.unique(ym,return_index = True)
+	dates = dates[ind]
+	shape = np.shape(to_agg)
+	if agg_dim == 3:
+		shape[0] = len(ind)
+	else:
+		shape[1] = len(ind)
+	to_return = np.zeros(shape)
+	for i in range(len(ind)):
+		if agg_dim == 3:
+			if i == len(ind)-1:
+				subset = to_agg[ind[i]:,:,:]
+			else:
+				subset = to_agg[ind[i]:ind[i+1],:,:]
+			to_return[i,:,:] = np.mean(subset,axis=0)
+		else:
+			if i == len(ind)-1:
+				subset = to_agg[:,ind[i]:,:,:]
+			else:
+				subset = to_agg[:,ind[i]:ind[i+1],:,:]
+			to_return[:,i,:,:] = np.mean(subset,axis=1)
+	return [dates,to_return]
