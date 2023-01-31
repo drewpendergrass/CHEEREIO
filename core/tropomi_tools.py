@@ -334,7 +334,8 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 				additional_args_avgGC['blended_albedo'] = TROPOMI['blended_albedo']
 			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
-			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],TROPOMI['utctime'])
+			timevals = GC.time.values[t]
+			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],timevals)
 			if saveAlbedo:
 				toreturn.addData(swir_av=TROPOMI['albedo_swir'],nir_av=TROPOMI['albedo_nir'],blended_av=TROPOMI['blended_albedo'])
 			if doErrCalc and useObserverError:

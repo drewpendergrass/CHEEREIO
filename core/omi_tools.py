@@ -224,7 +224,8 @@ class OMI_Translator(obsop.Observation_Translator):
                         additional_args_avgGC['errorCorr'] = errorCorr
                 toreturn = obsop.averageByGC(i,j,t,GC,GC_SCD,OMI_SCD,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
             else:
-                toreturn = obsop.ObsData(GC_SCD,OMI_SCD,OMI['latitude'],OMI['longitude'],OMI['utctime'])
+                timevals = GC.time.values[t]
+                toreturn = obsop.ObsData(GC_SCD,OMI_SCD,OMI['latitude'],OMI['longitude'],timevals)
                 if doErrCalc and useObserverError:
                     toreturn.addData(err_av=OMI['Error']*OMI['AmfTrop'])
             return toreturn
