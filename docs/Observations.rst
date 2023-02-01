@@ -127,6 +127,25 @@ The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed e
    :rtype: ObsData
    :raises ValueError: if the error information is specified incorrectly.
 
+.. _ObsData:
+
+The ObsData class
+~~~~~~~~~~~~~
+
+This section is under construction, check back later!
+
+.. py:class:: ObsData(gccol,obscol,obslat,obslon,obstime,**additional_data)
+
+   A simple class for storing labeled data output by observation operators. 
+
+   :var array gccol: A NumPy array which contains GEOS-Chem model output mapped onto corresponding observations (i.e. passed through an operation operator. This is sometimes a 2D array containing all ensemble columns. 
+   :var array obscol: An array containing observational data.
+   :var array obslat: An array containing latitude of observations.
+   :var array obslon: An array containing longitude of observations.
+   :var array obstime: An array containing times of observations.
+   :var dict additional_data: Additional data supplied to the constructor as keyword arguments are stored in dictionary form in this variable.
+
+
 .. _Observation_Translator:
 
 The Observation_Translator class
@@ -134,12 +153,6 @@ The Observation_Translator class
 
 This section is under construction, check back later!
 
-.. _ObsData:
-
-The ObsData class
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
 
 Existing observation toolkits
 -------------
