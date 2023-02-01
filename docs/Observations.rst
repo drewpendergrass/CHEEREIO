@@ -152,6 +152,32 @@ This section is under construction, check back later!
       :return: The gccol attribute of ObsData.
       :rtype: array
 
+   .. py:method:: ObsData.setGCCol(gccol)
+
+      Sets the gccol attribute to the input argument
+
+      :param array gccol: Set ``gccol`` attribute to this value.
+
+   .. py:method:: ObsData.getObsCol()
+
+      Returns the obscol attribute
+
+      :return: The obscol attribute of ObsData.
+      :rtype: array
+
+   .. py:method:: ObsData.setObsCol(gccol)
+
+      Sets the obscol attribute to the input argument
+
+      :param array obscol: Set ``obscol`` attribute to this value.
+
+   .. py:method:: ObsData.getCols()
+
+      Returns the gccol and obscol attributes as a list
+
+      :return: The gccol and obscol attributes of ObsData as a list in that order.
+      :rtype: list
+
 
 
 
