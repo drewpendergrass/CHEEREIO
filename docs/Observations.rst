@@ -132,7 +132,7 @@ The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed e
 The ObsData class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+The ObsData class is a simple data storage class, used by CHEEREIO to handled data output from observation operators. It operates very similarly to a dictionary, but forces expected data to be present and allows users to flexibly add additional data (like albedo) which is present for some but not other operators. 
 
 .. py:class:: ObsData(gccol,obscol,obslat,obslon,obstime,**additional_data)
 
