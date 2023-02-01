@@ -144,11 +144,11 @@ This section is under construction, check back later!
    :var array obslon: An array containing longitude of observations.
    :var array obstime: An array containing times of observations.
    :var dict additional_data: Additional data supplied to the constructor as keyword arguments are stored in dictionary form in this variable.
-   :method getGCCol: :py:method:`getGCCol`
+   :meth getGCCol: See :py:func:`getGCCol`
 
 The ObsData class has the following methods
 
-.. py:method:: getGCCol()
+.. py:function:: getGCCol()
 
    Returns the gccol attribute
 
