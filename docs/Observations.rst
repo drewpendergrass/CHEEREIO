@@ -178,6 +178,33 @@ This section is under construction, check back later!
       :return: The gccol and obscol attributes of ObsData as a list in that order.
       :rtype: list
 
+   .. py:method:: ObsData.getLatLon()
+
+      Returns the obslat and obslon attributes as a list
+
+      :return: The obslat and obslon attributes of ObsData as a list in that order.
+      :rtype: list
+
+   .. py:method:: ObsData.getObsTime()
+
+      Returns the obstime attribute
+
+      :return: The obstime attribute of ObsData.
+      :rtype: array
+
+   .. py:method:: ObsData.addData(**data_to_add)
+
+      Add custom data fields to ObsData
+
+      :param array data_to_add: Add data by keyword argument to the ``additional_data`` dictionary attribute as key-value pairs.
+
+   .. py:method:: ObsData.getDataByKey(key)
+
+      Add custom data fields to ObsData
+
+      :param str_or_list data_to_add: Get data from the ``additional_data`` dictionary attribute by key. If supplying a list of keys, it will return a list of values corresponding to each key.
+      :return: The array requested by key, or a list of arrays requested by key, from the ``additional_data`` dictionary attribute.
+      :rtype: array_or_list
 
 
 
