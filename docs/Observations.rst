@@ -206,14 +206,37 @@ The ObsData class is a simple data storage class, used by CHEEREIO to handled da
       :return: The array requested by key, or a list of arrays requested by key, from the ``additional_data`` dictionary attribute.
       :rtype: array,list
 
-
-
 .. _Observation_Translator:
 
 The Observation_Translator class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+The Observation_Translator class is TKTKTKT. 
+
+.. py:class:: Observation_Translator(verbose)
+
+   All observation operators compatible with CHEEREIO inherit from this abstract class and implement the two required methods ``getObservations()`` and ``gcCompare()``. 
+
+   :attr int verbose: Verbosity of output; 1 is default, higher values print more statements during calculation. 
+   :attr dict spc_config: Ensemble configuration data, from ``ens_config.json``.
+   :attr str scratch: Path to the ensemble scratch folder.
+
+   .. py:method:: Observation_Translator.getObservations(specieskey,timeperiod, interval=None, includeObsError=False))
+
+      TKTKT
+
+      :return: Observation data formatted as a dictionary.
+      :rtype: dict
+
+   .. py:method:: Observation_Translator.gcCompare(specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None))
+
+      TKTKT
+
+      :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
+      :rtype: ObsData
+
+
+
 
 
 Existing observation toolkits
