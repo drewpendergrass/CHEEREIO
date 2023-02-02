@@ -291,12 +291,23 @@ This section is under construction, check back later!
 Workflow to add a new observation operator
 -------------
 
-This section is under construction, check back later!
+Because of CHEEREIO's modular design, adding a new observation operator for an arbitrary new observation type (like a new satellite instrument) is straightforward. Here we walk through the process to write a new CHEEREIO observation operator step-by-step. You can always look at existing tools for an additional model to follow (e.g. :ref:`TROPOMI tools` in ``core/tropomi_tools.py`` and :ref:`OMI tools` in ``core/omi_tools.py``).
 
 (1) Create a class inheriting from Observation_Translator 
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+Create a new file in the ``core/`` folder to contain your observation operator and whatever support methods you need to write. At a minimum, you will need to import the ``observation_operators`` module, because all observation operators compatible with CHEEREIO need to inherit from :py:class:`Observation_Translator`.
+
+Suppose we were writing an operator for surface NO2 monitors. Here's how your new ``surface_no2_translator.py`` file might start:
+
+.. code-block:: python
+
+	import observation_operators as obsop
+
+	class Surface_NO2_Translator(obsop.Observation_Translator):
+		def __init__(self,verbose=1):
+			super().__init__(verbose)
+
 
 (2) Implement getObservations() function 
 ~~~~~~~~~~~~~
