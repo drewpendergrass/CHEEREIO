@@ -537,34 +537,93 @@ Scaling factor settings
 LETKF settings
 ~~~~~~~~~~~~~
 
-* REGULARIZING_FACTOR_GAMMA: A dictionary of regularization factors, with a key corresponding with each key in ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`.
-* OBS_ERROR: An dictionary of error information, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. The value is interpreted as one of three categories: "relative", "absolute", or "product". This information represents uncertainty in observations. If error is relative, it is given as a decimal (0.1 means 10% relative error). If error is absolute, it is given as the same units as the observations are in (CHEEREIO will square these values for the covariance matrix). If error is "product," then CHEEREIO uses the error from the observation product. In the product case, the number recorded under OBS_ERROR will not be used. For clarity, only diagonal observational covariance matrices are supported at this time.
-* OBS_ERROR_TYPE: A dictionary of error types, with values given as strings reading "relative",  "absolute", or "product", and with keys corresponding to each key in ``OBSERVED_SPECIES``. This tells CHEEREIO how to interpret the error data types, as described above.
-* OBS_ERROR_SELF_CORRELATION: A dictionary of correlations between errors in data samples, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. This value is used to reduce error if the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"). More on this below in the ``AV_TO_GC_GRID`` entry. 
-* MIN_OBS_ERROR: A dictionary of minimum possible errors, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. If the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"), this value gives the minimum possible error allowable upon error reduction. More on this below in the ``AV_TO_GC_GRID`` entry. 
-* OTHER_OBS_ERROR_PARAMETERS: A dictionary of dictionaries, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a value that itself is a dictionary with additional settings and their values. At this time, the only setting that is applied using this entry is called ``transport_error``, which is used to account for perfectly correlated model transport errors when the user aggregates multiple observations together onto the GEOS-Chem grid ("super-observations"). More information on this in the the ``AV_TO_GC_GRID`` entry. Below is valid syntax for this setting:
-::
+.. option:: REGULARIZING_FACTOR_GAMMA
+	
+	A dictionary of regularization factors, with a key corresponding with each key in ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`.
 
-	"OTHER_OBS_ERROR_PARAMETERS":{
-		"CH4_TROPOMI":{
-			"transport_error":"6.1"
-		}
-	},
+.. option:: OBS_ERROR
+	
+	An dictionary of error information, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. The value is interpreted as one of three categories: "relative", "absolute", or "product". This information represents uncertainty in observations. If error is relative, it is given as a decimal (0.1 means 10% relative error). If error is absolute, it is given as the same units as the observations are in (CHEEREIO will square these values for the covariance matrix). If error is "product," then CHEEREIO uses the error from the observation product. In the product case, the number recorded under OBS_ERROR will not be used. For clarity, only diagonal observational covariance matrices are supported at this time.
 
-* AV_TO_GC_GRID: "True" or "False", should observations be averaged to the GEOS-Chem grid? If "false", the above three entries and the below entry are all ignored. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
+.. option:: OBS_ERROR_TYPE
+	
+	A dictionary of error types, with values given as strings reading "relative",  "absolute", or "product", and with keys corresponding to each key in ``OBSERVED_SPECIES``. This tells CHEEREIO how to interpret the error data types, as described above.
 
-   * "sqrt": A modified version of the familiar square root law, where if we aggregate :math:`n` observations (indexed by :math:`i`) with errors :math:`\sigma_i` together, the new error is :math:`\bar{\sigma}/\sqrt{n}` where :math:`\bar{\sigma}` is the mean of the :math:`\sigma_i`. The modification accounts for correlations :math:`c` between errors (e.g. due to correlated retrieval errors from shared surface type or similar albedo), and for a user-specified minimum error :math:`\sigma_{\min}`. Thus the equation that is actually applied is given by :math:`\max\left[\left(\bar{\sigma}\cdot\sqrt{\frac{1-c}{n}+c}\right),\sigma_{\min}\right]`. The correlation :math:`c` is taken from ``OBS_ERROR_SELF_CORRELATION`` with default value 0, and the minimum error :math:`\sigma_{\min}` is taken from ``MIN_OBS_ERROR`` with default value 0 (i.e. the normal square root law).
-   * "default": As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irriducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` etnry. 
-   * "constant": No error reduction applied. In other words, no matter how many observations are averaged, this function just returns :math:`\bar{\sigma}`. 
+.. option:: OBS_ERROR_SELF_CORRELATION
+	
+	A dictionary of correlations between errors in data samples, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. This value is used to reduce error if the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"). More on this below in the ``AV_TO_GC_GRID`` entry. 
 
-* SUPER_OBSERVATION_FUNCTION: A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the ``AV_TO_GC_GRID`` entry. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
-* INFLATION_FACTOR: :math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
-* ASSIM_TIME: Length in hours of assimilation window. The assimilation window refers to the period in which GEOS-Chem is run and observations are accumulated; the data assimilation update is calculated in one go within this window. The data assimilation literature contains extensive discussion of this concept.
-* MAXNUMOBS: Maximum number of observations used in a column assimilation calculation. If the number of observations available is greater than this value, then CHEEREIO will randomly throw out observations until only ``MAXNUMOBS`` remain.
-* MINNUMOBS: Minimum number of observations for a column assimilation calculation to be performed. If the number of observations is below this number, no assimilation is calculated and the posterior is set to the prior.
-* LOCALIZATION_RADIUS_km: When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
-* AveragePriorAndPosterior: "True" or "False", should the posterior be set to a weighted average of the prior and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinPriorPosteriorAverage`` in the next setting.
-* PriorWeightinPriorPosteriorAverage: The prior weight if averaging with the posterior from the LETKF. A value between 0 and 1.
+.. option:: MIN_OBS_ERROR
+	
+	 A dictionary of minimum possible errors, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. If the user would like to aggregate multiple observations together onto the GEOS-Chem grid ("super-observations"), this value gives the minimum possible error allowable upon error reduction. More on this below in the ``AV_TO_GC_GRID`` entry.
+
+.. option:: OTHER_OBS_ERROR_PARAMETERS
+	
+	A dictionary of dictionaries, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a value that itself is a dictionary with additional settings and their values. At this time, the only setting that is applied using this entry is called ``transport_error``, which is used to account for perfectly correlated model transport errors when the user aggregates multiple observations together onto the GEOS-Chem grid ("super-observations"). More information on this in the the ``AV_TO_GC_GRID`` entry. Below is valid syntax for this setting:
+	::
+
+		"OTHER_OBS_ERROR_PARAMETERS":{
+			"CH4_TROPOMI":{
+				"transport_error":"6.1"
+			}
+		},
+
+.. option:: AV_TO_GC_GRID
+	
+	"True" or "False", should observations be averaged to the GEOS-Chem grid? If "false", the above three entries and the below entry are all ignored. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
+
+	.. option:: sqrt
+
+		A modified version of the familiar square root law, where if we aggregate :math:`n` observations (indexed by :math:`i`) with errors :math:`\sigma_i` together, the new error is :math:`\bar{\sigma}/\sqrt{n}` where :math:`\bar{\sigma}` is the mean of the :math:`\sigma_i`. The modification accounts for correlations :math:`c` between errors (e.g. due to correlated retrieval errors from shared surface type or similar albedo), and for a user-specified minimum error :math:`\sigma_{\min}`. Thus the equation that is actually applied is given by :math:`\max\left[\left(\bar{\sigma}\cdot\sqrt{\frac{1-c}{n}+c}\right),\sigma_{\min}\right]`. The correlation :math:`c` is taken from ``OBS_ERROR_SELF_CORRELATION`` with default value 0, and the minimum error :math:`\sigma_{\min}` is taken from ``MIN_OBS_ERROR`` with default value 0 (i.e. the normal square root law).
+
+	.. option:: default
+
+		As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irriducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` etnry.
+
+	.. option:: constant
+
+		No error reduction applied. In other words, no matter how many observations are averaged, this function just returns :math:`\bar{\sigma}
+
+.. option:: SUPER_OBSERVATION_FUNCTION
+	
+	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the ``AV_TO_GC_GRID`` entry. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
+
+.. option:: INFLATION_FACTOR
+	
+	:math:`\rho-1` from Hunt et. al. (2007). A small number (start with something between 0 and 0.1 and slowly increase according to testing) that inflates the ensemble range. In ensemble Kalman filters, uncertainty usually decreases too quickly and must manually be reinflated.
+
+.. option:: ASSIM_TIME
+	
+	Length in hours of assimilation window. The assimilation window refers to the period in which GEOS-Chem is run and observations are accumulated; the data assimilation update is calculated in one go within this window. The data assimilation literature contains extensive discussion of this concept.
+
+.. option:: MAXNUMOBS
+	
+	Maximum number of observations used in a column assimilation calculation. If the number of observations available is greater than this value, then CHEEREIO will randomly throw out observations until only ``MAXNUMOBS`` remain.
+
+.. option:: MINNUMOBS
+	
+	Minimum number of observations for a column assimilation calculation to be performed. If the number of observations is below this number, no assimilation is calculated and the posterior is set to the prior.
+
+.. option:: LOCALIZATION_RADIUS_km
+	
+	When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
+
+.. option:: AveragePriorAndPosterior
+	
+	"True" or "False", should the posterior be set to a weighted average of the prior and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinPriorPosteriorAverage`` in the next setting.
+
+.. option:: PriorWeightinPriorPosteriorAverage
+	
+	The prior weight if averaging with the posterior from the LETKF. A value between 0 and 1.
+
+.. option:: AverageScaleFactorPosteriorWithPrior
+	
+	"True" or "False", should the posterior scaling factors be set to a weighted average of the prior (i.e. 1) and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinSFAverage`` in the next setting.
+
+.. option:: PriorWeightinSFAverage
+	
+	The prior weight if averaging scaling factors with the posterior from the LETKF. A value between 0 and 1.
+
 
 Postprocessing settings
 ~~~~~~~~~~~~~
