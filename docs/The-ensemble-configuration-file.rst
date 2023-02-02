@@ -75,87 +75,166 @@ Basic GEOS-Chem and ensemble settings
 
 The first section of the ``ens_config.json`` file (i.e. between the first two comments) mostly controls settings analagous to those set during normal GEOS-Chem run directory creation. However, there are a few unique options in this setting particular to CHEEREIO. We'll consider these one-by-one.
 
-.. list-table::
-	:widths: 25, 75
+.. option:: RES
+	
+	The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user. If there is enough interest I will add more automated support in a later CHEEREIO update. 
 
-	* - ``RES`` 
-	  - The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user. If there is enough interest I will add more automated support in a later CHEEREIO update. **Warning: once the CHEEREIO ensemble is installed, the resolution cannot be changed without re-installing the ensemble.** CHEEREIO sets up a number of LETKF-specific routines assuming a specific resolution (including the parallelization design), and will fail if the resolution is adjusted after this setup is complete.
-	* - ``met_name``
-	  - Meteorology (chosen from MERRA2, GEOSFP, or ModelE2.1).
-	* - ``LEVS`` 
-	  - Number of levels (47 or 72).
-	* - ``NEST`` 
-	  - Is this a nested grid simulation? "T" or "F".
-	* - ``REGION``
-	  - Two letter region code for nested grid, or empty string ("") if not.
-	* - ``ASSIM_PATH``
-	  - **Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.** Again, when in doubt follow the provided templates.
-	* - ``RUN_NAME`` 
-	  - The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on).
-	* - ``MY_PATH``
-	  - Path to the directory where ensembles will be created. A folder with name ``RUN_NAME`` will be created inside.
-	* - ``DATA_PATH``
-	  - Path to where external GEOS-Chem data is located. This can be an empty string if GEOS-Chem has already been configured on your machine (it is automatically overwritten).
-	* - ``CH4_HEMCO_ROOT``
-	  - If the subsequent option, "USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config", is set to "True", then this is the root folder where emissions and other input files for the methane specialty simulation are located. In this case, a special CHEEREIO ``HEMCO_Config.rc`` template from the ``templates/`` folder in the code directory is used. *Note: this option is functional but currently causes GEOS-Chem crashes with an unknown cause (DP, 2022/03/09).*
-	* - ``RESTART_FILE``
-	  - Full path to the restart file for the simulation. If in the initialization process you selected ``SetupSpinupRun=true``, then this restart file will be used for the classic spin up routine (getting realistic atmospheric conditions for the entire ensemble). Otherwise, this will be the restart file used to initialize all ensemble members.
-	* - ``BC_FILES``
-	  - Full path to the boundary condition files for the simulation if you are using a nested grid (empty string otherwise).
-	* - ``sim_name``
-	  - Simulation type. Valid options are "fullchem", "aerosol", "CH4", "CO2", "Hg", "POPs", "tagCH4", "tagCO", "tagO3", and "TransportTracers".
-	* - ``chemgrid``
-	  - Options are "trop+strat" and "trop_only".
-	* - ``sim_extra_option``
-	  - Options are "none", "benchmark", "complexSOA", "complexSOA_SVPOA", "marinePOA", "aciduptake", "TOMAS15", "TOMAS40", "APM", "RRTMG", "BaP", "PHE", and "PYR". Depending on the simulation type only some will be available. Consult the GEOS-Chem documation for more information.
-	* - ``DO_SPINUP``
-	  - Would you like CHEEREIO to set up a spinup directory for you? "true" or "false". The ensemble will automatically start from the end restart file produced by this run. Note this option is for the standard GEOS-Chem spinup (run once for the whole ensemble). Note that if this is activated, you have to run the ``setup_ensemble.sh`` utility with the ``SetupSpinupRun`` switch set to ``true``.
-	* - ``SPINUP_START``
-	  - Start date for spinup (YYYYMMDD). Empty string if no spinup.
-	* - ``SPINUP_END``
-	  - End date for spinup (YYYYMMDD).
-	* - ``DO_CONTROL_RUN``
-	  - The control run is a normal GEOS-Chem simulation without any assimilation. The output of this simulation can be compared with the LETKF results in the postprocessing workflow. Set to "true" if using a control run (most users). There are two ways of doing control runs in CHEEREIO, which are detailed in the next entry on this page and on :ref:`control simulation` page.
-	* - ``DO_CONTROL_WITHIN_ENSEMBLE_RUNS``
-	  - CHEEREIO has two ways of running a control simulation. The preferred method, which is activated by setting this option to true, is to run the control simulation as an additional ensemble member with label 0 (ensemble members used for assimilation are numbered starting at 1). This allows the control simulation to match non-assimilation adjustments performed on the ensemble, such as scaling concentrations to be non-biased relative to observations. The control directory in this case is created automatically when the ``setup_ensemble.sh`` utility is used to create the ensemble. If this option is set to false, and DO_CONTROL_RUN is set to true, then the control simulation is created as an additional run directory at the top directory level (analagous to :ref:`spinup simulation`). This keeps the control simulation fully separate from the ensemble and any non-assimilation adjustments that are performed. In this case, you have to run the ``setup_ensemble.sh`` utility with the ``SetupControlRun`` switch set to ``true`` to create the control run directory. More information is available on :ref:`control simulation` page.
-	* - ``CONTROL_START``
-	  - Start date for the control run (YYYYMMDD).
-	* - ``CONTROL_END``
-	  - End date for the control run (YYYYMMDD).
-	* - ``DO_ENS_SPINUP``
-	  - Do you want to use a separate job array to spin up your GEOS-Chem ensemble with randomized scaling factors applied to each ensemble member? "true" or "false". If set to "true", shell scripts entitled ``run_ensemble_spinup_simulations.sh`` and ``run_ensspin.sh`` are installed in the ``ensemble_runs/`` folder. The user should then execute ``run_ensspin.sh`` to spin up the ensemble and create variability between ensemble members before executing ``run_ens.sh`` in the normal run procedure. For more information on the ensemble spinup process, see :ref:`Run Ensemble Spinup Simulations`.
-	* - ``ENS_SPINUP_FROM_BC_RESTART``
-	  - It is possible to start the ensemble spinup procedure using a boundary condition file, rather than a traditional restart file. Set to "true" if using a BC file, and "false" if using a normal restart file to start the ensemble spinup.
-	* - ``ENS_SPINUP_START``
-	  - Start date for ensemble spinup run (YYYYMMDD).
-	* - ``ENS_SPINUP_END``
-	  - End date for ensemble spinup run (YYYYMMDD).
-	* - ``START_DATE``
-	  - Start date for main ensemble data assimilation run (YYYYMMDD).
-	* - ``ASSIM_START_DATE``
-	  - Date where assimilation begins (YYYYMMDD). This option allows you to run the first assimilation period for an extra long time (although the assimilation window remains the same), effectively providing an ensemble-wide spinup. For more information on this ensemble spinup option, see :ref:`Run Ensemble Spinup Simulations`. If you have set ``DO_ENS_SPINUP`` to ``true``, then you should set this date to be one assimilation window later than ``START_DATE``.
-	* - ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD``
-	  - At the end of the first assimilation period, rather than doing the full LETKF calculation, CHEEREIO can scale the ensemble mean so that it matches the observational mean. This is done because if the model is biased relative to observations the LETKF will perform suboptimal updates. Set to "true" to do this scaling (recommended) or "false" to do the usual LETKF calculation. For more information, see :ref:`Simple scale`.
-	* - ``END_DATE``
-	  - End date for ensemble run (YYYYMMDD).
-	* - ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD``
-	  - At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough. If this option is set to "true", then CHEEREIO will multiply the standard deviation of the ensemble after ensemble spinup is complete by the factor given in ``SPREAD_AMPLIFICATION_FACTOR``. This spread amplification is done after the first assimilation period, so it will work with either spinup method. For more information, see :ref:`Spread amplification`.
-	* - ``SPREAD_AMPLIFICATION_FACTOR``
-	  - If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period. For more information on the burn-in period, see :ref:`Burn in period`.
-	* - ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD``
-	  - Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
-	* - ``BURN_IN_END``
-	  - If ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` is set to ``true``, then this is the date (YYYYMMDD) when the burn-in period ends
-	* - ``POSTPROCESS_START_DATE``
-	  - The date when the postprocessing script should start (YYYYMMDD). This should always be at least one assimilation window away from ``START_DATE``. If you are using a burn-in period, you can set this for after the burn-in period ends to ensure that all your analysis discards this period.
-	* - ``POSTPROCESS_END_DATE``
-	  - The date when the postprocessing script should end (YYYYMMDD). Usually the same as ``END_DATE``, though the user can change the postprocess start and end dates to fit whatever application they are interested in.
-	* - ``nEnsemble``
-	  - Number of ensemble members. 32 or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
-	* - ``SIMULATE_NATURE``
-	  - *Deprecated: will be removed before official release (DP, 2022/03/09)*. End users should leave this set to "false", as this was used for testing in early CHEEREIO development. 
-	* - ``verbose``
-	  - Amount of information to print out as the ensemble runs. 1 is the default. 0 supresses most output, 2 is useful for basic debugging, and 3 for intense debugging. 
+	.. attention::
+
+		**Once the CHEEREIO ensemble is installed, the resolution cannot be changed without re-installing the ensemble.** CHEEREIO sets up a number of LETKF-specific routines assuming a specific resolution (including the parallelization design), and will fail if the resolution is adjusted after this setup is complete.
+
+.. option:: met_name
+	
+	Meteorology (chosen from MERRA2, GEOSFP, or ModelE2.1).
+
+.. option:: LEVS
+	
+	Number of levels (47 or 72).
+
+.. option:: NEST
+	
+	Is this a nested grid simulation? "T" or "F".
+
+.. option:: REGION
+	
+	Two letter region code for nested grid, or empty string ("") if not.
+
+.. option:: ASSIM_PATH
+	
+	**Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.** Again, when in doubt follow the provided templates.
+
+.. option:: RUN_NAME
+	
+	The name of the CHEEREIO ensemble run (will be the name of the folder containing the ensemble, template run directory, temporary files, and so on).
+
+.. option:: MY_PATH
+	
+	Path to the directory where ensembles will be created. A folder with name ``RUN_NAME`` will be created inside.
+
+.. option:: DATA_PATH
+	
+	Path to where external GEOS-Chem data is located. This can be an empty string if GEOS-Chem has already been configured on your machine (it is automatically overwritten).
+
+.. option:: CH4_HEMCO_ROOT
+	
+	If the subsequent option, "USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config", is set to "True", then this is the root folder where emissions and other input files for the methane specialty simulation are located. In this case, a special CHEEREIO ``HEMCO_Config.rc`` template from the ``templates/`` folder in the code directory is used. 
+
+	.. attention::
+
+		This option is functional but currently causes GEOS-Chem crashes with an unknown cause (DP, 2022/03/09).
+
+.. option:: RESTART_FILE
+	
+	Full path to the restart file for the simulation. If in the initialization process you selected ``SetupSpinupRun=true``, then this restart file will be used for the classic spin up routine (getting realistic atmospheric conditions for the entire ensemble). Otherwise, this will be the restart file used to initialize all ensemble members.
+
+.. option:: BC_FILES
+	
+	Full path to the boundary condition files for the simulation if you are using a nested grid (empty string otherwise).
+
+.. option:: sim_name
+	
+	Simulation type. Valid options are "fullchem", "aerosol", "CH4", "CO2", "Hg", "POPs", "tagCH4", "tagCO", "tagO3", and "TransportTracers".
+
+.. option:: chemgrid
+	
+	Options are "trop+strat" and "trop_only".
+
+.. option:: sim_extra_option
+	
+	Options are "none", "benchmark", "complexSOA", "complexSOA_SVPOA", "marinePOA", "aciduptake", "TOMAS15", "TOMAS40", "APM", "RRTMG", "BaP", "PHE", and "PYR". Depending on the simulation type only some will be available. Consult the GEOS-Chem documation for more information.
+
+.. option:: DO_SPINUP
+	
+	Would you like CHEEREIO to set up a spinup directory for you? "true" or "false". The ensemble will automatically start from the end restart file produced by this run. Note this option is for the standard GEOS-Chem spinup (run once for the whole ensemble). Note that if this is activated, you have to run the ``setup_ensemble.sh`` utility with the ``SetupSpinupRun`` switch set to ``true``.
+
+.. option:: SPINUP_START
+	
+	Start date for spinup (YYYYMMDD). Empty string if no spinup.
+
+.. option:: SPINUP_END
+	
+	End date for spinup (YYYYMMDD).
+
+.. option:: DO_CONTROL_RUN
+	
+	The control run is a normal GEOS-Chem simulation without any assimilation. The output of this simulation can be compared with the LETKF results in the postprocessing workflow. Set to "true" if using a control run (most users). There are two ways of doing control runs in CHEEREIO, which are detailed in the next entry on this page and on :ref:`control simulation` page.
+
+.. option:: DO_CONTROL_WITHIN_ENSEMBLE_RUNS
+	
+	CHEEREIO has two ways of running a control simulation. The preferred method, which is activated by setting this option to true, is to run the control simulation as an additional ensemble member with label 0 (ensemble members used for assimilation are numbered starting at 1). This allows the control simulation to match non-assimilation adjustments performed on the ensemble, such as scaling concentrations to be non-biased relative to observations. The control directory in this case is created automatically when the ``setup_ensemble.sh`` utility is used to create the ensemble. If this option is set to false, and DO_CONTROL_RUN is set to true, then the control simulation is created as an additional run directory at the top directory level (analagous to :ref:`spinup simulation`). This keeps the control simulation fully separate from the ensemble and any non-assimilation adjustments that are performed. In this case, you have to run the ``setup_ensemble.sh`` utility with the ``SetupControlRun`` switch set to ``true`` to create the control run directory. More information is available on :ref:`control simulation` page.
+
+.. option:: CONTROL_START
+	
+	Start date for the control run (YYYYMMDD).
+
+.. option:: CONTROL_END
+	
+	End date for the control run (YYYYMMDD).
+
+.. option:: DO_ENS_SPINUP
+	
+	Do you want to use a separate job array to spin up your GEOS-Chem ensemble with randomized scaling factors applied to each ensemble member? "true" or "false". If set to "true", shell scripts entitled ``run_ensemble_spinup_simulations.sh`` and ``run_ensspin.sh`` are installed in the ``ensemble_runs/`` folder. The user should then execute ``run_ensspin.sh`` to spin up the ensemble and create variability between ensemble members before executing ``run_ens.sh`` in the normal run procedure. For more information on the ensemble spinup process, see :ref:`Run Ensemble Spinup Simulations`.
+
+.. option:: ENS_SPINUP_FROM_BC_RESTART
+	
+	It is possible to start the ensemble spinup procedure using a boundary condition file, rather than a traditional restart file. Set to "true" if using a BC file, and "false" if using a normal restart file to start the ensemble spinup.
+
+.. option:: ENS_SPINUP_START
+	
+	Start date for ensemble spinup run (YYYYMMDD).
+
+.. option:: ENS_SPINUP_END
+	
+	End date for ensemble spinup run (YYYYMMDD).
+
+.. option:: START_DATE
+	
+	Start date for main ensemble data assimilation run (YYYYMMDD).
+
+.. option:: ASSIM_START_DATE
+	
+	Date where assimilation begins (YYYYMMDD). This option allows you to run the first assimilation period for an extra long time (although the assimilation window remains the same), effectively providing an ensemble-wide spinup. For more information on this ensemble spinup option, see :ref:`Run Ensemble Spinup Simulations`. If you have set ``DO_ENS_SPINUP`` to ``true``, then you should set this date to be one assimilation window later than ``START_DATE``.
+
+.. option:: SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD
+	
+	At the end of the first assimilation period, rather than doing the full LETKF calculation, CHEEREIO can scale the ensemble mean so that it matches the observational mean. This is done because if the model is biased relative to observations the LETKF will perform suboptimal updates. Set to "true" to do this scaling (recommended) or "false" to do the usual LETKF calculation. For more information, see :ref:`Simple scale`.
+
+.. option:: END_DATE
+	
+	End date for ensemble run (YYYYMMDD).
+
+.. option:: AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD
+	
+	At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough. If this option is set to "true", then CHEEREIO will multiply the standard deviation of the ensemble after ensemble spinup is complete by the factor given in ``SPREAD_AMPLIFICATION_FACTOR``. This spread amplification is done after the first assimilation period, so it will work with either spinup method. For more information, see :ref:`Spread amplification`.
+
+.. option:: SPREAD_AMPLIFICATION_FACTOR
+	
+	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period. For more information on the burn-in period, see :ref:`Burn in period`.
+
+.. option:: SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD
+	
+	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
+
+.. option:: BURN_IN_END
+	
+	If ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` is set to ``true``, then this is the date (YYYYMMDD) when the burn-in period ends.
+
+.. option:: POSTPROCESS_START_DATE
+	
+	The date when the postprocessing script should start (YYYYMMDD). This should always be at least one assimilation window away from ``START_DATE``. If you are using a burn-in period, you can set this for after the burn-in period ends to ensure that all your analysis discards this period.
+
+.. option:: POSTPROCESS_END_DATE
+	
+	The date when the postprocessing script should end (YYYYMMDD). Usually the same as ``END_DATE``, though the user can change the postprocess start and end dates to fit whatever application they are interested in.
+
+.. option:: nEnsemble
+	
+	Number of ensemble members. 32 or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
+
+.. option:: verbose
+	
+	Amount of information to print out as the ensemble runs. 1 is the default. 0 supresses most output, 2 is useful for basic debugging, and 3 for intense debugging. 
+
 
 Cluster settings
 ~~~~~~~~~~~~~
