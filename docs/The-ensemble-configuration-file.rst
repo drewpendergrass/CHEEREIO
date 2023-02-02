@@ -337,44 +337,74 @@ One useful feature of CHEEREIO is its distinction between "control" and "state" 
 HISTORY.rc settings
 ~~~~~~~~~~~~~
 
-* HISTORY_collections_to_customize: A list of collections under HISTORY.rc that CHEEREIO will customize with user-specified frequency and duration settings. Here is a typical example:
-::
+.. option:: HISTORY_collections_to_customize
+	
+	A list of collections under HISTORY.rc that CHEEREIO will customize with user-specified frequency and duration settings. Here is a typical example:
+	::
 
-	"HISTORY_collections_to_customize" : [
-		"SpeciesConc",
-		"LevelEdgeDiags",
-		"StateMet"
-	],
+		"HISTORY_collections_to_customize" : [
+			"SpeciesConc",
+			"LevelEdgeDiags",
+			"StateMet"
+		],
 
-* HISTORY_freq: Frequency of data saved within history output files listed within collections in ``HISTORY_collections_to_customize``. For more information on history frequencies, see the GEOS-Chem manual.
-* HISTORY_dur: As in ``HISTORY_freq``, but for duration.
-* SPINUP_HISTORY_freq: Frequency of history output files saved during ensemble spinup (i.e. when executing ``run_ensspin.sh``). Often set to be a longer period to save memory.
-* SPINUP_HISTORY_dur: As in ``SPINUP_HISTORY_freq``, but for duration.
-* SaveLevelEdgeDiags: Should the LevelEdgeDiags collection be turned on? "True" or "False". This is mandatory for assimilating most forms of satellite data.
-* SaveStateMet: Should the StateMet collection be turned on? "True" or "False". This is mandatory for assimilating some forms of satellite data, like OMI NO\ :sub:`2`\ .
-* SaveArea: Should grid cell areas be used in the assimilation process? "True" or "False".
-* HistorySpeciesConcToSave: A list of species to save in the SpeciesConc collection. At minimum, this should encompass the concentration portion of the state vector. Below is an example: 
-::
+.. option:: HISTORY_freq
+	
+	Frequency of data saved within history output files listed within collections in ``HISTORY_collections_to_customize``. For more information on history frequencies, see the GEOS-Chem manual.
 
-	"HistorySpeciesConcToSave" : [
-		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5"
-	],
+.. option:: HISTORY_dur
+	
+	As in ``HISTORY_freq``, but for duration.
 
-* HistoryLevelEdgeDiagsToSave: A list of data to save in the LevelEdgeDiags collection. Just ``Met_PEDGE`` is sufficient for many forms of assimilation.
-* HistoryStateMetToSave: A list of data to save in the StateMet collection. Below is an example of necessary fields for assimilating OMI NO\ :sub:`2`\ .
-::
+.. option:: SPINUP_HISTORY_freq
+	
+	Frequency of history output files saved during ensemble spinup (i.e. when executing ``run_ensspin.sh``). Often set to be a longer period to save memory.
 
-	"HistoryStateMetToSave" : [
-		"Met_TropLev",
-		"Met_BXHEIGHT",
-		"Met_T"
-	],
+.. option:: SPINUP_HISTORY_dur
+	
+	As in ``SPINUP_HISTORY_freq``, but for duration.
+
+.. option:: SaveLevelEdgeDiags
+	
+	Should the LevelEdgeDiags collection be turned on? "True" or "False". This is mandatory for assimilating most forms of satellite data.
+
+.. option:: SaveStateMet
+	
+	Should the StateMet collection be turned on? "True" or "False". This is mandatory for assimilating some forms of satellite data, like OMI NO\ :sub:`2`\ .
+
+.. option:: SaveArea
+	
+	Should grid cell areas be used in the assimilation process? "True" or "False".
+
+.. option:: HistorySpeciesConcToSave
+	
+	A list of species to save in the SpeciesConc collection. At minimum, this should encompass the concentration portion of the state vector. Below is an example: 
+	::
+
+		"HistorySpeciesConcToSave" : [
+			"NO",
+			"NO2",
+			"HNO3",
+			"HNO4",
+			"PAN",
+			"MPAN",
+			"N2O5"
+		],
+
+.. option:: HistoryLevelEdgeDiagsToSave
+	
+	A list of data to save in the LevelEdgeDiags collection. Just ``Met_PEDGE`` is sufficient for many forms of assimilation.
+
+.. option:: HistoryStateMetToSave
+	
+	A list of data to save in the StateMet collection. Below is an example of necessary fields for assimilating OMI NO\ :sub:`2`\ .
+	::
+
+		"HistoryStateMetToSave" : [
+			"Met_TropLev",
+			"Met_BXHEIGHT",
+			"Met_T"
+		],
 
 Observation settings
 ~~~~~~~~~~~~~
