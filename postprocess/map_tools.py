@@ -106,7 +106,7 @@ def agg_to_monthly(dates, to_agg):
 	ym = (years*100) + months
 	_, ind = np.unique(ym,return_index = True)
 	dates = dates[ind]
-	shape = np.shape(to_agg)
+	shape = np.array(np.shape(to_agg))
 	if agg_dim == 3:
 		shape[0] = len(ind)
 	else:
