@@ -316,6 +316,39 @@ The init function here is run when the Surface_NO2_Translator object is created.
 
 The :py:method:`Observation_Translator.getObservations` method takes as input (1) a string representing a key from ``OBSERVED_SPECIES`` in ``ens_config.json``, and (2) a pair of datetime objects representing the start and end of the period of interest. This function should return a dictionary of all the relevant observations of the species of interest in this timeperiod. The dictionary should have (1) the observation data stored as a 1D NumPy array, (2) required metadata fields of latitude, longitude, and utc time of the observations each stored as NumPy arrays within the dictionary (see:py:method:`Observation_Translator.getObservations` for details), and (3) additional metadata fields as necessary for your observation operator, such as albedo.
 
+Suppose all of our observation data is in a CSV file. Our ``getObservations()`` function might look like this (pseudocode, may not be exactly right):
+
+
+.. code-block:: python
+
+	import observation_operators as obsop
+	import pandas as pd
+
+	class Surface_NO2_Translator(obsop.Observation_Translator):
+
+		def __init__(self,verbose=1):
+			super().__init__(verbose)
+
+		def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
+
+			species_of_interest = self.spc_config['OBSERVED_SPECIES'][specieskey] #Get the name of the species we are observaing
+			data_file = self.spc_config['Surface_dirs'][species_of_interest] #Here we imagine the user specifies the csv file name in the ens_config.json file.
+			data = pd.read_csv(data_file) #load the data
+
+			data = data[(data['date'].dt>=timeperiod[0]) & (data['date'].dt<timeperiod[1])] #subset the data to the right timespan.
+
+			to_return = {} #make an empty dictionary to return
+			to_return['NO2'] = data['NO2'] #store data in the dictionary
+			to_return['latitude'] = data['latitude']
+			to_return['longitude'] = data['longitude']
+			to_return['utctime'] = data['utctime']
+
+			if includeObsError: #we only include the error associated with the measurement if requested.
+				to_return['error'] = data['error']
+
+			return to_return #return the data
+			
+Note that this function is designed to (1) load data from file, (2) subset to the timeperiod of interest, and (3) return in a standardized dictionary form. Notice that the specific CSV file location is loaded from ``ens_config.json`` and stored in the ``self.spc_config`` object; you can always get user settings from ``ens_config.json`` via this object. Although the ``Surface_dirs`` is not in our current ``ens_config.json`` format, new observation operators will require us to grow the configuration file. See :ref:`observation_link` for more details on how to add new setting fields to ``ens_config.json`` for your observation operator.
 
 (3) Implement gcCompare() function 
 ~~~~~~~~~~~~~
@@ -328,6 +361,8 @@ This section is under construction, check back later!
 ~~~~~~~~~~~~~
 
 This section is under construction, check back later!
+
+.. _observation_link:
 
 (5) Link observational files from ens_config.json
 ~~~~~~~~~~~~~
