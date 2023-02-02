@@ -260,6 +260,7 @@ All observation operators that are compatible with CHEEREIO must inherit from th
       :rtype: ObsData
       :raises NotImplementedError: if the user fails to implement this function.
 
+.. _Existing obs tools:
 
 Existing observation toolkits
 -------------
@@ -368,7 +369,29 @@ This section is under construction, check back later!
 (4) Update operators.json
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+Now that we have written our observation operator, we have to let CHEEREIO know about it! In the top level directory of CHEEREIO, there is a file called ``operators.json``. Open it and add a new entry. In our Surface NO2 example, we would add the following:
+::
+
+	"SURFACE_NO2" : {
+		"module_name" : "surface_no2_translator",
+		"translator_name" : "Surface_NO2_Translator",
+		"implements_initialReadDate" : "False"
+	}
+
+Here is the description of each of the three options:
+
+
+.. option:: module_name
+	
+	File name of the Python script where the observation operator and support methods lives, without the ``.py`` extension. 
+
+.. option:: translator_name
+	
+	Name of the class inheriting from ``Observation_Translator``, where the main observation operator lives.
+
+.. option:: implements_initialReadDate
+	
+	"True" or "False", do you implement the initial read date function in your observation operator? This is fully optional.
 
 .. _observation_link:
 
@@ -390,4 +413,12 @@ This section is under construction, check back later!
 ~~~~~~~~~~~~~
 
 This section is under construction, check back later!
+
+(8) Share your operator with the CHEEREIO community
+~~~~~~~~~~~~~
+
+Once you are done with your observation operator and have tested it, make a pull request to the main CHEEREIO git repository. That way the community can make use of your tool and advance science faster!
+
+Document your operator by adding an entry in the :ref:`Existing obs tools` section of the documentation. In your documentation, provide the paper that people should cite if they use your operator, so that you get appropriate credit for your work.
+
 
