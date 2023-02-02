@@ -308,11 +308,14 @@ Suppose we were writing an operator for surface NO2 monitors. Here's how your ne
 		def __init__(self,verbose=1):
 			super().__init__(verbose)
 
+The init function here is run when the Surface_NO2_Translator object is created. The ``super()`` function here just means that we run the default initialization included in the :py:class:`Observation_Translator` class; unless you have a very good reason to do so, you should probably use this initialization.
+
 
 (2) Implement getObservations() function 
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+The :py:method:`Observation_Translator.getObservations` method takes as input (1) a string representing a key from ``OBSERVED_SPECIES`` in ``ens_config.json``, and (2) a pair of datetime objects representing the start and end of the period of interest. This function should return a dictionary of all the relevant observations of the species of interest in this timeperiod. The dictionary should have (1) the observation data stored as a 1D NumPy array, (2) required metadata fields of latitude, longitude, and utc time of the observations each stored as NumPy arrays within the dictionary (see:py:method:`Observation_Translator.getObservations` for details), and (3) additional metadata fields as necessary for your observation operator, such as albedo.
+
 
 (3) Implement gcCompare() function 
 ~~~~~~~~~~~~~
