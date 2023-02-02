@@ -211,6 +211,8 @@ The ObsData class is a simple data storage class, used by CHEEREIO to handled da
 The Observation_Translator class
 ~~~~~~~~~~~~~
 
+This section is under construction, check back later!
+
 The Observation_Translator class is TKTKTKT. 
 
 .. py:class:: Observation_Translator(verbose)
@@ -220,6 +222,13 @@ The Observation_Translator class is TKTKTKT.
    :attr int verbose: Verbosity of output; 1 is default, higher values print more statements during calculation. 
    :attr dict spc_config: Ensemble configuration data, from ``ens_config.json``.
    :attr str scratch: Path to the ensemble scratch folder.
+
+   .. py:method:: Observation_Translator.initialReadDate()
+
+      TKTKT OPTIONAL function. Indicate in operators.json
+
+      :return: Observation file names with start and end dates.
+      :rtype: dict
 
    .. py:method:: Observation_Translator.getObservations(specieskey,timeperiod, interval=None, includeObsError=False))
 
@@ -234,9 +243,6 @@ The Observation_Translator class is TKTKTKT.
 
       :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
       :rtype: ObsData
-
-
-
 
 
 Existing observation toolkits
