@@ -211,9 +211,7 @@ The ObsData class is a simple data storage class, used by CHEEREIO to handled da
 The Observation_Translator class
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
-
-The Observation_Translator class is TKTKTKT. 
+All observation operators that are compatible with CHEEREIO must inherit from the Observation_Translator class.  This class itself is basically empty and functions as a template for users to follow in building their own observation operators. 
 
 .. py:class:: Observation_Translator(verbose)
 
@@ -225,24 +223,42 @@ The Observation_Translator class is TKTKTKT.
 
    .. py:method:: Observation_Translator.initialReadDate()
 
-      TKTKT OPTIONAL function. Indicate in operators.json
+      This is an **optional** function that observation operators can implement, and as such is not present in the abstract class. For a sorted list of all the observation files, indicate in a dictionary the start and end datetimes of the data in each file and save as a pickle file into the ``scratch/`` directory. If an observation operator implements this function, then it should be indicated in operators.json (see :ref:`operators_json`).
 
-      :return: Observation file names with start and end dates.
+      :return: Start and end dates for each observation data file used in assimilation.
       :rtype: dict
 
    .. py:method:: Observation_Translator.getObservations(specieskey,timeperiod, interval=None, includeObsError=False))
 
-      TKTKT
+      For a given species and time period of interest, provide a dictionary with all relevant observations and observation metadata (latitude, longitude, time, and others as user needs).
 
-      :return: Observation data formatted as a dictionary.
+      :param str specieskey: The species of interest. Please note that the "specieskey" variable MUST be a key in the dictionary OBSERVED_SPECIES in ens_config.
+      :param list timeperiod: A list of two datetime objects indicating the start and end times of the observations which we need to aggregate.
+      :param int interval: If this value is not None, only read observations at a given interval (e.g. only a certain hour a day). This is only used to speed up certain kinds of plots; while users are required to accept this argument as an argument, they can opt to raise an error if interval is not None rather than implement this functionality.
+      :param bool includeObsError: True or False, should we load in error data which accompanies observation data? If your data set does not have error data that is useful, you can ignore this or opt to raise an error if this is set to True.
+      :return: Observation data formatted as a dictionary. The returned dictionary must have keys for "latitude", "longitude", and "utctime", where UTC time is an ISO 8601 date time string. Actual observation data can be named however the user would like, so long as ``gcCompare()`` can handle it.
       :rtype: dict
+      :raises NotImplementedError: if the user fails to implement this function.
 
    .. py:method:: Observation_Translator.gcCompare(specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None))
 
       TKTKT
 
+      :param str specieskey: The species of interest. Please note that the "specieskey" variable MUST be a key in the dictionary OBSERVED_SPECIES in ens_config.
+      :param dict OBSDATA: Observation data in dictionary form. See :py:func:`apply_filters` for more details.
+      :param DataSet GC: An xarray dataset which contains the combined GEOS-Chem model output. GC is provided by other CHEEREIO translators; users creating new observation operators can take it as a given.
+      :param array GC_area: If we are using the grid cell areas, we supply them here (rare)
+      :param bool saveAlbedo: True or False, should we save out albedo data into the ObsData object we return. Ignore if you do not use.
+      :param bool doErrCalc: TKTKTKTKTKTK.
+      :param bool useObserverError: TKTKTKTKTKTK.
+      :param float prescribed_error: TKTKTKTKTK.
+      :param str prescribed_error_type: TKTKTKTKTK.
+      :param float transportError: TKTKTKTKTK.
+      :param float errorCorr: TKTKTKTKTK.
+      :param float minError: TKTKTKTKTK.
       :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
       :rtype: ObsData
+      :raises NotImplementedError: if the user fails to implement this function.
 
 
 Existing observation toolkits
@@ -291,6 +307,8 @@ This section is under construction, check back later!
 ~~~~~~~~~~~~~
 
 This section is under construction, check back later!
+
+.. _operators_json:
 
 (4) Update operators.json
 ~~~~~~~~~~~~~
