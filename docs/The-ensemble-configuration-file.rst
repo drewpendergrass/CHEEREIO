@@ -241,18 +241,54 @@ Cluster settings
 
 The next section of the ``ens_config.json`` file controls settings that will be used when submitting jobs to the scheduler. These settings overwrite the template batch submission scripts included with CHEEREIO.
 
-* NumCores: Number of cores used in each of the ensemble runs. CHEEREIO also will use these cores to parallelize assimilation computation columnwise.
-* NumCtrlCores: Number of cores to use in the control run simulation, if using.
-* Partition: Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice.
-* Memory: Memory in megabytes used by each ensemble member. CHEEREIO can be quite memory intensive because it loads in restarts and history files for many ensemble members in addition to observations, and sometimes produces large matrices, so expect to use more than in standard GEOS-Chem runs.
-* EnsCtrlSpinupMemory: Memory in megabytes for ensemble spinup, control, and regular spinup simulations (i.e. those simulations without LETKF assimilation). Set as you would a normal GEOS-Chem simulation.
-* WallTime: Time allowed for the overall assimilation process (runs and assimilation) to occur in format D-HH\\\\:MM. Assimilation adds substantial overhead so expect it to be slow.
-* EnsSpinupWallTime: Time allowed for the ensemble spinup process (no assimilation, just running all ensemble members from ``ENS_SPINUP_START`` through ``ENS_SPINUP_END`` with scaling factors applied) in format D-HH\\\\:MM. If not using, you can just leave as an empty string.
-* ControlWallTime: Wall time for the control run simulation, if you're using one. Empty string otherwise.
-* SpinupWallTime: Wall time for the spinup simulation, if you're using one. Empty string otherwise.
-* CondaEnv: The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the YAML file that ships with CHEEREIO in the ``environments/`` folder.
-* AnimationEnv: The name of the Conda environment that has the tools necessary to make animated postprocessing plots. A YAML file will be added to the ``environments/`` folder before release giving this Conda environment.
-* MaxPar: Maximum number of cores to use while assimilating columns in parallel using CHEEREIO, maxing out at ``NumCores``. Setting this number smaller than NumCores saves on memory but adds to the assimilation time. 
+.. option:: NumCores
+	
+	Number of cores used in each of the ensemble runs. CHEEREIO also will use these cores to parallelize assimilation computation columnwise.
+
+.. option:: NumCtrlCores
+	
+	Number of cores to use in the control run simulation, if using.
+
+.. option:: Partition
+	
+	Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice.
+
+.. option:: Memory
+	
+	Memory in megabytes used by each ensemble member. CHEEREIO can be quite memory intensive because it loads in restarts and history files for many ensemble members in addition to observations, and sometimes produces large matrices, so expect to use more than in standard GEOS-Chem runs.
+
+.. option:: EnsCtrlSpinupMemory
+	
+	Memory in megabytes for ensemble spinup, control, and regular spinup simulations (i.e. those simulations without LETKF assimilation). Set as you would a normal GEOS-Chem simulation.
+
+.. option:: WallTime
+	
+	Time allowed for the overall assimilation process (runs and assimilation) to occur in format D-HH\\\\:MM. Assimilation adds substantial overhead so expect it to be slow.
+
+.. option:: EnsSpinupWallTime
+	
+	Time allowed for the ensemble spinup process (no assimilation, just running all ensemble members from ``ENS_SPINUP_START`` through ``ENS_SPINUP_END`` with scaling factors applied) in format D-HH\\\\:MM. If not using, you can just leave as an empty string.
+
+.. option:: ControlWallTime
+	
+	Wall time for the control run simulation, if you're using one separate from the ensemble itself. Empty string otherwise.
+
+.. option:: SpinupWallTime
+	
+	Wall time for the spinup simulation, if you're using one. Empty string otherwise.
+
+.. option:: CondaEnv
+	
+	The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the YAML file that ships with CHEEREIO in the ``environments/`` folder.
+
+.. option:: AnimationEnv
+	
+	The name of the Conda environment that has the tools necessary to make animated postprocessing plots. A YAML file will be added to the ``environments/`` folder before release giving this Conda environment.
+
+.. option:: MaxPar
+	
+	Maximum number of cores to use while assimilating columns in parallel using CHEEREIO, maxing out at ``NumCores``. Setting this number smaller than NumCores saves on memory but adds to the assimilation time. 
+
 
 Species in state/control vectors
 ~~~~~~~~~~~~~
