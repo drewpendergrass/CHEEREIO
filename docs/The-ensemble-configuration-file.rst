@@ -409,21 +409,41 @@ HISTORY.rc settings
 Observation settings
 ~~~~~~~~~~~~~
 
-* OBSERVED_SPECIES: A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. 
-* OBS_TYPE: A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
-* TROPOMI_dirs: Dictionary linking observed TROPOMI species to the directory containing the observations. If you aren't using TROPOMI, this can be left blank. Here is an example, along with the corresponding ``OBSERVED_SPECIES`` settings:
-::
+.. option:: OBSERVED_SPECIES
+	
+	A dictionary linking a label for observations with the species observed. For example, you could write ``"NO2_SATELLITE" : "NO2"`` to reference satellite observations of NO2. 
 
-	"OBSERVED_SPECIES" : {
-		"CH4_TROPOMI": "CH4"
-	},
-	"TROPOMI_dirs" : {
-		"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019"
-	},
+.. option:: OBS_TYPE
+	
+	A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
 
-* OMI_dirs: As in TROPOMI_dirs, but for OMI. Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page. 
-* SaveDOFS: Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. *Note: this option is functional but DOFS values are not easily interpretable; hold off use for now while we think of alternative definitions in our rank-deficient space (DP, 2022/11/07).*
-* DOFS_filter: What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
+.. option:: TROPOMI_dirs
+	
+	Dictionary linking observed TROPOMI species to the directory containing the observations. If you aren't using TROPOMI, this can be left blank. Here is an example, along with the corresponding ``OBSERVED_SPECIES`` settings:
+	::
+
+		"OBSERVED_SPECIES" : {
+			"CH4_TROPOMI": "CH4"
+		},
+		"TROPOMI_dirs" : {
+			"CH4" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2/2019"
+		},
+
+.. option:: OMI_dirs
+	
+	As in TROPOMI_dirs, but for OMI. Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page. 
+
+.. option:: SaveDOFS
+	
+	Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
+
+	.. attention::
+
+		*Note: this option is functional but DOFS values are not easily interpretable; hold off use for now while we think of alternative definitions in our rank-deficient space (DP, 2022/11/07).*
+
+.. option:: DOFS_filter
+	
+	What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
 
 Scaling factor settings
 ~~~~~~~~~~~~~
