@@ -314,7 +314,7 @@ The init function here is run when the Surface_NO2_Translator object is created.
 (2) Implement getObservations() function 
 ~~~~~~~~~~~~~
 
-The :py:method:`Observation_Translator.getObservations` method takes as input (1) a string representing a key from ``OBSERVED_SPECIES`` in ``ens_config.json``, and (2) a pair of datetime objects representing the start and end of the period of interest. This function should return a dictionary of all the relevant observations of the species of interest in this timeperiod. The dictionary should have (1) the observation data stored as a 1D NumPy array, (2) required metadata fields of latitude, longitude, and utc time of the observations each stored as NumPy arrays within the dictionary (see:py:method:`Observation_Translator.getObservations` for details), and (3) additional metadata fields as necessary for your observation operator, such as albedo.
+The ``getObservations()`` method takes as input (1) a string representing a key from ``OBSERVED_SPECIES`` in ``ens_config.json``, and (2) a pair of datetime objects representing the start and end of the period of interest. This function should return a dictionary of all the relevant observations of the species of interest in this timeperiod. The dictionary should have (1) the observation data stored as a 1D NumPy array, (2) required metadata fields of latitude, longitude, and utc time of the observations each stored as NumPy arrays within the dictionary (see :py:class:`Observation_Translator` for details), and (3) additional metadata fields as necessary for your observation operator, such as albedo.
 
 Suppose all of our observation data is in a CSV file. Our ``getObservations()`` function might look like this (pseudocode, may not be exactly right):
 
