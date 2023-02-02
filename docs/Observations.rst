@@ -335,8 +335,11 @@ Suppose all of our observation data is in a CSV file. Our ``getObservations()`` 
 			#Get the name of the species we are observaing
 			species_of_interest = self.spc_config['OBSERVED_SPECIES'][specieskey] 
 
-			#Here we imagine the user specifies the csv file name in the ens_config.json file.
-			data_file = self.spc_config['Surface_dirs'][species_of_interest] 
+			#Here we imagine the user specifies the csv file path in the ens_config.json file.
+			data_path = self.spc_config['Surface_dirs'][species_of_interest] 
+
+			#In this implementation, the NO2 data must be named NO2.csv.
+			data_file = f'{data_path}/NO2.csv
 
 			#Load the data
 			data = pd.read_csv(data_file) 
@@ -419,12 +422,32 @@ Here is the description of each of the three options:
 	
 	"True" or "False", do you implement the initial read date function in your observation operator? This is fully optional.
 
+Now that you have added your operator to ``operators.json``, users can activate the observation operator by setting values in the key-value pairs within ``OBS_TYPE`` to the name of your operator; in this case, SURFACE_NO2. Here is an example of what ``ens_config.json`` could look like:
+::
+
+	"OBS_TYPE" : {
+		"NO2_OMI":"OMI",
+		"NO2_MONITORS":"SURFACE_NO2"
+	},
+
+In this example, we are using NO2 from OMI and from the SURFACE_NO2 operators. CHEEREIO will now use your operator to handle surface NO2!
+
 .. _observation_link:
 
 (5) Link observational files from ens_config.json
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO needs to know where to look for your observational data files; indeed, when you wrote your ``getObservations()`` function you needed to get a file path from ``ens_config.json``. All we have to do is add an additional dictionary in ``ens_config.json`` which is compatible with how we wrote our observation operator. Here is an example:
+::
+
+	"OMI_dirs" : {
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
+	},
+	"Surface_dirs" : {
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/surface/NO2"
+	},
+
+Now future users can point CHEEREIO towards their observational data without modifying any code!
 
 .. _Observation filters:
 
