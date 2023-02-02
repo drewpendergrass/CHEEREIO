@@ -359,10 +359,36 @@ Suppose all of our observation data is in a CSV file. Our ``getObservations()`` 
 			
 Note that this function is designed to (1) load data from file, (2) subset to the timeperiod of interest, and (3) return in a standardized dictionary form. Notice that the specific CSV file location is loaded from ``ens_config.json`` and stored in the ``self.spc_config`` object; you can always get user settings from ``ens_config.json`` via this object. Although the ``Surface_dirs`` is not in our current ``ens_config.json`` format, new observation operators will require us to grow the configuration file. See :ref:`observation_link` for more details on how to add new setting fields to ``ens_config.json`` for your observation operator.
 
+You may want to allow users to filter out bad observational data, using filters they can set via an extension. You should implement that filtering in this function, by following the :ref:`Observation filters` procedure.
+
 (3) Implement gcCompare() function 
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+The ``gcCompare()`` method takes as input (1) a string representing a key from ``OBSERVED_SPECIES`` in ``ens_config.json``, (2) observational data in dictionary form, as output by getObservations(), (3) GEOS-Chem data as an xarray DataSet, and (4) additional input data, such as that specifying how to handle errors when aggregating to the GEOS-Chem grid. See :py:class:`Observation_Translator` for details. We return data as an ObsData object. Here we show a very simplified version of a gcCompare function (pseudocode, may not be exactly right).
+
+.. code-block:: python
+
+	def gcCompare(self,specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+
+		#Get the name of the species we are observaing
+		species = self.spc_config['OBSERVED_SPECIES'][specieskey] 
+
+		#Use one of the utilities included in the Observation Operator toolkit to get GEOS-Chem data matching observations
+		GC_col_data = obsop.getGCCols(GC,OBSDATA,species,self.spc_config,returnStateMet=returnStateMet,GC_area=GC_area)
+
+		#The GEOS-Chem 2D array, where the first dimension matches the length of observations and second is the column height.
+		GC_SPC = GC_col_data['GC_SPC']
+
+		#Get the surface data
+		GC_surf = GC_SPC[:,0]
+
+		toreturn = obsop.ObsData(GC_surf,OBSDATA[species],OBSDATA['latitude'],OBSDATA['longitude'],OBSDATA['utctime'])
+
+		return toreturn
+
+Here all we do is use the :py:func:`getGCCols` function to get GEOS-Chem columns that line up in space and time with our observational data. Then we get the surface data from this column. We create a :py:class:`ObsData` object with all the relevant data and return it.
+
+Note that a real observation operator will need to handle errors in the case that users choose to aggregate to the GEOS-Chem grid. Consult :py:func:`produceSuperObservationFunction`, and existing observation operator toolkits, for guidance on how to implement this.
 
 .. _operators_json:
 
