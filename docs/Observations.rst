@@ -331,19 +331,27 @@ Suppose all of our observation data is in a CSV file. Our ``getObservations()`` 
 
 		def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 
-			species_of_interest = self.spc_config['OBSERVED_SPECIES'][specieskey] #Get the name of the species we are observaing
-			data_file = self.spc_config['Surface_dirs'][species_of_interest] #Here we imagine the user specifies the csv file name in the ens_config.json file.
-			data = pd.read_csv(data_file) #load the data
+			#Get the name of the species we are observaing
+			species_of_interest = self.spc_config['OBSERVED_SPECIES'][specieskey] 
 
-			data = data[(data['date'].dt>=timeperiod[0]) & (data['date'].dt<timeperiod[1])] #subset the data to the right timespan.
+			#Here we imagine the user specifies the csv file name in the ens_config.json file.
+			data_file = self.spc_config['Surface_dirs'][species_of_interest] 
 
-			to_return = {} #make an empty dictionary to return
+			#Load the data
+			data = pd.read_csv(data_file) 
+
+			#subset the data to the right timespan.
+			data = data[(data['date'].dt>=timeperiod[0]) & (data['date'].dt<timeperiod[1])] 
+
+			#make an empty dictionary to return, fill it
+			to_return = {} 
 			to_return['NO2'] = data['NO2'] #store data in the dictionary
 			to_return['latitude'] = data['latitude']
 			to_return['longitude'] = data['longitude']
 			to_return['utctime'] = data['utctime']
 
-			if includeObsError: #we only include the error associated with the measurement if requested.
+			#we only include the error associated with the measurement if requested.
+			if includeObsError: 
 				to_return['error'] = data['error']
 
 			return to_return #return the data
