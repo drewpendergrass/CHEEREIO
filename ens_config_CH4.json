@@ -206,7 +206,7 @@
 	"comment023" : "**********************************************************************************",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
-	"omit_diff_cells_with_fewer_than_n_observations":"10",
+	"omit_diff_cells_with_fewer_than_n_observations":"50",
 	"hemco_diags_to_process" : [
 		"EmisCH4_Total"
 	],

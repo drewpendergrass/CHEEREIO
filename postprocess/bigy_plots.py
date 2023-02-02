@@ -79,11 +79,11 @@ for i,species in enumerate(specieslist):
 for i,species in enumerate(specieslist):
 	plotMap(m,gclat,gclon,total_obs_in_period[i,:,:],species,f'{pp_dir}/total_obs_count_{species}.png',useLog=True)
 	plotMap(m,gclat,gclon,total_weighted_mean_true_obs[i,:,:],species,f'{pp_dir}/weighted_mean_obs_{species}.png') 
-	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
 	#Remove pixels that are too low in observation (tend to be noisy)
 	pixels_to_remove = np.where(total_obs_in_period[i,:,:]<omit_diff_cells_with_fewer_than_n_observations)
 	assim_minus_obs[i,pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
 	ctrl_minus_obs[i,pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
+	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
 	plotMap(m,gclat,gclon,assim_minus_obs[i,:,:],species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
 	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(assim_minus_obs[i,:,:])}')
 	plotMap(m,gclat,gclon,ctrl_minus_obs[i,:,:],species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
