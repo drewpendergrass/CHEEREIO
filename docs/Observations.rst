@@ -242,20 +242,20 @@ All observation operators that are compatible with CHEEREIO must inherit from th
 
    .. py:method:: Observation_Translator.gcCompare(specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None))
 
-      TKTKT
+      THE BIG DADDY. This function takes as input observation data (formatted as a dictionary) and GEOS-Chem data from the ensemble (an xarray DataSet), and returns as output an ObsData object with GEOS-Chem data mapped into observation space, along with relevant metadata. This is the heart and soul of the observation operator.
 
       :param str specieskey: The species of interest. Please note that the "specieskey" variable MUST be a key in the dictionary OBSERVED_SPECIES in ens_config.
       :param dict OBSDATA: Observation data in dictionary form. See :py:func:`apply_filters` for more details.
       :param DataSet GC: An xarray dataset which contains the combined GEOS-Chem model output. GC is provided by other CHEEREIO translators; users creating new observation operators can take it as a given.
       :param array GC_area: If we are using the grid cell areas, we supply them here (rare)
       :param bool saveAlbedo: True or False, should we save out albedo data into the ObsData object we return. Ignore if you do not use.
-      :param bool doErrCalc: TKTKTKTKTKTK.
-      :param bool useObserverError: TKTKTKTKTKTK.
-      :param float prescribed_error: TKTKTKTKTK.
-      :param str prescribed_error_type: TKTKTKTKTK.
-      :param float transportError: TKTKTKTKTK.
-      :param float errorCorr: TKTKTKTKTK.
-      :param float minError: TKTKTKTKTK.
+      :param bool doErrCalc: In the case where ``AV_TO_GC_GRID`` is set to True, should we calculate the aggregated error and save it out in the returned ObsData object? This is always ignored if ``AV_TO_GC_GRID`` is set to False. THIS AND ALL SUBSEQUENT PARAMETERS ARE ONLY USED IF ``AV_TO_GC_GRID`` is set to True.
+      :param bool useObserverError: True or False, are we using error accompanying observation files or (if False) are we using prescribed (absolute/relative) errors.
+      :param float prescribed_error: If working with prescribed errors, then this is either the percent or absolute error associated with the observational data.
+      :param str prescribed_error_type: If using prescribed errors, a string for "relative" or "absolute" denoting how ``prescribed_error`` should be interpreted (as percent or an absolute value). Supplied by user configuration settings.
+      :param float transportError: If using a super-observation function that accounts for model transport error, the transport error. Supplied by the user configuration settings.
+      :param array errorCorr: : If using a super-observation function that accounts for correlation between errors, the error correlation. Supplied by the user configuration settings.
+      :param array minError: If using a super-observation function that accounts for minimum error, the minimum error allowed for a specific observation. Supplied by the user configuration settings.
       :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
       :rtype: ObsData
       :raises NotImplementedError: if the user fails to implement this function.
