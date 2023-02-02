@@ -628,17 +628,47 @@ LETKF settings
 Postprocessing settings
 ~~~~~~~~~~~~~
 
-* animation_fps_scalingfactor: Frames per second for movies of scaling factors and emissions made by the postprocessing workflow.
-* animation_fps_concentrations: Frames per second for movies of concentrations made by the postprocessing workflow.
-* hemco_diags_to_process: An array of entries from HEMCO Diagnostics that you would like processed into movies. This is usually emissions totals. See below for an example entry:
-:: 
+.. option:: animation_fps_scalingfactor
+	
+	Frames per second for movies of scaling factors and emissions made by the postprocessing workflow.
 
-	"hemco_diags_to_process" : [
-		"EmisCH4_Total"
-	],
+.. option:: animation_fps_concentrations
+	
+	Frames per second for movies of concentrations made by the postprocessing workflow.
 
-* OBSERVATION_UNITS: a dictionary with keys from ``OBSERVED_SPECIES`` and values representing the units will be plotted. This is governed by how the observation operator is defined. 
-* scalefactor_plot_freq: The CHEEREIO postprocessing routine will save out maps of scale at this temporal resolution: either "all" for save out an image for every assimilation window, or "monthly" to save out one per month.
+.. option:: omit_diff_cells_with_fewer_than_n_observations
+	
+	Some postprocessing plots show the difference between assimilation output and observations; we can omit grid cells with very few observations to prevent noisy results. 
+
+.. option:: hemco_diags_to_process
+	
+	An array of entries from HEMCO Diagnostics that you would like processed into movies. This is usually emissions totals. See below for an example entry:
+	:: 
+
+		"hemco_diags_to_process" : [
+			"EmisCH4_Total"
+		],
+
+.. option:: useLogScaleForEmissionsMaps
+	
+	"True" or "False", use log color scale to plot emissions from HEMCO.
+
+.. option:: min_emis_value_to_plot
+	
+	Minimum emission value to plot; useful if using a log scale.
+
+.. option:: min_emis_std_value_to_plot
+	
+	Minimum ensemble standard deviation emission value to plot; useful if using a log scale.
+
+.. option:: OBSERVATION_UNITS
+	
+	A dictionary with keys from ``OBSERVED_SPECIES`` and values representing the units will be plotted. This is governed by how the observation operator is defined. 
+
+.. option:: scalefactor_plot_freq
+	
+	The CHEEREIO postprocessing routine will save out maps of scale at this temporal resolution: either "all" for save out an image for every assimilation window, or "monthly" to save out monthly means.
+
 
 Extensions
 ~~~~~~~~~~~~~
@@ -654,29 +684,75 @@ Additional CHEEREIO settings, usually for specific observation types, can be loa
 
 Below we list the settings that you can set with extensions.
 
-* TROPOMI_CH4 extension.
+.. option:: TROPOMI_CH4 extension
+	
+	Specialized TROPOMI CH4 settings.
 
-   * TROPOMI_CH4_FILTERS: Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
-   * TROPOMI_CH4_filter_blended_albedo: Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
-   * TROPOMI_CH4_filter_swir_albedo_low: Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
-   * TROPOMI_CH4_filter_swir_albedo_high: Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
-   * TROPOMI_CH4_filter_winter_lat: Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
-   * TROPOMI_CH4_filter_roughness: Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
-   * TROPOMI_CH4_filter_swir_aot: Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
+	.. option:: TROPOMI_CH4_FILTERS
+	
+		Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
+	
+	.. option:: TROPOMI_CH4_filter_blended_albedo
+	
+		Filter out TROPOMI methane observations with a blended albedo above this value. Set to "nan" to ignore.
 
-* TROPOMI_ALL extension.
+	.. option:: TROPOMI_CH4_filter_swir_albedo_low
+	
+		Filter out TROPOMI methane observations with a SWIR albedo below this value. Set to "nan" to ignore.
 
-   * postprocess_save_albedo: Should the postprocessing workflow save out albedo? "True" or "False".
+	.. option:: TROPOMI_CH4_filter_swir_albedo_high
+	
+		Filter out TROPOMI methane observations with a SWIR albedo above this value. Set to "nan" to ignore.
 
-* CH4 extension.
+	.. option:: TROPOMI_CH4_filter_winter_lat
+	
+		Filter out TROPOMI methane observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
 
-   * USE_CUSTOM_CH4_OH_ENTRY: Should we overwrite the OH field setting in ``HEMCO_Config.rc`` for the specialty CH4 simulation with a user-specified entry (given below)? "True" or "False".
-   * CUSTOM_CH4_OH_ENTRY: If USE_CUSTOM_CH4_OH_ENTRY is True, then we overwrite the OH field line in ``HEMCO_Config.rc`` with this entry. Note that backslashes need to be escaped with a front slash. Here is an example entry: ``* GLOBAL_OH  $ROOT\/OH\/v2014-09\/v5-07-08\/OH_3Dglobal.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1`` 
+	.. option:: TROPOMI_CH4_filter_roughness
+	
+		Filter out TROPOMI methane observations with a surface roughness above this value. Set to "nan" to ignore.
 
-* OMI_NO2 extension.
+	.. option:: TROPOMI_CH4_filter_swir_aot
+	
+		Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
 
-   * OMI_NO2_FILTERS: Apply specialized filters for OMI NO2? Set to "True" if doing an OMI NO2 inversion, otherwise set to "False".
-   * OMI_NO2_filter_sza: Filter out OMI NO2 observations with a solar zenith angle above this value. Set to "nan" to ignore.
-   * OMI_NO2_filter_cloud_radiance_frac: Filter out OMI NO2 observations with a cloud radiance fraction above this value. Set to "nan" to ignore.
-   * OMI_NO2_filter_surface_albedo: Filter out OMI NO2 observations with a surface albedo above this value. Set to "nan" to ignore.
+.. option:: TROPOMI_ALL extension
+	
+	Specialized TROPOMI settings shared across all simulations.
+
+	.. option:: postprocess_save_albedo
+	
+		Should the postprocessing workflow save out albedo? "True" or "False".
+
+.. option:: CH4 extension
+	
+	Specialized settings for methane simulations.
+
+	.. option:: USE_CUSTOM_CH4_OH_ENTRY
+	
+		Should we overwrite the OH field setting in ``HEMCO_Config.rc`` for the specialty CH4 simulation with a user-specified entry (given below)? "True" or "False".
+
+	.. option:: CUSTOM_CH4_OH_ENTRY
+	
+		If USE_CUSTOM_CH4_OH_ENTRY is True, then we overwrite the OH field line in ``HEMCO_Config.rc`` with this entry. Note that backslashes need to be escaped with a front slash. Here is an example entry: ``* GLOBAL_OH  $ROOT\/OH\/v2014-09\/v5-07-08\/OH_3Dglobal.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1`` 
+
+.. option:: OMI_NO2 extension
+	
+	Specialized settings for the OMI NO2 operator.
+
+	.. option:: OMI_NO2_FILTERS
+	
+		Apply specialized filters for OMI NO2? Set to "True" if doing an OMI NO2 inversion, otherwise set to "False".
+
+	.. option:: OMI_NO2_filter_sza
+	
+		Filter out OMI NO2 observations with a solar zenith angle above this value. Set to "nan" to ignore.
+
+	.. option:: OMI_NO2_filter_cloud_radiance_frac
+	
+		Filter out OMI NO2 observations with a cloud radiance fraction above this value. Set to "nan" to ignore.
+	
+	.. option:: OMI_NO2_filter_surface_albedo
+	
+		Filter out OMI NO2 observations with a surface albedo above this value. Set to "nan" to ignore.
 
