@@ -49,7 +49,7 @@ If the postprocessing workflow runs successfully, then the following figures and
 
 .. option:: Scalefactor map movies
 	
-	TODO Australia, CONUS, EastChina, Europe, India, SouthAmerica, SouthernAfrica, and global. Max, mean, min, range, sd.
+	These movies show maps of scale factors evolving over time, one set for each of the emissions assimilated by CHEEREIO. Ensemble maximum, mean, minimum, range, and standard deviation are all generated and plotted. For global simulations, we also show several regions whose files are named with a corresponding suffix: Australia, CONUS, EastChina, Europe, India, South America, and Southern Africa. The global domain has no suffix.
 
 	.. note::
 
@@ -58,7 +58,7 @@ If the postprocessing workflow runs successfully, then the following figures and
 
 .. option:: SpeciesConc map movies
 	
-	TODO Australia, CONUS, EastChina, Europe, India, SouthAmerica, SouthernAfrica, and global. Max, mean, min, range, sd.
+	These movies show maps of surface concentrations evolving over time, one set for each of the concentrations in the CHEEREIO control vector. Ensemble maximum, mean, minimum, range, and standard deviation are all generated and plotted. For global simulations, we also show several regions whose files are named with a corresponding suffix: Australia, CONUS, EastChina, Europe, India, South America, and Southern Africa. The global domain has no suffix.
 
 .. option:: HEMCO diagnostic map plots (various time slices)
 	
@@ -88,27 +88,27 @@ After the default postprocessing run, the following data files will be present i
 
 .. option:: bigy_arrays_for_plotting.pkl
 	
-	TKTKTKT. Output by the :py:func:`makeBigYArrays` function.
+	A dictionary containing gridded observations and simulated observations. Output by the :py:func:`makeBigYArrays` function, which contains more details.
 
 .. option:: bigY.pkl
 	
-	TKTKTKT. Output by the :py:func:`makeYEachAssimPeriod` function.
+	A dictionary containing observations and simulated observations as arrays. Output by the :py:func:`makeYEachAssimPeriod` function, which contains more details.
 
 .. option:: Scalefactor .nc files
 	
-	TKTKTKT. Output by the :py:func:`combineScaleFactors` function.
+	NetCDF files containing aggregated scaling factors from across the ensemble; ensemble number is stored in a new dimension ``Ensemble``. Output by the :py:func:`combineScaleFactors` function, which contains more details.
 
 .. option:: combined_HEMCO_diagnostics.nc file
 	
-	TKTKTKT. Output by the :py:func:`combineHemcoDiag` function.
+	NetCDF files containing aggregated emissions from across the ensemble; ensemble number is stored in a new dimension ``Ensemble``. Output by the :py:func:`combineHemcoDiag` function, which contains more details.
 
 .. option:: control_HEMCO_diagnostics.nc file
 	
-	TKTKTKT. Output by the :py:func:`combineHemcoDiagControl` function.
+	NetCDF files containing aggregated emissions from the control run. Output by the :py:func:`combineHemcoDiagControl` function, which contains more details.
 
 .. option:: controlvar_pp.nc file
 	
-	TKTKTKT. Output by the :py:func:`makeDatasetForEnsemble` function.
+	NetCDF file containing the ensemble-wide surface species concentrations for species in the control vector (``CONTROL_VECTOR_CONC`` within ``ens_config.json``). Output by the :py:func:`makeDatasetForEnsemble` function, which contains more details.
 
 
 The postprocessing API
