@@ -116,8 +116,16 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :return: If fullpath_output_name is ``None``, an xarray DataSet with the combined concentrations.
    :rtype: DataSet
 
-makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpath_output_name = None):
-return masterY
+.. py:function:: makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpath_output_name = None)
+
+   Combine the intermediate Y datasets, as output by :ref:`HIST Ensemble`, into a dictionary for the entire ensemble run. These Y datasets contain simulated observations from GEOS-Chem aligned with actual observations, along with other metadata. Returns a combined dictionary, where the keys are timestamps.
+
+   :param str path_to_bigy_subsets: Path to where the intermediate values of Y are saved out by the ensemble (postprocess/bigy in your ensemble installation). 
+   :param datetime startdate: Start date for when we should process Y datasets. 
+   :param datetime enddate: End date for when we should process Y datasets. 
+   :param str fullpath_output_name: Path and filename of the pickle file to which we should save the combined Y dataset. If ``None``, return the data instead.
+   :return: If fullpath_output_name is ``None``, an dictionary with the combined Y datasets. The keys are timestamps and the values are the bigY data for the given day. See :ref:`HIST Ensemble` for details.
+   :rtype: dict
 
 plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
 
