@@ -127,7 +127,6 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :return: If fullpath_output_name is ``None``, an dictionary with the combined Y datasets. The keys are timestamps and the values are the bigY data dictionary for the given day -- entries in these include 'Latitude', 'Longitude', 'Observations', and the species name. See :ref:`HIST Ensemble` for details.
    :rtype: dict
 
-
 .. py:function:: plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False)
 
    Plot a timeseries of the surface concentrations for a single grid cell.
@@ -140,8 +139,16 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :param str unit: either 'ppm', 'ppb', or 'ppt'; CHEEREIO will multiply the GEOS-Chem mole-mole ratio to get these units.
    :param bool includesNature: True or False, include the no-assimilation control run in plot.
 
+.. py:function:: plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False)
 
-plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False):
+   Plot a timeseries of the average surface concentrations across the domain.
+
+   :param DataSet ds: DataSet of the combined ensemble species concentrations, output by :py:func:`makeDatasetForEnsemble`. 
+   :param list species_name: Species to plot. 
+   :param str outfile: Name of image file containing plot. If None, display the plot instead.
+   :param str unit: either 'ppm', 'ppb', or 'ppt'; CHEEREIO will multiply the GEOS-Chem mole-mole ratio to get these units.
+   :param bool includesNature: True or False, include the no-assimilation control run in plot.
+
 
 tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None):
 
