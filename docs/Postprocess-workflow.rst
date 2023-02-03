@@ -19,19 +19,25 @@ If the postprocessing workflow runs successfully, then the following figures and
 
 .. option:: actual_observations and simulated_observations movies
 	
-	TKTKTKT.
+	These movies show actual observations and simulated observations on the GEOS-Chem grid, and their evolution over time. One of each of these movies is made for every observed species.  
 
-.. option:: Observation counts movies
-	
-	total_aggregated_observation_counts_CH4_TROPOMI.mp4 total_raw_observation_counts_CH4_TROPOMI.mp4
+	.. attention:: 
 
-.. option:: Mean observation and observation counts plots
+	There are known issues with the colorbar in these movies, and will be debugged soon (DP: 2/3/2023). 
+
+.. option:: Observation counts movies (total_aggregated_observation_count and total_raw_observation_counts)
 	
-	total_obs_count_CH4_TROPOMI.png weighted_mean_obs_CH4_TROPOMI.png
+	These movies show the total counts of observations (both raw and aggregated to the GEOS-Chem grid) and their evolution over time. One of each of these movies is made for every observed species.  
+
+.. option:: Mean observation and observation counts plots (weighted_mean_obs, total_obs_count)
+	
+	Maps showing the average observations in the postprocessing period on the GEOS-Chem grid, as well as the number of observations averaged to make the map. One of each of these plots is made for each observation type.
 
 .. option:: assim_minus_obs and ctrl_minus_obs plots
 	
-	TKTKTKT.
+	The assim_minus_obs plots show the difference between the ensemble mean simulated observations and the mean observations over the entire postprocessing period, plotted as a map; one is generated per observed species. The ctrl_minus_obs show the same, but the difference is between the control simulation and observations. 
+
+	The mean bias and standard deviation of these plots is stored in the ``stats_out.txt`` file in the ``postprocess`` folder of the CHEEREIO code directory.
 
 .. option:: Scalefactor map plots (various time slices)
 	
