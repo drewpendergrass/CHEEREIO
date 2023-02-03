@@ -23,12 +23,12 @@ This section is under construction, check back later!
 The postprocessing API
 -------------
 
-This section is under construction, check back later!
+Here we list the postprocessing functions, which are stored in the ``postprocess_tools.py`` and ``map_tools.py`` files in the ``postprocessing`` folder.
 
 Functions in postprocess_tools
 ~~~~~~~~~~~~~
 
-Here is the documentation for the postprocessing toolkit, present in the ``postprocess_tolls.py`` file in the ``postprocessing`` folder.
+Here is the documentation for the postprocessing toolkit, present in the ``postprocess_tools.py`` file in the ``postprocessing`` folder.
 
 .. py:function:: globDirs(ensemble_dir,removeNature=False,includeOutputDir=False)
 
@@ -203,7 +203,7 @@ Here is the documentation for the postprocessing toolkit, present in the ``postp
 Functions in map_tools
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+Here is the documentation for the postprocessing mapmaking toolkit, present in the ``map_tools.py`` file in the ``postprocessing`` folder.
 
 .. py:function:: plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None)
 
@@ -235,7 +235,7 @@ This section is under construction, check back later!
    :param float min_emis_std: Minimum emissions standard deviation value to include in the plots of emissions standard deviations; below this value set to nan. No minimum if ``None``.
    :param bool plotcontrol: True or False, should we plot the control emission maps?
    :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done. Usually supplied by ``lognormalErrors`` in ``ens_config.json``.
-   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot?
+   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot? Uses :py:func:`agg_to_monthly` to aggregate.
 
 
 .. py:function:: plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True)
@@ -247,12 +247,17 @@ This section is under construction, check back later!
    :param array lon: Longitude values. 
    :param str ppdir: Path to postprocess directory. This function will read in the data files output from :py:func:`combineScaleFactors` and save the files here. 
    :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done. Usually supplied by ``lognormalErrors`` in ``ens_config.json``.
-   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot?
+   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot? Uses :py:func:`agg_to_monthly` to aggregate.
 
+.. py:function:: agg_to_monthly(dates, to_agg)
 
+   Aggregate a NumPy array to monthly resolution and return.
 
-agg_to_monthly(dates, to_agg)
-return [dates,to_return]
+   :param array dates: An array of dates, which are used to aggregate to monthly resolution.
+   :param array to_agg: A three or four dimensional array to aggregate to monthly resolution. If three-dimensional, we assume time is the 1st entry; if four-dimensional, we assume time is the second entry.
+   :return: A list with (1) the monthly dates, and (2) the aggregated array now at monthly resolution.
+   :rtype: list
+
 
 .. _New field in postprocessing:
 
