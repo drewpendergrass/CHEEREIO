@@ -3,17 +3,19 @@
 The postprocessing workflow  
 ==========
 
-This section is under construction, check back later!
+Once the CHEEREIO ensemble is complete, we need to postprocess the output into a useable form to analyze. On this page we describe how the postprocessing workflow works, and how to use the postprocessing functions to do additional customized analysis.
 
 How to run the default postprocessing workflow
 -------------
 
-This section is under construction, check back later!
+The postprocessing workflow works automatically by using settings in ``ens_config.json``, and can be run by navigating to the ``postprocess`` folder in the CHEEREIO code directory and executing ``postprocess.batch`` with an sbatch command (i.e. ``sbatch postprocess.batch``). Modify the script first for your cluster and memory requirements.
+
+Another default workflow that users can use is in ``snapshot.sh``. This script can be executed at any time during CHEEREIO run time to make a few plots that give an idea of CHEEREIO run status. See :ref:`Monitoring run` for details.
 
 The postprocessed figures
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+If the postprocessing workflow runs successfully
 
 The postprocessed data files
 ~~~~~~~~~~~~~
@@ -23,7 +25,7 @@ This section is under construction, check back later!
 The postprocessing API
 -------------
 
-Here we list the postprocessing functions, which are stored in the ``postprocess_tools.py`` and ``map_tools.py`` files in the ``postprocessing`` folder.
+Here we list the postprocessing functions, which are stored in the ``postprocess_tools.py`` and ``map_tools.py`` files in the ``postprocessing`` folder. These functions are called in the default postprocessing workflow, and can also be used 
 
 Functions in postprocess_tools
 ~~~~~~~~~~~~~

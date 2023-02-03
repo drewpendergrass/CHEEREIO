@@ -80,6 +80,8 @@ Starting the run
 
 Once the ensemble is fully installed, and  ensemble spinup is complete (if using method 2 above), initiating the CHEEREIO run is simple. Navigate to the Ensemble Runs Directory (see the :ref:`Guide to the Ensemble Directory` entry for details on ensemble directory structure). Then, execute the ``run_ens.sh`` script with the command ``nohup bash run_ens.sh &``. That's it!
 
+.. _Monitoring run:
+
 Monitoring the run progress
 -------------
 
