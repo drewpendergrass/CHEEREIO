@@ -124,7 +124,7 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :param datetime startdate: Start date for when we should process Y datasets. 
    :param datetime enddate: End date for when we should process Y datasets. 
    :param str fullpath_output_name: Path and filename of the pickle file to which we should save the combined Y dataset. If ``None``, return the data instead.
-   :return: If fullpath_output_name is ``None``, an dictionary with the combined Y datasets. The keys are timestamps and the values are the bigY data for the given day. See :ref:`HIST Ensemble` for details.
+   :return: If fullpath_output_name is ``None``, an dictionary with the combined Y datasets. The keys are timestamps and the values are the bigY data dictionary for the given day -- entries in these include 'Latitude', 'Longitude', 'Observations', and the species name. See :ref:`HIST Ensemble` for details.
    :rtype: dict
 
 plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
