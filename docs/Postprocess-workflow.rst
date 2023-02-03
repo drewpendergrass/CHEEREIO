@@ -157,7 +157,7 @@ Here is the documentation for the postprocessing toolkit, present in the ``postp
    :param DataSet ds_ensemble: DataSet of the combined ensemble HEMCO diagnostics, output by :py:func:`combineHemcoDiag`. 
    :param DataSet ds_prior: DataSet of the control HEMCO diagnostics, output by :py:func:`combineHemcoDiagControl`. 
    :param list collectionName: Name of HEMCO diagnostic collection to plot. 
-   :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done.
+   :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done. Usually supplied by ``lognormalErrors`` in ``ens_config.json``.
    :param list timeslice: A list of two datetime objects indicating the start and end of the time period of interest. Leave as None to request the entire time period.
    :param str outfile: Name of image file containing plot. If None, display the plot instead.
 
@@ -221,9 +221,35 @@ This section is under construction, check back later!
    :param float minval: Minimum value to include in the plot; below this value set to nan. No minimum if ``None``.
 
 
-plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, aggToMonthly=True):
+.. py:function:: plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, aggToMonthly=True)
 
-plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True):
+   Plot emissions, listed in ``hemco_diags_to_process``, on a map and write to file. Also plot ensemble standard deviations and control emissions.
+
+   :param Basemap m: Basemap object for plotting.
+   :param array lat: Latitude values.
+   :param array lon: Longitude values. 
+   :param str ppdir: Path to postprocess directory. This function will read in the data files output from :py:func:`combineHemcoDiag` and :py:func:`combineHemcoDiagControl` and save the files here. 
+   :param list hemco_diags_to_process: List of hemco diagnostics to plot. Usually given by ``hemco_diags_to_process`` in ``ens_config.json``.
+   :param bool plotWithLogScale: True or False, use a log scale for the colorbar.
+   :param float min_emis: Minimum emissions value to include in the plot; below this value set to nan. No minimum if ``None``.
+   :param float min_emis_std: Minimum emissions standard deviation value to include in the plots of emissions standard deviations; below this value set to nan. No minimum if ``None``.
+   :param bool plotcontrol: True or False, should we plot the control emission maps?
+   :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done. Usually supplied by ``lognormalErrors`` in ``ens_config.json``.
+   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot?
+
+
+.. py:function:: plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True)
+
+   Plot emissions scaling factors on a map and write to file.
+
+   :param Basemap m: Basemap object for plotting.
+   :param array lat: Latitude values.
+   :param array lon: Longitude values. 
+   :param str ppdir: Path to postprocess directory. This function will read in the data files output from :py:func:`combineScaleFactors` and save the files here. 
+   :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done. Usually supplied by ``lognormalErrors`` in ``ens_config.json``.
+   :param bool aggToMonthly: True or False, should we average emissions data to monthly resolution when we plot?
+
+
 
 agg_to_monthly(dates, to_agg)
 return [dates,to_return]
