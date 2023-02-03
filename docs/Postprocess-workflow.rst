@@ -15,12 +15,82 @@ Another default workflow that users can use is in ``snapshot.sh``. This script c
 The postprocessed figures
 ~~~~~~~~~~~~~
 
-If the postprocessing workflow runs successfully
+If the postprocessing workflow runs successfully, then the following figures and movies will be present in the ensemble ``postprocess/`` folder. 
+
+.. option:: actual_observations and simulated_observations movies
+	
+	TKTKTKT.
+
+.. option:: Observation counts movies
+	
+	total_aggregated_observation_counts_CH4_TROPOMI.mp4 total_raw_observation_counts_CH4_TROPOMI.mp4
+
+.. option:: Mean observation and observation counts plots
+	
+	total_obs_count_CH4_TROPOMI.png weighted_mean_obs_CH4_TROPOMI.png
+
+.. option:: assim_minus_obs and ctrl_minus_obs plots
+	
+	TKTKTKT.
+
+.. option:: Scalefactor map plots (various time slices)
+	
+	TKTKTKT.
+
+.. option:: Scalefactor map movies
+	
+	Australia, CONUS, EastChina, Europe, India, SouthAmerica, SouthernAfrica, and global. Max, mean, min, range, sd.
+
+.. option:: SpeciesConc map movies
+	
+	Australia, CONUS, EastChina, Europe, India, SouthAmerica, SouthernAfrica, and global. Max, mean, min, range, sd.
+
+.. option:: HEMCO diagnostic map plots (various time slices)
+	
+	EmisCH4_Total_2019-01-03T00_control.png, EmisCH4_Total_2019-01-03T00_ensemble_mean.png, EmisCH4_Total_2019-01-03T00_ensemble_std.png
+
+.. option:: Observation ts compare plots
+	
+	observations_ts_compare_CH4_TROPOMI.png and w_control.png
+
+.. option:: Surface mean timeseries
+	
+	surfmean_ts_CH4.png
+
+.. option:: Emissions timeseries
+	
+	timeseries_totalemissions_EmisCH4_Total_against_prior.png
+
 
 The postprocessed data files
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+After the default postprocessing run, the following data files will be present in the ensemble ``postprocess/`` folder. 
+
+.. option:: bigy_arrays_for_plotting.pkl
+	
+	TKTKTKT.
+
+.. option:: bigY.pkl
+	
+	TKTKTKT.
+
+.. option:: Scalefactor .nc files
+	
+	TKTKTKT.
+
+.. option:: combined_HEMCO_diagnostics.nc file
+	
+	TKTKTKT.
+
+.. option:: control_HEMCO_diagnostics.nc file
+	
+	TKTKTKT.
+
+.. option:: controlvar_pp.nc file
+	
+	TKTKTKT.
+
 
 The postprocessing API
 -------------
