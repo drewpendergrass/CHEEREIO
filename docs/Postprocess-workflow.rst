@@ -74,11 +74,11 @@ If the postprocessing workflow runs successfully, then the following figures and
 
 .. option:: Surface mean timeseries
 	
-	 TODO surfmean_ts_CH4.png
+	 These plots, one generated for each species in the control vector (``CONTROL_VECTOR_CONC`` within ``ens_config.json``), show the mean surface concentration value over time (with the ensemble standard deviation showed with a dotted line). The files are named with pattern ``surfmean_ts_{SPECIES}.png``.
 
 .. option:: Emissions timeseries
 	
-	TODO timeseries_totalemissions_EmisCH4_Total_against_prior.png
+	These plots, one generated for each diagnostic in the HEMCO Diagnostic plot list (``hemco_diags_to_process`` within ``ens_config.json``), show the post-assimilation total emissions against the prior total emissions over time. The files are named with pattern ``timeseries_totalemissions_{HEMCO_Diag}_against_prior.png``.
 
 
 The postprocessed data files
