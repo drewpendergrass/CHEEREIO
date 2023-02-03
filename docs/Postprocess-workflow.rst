@@ -28,7 +28,7 @@ This section is under construction, check back later!
 Functions in postprocess_tools
 ~~~~~~~~~~~~~
 
-Here is the documentation for the postprocessing toolkit. Users are especially likely to use :py:func:`combineScaleFactors`. TKTKTK
+Here is the documentation for the postprocessing toolkit, present in the ``postprocess_tolls.py`` file in the ``postprocessing`` folder.
 
 .. py:function:: globDirs(ensemble_dir,removeNature=False,includeOutputDir=False)
 
@@ -200,14 +200,26 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :return: A dictionary with keys "obscount", containing the total number of observations; "obscount_avg", containing the total number of observations after averaging to the GEOS-Chem grid; "obs", containing actual observations; "sim_obs", containing simulated observations from the GEOS-Chem ensemble mean; "control", containing simulated observations from the GEOS-Chem control run if requested; and a list of dates under "dates" and species under "species". The NumPy arrays have dimension (date, species, lat, lon), indexed by the "dates" dictionary entry, "species" dictionary entry, gclat, and gclon arrays respectively.
    :rtype: dict
 
-
-
 Functions in map_tools
 ~~~~~~~~~~~~~
 
 This section is under construction, check back later!
 
-plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
+.. py:function:: plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None)
+
+   Utility method to plot a 2D dataset on a map.
+
+   :param Basemap m: Basemap object for plotting.
+   :param array lat: Latitude values.
+   :param array lon: Longitude values. 
+   :param array flat: 2D array of data to plot.
+   :param str labelname: Name of label for color bar. 
+   :param str outfile: Name of image file containing plot.
+   :param list clim: List of the minimum and maximum values for the colorbar. If None, use the maximum and minimum values of the dataset.
+   :param colormap cmap: Colormap to use for plot; defaults to jet if none supplied.
+   :param bool useLog: True or False, use a log scale for the colorbar.
+   :param float minval: Minimum value to include in the plot; below this value set to nan. No minimum if ``None``.
+
 
 plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, aggToMonthly=True):
 
