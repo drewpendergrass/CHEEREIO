@@ -88,27 +88,27 @@ After the default postprocessing run, the following data files will be present i
 
 .. option:: bigy_arrays_for_plotting.pkl
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`makeBigYArrays` function.
 
 .. option:: bigY.pkl
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`makeYEachAssimPeriod` function.
 
 .. option:: Scalefactor .nc files
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`combineScaleFactors` function.
 
 .. option:: combined_HEMCO_diagnostics.nc file
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`combineHemcoDiag` function.
 
 .. option:: control_HEMCO_diagnostics.nc file
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`combineHemcoDiagControl` function.
 
 .. option:: controlvar_pp.nc file
 	
-	TKTKTKT.
+	TKTKTKT. Output by the :py:func:`makeDatasetForEnsemble` function.
 
 
 The postprocessing API
