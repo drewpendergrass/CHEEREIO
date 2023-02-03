@@ -187,9 +187,20 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :param array prior: Optional array of values for the prior, corresponding with ``priortime`` in time, which will be labeled 'Prior' on the plot. 
    :param str outfile: Name of image file containing plot. If None, display the plot instead.
 
+.. py:function:: makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=False)
 
-makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=False):
-return arraysbase
+   Take the aggregated big Y data dictionary, as output by :py:func:`makeYEachAssimPeriod`, and processes it into a dictionary containing gridded NumPy arrays. The gridded NumPy arrays are used for plotting.
+
+   :param dict bigY: Dictionary containing the Y dictionaries across the entire ensemble. Output from :py:func:`makeYEachAssimPeriod`.
+   :param array gclat: Latitude from GEOS-Chem grid.
+   :param array gclon: Longitude from GEOS-Chem grid. 
+   :param int nEnsemble: Number of ensemble members. 
+   :param bool postprocess_save_albedo: True or False, should we process albedo data from TROPOMI CH4? 
+   :param bool useControl: True or False, should we process simulated observation data from the control run? 
+   :return: A dictionary with keys "obscount", containing the total number of observations; "obscount_avg", containing the total number of observations after averaging to the GEOS-Chem grid; "obs", containing actual observations; "sim_obs", containing simulated observations from the GEOS-Chem ensemble mean; "control", containing simulated observations from the GEOS-Chem control run if requested; and a list of dates under "dates" and species under "species". The NumPy arrays have dimension (date, species, lat, lon), indexed by the "dates" dictionary entry, "species" dictionary entry, gclat, and gclon arrays respectively.
+   :rtype: dict
+
+
 
 Functions in map_tools
 ~~~~~~~~~~~~~
