@@ -150,11 +150,43 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :param bool includesNature: True or False, include the no-assimilation control run in plot.
 
 
-tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None):
+.. py:function:: tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None)
 
-tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
+   Plot a timeseries of a HEMCO diagnostic of interest and compare it to control (no assimilation).
 
-tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,outfile=None):
+   :param DataSet ds_ensemble: DataSet of the combined ensemble HEMCO diagnostics, output by :py:func:`combineHemcoDiag`. 
+   :param DataSet ds_prior: DataSet of the control HEMCO diagnostics, output by :py:func:`combineHemcoDiagControl`. 
+   :param list collectionName: Name of HEMCO diagnostic collection to plot. 
+   :param bool useLognormal: True or False, are we using lognormal errors for emissions? This affects how the averaging is done.
+   :param list timeslice: A list of two datetime objects indicating the start and end of the time period of interest. Leave as None to request the entire time period.
+   :param str outfile: Name of image file containing plot. If None, display the plot instead.
+
+.. py:function:: tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None)
+
+   Plot a timeseries of simulated observations from the ensemble against the true observations, along with the control (no assimilation) simulation if requested.
+
+   :param dict bigY: Dictionary containing the Y dictionaries across the entire ensemble. Output from :py:func:`makeYEachAssimPeriod`.
+   :param str species: Species to plot 
+   :param int numens: Number of ensemble members. 
+   :param str unit: Unit to use on the plot label; usually stored in the ``OBSERVATION_UNITS`` entry in ``ens_config.json``.
+   :param str observer_name: Name of the observer to use on the plot legend; usually stored in the ``OBS_TYPE`` entry in ``ens_config.json``.
+   :param bool useControl: True or False, should we include the control simulation as a separate line on the plot?
+   :param str outfile: Name of image file containing plot. If None, display the plot instead.
+
+.. py:function:: tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,outfile=None)
+
+   Utility method to plot a timeseries of ensemble data, with dotted standard deviation, along with control the (no assimilation) simulation data if requested.
+
+   :param array time: Array of time values to plot on the x axis.
+   :param array ensmean: Array of the ensemble mean value of the data of interest. 
+   :param array enssd: Array of the ensemble standard deviation value of the data of interest.
+   :param str species_name: Name of species for plot title 
+   :param str unit: Unit to use on the plot label.
+   :param array nature: Optional array of values, matching ``ensmean`` in time, which will be labeled 'Nature' on the plot.
+   :param array priortime: Optional array of time values for the prior (no assimilation), which will be labeled 'Prior' on the plot. 
+   :param array prior: Optional array of values for the prior, corresponding with ``priortime`` in time, which will be labeled 'Prior' on the plot. 
+   :param str outfile: Name of image file containing plot. If None, display the plot instead.
+
 
 makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=False):
 return arraysbase
