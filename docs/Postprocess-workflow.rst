@@ -89,12 +89,32 @@ Here is the documentation for the postprocessing toolkit. Users are especially l
    :param str output_dir: Path to where the combined HEMCO diagnostic NetCDF should be saved. 
    :param list timeperiod: A list of two datetime objects indicating the start and end of the time period of interest. Leave as None to request the entire time period.
 
+.. py:function:: makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None)
 
-makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None)
-return ds
+   Combine GEOS-Chem species concentration output from a single ensemble member as a single dataset and either save to a NetCDF file or return.
 
-makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE',fullpath_output_name = None)
-return ds
+   :param str hist_dir: Path to GEOS-Chem output directory. 
+   :param list species_names: List of species that we would like to process. 
+   :param list timeperiod: A list of two datetime objects indicating the start and end of the time period of interest. Leave as None to request the entire time period.
+   :param int hourlysub: Only grab files whose hour timestamp is divisible by this number; i.e. 6 means that we grab data every six hours.
+   :param str subset_rule: Which vertical level(s) to save data from. SURFACE is the surface, 850 is the 850hPa level, and ALL is all vertical data.
+   :param str fullpath_output_name: Path and filename of the NetCDF file to which we should save the combined data. If ``None``, return the data instead
+   :return: If fullpath_output_name is ``None``, an xarray DataSet with the combined concentrations.
+   :rtype: DataSet
+
+
+.. py:function:: makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None)
+
+   Combine GEOS-Chem species concentration output from across the ensemble as a single dataset, with a new Ensemble dimension denoting ensemble member number, and either save to a NetCDF file or return.
+
+   :param str ensemble_dir: Path to CHEEREIO ensemble directory. 
+   :param list species_names: List of species that we would like to process. 
+   :param list timeperiod: A list of two datetime objects indicating the start and end of the time period of interest. Leave as None to request the entire time period.
+   :param int hourlysub: Only grab files whose hour timestamp is divisible by this number; i.e. 6 means that we grab data every six hours.
+   :param str subset_rule: Which vertical level(s) to save data from. SURFACE is the surface, 850 is the 850hPa level, and ALL is all vertical data.
+   :param str fullpath_output_name: Path and filename of the NetCDF file to which we should save the combined data. If ``None``, return the data instead
+   :return: If fullpath_output_name is ``None``, an xarray DataSet with the combined concentrations.
+   :rtype: DataSet
 
 makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpath_output_name = None):
 return masterY
