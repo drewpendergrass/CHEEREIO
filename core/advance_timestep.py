@@ -15,8 +15,8 @@ ENS_SPINUP_END = spc_config['ENS_SPINUP_END']
 ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
 
 #This tool also handles whether we scale at the end of the burn in period, producing signal files to trigger the appropriate processes
-SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD = spc_config['SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD'] == "true"
-if SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD:
+DO_BURN_IN = spc_config['DO_BURN_IN'] == "true"
+if DO_BURN_IN:
 	BURN_IN_END = spc_config['BURN_IN_END']
 	BURN_IN_END_datetime = datetime.strptime(BURN_IN_END, "%Y%m%d")
 
@@ -36,7 +36,7 @@ else:
 	end_string = end_datetime.strftime("%Y%m%d %H%M%S")
 
 #Check if the upcoming assimilation period will end  after the burn in period ends
-if SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD:
+if DO_BURN_IN:
 	#If burn in period will be over at end of next GC cycle
 	if end_datetime >= BURN_IN_END_datetime:
 		#If we have already processed the burn in period in GC

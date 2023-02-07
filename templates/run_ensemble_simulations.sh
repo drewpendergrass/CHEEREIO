@@ -37,6 +37,7 @@ fi
 firstrun=true
 scalefirst="$(jq -r ".SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
 trigger_burnin_scale=false
+doburnin="$(jq -r ".DO_BURN_IN" {ASSIM}/ens_config.json)"
 scaleburnin="$(jq -r ".SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" {ASSIM}/ens_config.json)"
 amplifyspread="$(jq -r ".AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" {ASSIM}/ens_config.json)"
 
@@ -90,7 +91,7 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
     trigger_burnin_scale=false
   fi
   #Check if we are doing a simple scale or a full assimilation
-  if [[ ("${firstrun}" = "true" && "${scalefirst}" = "true") || ("${trigger_burnin_scale}" = "true" && "${scaleburnin}" = "true") ]]; then
+  if [[ ("${firstrun}" = "true" && "${scalefirst}" = "true") || ("${trigger_burnin_scale}" = "true" && "${doburnin}" = "true" && "${scaleburnin}" = "true") ]]; then
     simplescale=true
   else
     simplescale=false
@@ -104,9 +105,9 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   #Use GNU parallel to submit parallel sruns, except nature
   if [ $x -ne 0 ]; then
     if [ {MaxPar} -eq 1 ]; then
-      bash par_assim.sh ${x} 1 ${simplescale} ${doamplification}
+      bash par_assim.sh ${x} 1 ${firstrun} ${simplescale} ${doamplification}
     else
-      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${simplescale} ${doamplification}" ::: {1..{MaxPar}}
+      parallel -j {MaxPar} "bash par_assim.sh ${x} {1} ${firstrun} ${simplescale} ${doamplification}" ::: {1..{MaxPar}}
     fi 
   fi
   #Hang until assimilation completes or cleanup completes (in case things go too quickly)
@@ -127,11 +128,19 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   fi
   #If this is ensemble member 1, and this is the first run, switch to main assimilation mode with regular intervals.
   if [ $x -eq 1 ] && [ "${firstrun}" = true ]; then
-    bash change_histrst_durfreq.sh
+    if [ "${doburnin}" = true ]; then #If we are burning in, do burn in durfreq update to restarts
+      bash change_histrst_durfreq.sh "BURNIN_DURFREQ"
+    else 
+      bash change_histrst_durfreq.sh "UPDATEDURFREQ"
+    fi
   fi
   #For all runs, switch off the first run marker.
   if [ "${firstrun}" = true ]; then
     firstrun=false
+  fi
+  #If this is ensemble member one, and we have finished burn in, and we are doing burn in, switch to main assimilation mode with regular intervals.
+  if [ $x -eq 1 ] && [ "${doburnin}" = true ] && [ "${trigger_burnin_scale}" = true ]; then
+    bash change_histrst_durfreq.sh "UPDATEDURFREQ"
   fi
   #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
   if [ $x -eq 1 ]; then

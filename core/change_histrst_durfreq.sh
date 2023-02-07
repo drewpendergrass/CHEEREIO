@@ -5,7 +5,7 @@
 #matches ASSIM_TIME in ens_config.json
 
 source activate $(jq -r ".CondaEnv" ../ens_config.json)
-python update_history.py "UPDATEDURFREQ"
+python update_history.py ${1}
 conda deactivate
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"

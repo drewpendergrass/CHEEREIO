@@ -8,8 +8,9 @@ path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
 ensnum = int(sys.argv[2])
 corenum = int(sys.argv[3])
-just_scale = str(sys.argv[4])=='true' #If this is the first run AND user specifies, we'll just scale (no assimilation); this is calculated in the run_ensemble_simulations script now.
-do_amplification = str(sys.argv[5])=='true' #If this is the first run AND user specifies, we'll amplify the spreads of the ensemble member concentrations.
+first_run = str(sys.argv[4])=='true' #If this is the first run, will be true.
+just_scale = str(sys.argv[5])=='true' #If this is the first run AND user specifies, we'll just scale (no assimilation); this is calculated in the run_ensemble_simulations script now.
+do_amplification = str(sys.argv[6])=='true' #If this is the first run AND user specifies, we'll amplify the spreads of the ensemble member concentrations.
 if just_scale:
 	label_str = 'scaling'
 else:

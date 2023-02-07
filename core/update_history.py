@@ -15,6 +15,12 @@ class HISTORY_Translator():
 				self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/control_run/"
 			else:
 				self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs/{foldername}/"
+		self.do_rip = self.spc_config['DO_RUN_IN_PLACE']=="True"
+		if self.do_rip:
+			self.rip_aw = int(self.spc_config['rip_update_time'])
+			self.do_diff_burnin_rip = self.spc_config['DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN']=="True"
+			if self.do_diff_burnin_rip: #If we have a different RIP for burn in
+				self.burnin_rip_aw = int(self.spc_config['rip_burnin_update_time'])
 		with open(self.historyrc_path+'HISTORY.rc') as f:
 			self.lines = f.readlines()
 		self.linenums = np.arange(0,len(self.lines))
@@ -43,7 +49,16 @@ class HISTORY_Translator():
 		elif isFirst=="Spinup":
 			timestr="'End'"
 		else:
-			ASSIM_TIME = int(self.spc_config['ASSIM_TIME'])
+			if self.do_rip:
+				if isFirst=="Burn-in": #If we are in burn in
+					if self.do_diff_burnin_rip: #If we are in burn in, and doing a different RIP for burn in
+						ASSIM_TIME = self.burnin_rip_aw 
+					else:
+						ASSIM_TIME = self.rip_aw
+				else: #Otherwise, in mid run, just do the RIP aw.
+					ASSIM_TIME = self.rip_aw
+			else:
+				ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) #If not doing run in place, don't worry about it 
 			assim_days = int(np.floor(ASSIM_TIME/24))
 			assim_hours = ASSIM_TIME%24
 			daystr = str(assim_days).zfill(2)
@@ -183,6 +198,8 @@ elif settingsstr=="PREPMAIN":
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="UPDATEDURFREQ":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
+elif settingsstr=="BURNIN_DURFREQ":
+	trans.updateRestartDurationFrequency(isFirst="Burn-in")
 elif settingsstr=="SETCONTROL":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
