@@ -5,7 +5,6 @@
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 
-bash update_current_time.sh ${1} #Advance timestep forward
 bash update_input_geos.sh "ASSIM" #Overwrite the input.geos files.
 
 #Remove signal files

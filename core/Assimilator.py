@@ -18,7 +18,7 @@ from HIST_Ens import HIST_Ens
 #That restart will be overwritten in place (name not changed) so next run starts from the assimilation state vector.
 #Emissions scaling factors are most recent available (one assimilation timestep ago). New values will be appended to netCDF. 
 class Assimilator(object):
-	def __init__(self,timestamp,ensnum,corenum):
+	def __init__(self,timestamp,ensnum,corenum,timestamp_from_rip=None):
 		spc_config = si.getSpeciesConfig()
 		self.verbose = int(spc_config['verbose'])
 		self.ensnum = ensnum
@@ -67,11 +67,16 @@ class Assimilator(object):
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		if self.verbose>=2:
 			print(f"Begin creating GC Translators with state vectors.")
+		#If we are running in place, use a different timestamp to make the GC translators.
+		if timestamp_from_rip is not None:
+			timestamp_for_gt = timestamp_from_rip
+		else:
+			timestamp_for_gt = timestamp
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if ens==0:
-				self.control = GC_Translator(directory, timestamp, False,self.verbose)
+				self.control = GC_Translator(directory, timestamp_for_gt, False,self.verbose)
 			else: 
-				self.gt[ens] = GC_Translator(directory, timestamp, True,self.verbose)
+				self.gt[ens] = GC_Translator(directory, timestamp_for_gt, True,self.verbose)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		if self.verbose>=2:
@@ -87,8 +92,9 @@ class Assimilator(object):
 				self.postprocess_save_albedo = spc_config['postprocess_save_albedo']=="True"
 			else:
 				self.postprocess_save_albedo = False
+			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
-		else:
+		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
 		if self.verbose>=2:

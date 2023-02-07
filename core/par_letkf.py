@@ -2,10 +2,34 @@ from Assimilator import Assimilator
 import sys
 import time
 import settings_interface as si 
+import numpy as np
+from datetime import datetime,timedelta
 
 data = si.getSpeciesConfig()
 path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
+
+with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
+    lines = f.readlines()
+
+actual_aw = float(lines[0])
+do_rip_aw = False
+
+if not np.isnan(actual_aw)
+	actual_aw = int(actual_aw)
+	do_rip_aw = True
+
+#Calculate time to use for restart load if we are doing run in place; different from timestamp
+if do_rip_aw:
+	ASSIM_TIME = int(data['ASSIM_TIME'])
+	backwards = ASSIM_TIME-actual_aw #How many hours backwards should we look from current timestamp for restart to use in building state vector?
+	timestamp_datetime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
+	delta = timedelta(hours=int(backwards))
+	timestamp_restart_dt = timestamp_datetime-delta
+	timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d %H%M")
+else:
+	timestamp_restart = None
+
 ensnum = int(sys.argv[2])
 corenum = int(sys.argv[3])
 first_run = str(sys.argv[4])=='true' #If this is the first run, will be true.
@@ -22,8 +46,8 @@ if just_scale:
 	if (ensnum == 1) and (corenum==1):
 		print(f'Core ({ensnum},{corenum}) is gathering ensemble at time {dateval}.')
 		start = time.time()
-		print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum})')
-		a = Assimilator(timestamp,ensnum,corenum)
+		print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum},timestamp_from_rip={timestamp_restart})')
+		a = Assimilator(timestamp,ensnum,corenum,timestamp_from_rip=timestamp_restart)
 		end = time.time()
 		print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
 		start = time.time()
@@ -40,9 +64,9 @@ if just_scale:
 else:
 	print(f'Core ({ensnum},{corenum}) is gathering ensemble at time {dateval}.')
 	start = time.time()
-	print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum})')
+	print(f'Assimilator call: Assimilator({timestamp},{ensnum},{corenum},timestamp_from_rip={timestamp_restart})')
 	#a = Assimilator('20190108_0000',2,1)
-	a = Assimilator(timestamp,ensnum,corenum)
+	a = Assimilator(timestamp,ensnum,corenum,timestamp_from_rip=timestamp_restart)
 	end = time.time()
 	print(f'Core ({ensnum},{corenum}) gathered ensemble in {end - start} seconds. Begin {label_str} procedure.')
 	start = time.time()

@@ -2,6 +2,7 @@ import settings_interface as si
 import os.path
 from datetime import datetime,timedelta
 import sys
+import numpy as np
 
 periodstr = str(sys.argv[1])
 spc_config = si.getSpeciesConfig()
@@ -9,10 +10,22 @@ spc_config = si.getSpeciesConfig()
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}"
 ens_dir = f"{parent_dir}/ensemble_runs"
 ASSIM_TIME = spc_config['ASSIM_TIME']
+START_DATE = spc_config['START_DATE']
 ENS_END_DATE = spc_config['END_DATE']
 ASSIM_START_DATE = spc_config['ASSIM_START_DATE']
+ENS_SPINUP_START = spc_config['ENS_SPINUP_START']
 ENS_SPINUP_END = spc_config['ENS_SPINUP_END']
 ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
+
+with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
+    lines = f.readlines()
+
+actual_aw = float(lines[0])
+do_rip_aw = False
+
+if not np.isnan(actual_aw)
+	actual_aw = int(actual_aw)
+	do_rip_aw = True
 
 #This tool also handles whether we scale at the end of the burn in period, producing signal files to trigger the appropriate processes
 DO_BURN_IN = spc_config['DO_BURN_IN'] == "true"
@@ -20,17 +33,29 @@ if DO_BURN_IN:
 	BURN_IN_END = spc_config['BURN_IN_END']
 	BURN_IN_END_datetime = datetime.strptime(BURN_IN_END, "%Y%m%d")
 
-with open(f"{parent_dir}/scratch/CURRENT_DATE_TIME") as f:
-    start_string = f.readlines()[0].rstrip()
+with open(f"{parent_dir}/scratch/INPUT_GEOS_TEMP") as f:
+	lines = f.readlines()
+    
+ig_startstring = lines[0].rstrip()
+ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
+ig_endstring = lines[1].rstrip()
+ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
 
-start_datetime = datetime.strptime(start_string, "%Y%m%d %H%M%S")
 if periodstr=="FIRST":
+	start_string = f"{START_DATE} 000000"
 	end_string = f"{ASSIM_START_DATE} 000000"
 	end_datetime = datetime.strptime(ASSIM_START_DATE, "%Y%m%d")
 elif periodstr=="SPINUP":
+	start_string = f"{ENS_SPINUP_START} 000000"
 	end_string = f"{ENS_SPINUP_END} 000000"
 	end_datetime = datetime.strptime(ENS_SPINUP_END, "%Y%m%d")
 else:
+	if do_rip_aw:
+		start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
+		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
+	else:
+		start_datetime = ig_end_datetime
+		start_string = ig_endstring
 	delta = timedelta(hours=int(ASSIM_TIME))
 	end_datetime = start_datetime+delta
 	end_string = end_datetime.strftime("%Y%m%d %H%M%S")

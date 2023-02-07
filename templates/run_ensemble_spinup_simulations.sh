@@ -51,7 +51,6 @@ if [ $x -eq 1 ]; then
     sleep 1
     bash check_for_all_ensemble_spinup_restarts.sh
   done
-	printf "${START_DATE} 000000" > ${MY_PATH}/${RUN_NAME}/scratch/CURRENT_DATE_TIME
 	bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
   bash change_histcollections_durfreq.sh #update history collections.
   bash change_hemcodiag_freq.sh "ensemble" #update hemco diagnostics frequency for ensemble

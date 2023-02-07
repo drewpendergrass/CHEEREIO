@@ -6,6 +6,7 @@ class HISTORY_Translator():
 	#Constructor. If foldername is none, open template HISTORY.rc. Otherwise open ensemble member
 	def __init__(self,foldername=None):
 		self.spc_config = si.getSpeciesConfig()
+		self.path_to_scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 		if not foldername:
 			#Default to template HEMCO config
 			self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/template_run/"
@@ -24,6 +25,7 @@ class HISTORY_Translator():
 		with open(self.historyrc_path+'HISTORY.rc') as f:
 			self.lines = f.readlines()
 		self.linenums = np.arange(0,len(self.lines))
+		self.applied_RIP_aw = None #actual run in place assimilation window chosen.
 	def calcDurFreq(self,isFirst):
 		if isFirst=="First":
 			ASSIM_START_DATE = self.spc_config['ASSIM_START_DATE']
@@ -57,6 +59,7 @@ class HISTORY_Translator():
 						ASSIM_TIME = self.rip_aw
 				else: #Otherwise, in mid run, just do the RIP aw.
 					ASSIM_TIME = self.rip_aw
+				self.applied_RIP_aw = ASSIM_TIME
 			else:
 				ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) #If not doing run in place, don't worry about it 
 			assim_days = int(np.floor(ASSIM_TIME/24))
@@ -204,5 +207,13 @@ elif settingsstr=="SETCONTROL":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 
+#If we changed our run in place averaging window, write it out to scratch
+with open(f"{trans.path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW", "w") as f:
+	if trans.applied_RIP_aw is not None:
+		f.write(f"{trans.applied_RIP_aw}\n")
+	else:
+		f.write("nan")
+	f.close()
+	
 
 trans.writeHistoryConfig()
