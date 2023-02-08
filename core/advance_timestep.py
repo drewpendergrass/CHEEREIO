@@ -33,14 +33,6 @@ if DO_BURN_IN:
 	BURN_IN_END = spc_config['BURN_IN_END']
 	BURN_IN_END_datetime = datetime.strptime(BURN_IN_END, "%Y%m%d")
 
-with open(f"{parent_dir}/scratch/INPUT_GEOS_TEMP") as f:
-	lines = f.readlines()
-    
-ig_startstring = lines[0].rstrip()
-ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
-ig_endstring = lines[1].rstrip()
-ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
-
 if periodstr=="FIRST":
 	start_string = f"{START_DATE} 000000"
 	end_string = f"{ASSIM_START_DATE} 000000"
@@ -50,6 +42,13 @@ elif periodstr=="SPINUP":
 	end_string = f"{ENS_SPINUP_END} 000000"
 	end_datetime = datetime.strptime(ENS_SPINUP_END, "%Y%m%d")
 else:
+	#Load INPUT GEOS TEMP
+	with open(f"{parent_dir}/scratch/INPUT_GEOS_TEMP") as f:
+		lines = f.readlines()
+	ig_startstring = lines[0].rstrip()
+	ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
+	ig_endstring = lines[1].rstrip()
+	ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
 	if do_rip_aw:
 		start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
 		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
