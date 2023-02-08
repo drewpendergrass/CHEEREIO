@@ -52,7 +52,7 @@ else:
 	ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
 	ig_endstring = lines[1].rstrip()
 	ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
-	if do_rip_aw:
+	if do_rip_aw and (periodstr=="ASSIM"): #If we are just after the first assimilation period (POSTFIRST), don't worry about RIP.
 		start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
 		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
 	else:

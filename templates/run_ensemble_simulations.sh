@@ -134,17 +134,21 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
       bash change_histrst_durfreq.sh "UPDATEDURFREQ"
     fi
   fi
-  #For all runs, switch off the first run marker.
-  if [ "${firstrun}" = true ]; then
-    firstrun=false
-  fi
   #If this is ensemble member one, and we have finished burn in, and we are doing burn in, switch to main assimilation mode with regular intervals.
   if [ $x -eq 1 ] && [ "${doburnin}" = true ] && [ "${trigger_burnin_scale}" = true ]; then
     bash change_histrst_durfreq.sh "UPDATEDURFREQ"
   fi
   #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
   if [ $x -eq 1 ]; then
-    bash cleanup.sh #This also will break us out of this loop when assimilation complete.
+    if [ "${firstrun}" = true ]; then
+      bash cleanup.sh "POSTFIRST" #This also will break us out of this loop when assimilation complete.
+    else
+      bash cleanup.sh "ASSIM" #This also will break us out of this loop when assimilation complete.
+    fi
+  fi
+  #For all runs, switch off the first run marker.
+  if [ "${firstrun}" = true ]; then
+    firstrun=false
   fi
   #Hang until cleanup complete, as determined by temp file deletion.
   until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do
