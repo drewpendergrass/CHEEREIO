@@ -15,7 +15,7 @@ with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
 actual_aw = float(lines[0])
 do_rip_aw = False
 
-if not np.isnan(actual_aw)
+if not np.isnan(actual_aw):
 	actual_aw = int(actual_aw)
 	do_rip_aw = True
 
