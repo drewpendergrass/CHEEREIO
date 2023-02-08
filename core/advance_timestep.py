@@ -8,6 +8,7 @@ periodstr = str(sys.argv[1])
 spc_config = si.getSpeciesConfig()
 
 parent_dir = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}"
+path_to_scratch = f"{parent_dir}/scratch"
 ens_dir = f"{parent_dir}/ensemble_runs"
 ASSIM_TIME = spc_config['ASSIM_TIME']
 START_DATE = spc_config['START_DATE']
