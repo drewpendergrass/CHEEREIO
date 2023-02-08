@@ -36,10 +36,12 @@ if DO_BURN_IN:
 
 if periodstr=="FIRST":
 	start_string = f"{START_DATE} 000000"
+	start_datetime = datetime.strptime(START_DATE, "%Y%m%d")
 	end_string = f"{ASSIM_START_DATE} 000000"
 	end_datetime = datetime.strptime(ASSIM_START_DATE, "%Y%m%d")
 elif periodstr=="SPINUP":
 	start_string = f"{ENS_SPINUP_START} 000000"
+	start_datetime = datetime.strptime(ENS_SPINUP_START, "%Y%m%d")
 	end_string = f"{ENS_SPINUP_END} 000000"
 	end_datetime = datetime.strptime(ENS_SPINUP_END, "%Y%m%d")
 else:
