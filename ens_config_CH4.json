@@ -200,7 +200,7 @@
 	"LOCALIZATION_RADIUS_km" : "500",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
-	"AverageScaleFactorPosteriorWithPrior" : "True",
+	"AverageScaleFactorPosteriorWithPrior" : "False",
 	"PriorWeightinSFAverage" : "0.02",
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
