@@ -26,7 +26,7 @@ if do_rip_aw:
 	timestamp_datetime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
 	delta = timedelta(hours=int(backwards))
 	timestamp_restart_dt = timestamp_datetime-delta
-	timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d %H%M")
+	timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d_%H%M")
 else:
 	timestamp_restart = None
 
