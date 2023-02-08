@@ -84,15 +84,16 @@ check_for_all_restarts.sh
 
 A shell script which checks if all expected restarts are present with a timestamp corresponding to the end of the current GEOS-Chem run period. If all expected restarts are present, the script writes a file called ``ALL_RUNS_COMPLETE`` into the ``scratch/`` folder. This file's presence means that all ensemble members have finished running their respective GEOS-Chem simulations and the assimilation step can begin. 
 
+check_for_all_runs_complete.py
+~~~~~~~~~~~~~
+
+A Python script which checks if all GEOS-Chem runs are complete. The function is very similar to ``check_for_all_restarts.sh`` above, but it is robust to more exotic running-in-place settings; CHEEREIO automatically uses this script if necessary. 
+
 cleanup.sh
 ~~~~~~~~~~~~~
 
-A shell script called after assimilation has fully completed (i.e., all restart files and scaling factors are updated with the posterior results). This script (1) removes all assimilated columns and signal files from ``scratch/``, and (2) calls ``update_current_time.sh`` and ``update_input_geos.sh`` which prepare the GEOS-Chem input files for the next run. The removal of signal files like ``ALL_RUNS_COMPLETE`` indicate to the ensemble run script that it is safe to start GEOS-Chem again.
+A shell script called after assimilation has fully completed (i.e., all restart files and scaling factors are updated with the posterior results). This script (1) removes all assimilated columns and signal files from ``scratch/``, and (2) calls ``update_input_geos.sh`` which prepare the GEOS-Chem input files for the next run. The removal of signal files like ``ALL_RUNS_COMPLETE`` indicate to the ensemble run script that it is safe to start GEOS-Chem again.
 
-update_current_time.sh
-~~~~~~~~~~~~~
-
-A very brief shell script called at the very end of assimilation by ``cleanup.sh``, which updates the file ``CURRENT_DATE_TIME`` in ``scratch/`` so that it contains the start date for the upcoming GEOS-Chem run. 
 
 update_input_geos.sh
 ~~~~~~~~~~~~~
