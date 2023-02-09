@@ -625,6 +625,25 @@ LETKF settings
 	The prior weight if averaging scaling factors with the posterior from the LETKF. A value between 0 and 1.
 
 
+Run-in-place settings
+~~~~~~~~~~~~~
+
+.. option:: DO_RUN_IN_PLACE
+	
+	``True`` or ``False``, should we do a run-in-place simulation. See :ref:`Run in place` for more information.
+
+.. option:: rip_update_time
+	
+	In hours, the run-in-place assimilation window. In run-in-place simulations, the ``ASSIM_TIME`` variable is now interpreted as the run-in-place observation window. See :ref:`Run in place` for more information.
+
+.. option:: DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN
+	
+	``True`` or ``False``, should we use a different assimilation window during the burn in period for a run-in-place simulation. See :ref:`Run in place` for more information.
+
+.. option:: rip_burnin_update_time
+	
+	In hours, the run-in-place assimilation window during the burn in period only.
+
 Postprocessing settings
 ~~~~~~~~~~~~~
 

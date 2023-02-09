@@ -75,6 +75,17 @@ A burn-in period is a time period where full LETKF assimilation is being applied
 
 CHEEREIO allows for a burn-in period, which does two things (1) assimilations that take place during the burn-in period are removed from postprocessing results, and (2) the CHEEREIO ensemble mean is scaled to match the observational mean at the end of the burn-in period, as described in :ref:`:Simple scale`. To enable a burn-in period, set ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` to ``true`` in ``ens_config.json`` and specify the burn-in period end date with the ``BURN_IN_END`` entry. Note that the burn-in period takes place during the normal LETKF run cycle, so the ``BURN_IN_END`` time has to be after ensemble spinup completes and after ``START_TIME``. You also have to specify the postprocessing dates so that they exclude the burn-in period, and can do so with the ``POSTPROCESS_START_DATE`` and ``POSTPROCESS_END_DATE`` entries. 
 
+.. _Run in place:
+
+Running in place
+-------------
+
+Following `Liu et al. [2019] <https://doi.org/10.5194/gmd-12-2899-2019>`_ , CHEEREIO support run-in-place. The idea with run-in-place is to calculate the LETKF assimilation update with a long period of observations (e.g. 1 week) but then advance the assimilation forward for a smaller amount of time (e.g. 1 day). Run-in-place simulations thus allow the period where the assimilation update is calculated to experience the emissions adjustment; in practice, this makes it less likely for the simulation to "chase errors" because the system has more time to respond to emissions updates. Running in place is a good idea for optimizing long lived gases such as carbon dioxide and methane. In run-in-place lingo we call the longer period (in which the assimilation is calculated) the observation window and the shorter period (in which the simulation is advanced) the assimilation window.
+
+To activate run-in-place simulations, set the ``DO_RUN_IN_PLACE`` variable in ``ens_config.json`` to ``True``. Now the usual assimilation window variable ``ASSIM_TIME`` will be interpreted as the abservation window; the ``rip_update_time`` variable is the assimilation window. For example, if ``ASSIM_TIME`` is 72 and ``rip_update_time`` is 24, we run the model for 3 days, calculate the assimilation increment, and then advance the model/emissions 1 day and repeat the process from the posterior emissions/concentrations calculated by CHEEREIO.
+
+CHEEREIO allows users to optionally use a different assimilation window for run-in-place during the burn-in period. This can be activated by setting ``DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN`` to ``True`` and providing the assimilation window for the burn in period in the ``rip_burnin_update_time`` variable.
+
 Starting the run
 -------------
 
