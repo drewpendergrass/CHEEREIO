@@ -40,15 +40,15 @@ labelnames = ['Count','Count','OBSUNIT', 'OBSUNIT']
 if postprocess_save_albedo:
 	total_swir = pickledata["swir_albedo"]
 	arraysbase.append(total_swir)
-	filenamesbase.append('{pp_dir}/averaged_albedo_SWIR')
+	filenamesbase.append(f'{pp_dir}/averaged_albedo_SWIR')
 	labelnames.append('Albedo')
 	total_nir = pickledata["nir_albedo"]
 	arraysbase.append(total_nir)
-	filenamesbase.append('{pp_dir}/averaged_albedo_NIR')
+	filenamesbase.append(f'{pp_dir}/averaged_albedo_NIR')
 	labelnames.append('Albedo')
 	total_blended = pickledata["blended_albedo"]
 	arraysbase.append(total_blended)
-	filenamesbase.append('{pp_dir}/averaged_blended_albedo')
+	filenamesbase.append(f'{pp_dir}/averaged_blended_albedo')
 	labelnames.append('Albedo')
 
 
