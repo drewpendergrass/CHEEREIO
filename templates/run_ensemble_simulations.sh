@@ -138,12 +138,16 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   if [ $x -eq 1 ] && [ "${doburnin}" = true ] && [ "${trigger_burnin_scale}" = true ]; then
     bash change_histrst_durfreq.sh "UPDATEDURFREQ"
   fi
-  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once.
+  #If this is ensemble member 1, execute cleanup. This is because we only want it to run once. Cleanup passes various tags to the advance timestep script to handle edge cases for run in place simulations
   if [ $x -eq 1 ]; then
     if [ "${firstrun}" = true ]; then
       bash cleanup.sh "POSTFIRST" #This also will break us out of this loop when assimilation complete.
     else
-      bash cleanup.sh "ASSIM" #This also will break us out of this loop when assimilation complete.
+      if [ "${doburnin}" = true ] && [ "${trigger_burnin_scale}" = true ]; then
+        bash cleanup.sh "POSTBURN" #This also will break us out of this loop when assimilation complete.
+      else
+        bash cleanup.sh "ASSIM" #This also will break us out of this loop when assimilation complete.
+      fi   
     fi
   fi
   #For all runs, switch off the first run marker.
