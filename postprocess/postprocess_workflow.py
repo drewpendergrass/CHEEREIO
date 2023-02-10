@@ -86,7 +86,7 @@ if "histprocess" in sys.argv:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
 		print('Observation postprocessing files not detected; generating now.')
-		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
 	print('Simulated observation vs actual observation (Y) postprocessed and loaded.')
 
 if useControl:

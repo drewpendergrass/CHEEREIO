@@ -40,9 +40,10 @@ else:
 data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
+ASSIM_TIME = data['ASSIM_TIME']
 
 print('Loading simulated observation and observation dictionaries...')
-bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy")
+bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME))
 print('Simulated observation and observation dictionaries loaded.')
 
 nEnsemble = int(data['nEnsemble'])
