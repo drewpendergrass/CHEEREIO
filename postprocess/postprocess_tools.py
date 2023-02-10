@@ -4,7 +4,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import NullFormatter
-from datetime import datetime
+from datetime import datetime,timedelta
 import sys
 import pickle
 import pandas as pd
@@ -128,12 +128,13 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
-def makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpath_output_name = None):
+def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,startdate=None,enddate=None,fullpath_output_name = None):
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
 	bigy_list.sort()
 	timestamps = [by.split('/')[-1].split('.')[0] for by in bigy_list]
 	timestamps_datetime = [datetime.strptime(timestamp, "%Y%m%d_%H%M") for timestamp in timestamps]
+	timebounds = getDatesToSubsetEachYAssimPeriod(timestamps_datetime, assim_time)
 	for bigy_file,timestamp,timedate in zip(bigy_list,timestamps,timestamps_datetime):
 		#Don't process values during burn in period
 		if startdate is not None:
@@ -145,12 +146,35 @@ def makeYEachAssimPeriod(path_to_bigy_subsets,startdate=None,enddate=None,fullpa
 		print(f'Processing the Y dictionary for time {timestamp}')
 		with open(bigy_file,'rb') as f:
 			bigy=pickle.load(f)
+		#subset bigy to right times; needed for RIP.
+		bigy_start,bigy_end = timebounds[timedate]
+		bigy = subsetYDict(bigy,bigy_start,bigy_end)
 		masterY[timestamp] = bigy
 	if fullpath_output_name:
 		f = open(fullpath_output_name,"wb")
 		pickle.dump(masterY,f)
 		f.close()
 	return masterY
+
+def getDatesToSubsetEachYAssimPeriod(timestamps, assim_time):
+	assim_time = timedelta(hours=assim_time)
+	timebounds = {} #dictionary, where each timestamp has the start and end datetime for processing
+	for ind,timestamp in enumerate(timestamps):
+		if ind == 0:
+			start = timestamp-assim_time
+			timebounds[timestamp] = [start,timestamp]
+		else:
+			prev_time = timestamps[ind-1]
+			timebounds[timestamp] = [prev_time,timestamp]
+	return timebounds
+
+def subsetYDict(ydict, startdate,enddate):
+	for spec in list(ydict.keys()):
+		df = ydict[spec]
+		df = df[(df['time']>=startdate) & (df['time']<enddate)]
+		ydict[spec] = df
+	return ydict
+
 
 def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
 	if unit=='ppm':
