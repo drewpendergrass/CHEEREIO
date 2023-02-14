@@ -75,7 +75,7 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 				plotMap(m,lat,lon,ctrlfield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_control.png',clim = clim, useLog=plotWithLogScale,minval = min_emis)
 
 
-def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True):
+def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plot_on_log_scale=False,clim = None):
 	files = glob(f'{ppdir}/*_SCALEFACTOR.nc')
 	files.sort()
 	sf_names = [pts.split('/')[-1][0:-15] for pts in files]
@@ -90,14 +90,19 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True):
 		else:
 			scalar = np.mean(scalar,axis=0) #average across ensemble
 		timelabels = [str(timeval)[0:13] for timeval in dates]
-		#Make custom blue-white-red colorbar centered at one
-		cvals  = [0.0, 1.0, np.max([np.max(scalar),1.1])]
-		colors = ["blue","white","red"]
-		pltnorm=plt.Normalize(min(cvals),max(cvals))
-		tuples = list(zip(map(pltnorm,cvals), colors))
-		cmap = LinearSegmentedColormap.from_list("", tuples)
+		if plot_on_log_scale:
+			cmap = plt.cm.bwr #Let user supplied clim and plotMap do the rest.
+		else:
+			#Make custom blue-white-red colorbar centered at one
+			cvals  = [0.0, 1.0, np.max([np.max(scalar),1.1])]
+			colors = ["blue","white","red"]
+			pltnorm=plt.Normalize(min(cvals),max(cvals))
+			tuples = list(zip(map(pltnorm,cvals), colors))
+			cmap = LinearSegmentedColormap.from_list("", tuples)
+			if clim is None:
+				clim = [0,np.max([np.max(scalar),1.1])]
 		for i,dateval in enumerate(timelabels):
-			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=[0,np.max([np.max(scalar),1.1])],cmap=cmap)
+			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=clim,cmap=cmap,useLog=plot_on_log_scale)
 
 def agg_to_monthly(dates, to_agg):
 	agg_dim = len(np.shape(to_agg))
