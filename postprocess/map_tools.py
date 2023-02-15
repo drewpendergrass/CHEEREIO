@@ -28,7 +28,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
-def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, plotcontrol=True,useLognormal = False, aggToMonthly=True):
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, clim=None, clim_std=None,plotcontrol=True,useLognormal = False, aggToMonthly=True):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
 		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
@@ -53,20 +53,23 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 		#Now hemcofield is of dim time, lat, lon
 		timelabels = [str(timeval)[0:13] for timeval in dates]
 		#Do the plotting.
-		if min_emis_std is not None:
-			clim_std = [min_emis_std,np.max(hemcofield_std)]
-		else:
-			clim_std = [np.min(hemcofield_std),np.max(hemcofield_std)]
-		if plotcontrol:
-			if min_emis is not None:
-				clim  = [min_emis, np.max([np.max(hemcofield),np.max(ctrlfield)])]
+		#Get colormaps
+		if clim_std is not None:
+			if min_emis_std is not None:
+				clim_std = [min_emis_std,np.max(hemcofield_std)]
 			else:
-				clim  = [np.min([np.min(hemcofield),np.min(ctrlfield)]), np.max([np.max(hemcofield),np.max(ctrlfield)])]
-		else:
-			if min_emis is not None:
-				clim  = [min_emis, np.max(hemcofield)]
+				clim_std = [np.min(hemcofield_std),np.max(hemcofield_std)]
+		if clim is not None:
+			if plotcontrol:
+				if min_emis is not None:
+					clim  = [min_emis, np.max([np.max(hemcofield),np.max(ctrlfield)])]
+				else:
+					clim  = [np.min([np.min(hemcofield),np.min(ctrlfield)]), np.max([np.max(hemcofield),np.max(ctrlfield)])]
 			else:
-				clim  = [np.min(hemcofield), np.max(hemcofield)]
+				if min_emis is not None:
+					clim  = [min_emis, np.max(hemcofield)]
+				else:
+					clim  = [np.min(hemcofield), np.max(hemcofield)]
 		cmap = plt.cm.jet
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,hemcofield[i,:,:],diag,f'{ppdir}/{diag}_{dateval}_ensemble_mean.png',clim = clim, useLog=plotWithLogScale,minval = min_emis)
