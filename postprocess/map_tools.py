@@ -54,12 +54,12 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 		timelabels = [str(timeval)[0:13] for timeval in dates]
 		#Do the plotting.
 		#Get colormaps
-		if clim_std is not None:
+		if clim_std is None:
 			if min_emis_std is not None:
 				clim_std = [min_emis_std,np.max(hemcofield_std)]
 			else:
 				clim_std = [np.min(hemcofield_std),np.max(hemcofield_std)]
-		if clim is not None:
+		if clim is None:
 			if plotcontrol:
 				if min_emis is not None:
 					clim  = [min_emis, np.max([np.max(hemcofield),np.max(ctrlfield)])]
