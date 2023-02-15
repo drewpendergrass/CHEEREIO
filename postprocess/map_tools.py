@@ -28,15 +28,19 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
-def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, clim=None, clim_std=None,plotcontrol=True,useLognormal = False, aggToMonthly=True):
+def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, clim=None, clim_std=None,plotcontrol=True,useLognormal = False, aggToMonthly=True,conversion_factor=None):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
 		hemcocontroldiag = xr.open_dataset(f'{ppdir}/control_HEMCO_diagnostics.nc')
 	dates = hemcodiag['time'].values
 	for diag in hemco_diags_to_process:
 		hemcofield = hemcodiag[diag].values
+		if conversion_factor is not None:
+			hemcofield*=conversion_factor
 		if plotcontrol:
 			ctrlfield = hemcocontroldiag[diag].values
+			if conversion_factor is not None:
+				ctrlfield*=conversion_factor
 		if len(np.shape(hemcofield)) == 5: #we have emissions at higher levels (e.g. aircraft)
 			hemcofield = np.sum(hemcofield,axis=2) #ensemble gone, dim 0 is ens, dim 1 is time, dim 2 is lev. Sum up.
 			if plotcontrol:
