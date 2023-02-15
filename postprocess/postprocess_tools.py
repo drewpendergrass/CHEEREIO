@@ -218,7 +218,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None):
+def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None,conversion_factor=None):
 	if timeslice is not None:
 		ds_ensemble = ds_ensemble.sel(time=slice(timeslice[0],timeslice[1]))
 		ds_prior = ds_prior.sel(time=slice(timeslice[0],timeslice[1]))
@@ -238,6 +238,10 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = Fals
 		enssd = da.std(axis=0)
 	da_prior = ds_prior[collectionName].sum(axis=prior_axis_to_average) #sum up all emissions from the control run
 	priortime = np.array(ds_prior['time'])
+	if conversion_factor is not None:
+		ensmean*=conversion_factor
+		enssd*=conversion_factor
+		da_prior*=conversion_factor
 	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
 
 def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
