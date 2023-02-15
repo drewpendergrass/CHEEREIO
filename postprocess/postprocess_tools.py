@@ -239,15 +239,16 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,area,collectionName,useLognormal =
 	#Remove the area unit (e.g. kg/m2/s) by multiplying by area (m2)
 	da = ds_ensemble[collectionName]*area
 	da = da.sum(axis=axis_to_average) #sum up all emissions
+	da_prior = ds_prior[collectionName]*area 
+	da_prior = da_prior.sum(axis=prior_axis_to_average)
 	enstime = np.array(ds_ensemble['time'])
+	priortime = np.array(ds_prior['time'])
 	if useLognormal:
 		ensmean = np.exp(np.mean(np.log(da),axis=0))
 		enssd = np.exp(np.std(np.log(da),axis=0))
 	else:
 		ensmean = da.mean(axis=0)
 		enssd = da.std(axis=0)
-	da_prior = ds_prior[collectionName].sum(axis=prior_axis_to_average) #sum up all emissions from the control run
-	priortime = np.array(ds_prior['time'])
 	if conversion_factor is not None:
 		ensmean*=conversion_factor
 		enssd*=conversion_factor
