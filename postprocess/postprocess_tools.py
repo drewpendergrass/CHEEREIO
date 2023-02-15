@@ -128,6 +128,14 @@ def makeDatasetForEnsemble(ensemble_dir,species_names,timeperiod=None,hourlysub 
 		ds.to_netcdf(fullpath_output_name)
 	return ds
 
+def getArea(ensemble_dir,pp_dir):
+	subdirs,_,_ = globDirs(ensemble_dir,includeOutputDir=True,removeNature=True)
+	specconc_list = globSubDir(subdirs[0],None,1)
+	file = specconc_list[0]
+	ds = xr.open_dataset(file)
+	area = ds['AREA'].values
+	np.save(f'{pp_dir}/area.npy',area)
+
 def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,startdate=None,enddate=None,fullpath_output_name = None):
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
@@ -218,7 +226,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 	enssd = ens.std(axis=0)
 	tsPlot(time,ensmean,enssd,species_name,unit,nature,outfile=outfile)
 
-def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = False, timeslice=None,outfile=None,conversion_factor=None):
+def tsPlotTotalEmissions(ds_ensemble,ds_prior,area,collectionName,useLognormal = False, timeslice=None,outfile=None,conversion_factor=None):
 	if timeslice is not None:
 		ds_ensemble = ds_ensemble.sel(time=slice(timeslice[0],timeslice[1]))
 		ds_prior = ds_prior.sel(time=slice(timeslice[0],timeslice[1]))
@@ -228,7 +236,9 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,collectionName,useLognormal = Fals
 	else:
 		axis_to_average = (2,3) #Surface emissions only
 		prior_axis_to_average = (1,2)
-	da = ds_ensemble[collectionName].sum(axis=axis_to_average) #sum up all emissions
+	#Remove the area unit (e.g. kg/m2/s) by multiplying by area (m2)
+	da = ds_ensemble[collectionName]*area
+	da = da.sum(axis=axis_to_average) #sum up all emissions
 	enstime = np.array(ds_ensemble['time'])
 	if useLognormal:
 		ensmean = np.exp(np.mean(np.log(da),axis=0))

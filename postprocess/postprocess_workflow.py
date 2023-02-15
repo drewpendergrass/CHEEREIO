@@ -60,6 +60,13 @@ print('Scale factor postprocessing complete.')
 print('Starting HEMCO diagnostic (e.g. emissions) postprocessing.')
 
 try:
+	area = np.load(f'{pp_dir}/area.npy')
+except OSError:
+	print('Area postprocessing file not detected; generating now.')
+	pt.getArea(ens_dir,pp_dir)
+	area = np.load(f'{pp_dir}/area.npy')
+
+try:
 	hemcodiag = xr.open_dataset(f'{pp_dir}/combined_HEMCO_diagnostics.nc')
 except FileNotFoundError:
 	print('HEMCO diagnostic postprocessing file not detected; generating now.')
@@ -98,7 +105,7 @@ if useControl:
 		pt.combineHemcoDiagControl(control_dir,pp_dir,timeperiod)
 		hemcocontroldiag = xr.open_dataset(f'{pp_dir}/control_HEMCO_diagnostics.nc')
 	for collection in hemco_diags_to_process:
-		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,collectionName=collection,useLognormal = lognormalErrors,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
+		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,area=area,collectionName=collection,area = area,useLognormal = lognormalErrors,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
 if "calc850" in sys.argv:
