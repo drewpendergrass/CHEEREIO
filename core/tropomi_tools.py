@@ -184,6 +184,78 @@ def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = Fals
 
 	return met
 
+
+#Read the Belasus et al 2023 version of TROPOMI CH4, corrected using GOSAT
+#no albedo, make sure it is set to nan in ens_config.
+def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False):
+
+	if species !='CH4':
+		raise ValueError('Species not supported.')
+	# Initialize list for TROPOMI data
+	met = {}
+	
+	# Store species, QA, lat, lon, time, averaging kernel
+	data = xr.open_dataset(filename,group='diagnostics')
+	qa = data['qa_value'].values
+	goodvals=np.where(qa>0.5)[0]
+
+	met['qa_value'] = qa[goodvals]
+
+	data.close()
+
+	data = xr.open_dataset(filename,group='target_product')
+
+	met[species] = data['xch4_blended'].values[goodvals] #nobs
+
+	if includeObsError:
+		met['Error'] = data['xch4_precision'].values[goodvals] #nobs
+
+	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
+	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
+
+	data.close()
+	
+	data = xr.open_dataset(filename,group='instrument')
+
+	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
+	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
+	timeraw = data['time'].values[goodvals,:] #nobs, ntime. Seven entries in format year', 'month', 'day', 'hour','minute', 'second'
+	#format as CHEEREIO-compliant string
+	timestring = [f'{str(int(timestamp[0]))}-{str(int(timestamp[1])).zfill(2)}-{str(int(timestamp[2])).zfill(2)}T{str(int(timestamp[3])).zfill(2)}:{str(int(timestamp[4])).zfill(2)}:{str(int(timestamp[5])).zfill(2)}Z' for timestamp in timeraw]
+	met['utctime'] =  np.array(timestring)
+
+	data.close()
+	
+	data = xr.open_dataset(filename,group='meteo')
+
+	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
+	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
+	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
+		
+	data.close()
+
+	data = xr.open_dataset(filename,group='side_product')
+
+	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
+	met['albedo_nir'] = data['surface_albedo'].values[goodvals,0]
+	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
+	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
+
+	data.close()
+
+	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
+	pressures.fill(np.nan)
+	for i in range(13):
+		pressures[:,i]=surface_pressure-(i*pressure_interval)
+	
+	met['pressures'] = pressures
+	
+	if filterinfo is not None:
+		met = obsop.apply_filters(met,filterinfo)
+
+	return met
+
+
 #This seems to be the memory bottleneck
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	'''
@@ -253,11 +325,25 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		TROPOMI_date_dict = {}
 		for key in list(sourcedirs.keys()):
 			sourcedir = sourcedirs[key]
-			obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
-			obs_list.sort()
-			TROPOMI_date_dict[key] = {}
-			TROPOMI_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-6], "%Y%m%dT%H%M%S") for obs in obs_list]
-			TROPOMI_date_dict[key]['end'] = [datetime.strptime(obs.split('_')[-5], "%Y%m%dT%H%M%S") for obs in obs_list]
+			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED': #different filename convention
+				obs_list = glob(f'{sourcedir}/**/s5p_*.nc', recursive=True)
+				obs_list.sort()
+				TROPOMI_date_dict[key] = {}
+				TROPOMI_date_dict[key]['start'] = []
+				TROPOMI_date_dict[key]['end'] = []
+				for obs in obs_list:
+					data = xr.open_dataset(obs,group='instrument')
+					start_date = data['time'].values[0,:]
+					TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
+					end_date = data['time'].values[-1,:]
+					TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
+					data.close()
+			else:
+				obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
+				obs_list.sort()
+				TROPOMI_date_dict[key] = {}
+				TROPOMI_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-6], "%Y%m%dT%H%M%S") for obs in obs_list]
+				TROPOMI_date_dict[key]['end'] = [datetime.strptime(obs.split('_')[-5], "%Y%m%dT%H%M%S") for obs in obs_list]
 		with open(f"{self.scratch}/tropomi_dates.pickle", 'wb') as handle:
 			pickle.dump(TROPOMI_date_dict, handle)
 		return TROPOMI_date_dict
@@ -270,7 +356,10 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		else:
 			TROPOMI_date_dict = self.initialReadDate()
 		obs_dates = TROPOMI_date_dict[species]
-		obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
+		if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED': #different filename convention
+			obs_list = glob(f'{sourcedir}/**/s5p_*.nc', recursive=True)
+		else:
+			obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 		obs_list.sort()
 		if interval:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % interval == 0) or (t1.hour % interval == (interval-1)))]
@@ -288,8 +377,10 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			if self.spc_config['USE_ACMG_PRODUCT'] == 'True':
+			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'ACMG':
 				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
+			elif self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED':
+				trop_obs.append(read_tropomi_gosat_corrected(obs,species,filterinfo,includeObsError=includeObsError))
 			else:
 				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}

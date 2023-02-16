@@ -167,10 +167,10 @@
 		"CH4_TROPOMI":"0.2"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"True"
+		"CH4_TROPOMI":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"0.5"
+		"CH4_TROPOMI":"0.2"
 	},
 	"OBS_ERROR": {
 		"CH4_TROPOMI":"17"

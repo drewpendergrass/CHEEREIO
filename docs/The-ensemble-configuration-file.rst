@@ -707,6 +707,10 @@ Below we list the settings that you can set with extensions.
 	
 	Specialized TROPOMI CH4 settings.
 
+	.. option:: WHICH_TROPOMI_PRODUCT
+
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, 'ACMG' for the ACMG TROPOMI product, and 'BLENDED' for Belasus et al., 2023. 
+
 	.. option:: TROPOMI_CH4_FILTERS
 	
 		Apply specialized filters for TROPOMI methane? Set to "True" if doing a TROPOMI methane inversion, otherwise set to "False".
