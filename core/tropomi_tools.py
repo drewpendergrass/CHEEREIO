@@ -334,10 +334,12 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 				TROPOMI_date_dict[key]['end'] = []
 				for obs in obs_list:
 					data = xr.open_dataset(obs,group='instrument')
-					start_date = data['time'].values[0,:]
-					TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
-					end_date = data['time'].values[-1,:]
-					TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
+					time = data['time'].values
+					if len(time)>0
+						start_date = time.values[0,:]
+						TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
+						end_date = time.values[-1,:]
+						TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
 					data.close()
 			else:
 				obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
