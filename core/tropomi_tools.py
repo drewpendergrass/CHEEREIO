@@ -231,7 +231,8 @@ def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsE
 	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
 	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
 	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
-		
+	met['surface_elevation_sd'] = data['surface_altitude_stdv'].values[goodvals]
+
 	data.close()
 
 	data = xr.open_dataset(filename,group='side_product')
