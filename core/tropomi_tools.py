@@ -336,9 +336,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 					data = xr.open_dataset(obs,group='instrument')
 					time = data['time'].values
 					if len(time)>0:
-						start_date = time.values[0,:]
+						start_date = time[0,:]
 						TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
-						end_date = time.values[-1,:]
+						end_date = time[-1,:]
 						TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
 					data.close()
 			else:
