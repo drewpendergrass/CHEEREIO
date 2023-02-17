@@ -207,7 +207,7 @@
 	"comment023" : "******************************************************************************",
 	"DO_RUN_IN_PLACE" : "True",
 	"rip_update_time" : "72",
-	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "True",
+	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
