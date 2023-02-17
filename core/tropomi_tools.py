@@ -367,7 +367,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			#Some of these will be empty, so remove
 			obs_list.sort()
 			inds_to_skip = [i for i, e in enumerate(obs_dates['start']) if e == 'SKIP']
-			for i in inds_to_skip: #delete these elements
+			for i in reversed(inds_to_skip): #delete these elements; go in reverse order so we don't break indexing
 				del obs_list[i]
 				del obs_dates['start'][i]
 				del obs_dates['end'][i]
