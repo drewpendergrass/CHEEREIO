@@ -340,6 +340,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 						TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
 						end_date = time[-1,:]
 						TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
+					else:
+						TROPOMI_date_dict[key]['start'].append('SKIP') #empty observations, skip
+						TROPOMI_date_dict[key]['end'].append('SKIP')
 					data.close()
 			else:
 				obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
@@ -361,9 +364,16 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		obs_dates = TROPOMI_date_dict[species]
 		if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED': #different filename convention
 			obs_list = glob(f'{sourcedir}/**/s5p_*.nc', recursive=True)
+			#Some of these will be empty, so remove
+			obs_list.sort()
+			inds_to_skip = [i for i, e in enumerate(obs_dates['start']) if e == 'SKIP']
+			for i in inds_to_skip: #delete these elements
+				del obs_list[i]
+				del obs_dates['start'][i]
+				del obs_dates['end'][i]
 		else:
 			obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
-		obs_list.sort()
+			obs_list.sort()
 		if interval:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % interval == 0) or (t1.hour % interval == (interval-1)))]
 		else:
