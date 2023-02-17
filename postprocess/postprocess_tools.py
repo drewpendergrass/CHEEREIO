@@ -266,14 +266,21 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations'
 	for date in datestrs:
 		conc2D=np.array(bigY[date][species].iloc[:,0:numens])
 		assimperiodensmean = np.mean(conc2D,axis=0) #One average for each ensemble member
-		ensmean = np.mean(assimperiodensmean) #Ensemble mean for total average
-		enssd = np.std(assimperiodensmean)
-		obscol=np.array(bigY[date][species]['Observations'])
-		obsmean = np.mean(obscol)
-		if useControl:
-			ctrlcol=np.array(bigY[date][species]['Control'])
-			ctrlmean = np.mean(ctrlcol)
-			ctrlmeans.append(ctrlmean)
+		if len(assimperiodensmean)==0: #In case we have no observations for a given date.
+			ensmean=np.nan
+			enssd=np.nan
+			obsmean=np.nan
+			if useControl:
+				ctrlmeans.append(np.nan)
+		else:
+			ensmean = np.mean(assimperiodensmean) #Ensemble mean for total average
+			enssd = np.std(assimperiodensmean)
+			obscol=np.array(bigY[date][species]['Observations'])
+			obsmean = np.mean(obscol)
+			if useControl:
+				ctrlcol=np.array(bigY[date][species]['Control'])
+				ctrlmean = np.mean(ctrlcol)
+				ctrlmeans.append(ctrlmean)
 		ensmeans.append(ensmean)
 		ensstds.append(enssd)
 		obsmeans.append(obsmean)
