@@ -5,6 +5,7 @@ import xarray as xr
 from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LogNorm,LinearSegmentedColormap
 import pickle
+from datetime import datetime
 from glob import glob
 
 def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
@@ -111,13 +112,20 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plo
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=clim,cmap=cmap,useLog=plot_on_log_scale)
 
-def regridBigYdata(bigy,gclat,gclon):
+def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
+	dates = bigy["dates"]
+	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
 	specieslist = bigy["species"]
 	total_satellite_obs=bigy["obscount"]
-	total_averaged_obs=bigy["obscount_avg"]
 	true_obs = bigy["obs"]
 	sim_obs = bigy["sim_obs"]
 	ctrl_obs = bigy["control"]
+	if timeperiod is not None: #Slice data down to timeperiod
+		inds = [i for i, e in enumerate(datevals) if (e >= timeperiod[0]) & (e < timeperiod[1])]
+		total_satellite_obs=total_satellite_obs[inds,:,:,:]
+		true_obs = true_obs[inds,:,:,:]
+		sim_obs = sim_obs[inds,:,:,:]
+		ctrl_obs = ctrl_obs[inds,:,:,:]
 	#Arrays to return
 	total_obs_in_period = np.sum(total_satellite_obs,axis=0)
 	total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
