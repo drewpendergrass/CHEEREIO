@@ -7,6 +7,7 @@ import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 import pickle
+from map_tools import *
 import sys
 sys.path.append('../core')
 import settings_interface as si 
@@ -31,11 +32,38 @@ pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
 anim_fps = int(data['animation_fps_scalingfactor'])
+gclat,gclon = si.getLatLonVals(data)
+gclat = np.array(gclat)
+gclon = np.array(gclon)
 
 if useControl and controlInEns:
 	control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/{data['RUN_NAME']}_0000"
 else:
 	control_dir = None
+
+m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
+
+print('Generating observation and control minus observation maps...')
+
+with open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl','rb') as f:
+	pickledata=pickle.load(f)
+
+specieslist = pickledata["species"]
+total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs = regridBigYdata(pickledata,gclat,gclon)
+
+print('')
+
+for i,species in enumerate(specieslist):
+	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
+	plotMap(m,gclat,gclon,assim_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(assim_minus_obs[i,:,:])}')
+	plotMap(m,gclat,gclon,ctrl_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
+	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(ctrl_minus_obs[i,:,:])}')
+	print('')
+
+
+print('Observation and control minus observation maps complete!')
+print('')
 
 print('Starting to generate movies of scaling factors.')
 
@@ -47,7 +75,7 @@ sfs = {}
 for name,path in zip(sf_names,path_to_sfs):
 	sfs[name] = xr.open_dataset(path)
 
-m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
+
 
 for sf in sfs:
 	ds = sfs[sf]

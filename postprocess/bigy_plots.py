@@ -49,30 +49,10 @@ with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 
 dates = pickledata["dates"]
 specieslist = pickledata["species"]
-total_satellite_obs=pickledata["obscount"]
-total_averaged_obs=pickledata["obscount_avg"]
-true_obs = pickledata["obs"]
-sim_obs = pickledata["sim_obs"]
-ctrl_obs = pickledata["control"]
+
+total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs = regridBigYdata(pickledata,gclat,gclon)
 
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
-
-total_obs_in_period = np.sum(total_satellite_obs,axis=0)
-total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
-assim_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
-ctrl_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
-
-for i,species in enumerate(specieslist):
-	for j in range(len(gclat)):
-		for k in range(len(gclon)):
-			if np.sum(~np.isnan(true_obs[:,i,j,k]))>0:
-				assim_minus_obs[i,j,k] = np.nanmean(sim_obs[:,i,j,k]-true_obs[:,i,j,k])
-				ctrl_minus_obs[i,j,k] = np.nanmean(ctrl_obs[:,i,j,k]-true_obs[:,i,j,k])
-			if np.sum(total_satellite_obs[:,i,j,k]) == 0:
-				total_weighted_mean_true_obs[i,j,k] = np.nan
-			else:
-				indices = np.where(np.logical_not(np.isnan(true_obs[:,i,j,k])))[0]
-				total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[indices,i,j,k],weights=total_satellite_obs[indices,i,j,k])
 
 #Plot observation means and counts
 #Plot assimilation minus obs and ctrl minus obs

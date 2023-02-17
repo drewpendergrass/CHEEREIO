@@ -41,11 +41,6 @@ data = si.getSpeciesConfig()
 pp_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/postprocess"
 ens_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs"
 ASSIM_TIME = data['ASSIM_TIME']
-
-print('Loading simulated observation and observation dictionaries...')
-bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME))
-print('Simulated observation and observation dictionaries loaded.')
-
 nEnsemble = int(data['nEnsemble'])
 observed_species = data['OBSERVED_SPECIES']
 obs_units = data['OBSERVATION_UNITS']
@@ -53,16 +48,38 @@ useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
 
 if useControl and controlInEns:
+	do_control = True
 	control_dir = f"{data['MY_PATH']}/{data['RUN_NAME']}/ensemble_runs/{data['RUN_NAME']}_0000"
 else:
+	do_control = False
 	control_dir = None
+
+print('Loading simulated observation and observation dictionaries...')
+bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME))
+print('Simulated observation and observation dictionaries loaded.')
+print('')
+
+gclat,gclon = si.getLatLonVals(data)
+gclat = np.array(gclat)
+gclon = np.array(gclon)
+
+print('Gridding simulated observation and observation dictionaries...')
+arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=do_control)
+
+f = open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl',"wb")
+pickle.dump(arraysbase,f)
+f.close()
+
+print('Simulated observation and observation dictionaries gridded...')
+
+print('')
 
 print('Plotting timeseries of observations against assimilation')
 
 for spec in observed_species:
 	print('')
 	print('')
-	if control_dir is not None:
+	if do_control:
 		outfile = f'{pp_dir}/SNAPSHOT_observations_ts_compare_{spec}_w_control.png'
 		pt.tsPlotSatCompare(bigy,spec,nEnsemble,unit=obs_units[spec],observer_name=data['OBS_TYPE'][spec],useControl=True,outfile=f'{pp_dir}/SNAPSHOT_observations_ts_compare_{spec}_w_control.png')
 	else:
@@ -74,10 +91,12 @@ print('')
 print('')
 
 print('Timeseries plots complete.')
+print('')
 
 print('Aggregating scale factors from across the ensemble...')
 pt.combineScaleFactors(ens_dir,pp_dir,flag_snapshot=True)
 print('Scale factor aggregation complete.')
+print('')
 
 
 

@@ -111,6 +111,33 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plo
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=clim,cmap=cmap,useLog=plot_on_log_scale)
 
+def regridBigYdata(bigy,gclat,gclon):
+	specieslist = bigy["species"]
+	total_satellite_obs=bigy["obscount"]
+	total_averaged_obs=bigy["obscount_avg"]
+	true_obs = bigy["obs"]
+	sim_obs = bigy["sim_obs"]
+	ctrl_obs = bigy["control"]
+	#Arrays to return
+	total_obs_in_period = np.sum(total_satellite_obs,axis=0)
+	total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
+	assim_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
+	ctrl_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
+	#loop through and fill.
+	for i,species in enumerate(specieslist):
+		for j in range(len(gclat)):
+			for k in range(len(gclon)):
+				if np.sum(~np.isnan(true_obs[:,i,j,k]))>0:
+					assim_minus_obs[i,j,k] = np.nanmean(sim_obs[:,i,j,k]-true_obs[:,i,j,k])
+					ctrl_minus_obs[i,j,k] = np.nanmean(ctrl_obs[:,i,j,k]-true_obs[:,i,j,k])
+				if np.sum(total_satellite_obs[:,i,j,k]) == 0:
+					total_weighted_mean_true_obs[i,j,k] = np.nan
+				else:
+					indices = np.where(np.logical_not(np.isnan(true_obs[:,i,j,k])))[0]
+					total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[indices,i,j,k],weights=total_satellite_obs[indices,i,j,k])
+	return [total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs]
+
+
 def agg_to_monthly(dates, to_agg):
 	agg_dim = len(np.shape(to_agg))
 	years = dates.astype('datetime64[Y]').astype(int) + 1970
