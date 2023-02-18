@@ -84,6 +84,12 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
   done
   #CD to core
   cd {ASSIM}/core
+  #check if we are in the first assimilation cycle
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/IS_FIRST ]; then
+    firstrun=true
+  else
+    firstrun=false
+  fi
   #Check if we are in the first assimilation cycle after burn in completes
   if [ -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_PERIOD_PROCESSED ] && [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/BURN_IN_SCALING_COMPLETE ]; then
     trigger_burnin_scale=true
@@ -150,9 +156,9 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
       fi   
     fi
   fi
-  #For all runs, switch off the first run marker.
-  if [ "${firstrun}" = true ]; then
-    firstrun=false
+  #For all runs, switch off the first run marker by having the job controller delete the flag file
+  if [ $x -eq 1 ] && [ -f ${MY_PATH}/${RUN_NAME}/scratch/IS_FIRST ]; then
+    rm ${MY_PATH}/${RUN_NAME}/scratch/IS_FIRST
   fi
   #Hang until cleanup complete, as determined by temp file deletion.
   until [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE ]; do

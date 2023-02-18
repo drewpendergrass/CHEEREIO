@@ -117,4 +117,6 @@ fi
 ### Navigate back to top-level directory
 cd ${MY_PATH}/${RUN_NAME}
 
+echo "This file's existence indicates that this is the first assimilation period." > scratch/IS_FIRST
+
 printf "${thickline}DONE CREATING ENSEMBLE MEMBER RUN DIRECTORIES${thickline}"
