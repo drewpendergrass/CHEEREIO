@@ -107,12 +107,12 @@ class GC_Translator(object):
 	#Also construct new scaling factors and add them as a separate array at the new timestep in each of the scaling factor netCDFs.
 	#However, only do so for species in the control vectors of emissions and concentrations.
 	def reconstructArrays(self,analysis_vector):
-		restart_shape = np.shape(self.getSpecies3Dconc(self.species_config['STATE_VECTOR_CONC'][0]))
 		emislist=list(self.species_config['CONTROL_VECTOR_EMIS'].keys())
 		emis_shape = np.shape(self.getEmisSF(emislist[0]))
 		counter =  0
 		for spec_conc in self.species_config['STATE_VECTOR_CONC']:
 			if spec_conc in self.species_config['CONTROL_VECTOR_CONC']: #Only overwrite if in the control vector; otherwise just increment.
+				restart_shape = np.shape(self.getSpecies3Dconc(spec_conc))
 				index_start = np.sum(self.statevec.statevec_lengths[0:counter])
 				index_end = np.sum(self.statevec.statevec_lengths[0:(counter+1)])
 				analysis_subset = analysis_vector[index_start:index_end]
