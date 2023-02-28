@@ -34,11 +34,11 @@ class GT_Container(object):
 		firstens = self.ensemble_numbers[0]
 		col1indvec = self.gt[firstens].getColumnIndicesFromFullStateVector(latind,lonind)
 		backgroundEnsemble = np.zeros((len(col1indvec),len(self.ensemble_numbers)))
-		backgroundEnsemble[:,firstens-1] = self.gt[firstens].statevec.statevec[col1indvec]
+		backgroundEnsemble[:,firstens-1] = self.gt[firstens].getStateVector()[col1indvec]
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				colinds = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
-				backgroundEnsemble[:,i-1] = self.gt[i].statevec.statevec[colinds]
+				backgroundEnsemble[:,i-1] = self.gt[i].getStateVector()[colinds]
 		return backgroundEnsemble
 	def diffColumns(self,latind,lonind):
 		filenames = list(self.columns.keys())
@@ -48,6 +48,10 @@ class GT_Container(object):
 		backgroundEnsemble = self.constructColStatevec(latind,lonind)
 		diff = saved_col-backgroundEnsemble
 		return [saved_col,backgroundEnsemble,diff]
+	def constructBackgroundEnsemble(self):
+		self.backgroundEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
+		for i in self.ensemble_numbers:
+			self.backgroundEnsemble[:,i-1] = self.gt[i].getStateVector()
 	def reconstructAnalysisEnsemble(self):
 		self.analysisEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
 		for name, cols in zip(self.columns.keys(),self.columns.values()):
