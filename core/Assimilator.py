@@ -61,6 +61,8 @@ class Assimilator(object):
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
+		if not self.SaveDOFS:
+			self.DOFS_filter = np.nan
 		self.PriorWeightinPriorPosteriorAverage = float(spc_config["PriorWeightinPriorPosteriorAverage"])
 		self.PriorWeightinSFAverage = float(spc_config["PriorWeightinSFAverage"])
 		self.gt = {}
