@@ -34,11 +34,11 @@ class GT_Container(object):
 		firstens = self.ensemble_numbers[0]
 		col1indvec = self.gt[firstens].getColumnIndicesFromFullStateVector(latind,lonind)
 		backgroundEnsemble = np.zeros((len(col1indvec),len(self.ensemble_numbers)))
-		backgroundEnsemble[:,firstens-1] = self.gt[firstens].statevec[col1indvec]
+		backgroundEnsemble[:,firstens-1] = self.gt[firstens].statevec.statevec[col1indvec]
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				colinds = self.gt[i].getColumnIndicesFromFullStateVector(latind,lonind)
-				backgroundEnsemble[:,i-1] = self.gt[i].statevec[colinds]
+				backgroundEnsemble[:,i-1] = self.gt[i].statevec.statevec[colinds]
 		return backgroundEnsemble
 	def diffColumns(self,latind,lonind):
 		filenames = list(self.columns.keys())
