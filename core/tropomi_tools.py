@@ -196,12 +196,25 @@ def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsE
 	
 	# Store species, QA, lat, lon, time, averaging kernel
 	data = xr.open_dataset(filename,group='diagnostics')
-	qa = data['qa_value'].values
-	goodvals=np.where(qa>0.5)[0]
 
-	met['qa_value'] = qa[goodvals]
+	qa = data['qa_value'].values
 
 	data.close()
+
+	data = xr.open_dataset(filename,group='meteo')
+
+	landflag = data['landflag'].values
+	goodvals=np.where((qa>0.5) & (landflag==0))[0] #Only include land values (landflag=0); no coasts or ocean retrievals
+
+	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
+	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
+	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
+	met['surface_elevation_sd'] = data['surface_altitude_stdv'].values[goodvals]
+
+	data.close()
+
+
+	met['qa_value'] = qa[goodvals]
 
 	data = xr.open_dataset(filename,group='target_product')
 
@@ -226,15 +239,6 @@ def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsE
 
 	data.close()
 	
-	data = xr.open_dataset(filename,group='meteo')
-
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
-	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
-	met['surface_elevation_sd'] = data['surface_altitude_stdv'].values[goodvals]
-
-	data.close()
-
 	data = xr.open_dataset(filename,group='side_product')
 
 	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
