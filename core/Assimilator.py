@@ -249,15 +249,9 @@ class Assimilator(object):
 		#Get scalefactors off the end of statevector
 		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
 		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
-		if self.lognormalErrors: #For corrections transform back to lognormal space.
-			analysisScalefactor = np.exp(analysisScalefactor)
-			backgroundScalefactor = np.exp(backgroundScalefactor)
 		if self.verbose>=2:
-			print(f"Analysis scale factor has dimension {np.shape(analysisScalefactor)} and value {analysisScalefactor}.")
-			print(f"The analysis ensemble mean is {np.mean(analysisScalefactor,axis=1)}.")
-			print(f"Background scale factor has dimension {np.shape(backgroundScalefactor)} and value {backgroundScalefactor}.")
-			print(f"The background ensemble mean is {np.mean(backgroundScalefactor,axis=1)}.")
 			#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
+			#We do this in gaussian space (no log transform)
 			print('BEGIN section InflateScalingsToXOfInitialStandardDeviation')
 		for i,emis in enumerate(self.emis_names):
 			inflator = float(self.InflateScalingsToXOfInitialStandardDeviation[emis])
@@ -287,9 +281,17 @@ class Assimilator(object):
 					else:
 						if self.verbose>=2:
 							print(f'Ratio {ratio} is greater than inflator standard {inflator}, so doing nothing.')
+		if self.lognormalErrors: #For rest of the corrections transform back to lognormal space.
+			analysisScalefactor = np.exp(analysisScalefactor)
+			backgroundScalefactor = np.exp(backgroundScalefactor)
 		if self.verbose>=2:
 			print('END section InflateScalingsToXOfInitialStandardDeviation')
+			print(f"Analysis scale factor has dimension {np.shape(analysisScalefactor)} and value {analysisScalefactor}.")
+			print(f"The analysis ensemble mean is {np.mean(analysisScalefactor,axis=1)}.")
+			print(f"Background scale factor has dimension {np.shape(backgroundScalefactor)} and value {backgroundScalefactor}.")
+			print(f"The background ensemble mean is {np.mean(backgroundScalefactor,axis=1)}.")
 			print('BEGIN section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
+		#Transform into lognormal space for the rest of the corrections
 		#Apply maximum relative change per assimilation period:
 		for i,emis in enumerate(self.emis_names):
 			maxchange = float(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[emis])
