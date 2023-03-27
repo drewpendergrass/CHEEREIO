@@ -281,6 +281,13 @@ OMI tools
 
 This section is under construction, check back later!
 
+.. _ObsPack tools:
+
+ObsPack tools
+~~~~~~~~~~~~~
+
+This section is under construction, check back later!
+
 
 Supplementing an existing observation type
 ~~~~~~~~~~~~~
