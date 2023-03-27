@@ -253,7 +253,7 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,area,collectionName,useLognormal =
 		ensmean*=conversion_factor
 		enssd*=conversion_factor
 		da_prior*=conversion_factor
-	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,outfile=outfile)
+	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,priorname='control',outfile=outfile)
 
 def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
 	ensmeans = []
@@ -311,7 +311,7 @@ def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations'
 		plt.show()
 
 
-def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,outfile=None):
+def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior=None,priorname=None,outfile=None):
 	plt.rcParams.update({'font.size': 16})
 	plt.figure(figsize=(6,4))
 	plt.plot(time,ensmean,color='b',label='Ensemble')
@@ -321,7 +321,13 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 		plt.plot(time,nature,color='g',label='Nature')
 		plt.legend()
 	if prior is not None:
-		plt.plot(priortime,prior,color='g',label='Prior')
+		if priorname is not None:
+			if priorname=='control':
+				plt.plot(priortime,prior,color='r',label='Control')
+			else:
+				plt.plot(priortime,prior,color='g',label='Prior')
+		else:
+			plt.plot(priortime,prior,color='g',label='Prior')
 		plt.legend()
 	plt.xlabel('Time')
 	plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
