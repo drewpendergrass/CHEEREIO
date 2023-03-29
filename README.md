@@ -1,5 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/cheereio/badge/?version=latest)](https://cheereio.readthedocs.io/en/latest/?badge=latest)
 
+[![DOI](https://zenodo.org/badge/400506254.svg)](https://zenodo.org/badge/latestdoi/400506254) (latest release)
+
 # CHEEREIO
 
 The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint). CHEEREIO follows four design principles:
