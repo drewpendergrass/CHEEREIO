@@ -1,6 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/cheereio/badge/?version=latest)](https://cheereio.readthedocs.io/en/latest/?badge=latest)
 
-[![DOI](https://zenodo.org/badge/400506254.svg)](https://zenodo.org/badge/latestdoi/400506254) (latest release)
+[![DOI](https://zenodo.org/badge/400506254.svg)](https://zenodo.org/badge/latestdoi/400506254)
 
 # CHEEREIO
 
