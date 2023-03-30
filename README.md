@@ -11,8 +11,6 @@ The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is
 3. **Easy to deploy**: One configuration file controls installation and settings
 4. **Easy to link observations**: Object-oriented observation operator implementation allows the user to rapidly add new kinds of data with minimal programming required.
 
-The beta release for CHEEREIO and an accompanying model description is currently in prep. Until then, this codebase is under constant revision and re-engineering. At any one time the code here may be broken by an update only to be fixed later that day. Don't treat it as stable yet!
-
 ## Documentation
 Detailed documentation is available on [ReadTheDocs](https://cheereio.readthedocs.io), including installation instructions. If you encounter any problems not covered by the documentation, please open an [issue](https://github.com/drewpendergrass/CHEEREIO/issues) on GitHub.
 
