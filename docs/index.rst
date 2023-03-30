@@ -12,8 +12,6 @@ More formally, CHEEREIO is a set of Python and shell scripts that support data a
 
 This site provides a manual for the installation, use, and modification of CHEEREIO for a variety of scientific applications. You can download CHEEREIO from the `Github page <https://github.com/drewpendergrass/CHEEREIO/>`__ and install by following the instructions on the :ref:`Installation` page later in the documentation.
 
-**CHEEREIO development status**: We will officially release a CHEEREIO beta when we publish our model description paper, which is currently in prep. We are not yet on a formal release schedule because CHEEREIO is still in active initial development --- though again, we are close (aiming for January 2023). In plain English, you are welcome to download CHEEREIO now but at this time the main branch is not guaranteed to be functional. This documentation is also not yet fully written but will be complete by the time we submit the model description paper. Check back often, or email me at pendergrass [AT] g [DOT] harvard [DOT] edu to be notified when CHEEREIO is released. 
-
 CHEEREIO follows four design principles:
 
 #. **Easy to customize**: Assimilate anything, in any GEOS-Chem configuration or simulation.
