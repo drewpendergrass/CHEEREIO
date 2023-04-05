@@ -18,6 +18,7 @@ ENS_SPINUP_START = spc_config['ENS_SPINUP_START']
 ENS_SPINUP_END = spc_config['ENS_SPINUP_END']
 DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN = spc_config['DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN']=='True'
 ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
+DO_RERUN = spc_config["DO_VARON_RERUN"] == "True"
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
@@ -53,19 +54,26 @@ else:
 	ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
 	ig_endstring = lines[1].rstrip()
 	ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
-	if do_rip_aw and (periodstr=="ASSIM"): #Do RIP if we are in a normal phase.
-		start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
+	if DO_RERUN: #if we are doing the Varon rerun, we start one assimilation period before and end one after current end slot.
+		delta = timedelta(hours=int(ASSIM_TIME))
+		start_datetime = ig_end_datetime-delta
 		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
-	elif do_rip_aw and DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN and (periodstr=="POSTBURN"): #If we are just after the burn in period, still advance using the burn in RIP.
-		aw = int(spc_config['rip_burnin_update_time'])
-		start_datetime = ig_start_datetime+timedelta(hours=int(aw)) #Advance start by burn in assimilation window
-		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
-	else: #If we are just after the first assimilation period (POSTFIRST), don't worry about RIP. Same if there is no RIP to begin with.
-		start_datetime = ig_end_datetime
-		start_string = ig_endstring
-	delta = timedelta(hours=int(ASSIM_TIME))
-	end_datetime = start_datetime+delta
-	end_string = end_datetime.strftime("%Y%m%d %H%M%S")
+		end_datetime = ig_end_datetime+delta
+		end_string = end_datetime.strftime("%Y%m%d %H%M%S")
+	else: 
+		if do_rip_aw and (periodstr=="ASSIM"): #Do RIP if we are in a normal phase.
+			start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
+			start_string = start_datetime.strftime("%Y%m%d %H%M%S")
+		elif do_rip_aw and DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN and (periodstr=="POSTBURN"): #If we are just after the burn in period, still advance using the burn in RIP.
+			aw = int(spc_config['rip_burnin_update_time'])
+			start_datetime = ig_start_datetime+timedelta(hours=int(aw)) #Advance start by burn in assimilation window
+			start_string = start_datetime.strftime("%Y%m%d %H%M%S")
+		else: #If we are just after the first assimilation period (POSTFIRST), don't worry about RIP. Same if there is no RIP to begin with.
+			start_datetime = ig_end_datetime
+			start_string = ig_endstring
+		delta = timedelta(hours=int(ASSIM_TIME))
+		end_datetime = start_datetime+delta
+		end_string = end_datetime.strftime("%Y%m%d %H%M%S")
 
 #Check if the upcoming assimilation period will end  after the burn in period ends
 if DO_BURN_IN:
