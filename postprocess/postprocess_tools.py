@@ -250,10 +250,10 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,area,collectionName,useLognormal =
 		ensmean = da.mean(axis=0)
 		enssd = da.std(axis=0)
 	if conversion_factor is not None:
-		ensmean*=conversion_factor
+		ensmean*=conversion_factor #kg/s to Tg/d (8.64e-05 in this case) or whatever you'd like 
 		enssd*=conversion_factor
 		da_prior*=conversion_factor
-	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,priorcolor='r',outfile=outfile)
+	tsPlot(enstime,ensmean,enssd,collectionName,'kg/s',priortime=priortime,prior=da_prior,priorcolor='r',outfile=outfile)
 
 def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
 	ensmeans = []

@@ -4,6 +4,13 @@
 
 eval "$(conda shell.bash hook)"
 
+python core/validate_ensconfig.py #Do some checks to see if ens_config looks good.
+ret=$?
+if [ $ret -ne 0 ]; then
+     #Handle failure
+     exit 1
+fi
+
 GC_VERSION="$(jq -r ".GC_VERSION" ens_config.json)"
 
 # Path to assimilation setup
