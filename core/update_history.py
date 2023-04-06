@@ -17,6 +17,7 @@ class HISTORY_Translator():
 			else:
 				self.historyrc_path = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs/{foldername}/"
 		self.do_rip = self.spc_config['DO_RUN_IN_PLACE']=="True"
+		self.do_rerun = self.spc_config['DO_VARON_RERUN']=="True"
 		if self.do_rip:
 			self.rip_aw = int(self.spc_config['rip_update_time'])
 			self.do_diff_burnin_rip = self.spc_config['DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN']=="True"
@@ -28,26 +29,34 @@ class HISTORY_Translator():
 		self.applied_RIP_aw = None #actual run in place assimilation window chosen.
 	def calcDurFreq(self,isFirst):
 		if isFirst=="First":
-			ASSIM_START_DATE = self.spc_config['ASSIM_START_DATE']
-			assim_start_year = int(ASSIM_START_DATE[0:4])
-			assim_start_month = int(ASSIM_START_DATE[4:6])
-			assim_start_day = int(ASSIM_START_DATE[6:8])
-			START_DATE = self.spc_config['START_DATE']
-			start_year = int(START_DATE[0:4])
-			start_month = int(START_DATE[4:6])
-			start_day = int(START_DATE[6:8])
-			monthsapart = (assim_start_year-start_year)*12+(assim_start_month-start_month)
-			yeardiff = int(np.floor(monthsapart/12))
-			monthdiff = monthsapart%12
-			daydiff = assim_start_day-start_day
-			if daydiff<0:
-				print('This date configuration not supported; defaulting to "End" restart setting')
-				timestr="'End'"
+			if self.do_rerun: #For rerun, we expect first interval to be some multiple of assim time. Save out!
+				ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) 
+				assim_days = int(np.floor(ASSIM_TIME/24))
+				assim_hours = ASSIM_TIME%24
+				daystr = str(assim_days).zfill(2)
+				hourstr = str(assim_hours).zfill(2)
+				timestr = f'000000{daystr} {hourstr}0000'
 			else:
-				yearstr = str(yeardiff).zfill(4)
-				monthstr = str(monthdiff).zfill(2)
-				daystr = str(daydiff).zfill(2)
-				timestr = f'{yearstr}{monthstr}{daystr} 000000'
+				ASSIM_START_DATE = self.spc_config['ASSIM_START_DATE']
+				assim_start_year = int(ASSIM_START_DATE[0:4])
+				assim_start_month = int(ASSIM_START_DATE[4:6])
+				assim_start_day = int(ASSIM_START_DATE[6:8])
+				START_DATE = self.spc_config['START_DATE']
+				start_year = int(START_DATE[0:4])
+				start_month = int(START_DATE[4:6])
+				start_day = int(START_DATE[6:8])
+				monthsapart = (assim_start_year-start_year)*12+(assim_start_month-start_month)
+				yeardiff = int(np.floor(monthsapart/12))
+				monthdiff = monthsapart%12
+				daydiff = assim_start_day-start_day
+				if daydiff<0:
+					print('This date configuration not supported; defaulting to "End" restart setting')
+					timestr="'End'"
+				else:
+					yearstr = str(yeardiff).zfill(4)
+					monthstr = str(monthdiff).zfill(2)
+					daystr = str(daydiff).zfill(2)
+					timestr = f'{yearstr}{monthstr}{daystr} 000000'
 		elif isFirst=="Spinup":
 			timestr="'End'"
 		else:
