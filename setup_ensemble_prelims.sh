@@ -4,7 +4,10 @@
 
 eval "$(conda shell.bash hook)"
 
-python core/validate_ensconfig.py #Do some checks to see if ens_config looks good.
+cd core
+python validate_ensconfig.py #Do some checks to see if ens_config looks good.
+cd ..
+
 ret=$?
 if [ $ret -ne 0 ]; then
      #Handle failure
