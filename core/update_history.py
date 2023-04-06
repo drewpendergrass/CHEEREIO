@@ -61,7 +61,7 @@ class HISTORY_Translator():
 					ASSIM_TIME = self.rip_aw
 				self.applied_RIP_aw = ASSIM_TIME
 			else:
-				ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) #If not doing run in place, don't worry about it 
+				ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) #If not doing run in place, don't worry about it (including rerun!)
 			assim_days = int(np.floor(ASSIM_TIME/24))
 			assim_hours = ASSIM_TIME%24
 			daystr = str(assim_days).zfill(2)
