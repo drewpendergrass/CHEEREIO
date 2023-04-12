@@ -124,7 +124,7 @@
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
-	"ACTIVATE_OBSPACK" : "True",
+	"ACTIVATE_OBSPACK" : "true",
 	"obspack_input_file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_co2_1_OCO2MIP_2018-11-28.YYYYMMDD.nc",
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",

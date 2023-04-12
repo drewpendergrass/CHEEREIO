@@ -14,7 +14,8 @@ lower_case_booleans = ["DO_SPINUP",
 "ENS_SPINUP_FROM_BC_RESTART",
 "SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD",
 "AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD",
-"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD"]
+"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD",
+"ACTIVATE_OBSPACK"]
 
 for b in lower_case_booleans:
 	val = spc_config[b]
@@ -34,8 +35,7 @@ upper_case_booleans = ["SaveLevelEdgeDiags",
 "DO_RUN_IN_PLACE",
 "DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN",
 "DO_VARON_RERUN",
-"useLogScaleForEmissionsMaps",
-"ACTIVATE_OBSPACK"]
+"useLogScaleForEmissionsMaps"]
 
 for b in upper_case_booleans:
 	val = spc_config[b]
@@ -69,6 +69,6 @@ if (spc_config["DO_RUN_IN_PLACE"] == "True") and (spc_config["DO_VARON_RERUN"] =
 ########CHECK OBSPACK COMPATIBILITY WITH VERSION############
 ############################################################
 
-if (GC_version==13) and spc_config['ACTIVATE_OBSPACK'] == 'True':
+if (GC_version==13) and spc_config['ACTIVATE_OBSPACK'] == 'true':
 	raise ValueError('Obspack integration implemented for only GC14 and newer.')
 
