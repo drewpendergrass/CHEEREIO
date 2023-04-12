@@ -207,6 +207,7 @@ elif settingsstr=="SPINUP":
 	trans.customizeAllSections()
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=True)
 elif settingsstr=="PREPMAIN":
+	trans.updateRestartDurationFrequency(isFirst="First")
 	trans.updateHistoryCollectionsDurationFrequency(isSpinup=False)
 elif settingsstr=="UPDATEDURFREQ":
 	trans.updateRestartDurationFrequency(isFirst="Midrun")
