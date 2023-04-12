@@ -1,13 +1,7 @@
 import settings_interface as si 
 
 spc_config = si.getSpeciesConfig()
-
-############################################################
-###############CHECK RUN-IN-PLACE SETTINGS##################
-############################################################
-
-if (spc_config["DO_RUN_IN_PLACE"] == "True") and (spc_config["DO_VARON_RERUN"] == "True"):
-	raise ValueError('Run-in-place and Varon et. al. rerun cannot both be turned on. Set one or both to False.')
+GC_version = int(spc_config['GC_VERSION'].split('.')[0])
 
 ############################################################
 ###############CHECK BOOLEAN CAPITALIZATION#################
@@ -40,7 +34,8 @@ upper_case_booleans = ["SaveLevelEdgeDiags",
 "DO_RUN_IN_PLACE",
 "DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN",
 "DO_VARON_RERUN",
-"useLogScaleForEmissionsMaps"]
+"useLogScaleForEmissionsMaps",
+"ACTIVATE_OBSPACK"]
 
 for b in upper_case_booleans:
 	val = spc_config[b]
@@ -60,6 +55,20 @@ for b in upper_case_boolean_dicts:
 	for key in dic:
 		val = dic[key]
 		if val not in ['True','False']:
-			raise ValueError(f'Setting {b} must have True or False (case sensitive) for all values; current value for {key} within {b} is {val}.')
+			raise ValueError(f'Setting {b} must have True or False (case sensitive) for all values; current value for key {key} within {b} is {val}.')
 
+############################################################
+###############CHECK RUN-IN-PLACE SETTINGS##################
+############################################################
+
+if (spc_config["DO_RUN_IN_PLACE"] == "True") and (spc_config["DO_VARON_RERUN"] == "True"):
+	raise ValueError('Run-in-place and Varon et. al. rerun cannot both be turned on. Set one or both to False.')
+
+
+############################################################
+########CHECK OBSPACK COMPATIBILITY WITH VERSION############
+############################################################
+
+if (GC_version==13) and spc_config['ACTIVATE_OBSPACK'] == 'True':
+	raise ValueError('Obspack integration implemented for only GC14 and newer.')
 
