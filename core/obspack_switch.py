@@ -18,5 +18,5 @@ with open(path) as fp:
 data['extra_diagnostics']['obspack']['activate'] = obspack_code
 data['extra_diagnostics']['obspack']['input_file'] = f'{obspack_path}/{obspack_file}'
 
-with open(f'{path}/geoschem_config.yml', "w") as f:
+with open(path, "w") as f:
 	yaml.dump(data, f)
