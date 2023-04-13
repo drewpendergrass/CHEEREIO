@@ -11,7 +11,7 @@ path = str(sys.argv[1])
 
 yaml = ruamel.yaml.YAML()
 # yaml.preserve_quotes = True
-with open(f'{path}/geoschem_config.yml') as fp:
+with open(path) as fp:
 	data = yaml.load(fp)
 
 #switch obspack to user setting
