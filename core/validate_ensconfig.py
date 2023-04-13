@@ -48,6 +48,7 @@ upper_case_boolean_dicts = ["correlatedInitialScalings",
 "Mask60NScaleFactor",
 "Mask60SScaleFactor",
 "USE_DIFFERENT_GAMMA_FOR_BURN_IN",
+"ASSIMILATE_OBS",
 "Extensions"]
 
 for b in upper_case_boolean_dicts:
@@ -66,9 +67,13 @@ if (spc_config["DO_RUN_IN_PLACE"] == "True") and (spc_config["DO_VARON_RERUN"] =
 
 
 ############################################################
-########CHECK OBSPACK COMPATIBILITY WITH VERSION############
+##################CHECK OBSPACK STUFF#######################
 ############################################################
 
-if (GC_version==13) and spc_config['ACTIVATE_OBSPACK'] == 'true':
+if (GC_version==13) and (spc_config['ACTIVATE_OBSPACK'] == 'true'):
 	raise ValueError('Obspack integration implemented for only GC14 and newer.')
+
+if (not spc_config['obspack_gc_input_file'].endswith('YYYYMMDD.nc')) and (spc_config['ACTIVATE_OBSPACK'] == 'true'):
+	raise ValueError(f'OBSPACK input file has to end in YYYYMMDD.nc; current noncompliant value is {spc_config['obspack_gc_input_file']}.')
+
 

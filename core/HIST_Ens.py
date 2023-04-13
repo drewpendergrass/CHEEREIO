@@ -14,11 +14,12 @@ translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False,useControl=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False,useControl=False):
 		self.verbose = verbose
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
+		self.useObsPack = useObsPack
 		self.useArea = useArea
 		self.useControl = useControl
 		self.spc_config = si.getSpeciesConfig()
@@ -137,7 +138,7 @@ class HIST_Ens(object):
 		obsdata_toreturn = {}
 		conc2Ds = {}
 		firstens = self.ensemble_numbers[0]
-		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet)
+		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 		for species in self.observed_species:
 			errval = float(self.spc_config['OBS_ERROR'][species])
 			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
@@ -172,7 +173,7 @@ class HIST_Ens(object):
 			conc2Ds[species][:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet)
+				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 				for species in self.observed_species:
 					hist4D = self.ht[i].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
@@ -181,7 +182,7 @@ class HIST_Ens(object):
 		for species in self.observed_species:
 			obsdata_toreturn[species].setGCCol(conc2Ds[species])
 		if self.useControl:
-			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet)
+			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 			for species in self.observed_species:
 				hist4D = self.control_ht.reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()

@@ -108,10 +108,16 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
-		"CH4_TROPOMI": "CH4"
+		"CH4_TROPOMI": "CH4",
+		"CH4_OBSPACK": "CH4"
 	},
 	"OBS_TYPE" : {
-		"CH4_TROPOMI":"TROPOMI"
+		"CH4_TROPOMI":"TROPOMI",
+		"CH4_OBSPACK":"OBSPACK"
+	},
+	"ASSIMILATE_OBS" : {
+		"CH4_TROPOMI":"True",
+		"CH4_OBSPACK":"False"
 	},
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/nbalasus/blended_tropomi_gosat_methane/blended_tropomi_gosat"
@@ -119,13 +125,25 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
+	"OBSPACK_dirs" : {
+		"CH4" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_gc"
+	},
 	"filter_obs_poleward_of_n_degrees" : {
 		"CH4_TROPOMI":"nan"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
 	"ACTIVATE_OBSPACK" : "true",
-	"obspack_input_file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_co2_1_OCO2MIP_2018-11-28.YYYYMMDD.nc",
+	"raw_obspack_path" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_raw",
+	"gc_obspack_path" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_gc",
+	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
+	"raw_OBSPACK_dirs" : {
+		"CH4" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_raw"
+	},
+	"HistoryObsPackToSave" : [
+		"pressure",
+		"CH4"
+	],
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",

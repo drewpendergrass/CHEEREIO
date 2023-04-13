@@ -58,6 +58,7 @@ class Assimilator(object):
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
+		self.SaveObsPack = spc_config["ACTIVATE_OBSPACK"] == "true"
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
@@ -95,9 +96,9 @@ class Assimilator(object):
 			else:
 				self.postprocess_save_albedo = False
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
