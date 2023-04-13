@@ -9,14 +9,15 @@ import numpy as np
 import pandas as pd
 import observation_operators as obsop
 
+data_vars = ['time', 'start_time', 'midpoint_time', 'time_components', 'value',
+'latitude', 'longitude', 'altitude', 'assimilation_concerns',
+'obspack_id']
+
 #Make a filter function (output function) with start and end date and 2-value (min,max) tuples for lat and lon bounds
 def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 	# Define a filtering function
 	def filter_obspack(data):
 	# Define the variables to keep
-		data_vars = ['time', 'start_time', 'midpoint_time', 'time_components', 'value',
-		'latitude', 'longitude', 'altitude', 'assimilation_concerns',
-		'obspack_id']
 		# Subset variables
 		data = data[data_vars]
 		# Subset for time and location
@@ -52,7 +53,6 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 	filter_obspack = make_filter_fxn(start_date,end_date)
 	## Iterate through the files and see which are relevant to the domain
 	filtered_files = []
-	platforms = []
 	for i, f in enumerate(files):
 		op = xr.open_dataset(f)
 		# Only use files in the needed time, latitude, and longitude
@@ -67,13 +67,9 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		if len(op.obs) == 0:
 			continue
 		# If the file still has observations, append it to conus_files
-		filtered_files.append(f)
-		# And get information on the platform
-		platforms.append(op.attrs['dataset_project'])
-	# Sort the files
-	filtered_files.sort()
-	# Now load all the files
-	obspack = xr.open_mfdataset(filtered_files, concat_dim='obs', combine='nested', mask_and_scale=False, preprocess=filter_obspack)
+		filtered_files.append(op)
+	# Now combine all the files
+	obspack = xr.concat(filtered_files,dim='obs')
 	# Check for the sampling strategy
 	## Get the time in hours of each sample
 	obspack['obs_length'] = (obspack['time'] - obspack['start_time'])
