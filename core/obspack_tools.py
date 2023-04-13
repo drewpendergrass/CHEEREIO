@@ -20,8 +20,7 @@ def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 		# Subset variables
 		data = data[data_vars]
 		# Subset for time and location
-		datatime = pd.to_datetime(data['time'])
-		data = data.where((datatime >= start_date) & (datatime <= end_date), drop=True)
+		data = data.where((data['time'].dt.date >= start_date.date) & (datatime <= end_date.date), drop=True)
 		if lat_bounds is not None:
 			data = data.where((data['latitude'] >= lat_bounds[0]) & (data['latitude'] <= lat_bounds[1]), drop=True)
 		if lon_bounds is not None:
