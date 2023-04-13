@@ -6,6 +6,7 @@ import pickle
 import os.path
 import xarray as xr
 import numpy as np
+import pandas as pd
 import observation_operators as obsop
 
 #Make a filter function (output function) with start and end date and 2-value (min,max) tuples for lat and lon bounds
