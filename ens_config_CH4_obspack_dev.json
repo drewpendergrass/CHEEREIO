@@ -125,9 +125,6 @@
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
-	"OBSPACK_dirs" : {
-		"CH4" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_gc"
-	},
 	"filter_obs_poleward_of_n_degrees" : {
 		"CH4_TROPOMI":"nan"
 	},
@@ -137,9 +134,6 @@
 	"raw_obspack_path" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_raw",
 	"gc_obspack_path" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_gc",
 	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
-	"raw_OBSPACK_dirs" : {
-		"CH4" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/obspack_raw"
-	},
 	"HistoryObsPackToSave" : [
 		"pressure",
 		"CH4"

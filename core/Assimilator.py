@@ -68,6 +68,9 @@ class Assimilator(object):
 		self.PriorWeightinSFAverage = float(spc_config["PriorWeightinSFAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
+		self.assimilate_observation = self.spc_config['ASSIMILATE_OBS']
+		for ao in self.assimilate_observation:
+			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		if self.verbose>=2:
 			print(f"Begin creating GC Translators with state vectors.")
 		#If we are running in place, use a different timestamp to make the GC translators.
@@ -368,17 +371,19 @@ class Assimilator(object):
 			print(f"Scaling all restarts to match observations.")
 		scale_factors_by_species_key = {}
 		for species_key in self.observed_species:
-			scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
+			if assimilate_observation[species_key]: #Only use species where assimilation is turned on
+				scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
-			species_value = self.observed_species[species_key]
-			if species_value in list(scale_factors_by_species.keys()):
-				scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
-				scale_factors_by_species_count[species_value] += 1 #increment count for dividing next
-			else:
-				scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
-				scale_factors_by_species_count[species_value] = 1
+			if assimilate_observation[species_key]:
+				species_value = self.observed_species[species_key]
+				if species_value in list(scale_factors_by_species.keys()):
+					scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
+					scale_factors_by_species_count[species_value] += 1 #increment count for dividing next
+				else:
+					scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
+					scale_factors_by_species_count[species_value] = 1
 		#Complete the averaging by dividing by count
 		for species in scale_factors_by_species:
 			count = scale_factors_by_species_count[species]

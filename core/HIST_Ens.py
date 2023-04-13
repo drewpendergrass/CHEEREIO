@@ -41,6 +41,9 @@ class HIST_Ens(object):
 		self.control_ht = None
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
+		self.assimilate_observation = self.spc_config['ASSIMILATE_OBS']
+		for ao in self.assimilate_observation:
+			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if (ens==0) and self.useControl:
 				if fullperiod:
@@ -72,7 +75,6 @@ class HIST_Ens(object):
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
-		#USER: if you have implemented a new observation operator, plug it in here following the pattern established already.
 		for spec in list(self.observed_species.keys()):
 			obstype = self.spc_config['OBS_TYPE'][spec]
 			if obstype in translators:
@@ -132,7 +134,8 @@ class HIST_Ens(object):
 	def makeR(self,latind,lonind):
 		errmats = []
 		for spec in self.obsSpecies:
-			errmats.append(self.makeRforSpecies(spec,latind,lonind))
+			if self.assimilate_observation[spec]: #If assimilation is turned on, add it to R.
+				errmats.append(self.makeRforSpecies(spec,latind,lonind))
 		return la.block_diag(*errmats)
 	def getCols(self):
 		obsdata_toreturn = {}
@@ -209,20 +212,21 @@ class HIST_Ens(object):
 		obsperts = []
 		obsdiffs = []
 		for spec in self.obsSpecies:
-			ind = self.getIndsOfInterest(spec,latind,lonind)
-			errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
-			useError = errtype=='product'
-			gccol,obscol = self.bigYDict[spec].getCols()
-			gccol = gccol[ind,:]
-			obscol = obscol[ind]
-			obsmean = np.mean(gccol,axis=1)
-			obspert = np.zeros(np.shape(gccol))
-			for i in range(np.shape(gccol)[1]):
-				obspert[:,i]=gccol[:,i]-obsmean
-			obsdiff = obscol-obsmean
-			obsmeans.append(obsmean)
-			obsperts.append(obspert)
-			obsdiffs.append(obsdiff)
+			if self.assimilate_observation[spec]: #If assimilation is turned on, add it to R.
+				ind = self.getIndsOfInterest(spec,latind,lonind)
+				errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
+				useError = errtype=='product'
+				gccol,obscol = self.bigYDict[spec].getCols()
+				gccol = gccol[ind,:]
+				obscol = obscol[ind]
+				obsmean = np.mean(gccol,axis=1)
+				obspert = np.zeros(np.shape(gccol))
+				for i in range(np.shape(gccol)[1]):
+					obspert[:,i]=gccol[:,i]-obsmean
+				obsdiff = obscol-obsmean
+				obsmeans.append(obsmean)
+				obsperts.append(obspert)
+				obsdiffs.append(obsdiff)
 		full_obsmeans = np.concatenate(obsmeans)
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)

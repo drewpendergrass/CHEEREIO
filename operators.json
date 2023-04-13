@@ -8,5 +8,10 @@
 		"module_name" : "omi_tools",
 		"translator_name" : "OMI_Translator",
 		"implements_initialReadDate" : "True"
+	},
+	"OBSPACK" : {
+		"module_name" : "obspack_tools",
+		"translator_name" : "ObsPack_Translator",
+		"implements_initialReadDate" : "True"
 	}
 }
