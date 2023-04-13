@@ -4,7 +4,7 @@ import sys
 import os.path
 
 spc_config = si.getSpeciesConfig()
-obspack_code = spc_config["ACTIVATE_OBSPACK"]
+obspack_code = spc_config["ACTIVATE_OBSPACK"] == 'true'
 obspack_file = spc_config["obspack_gc_input_file"]
 obspack_path = spc_config["gc_obspack_path"]
 path = str(sys.argv[1])
