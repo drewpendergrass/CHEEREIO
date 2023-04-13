@@ -104,6 +104,11 @@ else
 fi
 python prep_par.py "PRODUCTION" #Figure out who should assimilate which cores. 
 python setup_obs_dates.py #Create date dictionaries for rapid reference at assimilation time.
+
+if [ "${ACTIVATE_OBSPACK}" = true ]; then #Preprocess obspack if that's what we do.
+  python preprocess_obspack.py
+fi
+
 conda deactivate #Exit Conda environment
 
 #Store current time.

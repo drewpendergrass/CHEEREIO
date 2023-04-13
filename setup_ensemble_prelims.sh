@@ -60,6 +60,7 @@ MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
 SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
 
+ACTIVATE_OBSPACK=$(jq -r ".ACTIVATE_OBSPACK" ens_config.json)
 
 # Path to find non-emissions input data; will use if no default found
 if [[ -f ${HOME}/.geoschem/config ]]; then
