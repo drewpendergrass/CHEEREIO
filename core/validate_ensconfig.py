@@ -74,6 +74,6 @@ if (GC_version==13) and (spc_config['ACTIVATE_OBSPACK'] == 'true'):
 	raise ValueError('Obspack integration implemented for only GC14 and newer.')
 
 if (not spc_config['obspack_gc_input_file'].endswith('YYYYMMDD.nc')) and (spc_config['ACTIVATE_OBSPACK'] == 'true'):
-	raise ValueError(f'OBSPACK input file has to end in YYYYMMDD.nc; current noncompliant value is {spc_config['obspack_gc_input_file']}.')
+	raise ValueError(f"OBSPACK input file has to end in YYYYMMDD.nc; current noncompliant value is {spc_config['obspack_gc_input_file']}.")
 
 
