@@ -18,16 +18,16 @@ def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 		'obspack_id']
 		# Subset variables
 		data = data[data_vars]
-	    # Subset for time and location
+		# Subset for time and location
 		data = data.where((data['time'].dt >= start_date) & (data['time'].dt <= end_date), drop=True)
 		if lat_bounds is not None:
 			data = data.where((data['latitude'] >= lat_bounds[0]) & (data['latitude'] <= lat_bounds[1]), drop=True)
 		if lon_bounds is not None:
 			data = data.where((data['longitude'] >= lon_bounds[0]) & (data['longitude'] <= lon_bounds[1]),drop=True)
 		# Save out a platform variable
-	    platform = data.attrs['dataset_project'].split('-')[0]
+		platform = data.attrs['dataset_project'].split('-')[0]
 		data['platform'] = xr.DataArray([platform]*len(data.obs), dims=('obs'))
-	    # Correct to local timezone if it's an in situ or surface observation
+		# Correct to local timezone if it's an in situ or surface observation
 		if (len(data.obs) > 0) and (platform in ['surface', 'tower']):
 			utc_conv = data.attrs['site_utc2lst']
 			if int(utc_conv) != utc_conv:
@@ -103,24 +103,70 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		day = start_date + timedelta(days=i)
 		# Subset for that day
 		daily = obspack.where((obspack['time'].dt.month == day.month) & (obspack['time'].dt.day == day.day) & (obspack['time'].dt.year == day.year), drop=True)
-        # If there is no data, continue
-        if len(daily.obs) == 0:
-            continue
-        # Data type fix
-        daily['obspack_id'] = daily['obspack_id'].astype('S200')
-        daily['platform'] = daily['platform'].astype('S50')
-        # Time fix
-        daily['time'].encoding['units'] = 'seconds since 1970-01-01 00:00:00 UTC'
-        daily['time'].encoding['calendar'] = 'proleptic_gregorian'
-        # daily['time_ltc'].encoding['units'] = 'seconds since 1970-01-01 00:00:00 UTC'
-        # daily['time_ltc'].encoding['calendar'] = 'proleptic_gregorian'
-        # One last rename
-        # daily = daily.rename({'value' : 'obs'})
-        # Otherwise, save out
-        print(f'Saving {day.year:04d}-{day.month:02d}-{day.day:02d}')
-        daily.to_netcdf(f'{gc_obspack_dir}/{name_str}{day.year:04d}{day.month:02d}{day.day:02d}.nc',unlimited_dims=['obs'])
+		# If there is no data, continue
+		if len(daily.obs) == 0:
+			continue
+		# Data type fix
+		daily['obspack_id'] = daily['obspack_id'].astype('S200')
+		daily['platform'] = daily['platform'].astype('S50')
+		# Time fix
+		daily['time'].encoding['units'] = 'seconds since 1970-01-01 00:00:00 UTC'
+		daily['time'].encoding['calendar'] = 'proleptic_gregorian'
+		# daily['time_ltc'].encoding['units'] = 'seconds since 1970-01-01 00:00:00 UTC'
+		# daily['time_ltc'].encoding['calendar'] = 'proleptic_gregorian'
+		# One last rename
+		# daily = daily.rename({'value' : 'obs'})
+		# Otherwise, save out
+		print(f'Saving {day.year:04d}-{day.month:02d}-{day.day:02d}')
+		daily.to_netcdf(f'{gc_obspack_dir}/{name_str}{day.year:04d}{day.month:02d}{day.day:02d}.nc',unlimited_dims=['obs'])
 
+def filter_postprocess_obspack_from_file(data):
+	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'utc_conv', 'platform']]
 
-
-
+class ObsPack_Translator(obsop.Observation_Translator):
+	def __init__(self,verbose=1):
+		super().__init__(verbose)
+	#Save dictionary of dates for later use
+	def initialReadDate(self):
+		sourcedir = self.spc_config['gc_obspack_path']
+		obs_list = glob(f'{sourcedir}/*.nc')
+		obs_list.sort()
+		obs_dates = [datetime.strptime(obs.split('/')[-1][-11:-3], "%Y%m%d") for obs in obs_list]
+		with open(f"{self.scratch}/obspack_dates.pickle", 'wb') as handle:
+			pickle.dump(obs_dates, handle)
+		return obs_dates
+	#Timeperiod is two datetime objects
+	def globObs(self,species,timeperiod, interval=None):
+		sourcedir = self.spc_config['gc_obspack_path']
+		if os.path.exists(f"{self.scratch}/obspack_dates.pickle"):
+			with open(f"{self.scratch}/obspack_dates.pickle", 'rb') as handle:
+				obs_dates = pickle.load(handle)
+		else:
+			obs_dates = self.initialReadDate()
+		obs_list = glob(f'{sourcedir}/*.nc')
+		obs_list.sort()
+		if interval:
+			obs_list = [obs for obs,t in zip(obs_list,obs_dates) if (t>=timeperiod[0]) and (t<timeperiod[1]) and ((t.hour % interval == 0) or (t.hour % interval == (interval-1)))]
+		else:
+			obs_list = [obs for obs,t in zip(obs_list,obs_dates) if (t>=timeperiod[0]) and (t<timeperiod[1])]
+		return obs_list
+	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
+		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
+		obs_list = self.globObs(species,timeperiod,interval)
+		obspack = xr.open_mfdataset(obs_list, concat_dim='obs', combine='nested', mask_and_scale=False, preprocess=filter_postprocess_obspack_from_file)
+		met = {}
+		met['value'] = obspack['value'].values
+		met['longitude'] = obspack['longitude'].values
+		met['latitude'] = obspack['latitude'].values
+		met['altitude'] = obspack['altitude'].values
+		met['utctime'] = obspack['time'].values
+		met['utc_conv'] = obspack['utc_conv'].values
+		met['platform'] = obspack['platform'].values
+		met['obspack_id'] = obspack['obspack_id'].values
+		return met
+	def gcCompare(self,specieskey,ObsPack,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
+		toreturn = obsop.ObsData(GC[species].values,ObsPack['value'],ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+		toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'])
+		return toreturn
 
