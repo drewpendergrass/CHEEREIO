@@ -16,9 +16,9 @@ spc_config = si.getSpeciesConfig()
 
 gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
 if gc_version>=14.1:
-	spcconc_name = "SpeciesConc"
+	spcconc_name = "SpeciesConcVV"
 else:
-	spcconc_name = "SpeciesConcVV" #Starting in 14.1 we have to specify VV
+	spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):

@@ -8,11 +8,11 @@ class HISTORY_Translator():
 		self.spc_config = si.getSpeciesConfig()
 		gc_version = float(self.spc_config['GC_VERSION'][0:-2]) #major plus minor version
 		if gc_version>=14.1:
-			self.spcconc_name = "SpeciesConc"
-			self.spcconc_len = 18
-		else:
-			self.spcconc_name = "SpeciesConcVV" #Starting in 14.1 we have to specify VV
+			self.spcconc_name = "SpeciesConcVV"
 			self.spcconc_len = 16
+		else:
+			self.spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+			self.spcconc_len = 18
 		self.path_to_scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 		if not foldername:
 			#Default to template HEMCO config

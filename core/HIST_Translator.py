@@ -10,9 +10,9 @@ class HIST_Translator(object):
 		self.spc_config = si.getSpeciesConfig()
 		gc_version = float(self.spc_config['GC_VERSION'][0:-2]) #major plus minor version
 		if gc_version>=14.1:
-			self.spcconc_name = "SpeciesConc"
+			self.spcconc_name = "SpeciesConcVV"
 		else:
-			self.spcconc_name = "SpeciesConcVV" #Starting in 14.1 we have to specify VV
+			self.spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
 		self.interval = interval
