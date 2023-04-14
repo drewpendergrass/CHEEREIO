@@ -17,9 +17,9 @@ class HIST_Translator(object):
 		self.timeperiod = timeperiod
 		self.interval = interval
 	def makeCollDict(self,useLevelEdge = False, useStateMet = False, useObsPack = False):
-		colls_to_grab = {'StateMet': {'use'=useStateMet, 'glob' = f'{self.hist_dir}/GEOSChem.StateMet*.nc4', 'diags' = 'HistoryStateMetToSave'},
-		'LevelEdgeDiags': {'use'=useLevelEdge, 'glob' = f'{self.hist_dir}/GEOSChem.LevelEdgeDiags*.nc4', 'diags' = 'HistoryLevelEdgeDiagsToSave'},
-		'ObsPack': {'use'=useObsPack, 'glob' = f'{self.hist_dir}/GEOSChem.ObsPack*.nc4','diags' = 'HistoryObsPackToSave'}
+		colls_to_grab = {'StateMet': {'use' : useStateMet, 'glob' : f'{self.hist_dir}/GEOSChem.StateMet*.nc4', 'diags' : 'HistoryStateMetToSave'},
+		'LevelEdgeDiags': {'use' : useLevelEdge, 'glob' : f'{self.hist_dir}/GEOSChem.LevelEdgeDiags*.nc4', 'diags' : 'HistoryLevelEdgeDiagsToSave'},
+		'ObsPack': {'use' : useObsPack, 'glob' : f'{self.hist_dir}/GEOSChem.ObsPack*.nc4','diags' : 'HistoryObsPackToSave'}
 		}
 		return colls_to_grab
 	def globSubDir(self,timeperiod,useLevelEdge = False, useStateMet = False, useObsPack = False):
