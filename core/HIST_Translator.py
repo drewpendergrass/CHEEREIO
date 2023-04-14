@@ -8,6 +8,11 @@ class HIST_Translator(object):
 	def __init__(self, path_to_rundir,timeperiod,interval=None,verbose=1):
 		self.verbose = verbose
 		self.spc_config = si.getSpeciesConfig()
+		gc_version = float(self.spc_config['GC_VERSION'][0:-2]) #major plus minor version
+		if gc_version>=14.1:
+			self.spcconc_name = "SpeciesConc"
+		else:
+			self.spcconc_name = "SpeciesConcVV" #Starting in 14.1 we have to specify VV
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
 		self.interval = interval
@@ -46,7 +51,7 @@ class HIST_Translator(object):
 			hist_ds = xr.load_dataset(specfile)
 			to_merge=[]
 			for species in self.spc_config['HistorySpeciesConcToSave']:
-				to_merge.append(hist_ds[f'SpeciesConc_{species}'])
+				to_merge.append(hist_ds[f'{self.spcconc_name}_{species}'])
 			for coll in colls_to_grab:
 				subdict = colls_to_grab[coll]
 				if subdict['use']:
@@ -61,7 +66,7 @@ class HIST_Translator(object):
 	def reduceCombinedHistToSpecies(self,combinedHist,species):
 		for spc in self.spc_config['HistorySpeciesConcToSave']:
 			if spc != species:
-				combinedHist = combinedHist.drop_vars(f'SpeciesConc_{spc}')
+				combinedHist = combinedHist.drop_vars(f'{self.spcconc_name}_{spc}')
 		return combinedHist
 	def getArea(self):
 		specconc_list=self.globSubDir(self.timeperiod,useLevelEdge=False,useStateMet=False)

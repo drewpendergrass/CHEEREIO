@@ -6,6 +6,13 @@ class HISTORY_Translator():
 	#Constructor. If foldername is none, open template HISTORY.rc. Otherwise open ensemble member
 	def __init__(self,foldername=None):
 		self.spc_config = si.getSpeciesConfig()
+		gc_version = float(self.spc_config['GC_VERSION'][0:-2]) #major plus minor version
+		if gc_version>=14.1:
+			self.spcconc_name = "SpeciesConc"
+			self.spcconc_len = 18
+		else:
+			self.spcconc_name = "SpeciesConcVV" #Starting in 14.1 we have to specify VV
+			self.spcconc_len = 16
 		self.path_to_scratch = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/scratch"
 		if not foldername:
 			#Default to template HEMCO config
@@ -139,8 +146,8 @@ class HISTORY_Translator():
 				startstring = "  SpeciesConc.fields:         "
 			else:
 				startstring = "                              "
-			secondstring = "'SpeciesConc_"
-			endwhitespacecount=18-len(species)
+			secondstring = f"'{self.spcconc_name}_"
+			endwhitespacecount=self.spcconc_len-len(species)
 		else:
 			if isFirst:
 				startstring = f"  {sectionname}.fields:"
