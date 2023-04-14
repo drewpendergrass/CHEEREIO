@@ -126,7 +126,8 @@
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"CH4_TROPOMI":"nan"
+		"CH4_TROPOMI":"nan",
+		"CH4_OBSPACK":"nan"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
@@ -178,34 +179,45 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1"
+		"CH4_TROPOMI":"0.1",
+		"CH4_OBSPACK":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"False"
+		"CH4_TROPOMI":"False",
+		"CH4_OBSPACK":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"0.2"
+		"CH4_TROPOMI":"0.2",
+		"CH4_OBSPACK":"0.2"
 	},
 	"OBS_ERROR": {
-		"CH4_TROPOMI":"17"
+		"CH4_TROPOMI":"17",
+		"CH4_OBSPACK":"17"
 	},
 	"OBS_ERROR_TYPE":{
-		"CH4_TROPOMI":"absolute"
+		"CH4_TROPOMI":"absolute",
+		"CH4_OBSPACK":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"CH4_TROPOMI":"0.28"
+		"CH4_TROPOMI":"0.28",
+		"CH4_OBSPACK":"0.28"
 	},
 	"MIN_OBS_ERROR":{
-		"CH4_TROPOMI":"10"
+		"CH4_TROPOMI":"10",
+		"CH4_OBSPACK":"False"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
 		"CH4_TROPOMI":{
+			"transport_error":"6.1"
+		},
+		"CH4_OBSPACK":{
 			"transport_error":"6.1"
 		}
 	},
 	"AV_TO_GC_GRID" : "True",
 	"SUPER_OBSERVATION_FUNCTION":{
-		"CH4_TROPOMI":"default"
+		"CH4_TROPOMI":"default",
+		"CH4_OBSPACK":"default"
 	},
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "24",
@@ -237,7 +249,8 @@
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
-		"CH4_TROPOMI": "ppb"
+		"CH4_TROPOMI": "ppb",
+		"CH4_OBSPACK": "ppb"
 	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
