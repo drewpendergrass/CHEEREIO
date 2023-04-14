@@ -58,9 +58,7 @@ do
                 -e "s:{TIME${counter}}:${time}:g" ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}
          x=$[$x+1]
          if [ "$ACTIVATE_OBSPACK" = true ]; then
-            if [ "${1}" = "FIRST" ]; then
-                python obspack_switch.py "${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}"
-            fi
+            python obspack_switch.py "${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}"
          fi
        done
        #Increment so we do end time
