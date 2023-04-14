@@ -10,7 +10,8 @@ obspack_path = spc_config["gc_obspack_path"]
 path = str(sys.argv[1])
 
 yaml = ruamel.yaml.YAML()
-# yaml.preserve_quotes = True
+yaml.indent(mapping=2, sequence=4, offset=2) #GEOS Chem is pretty strict about YAML formatting
+yaml.preserve_quotes = True
 with open(path) as fp:
 	data = yaml.load(fp)
 
