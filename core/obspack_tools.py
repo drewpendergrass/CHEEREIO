@@ -94,7 +94,7 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 	obspack.attrs = {}
 	obspack = obspack.drop(['obs_length', 'start_time', 'midpoint_time'])
 	#Drop data without sampling strategy
-	inds_to_drop np.where(obspack['ss']==999)[0]
+	inds_to_drop = np.where(obspack['ss']==999)[0]
 	obspack=obspack.drop_isel(obs=inds_to_drop)
 	# And iterate through the unique days
 	name_str = filename_format.split('YYYYMMDD.nc')[0]
