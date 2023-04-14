@@ -68,7 +68,7 @@ class Assimilator(object):
 		self.PriorWeightinSFAverage = float(spc_config["PriorWeightinSFAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
-		self.assimilate_observation = self.spc_config['ASSIMILATE_OBS']
+		self.assimilate_observation = spc_config['ASSIMILATE_OBS']
 		for ao in self.assimilate_observation:
 			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		if self.verbose>=2:
