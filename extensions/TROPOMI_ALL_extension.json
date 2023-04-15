@@ -1,5 +1,5 @@
 {
 	"postprocess_save_albedo":[
-		"TROPOMI_CH4"
+		"CH4_TROPOMI"
 	]
 }
