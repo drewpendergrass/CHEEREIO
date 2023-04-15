@@ -216,7 +216,7 @@
 	},
 	"AV_TO_GC_GRID" : {
 		"CH4_TROPOMI":"True",
-		"CH4_OBSPACK":"False",
+		"CH4_OBSPACK":"False"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default",
