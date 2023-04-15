@@ -47,14 +47,15 @@ class HIST_Translator(object):
 		dataset=[]
 		subdir_lists=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet,useObsPack)
 		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack)
+		to_merge=[]
 		for ind, specfile in enumerate(subdir_lists['SpeciesConc']):
 			hist_ds = xr.load_dataset(specfile)
-			to_merge=[]
 			for species in self.spc_config['HistorySpeciesConcToSave']:
 				to_merge.append(hist_ds[f'{self.spcconc_name}_{species}'])
-			for coll in colls_to_grab:
-				subdict = colls_to_grab[coll]
-				if subdict['use']:
+		for coll in colls_to_grab:
+			subdict = colls_to_grab[coll]
+			if subdict['use']:
+				for ind in range(len(subdir_lists[coll])):
 					lefile = subdir_lists[coll][ind]
 					le_ds = xr.load_dataset(lefile)
 					for lecoll in self.spc_config[subdict['diags']]:
