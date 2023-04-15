@@ -91,7 +91,9 @@ class Assimilator(object):
 		if (ensnum==1) and (corenum == 1): #This assimilator will save out the hist ens value for postprocessing later.
 			#Get postprocessing flags for saving out BigY
 			self.useControl=spc_config['DO_CONTROL_RUN']=="true"
-			self.avtogcgrid = spc_config['AV_TO_GC_GRID']=="True"
+			self.avtogcgrid = spc_config['AV_TO_GC_GRID']
+			for a in self.avtogcgrid:
+				self.avtogcgrid[a] = self.avtogcgrid[a]=="True" #parse as booleans
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
 			if 'postprocess_save_albedo' in spc_config:
@@ -424,7 +426,7 @@ class Assimilator(object):
 			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
 			df['Observations'] = bigy[spec].getObsCol()
 			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
-			if self.avtogcgrid:
+			if self.avtogcgrid[spec]:
 				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
 			else:
 				df['Num_Averaged'] = None

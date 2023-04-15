@@ -14,7 +14,7 @@ translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False,useControl=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=None,useControl=False):
 		self.verbose = verbose
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
@@ -97,7 +97,7 @@ class HIST_Ens(object):
 		errval = float(self.spc_config['OBS_ERROR'][species])
 		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
 		inds = self.getIndsOfInterest(species,latind,lonind)
-		if self.spc_config['AV_TO_GC_GRID']=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
+		if self.spc_config['AV_TO_GC_GRID'][species]=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
 			obsdat = self.bigYDict[species]
 			err_av = obsdat.getDataByKey('err_av')
 			err_av = err_av[inds]

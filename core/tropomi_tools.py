@@ -422,7 +422,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_SPC*=1e9 #scale to mol/mol
 		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
 		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
-		if self.spc_config['AV_TO_GC_GRID']=="True":
+		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
 			if doErrCalc:

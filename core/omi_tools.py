@@ -208,7 +208,7 @@ class OMI_Translator(obsop.Observation_Translator):
             GC_AMF = GC_SCD / GC_VCD
             #OMI SCD in the troposphere we back out using the AMF
             OMI_SCD = OMI['AmfTrop'] * OMI['NO2']
-            if self.spc_config['AV_TO_GC_GRID']=="True":
+            if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
                 superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
                 additional_args_avgGC = {}
                 if doErrCalc:

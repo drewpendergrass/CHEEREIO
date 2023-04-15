@@ -214,7 +214,10 @@
 			"transport_error":"6.1"
 		}
 	},
-	"AV_TO_GC_GRID" : "True",
+	"AV_TO_GC_GRID" : {
+		"CH4_TROPOMI":"True",
+		"CH4_OBSPACK":"False",
+	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default",
 		"CH4_OBSPACK":"default"

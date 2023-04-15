@@ -29,7 +29,6 @@ upper_case_booleans = ["SaveLevelEdgeDiags",
 "speedyCorrelationApprox",
 "lognormalErrors",
 "MaskCoastsGT25pctOcean",
-"AV_TO_GC_GRID",
 "AveragePriorAndPosterior",
 "AverageScaleFactorPosteriorWithPrior",
 "DO_RUN_IN_PLACE",
@@ -49,6 +48,7 @@ upper_case_boolean_dicts = ["correlatedInitialScalings",
 "Mask60SScaleFactor",
 "USE_DIFFERENT_GAMMA_FOR_BURN_IN",
 "ASSIMILATE_OBS",
+"AV_TO_GC_GRID",
 "Extensions"]
 
 for b in upper_case_boolean_dicts:
