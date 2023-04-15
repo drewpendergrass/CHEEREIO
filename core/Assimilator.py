@@ -371,12 +371,12 @@ class Assimilator(object):
 			print(f"Scaling all restarts to match observations.")
 		scale_factors_by_species_key = {}
 		for species_key in self.observed_species:
-			if assimilate_observation[species_key]: #Only use species where assimilation is turned on
+			if self.assimilate_observation[species_key]: #Only use species where assimilation is turned on
 				scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
-			if assimilate_observation[species_key]:
+			if self.assimilate_observation[species_key]:
 				species_value = self.observed_species[species_key]
 				if species_value in list(scale_factors_by_species.keys()):
 					scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
