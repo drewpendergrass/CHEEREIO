@@ -162,12 +162,11 @@ class HIST_Ens(object):
 				transportError = float(additional_err_params["transport_error"])
 			else:
 				transportError = None
-			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
 			if self.saveAlbedo is not None:
 				if species in self.saveAlbedo:
 					gccompare_kwargs["saveAlbedo"] = self.saveAlbedo
-			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,**gccompare_kwargs)
+			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
 			firstcol = obsdata_toreturn[species].getGCCol()
 			shape2D = np.zeros(2)
 			shape2D[0] = len(firstcol)
@@ -179,8 +178,7 @@ class HIST_Ens(object):
 			if i!=firstens:
 				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 				for species in self.observed_species:
-					hist4D = self.ht[i].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
-					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 					conc2Ds[species][:,i-1] = col
 		#Save full ensemble data in each of the obsdata objects
 		for species in self.observed_species:
@@ -188,8 +186,7 @@ class HIST_Ens(object):
 		if self.useControl:
 			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 			for species in self.observed_species:
-				hist4D = self.control_ht.reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
-				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 				obsdata_toreturn[species].addData(control=col)
 		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind):
