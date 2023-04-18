@@ -1,7 +1,25 @@
 import settings_interface as si 
+import json
 
 spc_config = si.getSpeciesConfig()
 GC_version = int(spc_config['GC_VERSION'].split('.')[0])
+
+
+############################################################
+#######CHECK THAT ALL EXPECTED KEYS ARE PRESENT#############
+############################################################
+
+#Load a template that contains all expected keys
+with open('../ens_config_CH4_obspack_dev.json') as f:
+	template = json.load(f)
+
+expected_keys = list(template.keys())
+
+expected_keys = [key in expected_keys if 'comment' not in key] #Drop the comments, doesn't matter if they are there.
+
+for key in expected_keys:
+	if key not in spc_config:
+		raise ValueError(f'Setting {key} is required in ens_config.json, even if it is not used by your simulation, but is not present.')
 
 ############################################################
 ###############CHECK BOOLEAN CAPITALIZATION#################
