@@ -23,7 +23,7 @@ if gc_version>=14.1:
 else:
     spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 
-lognormalErrors=str(sys.argv[6])=="True"
+lognormalErrors=data['lognormalErrors']=="True"
 
 if data['NEST'] == 'F':
     is_global = True
