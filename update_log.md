@@ -1,6 +1,6 @@
 # Update log
 
-## Version 1.1 goals (under development)
+## Version 1.1
 
 **Action items for users updating to version 1.1:**
 
@@ -17,7 +17,6 @@
 * Improvements to the postprocessing workflow. 
 * Add ObsPack support for GC >=14.1.0
   * New ObsPack observation operator released and ready for either use in assimilation or validation.
-  * New ObsPack postprocess workflow for validation.
 
 ## Version 1.0
 
