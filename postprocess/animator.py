@@ -114,8 +114,9 @@ lat = np.array(ds['lat'])
 lon = np.array(ds['lon'])
 anim_fps_val = anim_fps_conc
 for conc_val in data['CONTROL_VECTOR_CONC']:
-    variables.append(f'{spcconc_name}_{conc_val}')
-    das.append(np.array(ds[variables[-1]]))
+    variable = f'{spcconc_name}_{conc_val}'
+    variables.append(variable)
+    das.append(np.array(ds[variable]))
     outfiles.append(f"{pp_dir}/SpeciesConc_{conc_val}{ending}")
     times.append(time)
     timestrs.append(timestr)
@@ -131,8 +132,8 @@ for emis_val in data['CONTROL_VECTOR_EMIS']:
     timestr = [str(t)[0:16] for t in time]
     lat = np.array(ds['lat'])
     lon = np.array(ds['lon'])
-    variables.append(f'SCALAR')
-    das.append(np.array(ds[variables[-1]]))
+    variables.append('Scalar')
+    das.append(np.array(ds['Scalar']))
     outfiles.append(f"{pp_dir}/SCALEFACTOR_{emis_val}{ending}")
     times.append(time)
     timestrs.append(timestr)
@@ -149,7 +150,7 @@ lon = np.array(ds['lon'])
 anim_fps_val = anim_fps_emis
 for hemco_val in data['hemco_diags_to_process']:
     variables.append(hemco_val)
-    das.append(np.array(ds[variables[-1]]))
+    das.append(np.array(ds[hemco_val]))
     outfiles.append(f"{pp_dir}/HEMCOdiag_{hemco_val}{ending}")
     times.append(time)
     timestrs.append(timestr)
