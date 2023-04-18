@@ -15,7 +15,7 @@ with open('../ens_config_CH4_obspack_dev.json') as f:
 
 expected_keys = list(template.keys())
 
-expected_keys = [key in expected_keys if 'comment' not in key] #Drop the comments, doesn't matter if they are there.
+expected_keys = [key for key in expected_keys if 'comment' not in key] #Drop the comments, doesn't matter if they are there.
 
 for key in expected_keys:
 	if key not in spc_config:
