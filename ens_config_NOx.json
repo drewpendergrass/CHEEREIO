@@ -141,6 +141,9 @@
 	"OBS_TYPE" : {
 		"NO2_OMI":"OMI"
 	},
+	"ASSIMILATE_OBS" : {
+		"NO2_OMI":"True"
+	},
 	"TROPOMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2"
 	},
