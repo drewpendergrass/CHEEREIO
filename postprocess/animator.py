@@ -236,7 +236,7 @@ for variable,da,file_out,time,timestr,lon,lat,anim_fps in zip(variables,das,outf
             anim.save(file_out, writer=writer)
 
         #Close figure
-        fig.close()
+        plt.close(fig)
 
 
 #####Regions for global simulation#########
@@ -299,7 +299,7 @@ if is_global:
                     anim.save(file_out, writer=writer)
 
                 #Close figure
-                fig.close()
+                plt.close(fig)
 
 
 
