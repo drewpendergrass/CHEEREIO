@@ -1,5 +1,9 @@
 # Update log
 
+## Version 1.2 (in development)
+
+TKTKTKT
+
 ## Version 1.1
 
 **Action items for users updating to version 1.1:**
