@@ -58,6 +58,7 @@ class Assimilator(object):
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
+		self.SaveObsPack = spc_config["ACTIVATE_OBSPACK"] == "true"
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
@@ -67,6 +68,9 @@ class Assimilator(object):
 		self.PriorWeightinSFAverage = float(spc_config["PriorWeightinSFAverage"])
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
+		self.assimilate_observation = spc_config['ASSIMILATE_OBS']
+		for ao in self.assimilate_observation:
+			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		if self.verbose>=2:
 			print(f"Begin creating GC Translators with state vectors.")
 		#If we are running in place, use a different timestamp to make the GC translators.
@@ -87,17 +91,19 @@ class Assimilator(object):
 		if (ensnum==1) and (corenum == 1): #This assimilator will save out the hist ens value for postprocessing later.
 			#Get postprocessing flags for saving out BigY
 			self.useControl=spc_config['DO_CONTROL_RUN']=="true"
-			self.avtogcgrid = spc_config['AV_TO_GC_GRID']=="True"
+			self.avtogcgrid = spc_config['AV_TO_GC_GRID']
+			for a in self.avtogcgrid:
+				self.avtogcgrid[a] = self.avtogcgrid[a]=="True" #parse as booleans
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
 			if 'postprocess_save_albedo' in spc_config:
-				self.postprocess_save_albedo = spc_config['postprocess_save_albedo']=="True"
+				self.postprocess_save_albedo = spc_config['postprocess_save_albedo'] #LIST OF OBSERVERS WHERE WE SAVE
 			else:
-				self.postprocess_save_albedo = False
+				self.postprocess_save_albedo = None
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useArea=self.SaveArea,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
@@ -367,17 +373,19 @@ class Assimilator(object):
 			print(f"Scaling all restarts to match observations.")
 		scale_factors_by_species_key = {}
 		for species_key in self.observed_species:
-			scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
+			if self.assimilate_observation[species_key]: #Only use species where assimilation is turned on
+				scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
-			species_value = self.observed_species[species_key]
-			if species_value in list(scale_factors_by_species.keys()):
-				scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
-				scale_factors_by_species_count[species_value] += 1 #increment count for dividing next
-			else:
-				scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
-				scale_factors_by_species_count[species_value] = 1
+			if self.assimilate_observation[species_key]:
+				species_value = self.observed_species[species_key]
+				if species_value in list(scale_factors_by_species.keys()):
+					scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
+					scale_factors_by_species_count[species_value] += 1 #increment count for dividing next
+				else:
+					scale_factors_by_species[species_value] = scale_factors_by_species_key[species_key]
+					scale_factors_by_species_count[species_value] = 1
 		#Complete the averaging by dividing by count
 		for species in scale_factors_by_species:
 			count = scale_factors_by_species_count[species]
@@ -418,12 +426,13 @@ class Assimilator(object):
 			df = pd.DataFrame(bigy[spec].getGCCol(), columns = colnames)
 			df['Observations'] = bigy[spec].getObsCol()
 			df['Latitude'],df['Longitude'] = bigy[spec].getLatLon()
-			if self.avtogcgrid:
+			if self.avtogcgrid[spec]:
 				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
 			else:
 				df['Num_Averaged'] = None
-			if self.postprocess_save_albedo:
-				df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
+			if self.postprocess_save_albedo is not None:
+				if spec in self.postprocess_save_albedo:
+					df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
 			if self.useControl:
 				df['Control'] = bigy[spec].getDataByKey('control')
 			df['time'] = t

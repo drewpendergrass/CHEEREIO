@@ -1,3 +1,5 @@
 {
-	"postprocess_save_albedo":"True"
+	"postprocess_save_albedo":[
+		"CH4_TROPOMI"
+	]
 }

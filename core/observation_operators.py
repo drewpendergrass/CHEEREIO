@@ -106,8 +106,13 @@ def nearest_loc(GC,OBSDATA):
 
 def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=False,GC_area=None):
 	i,j,t = nearest_loc(GC,OBSDATA)
+	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
+	if gc_version>=14.1:
+		spcconc_name = "SpeciesConcVV"
+	else:
+		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 	to_return = {}
-	to_return['GC_SPC'] = GC[f'SpeciesConc_{species}'].values[t,:,j,i]
+	to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
 	to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
 		for metcoll in spc_config['HistoryStateMetToSave']:

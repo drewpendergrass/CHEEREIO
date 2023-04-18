@@ -4,6 +4,16 @@
 
 eval "$(conda shell.bash hook)"
 
+cd core
+python validate_ensconfig.py #Do some checks to see if ens_config looks good.
+cd ..
+
+ret=$?
+if [ $ret -ne 0 ]; then
+     #Handle failure
+     exit 1
+fi
+
 GC_VERSION="$(jq -r ".GC_VERSION" ens_config.json)"
 
 # Path to assimilation setup
@@ -50,6 +60,7 @@ MaxPar="$(jq -r ".MaxPar" ens_config.json)"
 
 SaveDOFS=$(jq -r ".SaveDOFS" ens_config.json) 
 
+ACTIVATE_OBSPACK=$(jq -r ".ACTIVATE_OBSPACK" ens_config.json)
 
 # Path to find non-emissions input data; will use if no default found
 if [[ -f ${HOME}/.geoschem/config ]]; then

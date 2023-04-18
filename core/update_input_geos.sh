@@ -5,13 +5,13 @@
 
 source activate $(jq -r ".CondaEnv" ../ens_config.json)
 python advance_timestep.py "${1}"
-conda deactivate
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
 ASSIM_TIME=$(jq -r ".ASSIM_TIME" ../ens_config.json)
 nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
 GC_VERSION="$(jq -r ".GC_VERSION" ../ens_config.json)"
+ACTIVATE_OBSPACK="$(jq -r ".ACTIVATE_OBSPACK" ../ens_config.json)"
 gc_major_version="${GC_VERSION:0:2}"
 
   if [ $gc_major_version = "13" ]; then
@@ -57,9 +57,15 @@ do
          sed -i -e "s:{DATE${counter}}:${date}:g" \
                 -e "s:{TIME${counter}}:${time}:g" ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}
          x=$[$x+1]
+         #We have to do on the second counter because the yaml parser gets pissed about the default strings.
+         if [[ ("${ACTIVATE_OBSPACK}" = "true" && $counter -eq 2) ]]; then
+            python obspack_switch.py "${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}"
+         fi
        done
        #Increment so we do end time
        counter=$[$counter+1]
 done <${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP
+
+conda deactivate
 
 printf "\n${filename} updated for ensemble.\n"

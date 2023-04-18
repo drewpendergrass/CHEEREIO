@@ -9,12 +9,12 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_rip_v05",
+	"RUN_NAME" : "METHANE_rerun_v02",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.BoundaryConditions.20190101_0000z.nc4",
+	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.BoundaryConditions.20180701_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -28,19 +28,19 @@
 	"CONTROL_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "true",
-	"ENS_SPINUP_START" : "20190101",
-	"ENS_SPINUP_END" : "20190501",
-	"START_DATE" : "20190501",
-	"ASSIM_START_DATE" : "20190508",
+	"ENS_SPINUP_START" : "20180701",
+	"ENS_SPINUP_END" : "20181101",
+	"START_DATE" : "20181101",
+	"ASSIM_START_DATE" : "20181115",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20200701",
+	"END_DATE" : "20210110",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
-	"BURN_IN_END" : "20190625",
-	"POSTPROCESS_START_DATE":"20190701",
-	"POSTPROCESS_END_DATE":"20200701",
+	"BURN_IN_END" : "20181225",
+	"POSTPROCESS_START_DATE":"20190101",
+	"POSTPROCESS_END_DATE":"20210110",
 	"nEnsemble" : "24",
 	"verbose":"1",
 	"comment003" : "***************************************************************************",
@@ -49,7 +49,7 @@
 	"NumCores" : "2",
 	"NumCtrlCores" : "24",
 	"Partition" : "huce_intel",
-	"Memory" : "32000",
+	"Memory" : "64000",
 	"EnsCtrlSpinupMemory" : "8000",
 	"WallTime" : "12-00\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
@@ -113,6 +113,9 @@
 	"OBS_TYPE" : {
 		"CH4_TROPOMI":"TROPOMI"
 	},
+	"ASSIMILATE_OBS" : {
+		"CH4_TROPOMI":"True"
+	},
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/nbalasus/blended_tropomi_gosat_methane/blended_tropomi_gosat"
 	},
@@ -120,10 +123,18 @@
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"CH4_TROPOMI":"60"
+		"CH4_TROPOMI":"nan"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
+	"ACTIVATE_OBSPACK" : "false",
+	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
+	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
+	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
+	"HistoryObsPackToSave" : [
+		"pressure",
+		"CH4"
+	],
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
@@ -164,7 +175,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.2"
+		"CH4_TROPOMI":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False"
@@ -189,7 +200,9 @@
 			"transport_error":"6.1"
 		}
 	},
-	"AV_TO_GC_GRID" : "True",
+	"AV_TO_GC_GRID" : {
+		"CH4_TROPOMI":"True"
+	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
 	},
@@ -197,7 +210,7 @@
 	"ASSIM_TIME": "168",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
-	"LOCALIZATION_RADIUS_km" : "500",
+	"LOCALIZATION_RADIUS_km" : "1500",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
@@ -205,10 +218,11 @@
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
-	"DO_RUN_IN_PLACE" : "True",
+	"DO_RUN_IN_PLACE" : "False",
 	"rip_update_time" : "48",
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
+	"DO_VARON_RERUN" : "True",
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",

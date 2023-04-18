@@ -14,11 +14,12 @@ translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=False,useControl=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=None,useControl=False):
 		self.verbose = verbose
 		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
+		self.useObsPack = useObsPack
 		self.useArea = useArea
 		self.useControl = useControl
 		self.spc_config = si.getSpeciesConfig()
@@ -40,6 +41,9 @@ class HIST_Ens(object):
 		self.control_ht = None
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
+		self.assimilate_observation = self.spc_config['ASSIMILATE_OBS']
+		for ao in self.assimilate_observation:
+			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		for ens, directory in zip(subdir_numbers,subdirs):
 			if (ens==0) and self.useControl:
 				if fullperiod:
@@ -71,7 +75,6 @@ class HIST_Ens(object):
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
-		#USER: if you have implemented a new observation operator, plug it in here following the pattern established already.
 		for spec in list(self.observed_species.keys()):
 			obstype = self.spc_config['OBS_TYPE'][spec]
 			if obstype in translators:
@@ -94,7 +97,7 @@ class HIST_Ens(object):
 		errval = float(self.spc_config['OBS_ERROR'][species])
 		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
 		inds = self.getIndsOfInterest(species,latind,lonind)
-		if self.spc_config['AV_TO_GC_GRID']=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
+		if self.spc_config['AV_TO_GC_GRID'][species]=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
 			obsdat = self.bigYDict[species]
 			err_av = obsdat.getDataByKey('err_av')
 			err_av = err_av[inds]
@@ -131,13 +134,14 @@ class HIST_Ens(object):
 	def makeR(self,latind,lonind):
 		errmats = []
 		for spec in self.obsSpecies:
-			errmats.append(self.makeRforSpecies(spec,latind,lonind))
+			if self.assimilate_observation[spec]: #If assimilation is turned on, add it to R.
+				errmats.append(self.makeRforSpecies(spec,latind,lonind))
 		return la.block_diag(*errmats)
 	def getCols(self):
 		obsdata_toreturn = {}
 		conc2Ds = {}
 		firstens = self.ensemble_numbers[0]
-		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet)
+		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 		for species in self.observed_species:
 			errval = float(self.spc_config['OBS_ERROR'][species])
 			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
@@ -158,11 +162,11 @@ class HIST_Ens(object):
 				transportError = float(additional_err_params["transport_error"])
 			else:
 				transportError = None
-			hist4D = self.ht[firstens].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
-			if self.saveAlbedo:
-				gccompare_kwargs["saveAlbedo"] = self.saveAlbedo
-			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,**gccompare_kwargs)
+			if self.saveAlbedo is not None:
+				if species in self.saveAlbedo:
+					gccompare_kwargs["saveAlbedo"] = self.saveAlbedo
+			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
 			firstcol = obsdata_toreturn[species].getGCCol()
 			shape2D = np.zeros(2)
 			shape2D[0] = len(firstcol)
@@ -172,19 +176,17 @@ class HIST_Ens(object):
 			conc2Ds[species][:,firstens-1] = firstcol
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet)
+				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 				for species in self.observed_species:
-					hist4D = self.ht[i].reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
-					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 					conc2Ds[species][:,i-1] = col
 		#Save full ensemble data in each of the obsdata objects
 		for species in self.observed_species:
 			obsdata_toreturn[species].setGCCol(conc2Ds[species])
 		if self.useControl:
-			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet)
+			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
 			for species in self.observed_species:
-				hist4D = self.control_ht.reduceCombinedHistToSpecies(hist4D_allspecies,self.observed_species[species])
-				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D,GC_area=self.AREA,doErrCalc=False).getGCCol()
+				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 				obsdata_toreturn[species].addData(control=col)
 		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind):
@@ -208,20 +210,21 @@ class HIST_Ens(object):
 		obsperts = []
 		obsdiffs = []
 		for spec in self.obsSpecies:
-			ind = self.getIndsOfInterest(spec,latind,lonind)
-			errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
-			useError = errtype=='product'
-			gccol,obscol = self.bigYDict[spec].getCols()
-			gccol = gccol[ind,:]
-			obscol = obscol[ind]
-			obsmean = np.mean(gccol,axis=1)
-			obspert = np.zeros(np.shape(gccol))
-			for i in range(np.shape(gccol)[1]):
-				obspert[:,i]=gccol[:,i]-obsmean
-			obsdiff = obscol-obsmean
-			obsmeans.append(obsmean)
-			obsperts.append(obspert)
-			obsdiffs.append(obsdiff)
+			if self.assimilate_observation[spec]: #If assimilation is turned on, add it to R.
+				ind = self.getIndsOfInterest(spec,latind,lonind)
+				errtype = self.spc_config['OBS_ERROR_TYPE'][spec]
+				useError = errtype=='product'
+				gccol,obscol = self.bigYDict[spec].getCols()
+				gccol = gccol[ind,:]
+				obscol = obscol[ind]
+				obsmean = np.mean(gccol,axis=1)
+				obspert = np.zeros(np.shape(gccol))
+				for i in range(np.shape(gccol)[1]):
+					obspert[:,i]=gccol[:,i]-obsmean
+				obsdiff = obscol-obsmean
+				obsmeans.append(obsmean)
+				obsperts.append(obspert)
+				obsdiffs.append(obsdiff)
 		full_obsmeans = np.concatenate(obsmeans)
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)

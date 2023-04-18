@@ -10,6 +10,16 @@ import pickle
 import pandas as pd
 sys.path.append('../core')
 from HIST_Ens import HIST_Ens 
+import settings_interface as si 
+
+spc_config = si.getSpeciesConfig()
+
+gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
+if gc_version>=14.1:
+	spcconc_name = "SpeciesConcVV"
+else:
+	spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
 	subdirs = glob(f"{ensemble_dir}/*/")
@@ -103,7 +113,7 @@ def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
 
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
 	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
-	concstrings = [f'SpeciesConc_{name}' for name in species_names]
+	concstrings = [f'{spcconc_name}_{name}' for name in species_names]
 	ds = xr.open_mfdataset(specconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
 	ds = ds[concstrings]
 	if subset_rule=='SURFACE':
@@ -193,7 +203,7 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includ
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'SpeciesConc_{species_name}'].isel(lat=latind,lon=lonind)
+	da = ds[f'{spcconc_name}_{species_name}'].isel(lat=latind,lon=lonind)
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
@@ -214,7 +224,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'SpeciesConc_{species_name}'].mean(axis=(2,3))
+	da = ds[f'{spcconc_name}_{species_name}'].mean(axis=(2,3))
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
@@ -250,10 +260,10 @@ def tsPlotTotalEmissions(ds_ensemble,ds_prior,area,collectionName,useLognormal =
 		ensmean = da.mean(axis=0)
 		enssd = da.std(axis=0)
 	if conversion_factor is not None:
-		ensmean*=conversion_factor
+		ensmean*=conversion_factor #kg/s to Tg/d (8.64e-05 in this case) or whatever you'd like 
 		enssd*=conversion_factor
 		da_prior*=conversion_factor
-	tsPlot(enstime,ensmean,enssd,collectionName,'kg/m2/s',priortime=priortime,prior=da_prior,priorcolor='r',outfile=outfile)
+	tsPlot(enstime,ensmean,enssd,collectionName,'kg/s',priortime=priortime,prior=da_prior,priorcolor='r',outfile=outfile)
 
 def tsPlotSatCompare(bigY,species,numens,unit='ppb',observer_name='Observations',useControl=False,outfile=None):
 	ensmeans = []
