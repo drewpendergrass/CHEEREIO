@@ -113,6 +113,9 @@
 	"OBS_TYPE" : {
 		"CH4_TROPOMI":"TROPOMI"
 	},
+	"ASSIMILATE_OBS" : {
+		"CH4_TROPOMI":"True",
+	},
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/nbalasus/blended_tropomi_gosat_methane/blended_tropomi_gosat"
 	},
