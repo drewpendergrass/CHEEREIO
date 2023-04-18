@@ -41,44 +41,47 @@ parser.add_argument('-func', '--statistical_function', type=str, default='all', 
 args = parser.parse_args()
 func = args.statistical_function
 
-## Some regional definitions.
-conus_lon_lim = [-130,-65]
-conus_lat_lim = [20,50]
-europe_lon_lim = [-10,40]
-europe_lat_lim = [40,65]
-india_lon_lim = [65,95]
-india_lat_lim = [5,30]
-australia_lon_lim = [110,155]
-australia_lat_lim = [-40,-10]
-eastchina_lon_lim = [110,135]
-eastchina_lat_lim = [20,45]
-southernafrica_lon_lim = [10,50]
-southernafrica_lat_lim = [-35,-10]
-southamerica_lon_lim = [-85,-30]
-southamerica_lat_lim = [-50,15]
+if is_global:
+    lon = longrid
+    lat = latgrid
+    ## Some regional definitions.
+    conus_lon_lim = [-130,-65]
+    conus_lat_lim = [20,50]
+    europe_lon_lim = [-10,40]
+    europe_lat_lim = [40,65]
+    india_lon_lim = [65,95]
+    india_lat_lim = [5,30]
+    australia_lon_lim = [110,155]
+    australia_lat_lim = [-40,-10]
+    eastchina_lon_lim = [110,135]
+    eastchina_lat_lim = [20,45]
+    southernafrica_lon_lim = [10,50]
+    southernafrica_lat_lim = [-35,-10]
+    southamerica_lon_lim = [-85,-30]
+    southamerica_lat_lim = [-50,15]
 
-latlims = [conus_lat_lim,europe_lat_lim,india_lat_lim,australia_lat_lim,eastchina_lat_lim,southernafrica_lat_lim,southamerica_lat_lim]
-lonlims = [conus_lon_lim,europe_lon_lim,india_lon_lim,australia_lon_lim,eastchina_lon_lim,southernafrica_lon_lim,southamerica_lon_lim]
+    latlims = [conus_lat_lim,europe_lat_lim,india_lat_lim,australia_lat_lim,eastchina_lat_lim,southernafrica_lat_lim,southamerica_lat_lim]
+    lonlims = [conus_lon_lim,europe_lon_lim,india_lon_lim,australia_lon_lim,eastchina_lon_lim,southernafrica_lon_lim,southamerica_lon_lim]
 
-conus_lon_ind = np.where((lon>=conus_lon_lim[0]) & (lon<=conus_lon_lim[1]))[0]
-conus_lat_ind = np.where((lat>=conus_lat_lim[0]) & (lat<=conus_lat_lim[1]))[0]
-europe_lon_ind = np.where((lon>=europe_lon_lim[0]) & (lon<=europe_lon_lim[1]))[0]
-europe_lat_ind = np.where((lat>=europe_lat_lim[0]) & (lat<=europe_lat_lim[1]))[0]
-india_lon_ind = np.where((lon>=india_lon_lim[0]) & (lon<=india_lon_lim[1]))[0]
-india_lat_ind = np.where((lat>=india_lat_lim[0]) & (lat<=india_lat_lim[1]))[0]
-australia_lon_ind = np.where((lon>=australia_lon_lim[0]) & (lon<=australia_lon_lim[1]))[0]
-australia_lat_ind = np.where((lat>=australia_lat_lim[0]) & (lat<=australia_lat_lim[1]))[0]
-eastchina_lon_ind = np.where((lon>=eastchina_lon_lim[0]) & (lon<=eastchina_lon_lim[1]))[0]
-eastchina_lat_ind = np.where((lat>=eastchina_lat_lim[0]) & (lat<=eastchina_lat_lim[1]))[0]
-southernafrica_lon_ind = np.where((lon>=southernafrica_lon_lim[0]) & (lon<=southernafrica_lon_lim[1]))[0]
-southernafrica_lat_ind = np.where((lat>=southernafrica_lat_lim[0]) & (lat<=southernafrica_lat_lim[1]))[0]
-southamerica_lon_ind = np.where((lon>=southamerica_lon_lim[0]) & (lon<=southamerica_lon_lim[1]))[0]
-southamerica_lat_ind = np.where((lat>=southamerica_lat_lim[0]) & (lat<=southamerica_lat_lim[1]))[0]
+    conus_lon_ind = np.where((lon>=conus_lon_lim[0]) & (lon<=conus_lon_lim[1]))[0]
+    conus_lat_ind = np.where((lat>=conus_lat_lim[0]) & (lat<=conus_lat_lim[1]))[0]
+    europe_lon_ind = np.where((lon>=europe_lon_lim[0]) & (lon<=europe_lon_lim[1]))[0]
+    europe_lat_ind = np.where((lat>=europe_lat_lim[0]) & (lat<=europe_lat_lim[1]))[0]
+    india_lon_ind = np.where((lon>=india_lon_lim[0]) & (lon<=india_lon_lim[1]))[0]
+    india_lat_ind = np.where((lat>=india_lat_lim[0]) & (lat<=india_lat_lim[1]))[0]
+    australia_lon_ind = np.where((lon>=australia_lon_lim[0]) & (lon<=australia_lon_lim[1]))[0]
+    australia_lat_ind = np.where((lat>=australia_lat_lim[0]) & (lat<=australia_lat_lim[1]))[0]
+    eastchina_lon_ind = np.where((lon>=eastchina_lon_lim[0]) & (lon<=eastchina_lon_lim[1]))[0]
+    eastchina_lat_ind = np.where((lat>=eastchina_lat_lim[0]) & (lat<=eastchina_lat_lim[1]))[0]
+    southernafrica_lon_ind = np.where((lon>=southernafrica_lon_lim[0]) & (lon<=southernafrica_lon_lim[1]))[0]
+    southernafrica_lat_ind = np.where((lat>=southernafrica_lat_lim[0]) & (lat<=southernafrica_lat_lim[1]))[0]
+    southamerica_lon_ind = np.where((lon>=southamerica_lon_lim[0]) & (lon<=southamerica_lon_lim[1]))[0]
+    southamerica_lat_ind = np.where((lat>=southamerica_lat_lim[0]) & (lat<=southamerica_lat_lim[1]))[0]
 
-latinds = [conus_lat_ind,europe_lat_ind,india_lat_ind,australia_lat_ind,eastchina_lat_ind,southernafrica_lat_ind,southamerica_lat_ind]
-loninds = [conus_lon_ind,europe_lon_ind,india_lon_ind,australia_lon_ind,eastchina_lon_ind,southernafrica_lon_ind,southamerica_lon_ind]
+    latinds = [conus_lat_ind,europe_lat_ind,india_lat_ind,australia_lat_ind,eastchina_lat_ind,southernafrica_lat_ind,southamerica_lat_ind]
+    loninds = [conus_lon_ind,europe_lon_ind,india_lon_ind,australia_lon_ind,eastchina_lon_ind,southernafrica_lon_ind,southamerica_lon_ind]
 
-regionnames = ['CONUS','Europe','India','Australia','EastChina','SouthernAfrica','SouthAmerica']
+    regionnames = ['CONUS','Europe','India','Australia','EastChina','SouthernAfrica','SouthAmerica']
 
 if func == 'all':
     looping = True
