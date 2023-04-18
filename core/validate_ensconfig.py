@@ -10,7 +10,7 @@ GC_version = int(spc_config['GC_VERSION'].split('.')[0])
 ############################################################
 
 #Load a template that contains all expected keys
-with open('../ens_config_CH4_obspack_dev.json') as f:
+with open('../ens_config_CH4.json') as f:
 	template = json.load(f)
 
 expected_keys = list(template.keys())
