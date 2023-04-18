@@ -151,7 +151,15 @@
 		"NO2_OMI":"60"
 	},
 	"SaveDOFS" : "False",
-	"DOFS_filter" : "1",
+	"DOFS_filter" : "nan",
+	"ACTIVATE_OBSPACK" : "false",
+	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
+	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
+	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
+	"HistoryObsPackToSave" : [
+		"pressure",
+		"CH4"
+	],
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
@@ -217,7 +225,9 @@
 			"transport_error":"0"
 		}
 	},
-	"AV_TO_GC_GRID" : "False",
+	"AV_TO_GC_GRID" : {
+		"NO2_OMI":"True"
+	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"NO2_OMI":"default"
 	},
