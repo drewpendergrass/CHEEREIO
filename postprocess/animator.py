@@ -31,6 +31,8 @@ else:
     is_global = False
 
 latgrid,longrid = si.getLatLonVals(data)
+latgrid = np.array(latgrid)
+longrid = np.array(longrid)
 totallat_minmax = [np.min(latgrid),np.max(latgrid)]
 totallon_minmax = [np.min(longrid),np.max(longrid)]
 
