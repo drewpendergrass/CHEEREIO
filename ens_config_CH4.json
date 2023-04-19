@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_rerun_v02",
+	"RUN_NAME" : "METHANE_rerun_v03",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -33,14 +33,14 @@
 	"START_DATE" : "20181101",
 	"ASSIM_START_DATE" : "20181115",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20210110",
+	"END_DATE" : "20200110",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
 	"BURN_IN_END" : "20181225",
 	"POSTPROCESS_START_DATE":"20190101",
-	"POSTPROCESS_END_DATE":"20210110",
+	"POSTPROCESS_END_DATE":"20200110",
 	"nEnsemble" : "24",
 	"verbose":"1",
 	"comment003" : "***************************************************************************",
@@ -108,13 +108,16 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
-		"CH4_TROPOMI": "CH4"
+		"CH4_TROPOMI": "CH4",
+		"CH4_OBSPACK": "CH4"
 	},
 	"OBS_TYPE" : {
-		"CH4_TROPOMI":"TROPOMI"
+		"CH4_TROPOMI":"TROPOMI",
+		"CH4_OBSPACK":"OBSPACK"
 	},
 	"ASSIMILATE_OBS" : {
-		"CH4_TROPOMI":"True"
+		"CH4_TROPOMI":"True",
+		"CH4_OBSPACK":"False"
 	},
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/nbalasus/blended_tropomi_gosat_methane/blended_tropomi_gosat"
@@ -123,11 +126,12 @@
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"CH4_TROPOMI":"nan"
+		"CH4_TROPOMI":"60",
+		"CH4_OBSPACK":"60"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
-	"ACTIVATE_OBSPACK" : "false",
+	"ACTIVATE_OBSPACK" : "true",
 	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
 	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
 	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
@@ -175,36 +179,48 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1"
+		"CH4_TROPOMI":"0.1",
+		"CH4_OBSPACK":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"False"
+		"CH4_TROPOMI":"False",
+		"CH4_OBSPACK":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
-		"CH4_TROPOMI":"0.2"
+		"CH4_TROPOMI":"0.2",
+		"CH4_OBSPACK":"0.2"
 	},
 	"OBS_ERROR": {
-		"CH4_TROPOMI":"17"
+		"CH4_TROPOMI":"17",
+		"CH4_OBSPACK":"17"
 	},
 	"OBS_ERROR_TYPE":{
-		"CH4_TROPOMI":"absolute"
+		"CH4_TROPOMI":"absolute",
+		"CH4_OBSPACK":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"CH4_TROPOMI":"0.28"
+		"CH4_TROPOMI":"0.28",
+		"CH4_OBSPACK":"0.28"
 	},
 	"MIN_OBS_ERROR":{
-		"CH4_TROPOMI":"10"
+		"CH4_TROPOMI":"10",
+		"CH4_OBSPACK":"10"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
 		"CH4_TROPOMI":{
 			"transport_error":"6.1"
+		},
+		"CH4_OBSPACK":{
+			"transport_error":"6.1"
 		}
 	},
 	"AV_TO_GC_GRID" : {
-		"CH4_TROPOMI":"True"
+		"CH4_TROPOMI":"True",
+		"CH4_OBSPACK":"False"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
-		"CH4_TROPOMI":"default"
+		"CH4_TROPOMI":"default",
+		"CH4_OBSPACK":"default"
 	},
 	"INFLATION_FACTOR": "0.05",
 	"ASSIM_TIME": "168",
