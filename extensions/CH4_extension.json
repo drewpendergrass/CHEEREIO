@@ -1,4 +1,5 @@
 {
 	"USE_CUSTOM_CH4_OH_ENTRY" : "True",
-	"CUSTOM_CH4_OH_ENTRY" : "* GLOBAL_OH  $ROOT\/OH\/v2014-09\/v5-07-08\/OH_3Dglobal.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1"
+	"CUSTOM_CH4_OH_ENTRY" : "* GLOBAL_OH  \/n\/holylfs05\/LABS\/jacob_lab\/dpendergrass\/input_data\/OH_3Dglobal.ELISE_POSTERIOR.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1"
 }
+
