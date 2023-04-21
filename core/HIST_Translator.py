@@ -45,23 +45,44 @@ class HIST_Translator(object):
 		return subdir_lists
 	def combineHist(self,useLevelEdge=False, useStateMet = False, useObsPack = False):
 		dataset=[]
+		to_merge=[]
 		subdir_lists=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet,useObsPack)
 		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack)
-		to_merge=[]
+		#Get species concentrations
 		for ind, specfile in enumerate(subdir_lists['SpeciesConc']):
 			hist_ds = xr.load_dataset(specfile)
 			for species in self.spc_config['HistorySpeciesConcToSave']:
 				to_merge.append(hist_ds[f'{self.spcconc_name}_{species}'])
+		#Merge species concentrations and add to overall dataset
+		data_val = xr.merge(to_merge)
+		dataset.append(data_val)
 		for coll in colls_to_grab:
 			subdict = colls_to_grab[coll]
 			if subdict['use']:
-				for ind in range(len(subdir_lists[coll])):
-					lefile = subdir_lists[coll][ind]
-					le_ds = xr.load_dataset(lefile)
+				#Obspack is a bit weirder and needs to be handled on its own
+				if coll == "ObsPack":
+					to_merge={}
+					#Make dictionary entries, blank for now
 					for lecoll in self.spc_config[subdict['diags']]:
-						to_merge.append(le_ds[lecoll])
-			data_val = xr.merge(to_merge)
-			dataset.append(data_val)
+						to_merge[lecoll] = []
+					for ind in range(len(subdir_lists[coll])):
+						lefile = subdir_lists[coll][ind]
+						le_ds = xr.load_dataset(lefile)
+						for lecoll in self.spc_config[subdict['diags']]:
+							to_merge[lecoll].append(le_ds[lecoll])
+					#Concatenate collections, merge doesn't like ragged arrays.
+					for lecoll in self.spc_config[subdict['diags']]:
+						data_val = xr.concat(to_merge[lecoll])
+						dataset.append(data_val)
+				else:
+					to_merge=[]
+					for ind in range(len(subdir_lists[coll])):
+						lefile = subdir_lists[coll][ind]
+						le_ds = xr.load_dataset(lefile)
+						for lecoll in self.spc_config[subdict['diags']]:
+							to_merge.append(le_ds[lecoll])
+					data_val = xr.merge(to_merge)
+					dataset.append(data_val)
 		dataset = xr.merge(dataset)
 		return dataset
 	def reduceCombinedHistToSpecies(self,combinedHist,species):
