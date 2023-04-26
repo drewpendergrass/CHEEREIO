@@ -8,6 +8,7 @@ import pickle
 from datetime import datetime
 from glob import glob
 
+#Plot 2d field over a map
 def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
 	fig = plt.figure(figsize=(10, 6))
 	m.drawcountries(color='lightgray')
@@ -26,6 +27,28 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 		plt.clim(clim[0],clim[1])
 	else:
 		plt.clim(np.nanmin(flat), np.nanmax(flat))
+	plt.colorbar(label=labelname)
+	fig.savefig(outfile)
+
+#Plot points on a map, with color codes
+def plotMapPoints(m, lat, lon, zvals, labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
+	fig = plt.figure(figsize=(10, 6))
+	m.drawcountries(color='lightgray')
+	m.drawcoastlines(color='lightgray')
+	if cmap is None:
+		cmap = plt.cm.jet
+	if useLog:
+		if minval is not None:
+			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
+		else:
+			flat[flat<=0] = np.nan
+		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,norm=LogNorm())
+	else:
+		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap)
+	if clim is not None:
+		plt.clim(clim[0],clim[1])
+	else:
+		plt.clim(np.nanmin(zvals), np.nanmax(zvals))
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
