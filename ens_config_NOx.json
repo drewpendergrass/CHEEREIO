@@ -268,6 +268,12 @@
 	"OBSERVATION_UNITS":{
 		"NO2_OMI": "molec/cm2"
 	},
+	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
+		"NO2_OMI" : []
+	},
+	"OBSERVERS_TO_PLOT_AS_POINTS":{
+		"CH4_OBSPACK":"obspack_id"
+	},
 	"scalefactor_plot_freq" : "all",
 	"comment027" : "**********************************************************************************",
 	"comment028" : "******************************BEGIN SETTING EXTENSIONS****************************",

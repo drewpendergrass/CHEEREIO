@@ -14,9 +14,8 @@ translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,saveAlbedo=None,useControl=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,useControl=False):
 		self.verbose = verbose
-		self.saveAlbedo = saveAlbedo
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
 		self.useObsPack = useObsPack

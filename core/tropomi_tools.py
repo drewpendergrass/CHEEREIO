@@ -404,8 +404,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		for key in list(trop_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in trop_obs])
 		return met
-	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
+		extra_obsdata_to_save = self.spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y'][specieskey]
 		if species=='CH4':
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
@@ -436,16 +437,21 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 					additional_args_avgGC['minError'] = minError
 				if errorCorr is not None:
 					additional_args_avgGC['errorCorr'] = errorCorr
-			if saveAlbedo:
-				additional_args_avgGC['albedo_swir'] = TROPOMI['albedo_swir']
-				additional_args_avgGC['albedo_nir'] = TROPOMI['albedo_nir']
-				additional_args_avgGC['blended_albedo'] = TROPOMI['blended_albedo']
+			#If saving extra fields, add them here
+			if len(extra_obsdata_to_save)>0:
+				additional_args_avgGC['other_fields_to_avg'] = {}
+				for field in extra_obsdata_to_save:
+					additional_args_avgGC['other_fields_to_avg'][field] = TROPOMI[field]
 			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			timevals = GC.time.values[t]
 			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],timevals)
-			if saveAlbedo:
-				toreturn.addData(swir_av=TROPOMI['albedo_swir'],nir_av=TROPOMI['albedo_nir'],blended_av=TROPOMI['blended_albedo'])
+			#If saving extra fields, add them here
+			if len(extra_obsdata_to_save)>0:
+				data_to_add = {}
+				for field in extra_obsdata_to_save:
+					data_to_add[field] = TROPOMI[field]
+				toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=TROPOMI['Error'])
 		return toreturn

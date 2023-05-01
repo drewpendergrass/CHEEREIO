@@ -254,12 +254,24 @@
 	"OBSERVATION_UNITS":{
 		"CH4_TROPOMI": "ppb"
 	},
+	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
+		"CH4_TROPOMI" : [
+			"albedo_swir",
+			"albedo_nir",
+			"blended_albedo"
+		],
+		"CH4_OBSPACK" : [
+			"obspack_id"
+		]
+	},
+	"OBSERVERS_TO_PLOT_AS_POINTS":{
+		"CH4_OBSPACK":"obspack_id"
+	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
 	"comment028" : "******************************BEGIN SETTING EXTENSIONS****************************",
 	"comment029" : "**********************************************************************************",
 	"Extensions": {
-		"TROPOMI_ALL":"True",
 		"TROPOMI_CH4":"True",
 		"CH4":"True"
 	}
