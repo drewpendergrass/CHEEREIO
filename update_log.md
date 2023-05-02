@@ -2,7 +2,15 @@
 
 ## Version 1.2 (in development)
 
-TKTKTKT
+**Action items for users updating to version 1.2:**
+
+* Update ens_config.json by comparing with templates, as new fields are now expected!
+
+**Updates under version 1.2**
+
+* Revamp the postprocess workflow
+  * Add option to plot sites (e.g. obspack) rather than gridding everything.
+  * Remove separate TROPOMI albedo postprocessing routines and replace with generalized method for adding 
 
 ## Version 1.1
 
