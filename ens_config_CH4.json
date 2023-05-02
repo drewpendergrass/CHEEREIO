@@ -252,7 +252,8 @@
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
-		"CH4_TROPOMI": "ppb"
+		"CH4_TROPOMI": "ppb",
+		"CH4_OBSPACK" : "ppb"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"CH4_TROPOMI" : [
@@ -263,6 +264,19 @@
 		"CH4_OBSPACK" : [
 			"obspack_id"
 		]
+	},
+	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
+		"CH4_TROPOMI" : [
+			"albedo_swir",
+			"albedo_nir",
+			"blended_albedo"
+		],
+		"CH4_OBSPACK" : []
+	},
+	"extra_plot_field_units":{
+		"albedo_swir":"Albedo",
+		"albedo_nir":"Albedo",
+		"blended_albedo":"Albedo"
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
 		"CH4_OBSPACK":"obspack_id"

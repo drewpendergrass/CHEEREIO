@@ -162,9 +162,6 @@ class HIST_Ens(object):
 			else:
 				transportError = None
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
-			if self.saveAlbedo is not None:
-				if species in self.saveAlbedo:
-					gccompare_kwargs["saveAlbedo"] = self.saveAlbedo
 			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
 			firstcol = obsdata_toreturn[species].getGCCol()
 			shape2D = np.zeros(2)

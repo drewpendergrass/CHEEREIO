@@ -40,6 +40,7 @@ class Assimilator(object):
 		ensemble_numbers = []
 		self.control = None
 		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
+		self.obsdata_to_save = spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y']
 		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
 			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
 		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
@@ -96,12 +97,8 @@ class Assimilator(object):
 				self.avtogcgrid[a] = self.avtogcgrid[a]=="True" #parse as booleans
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
-			if 'postprocess_save_albedo' in spc_config:
-				self.postprocess_save_albedo = spc_config['postprocess_save_albedo'] #LIST OF OBSERVERS WHERE WE SAVE
-			else:
-				self.postprocess_save_albedo = None
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
@@ -430,9 +427,9 @@ class Assimilator(object):
 				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
 			else:
 				df['Num_Averaged'] = None
-			if self.postprocess_save_albedo is not None:
-				if spec in self.postprocess_save_albedo:
-					df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
+			#Save out extra data.
+			for field in self.obsdata_to_save[spec]:
+				df[field] = bigy[spec].getDataByKey(field)
 			if self.useControl:
 				df['Control'] = bigy[spec].getDataByKey('control')
 			df['time'] = t
