@@ -346,69 +346,124 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 	else:
 		plt.show()
 
-def makeBigYArrays(bigy,gclat,gclon,nEnsemble,postprocess_save_albedo=False,useControl=False):
+#Process BigY as output by the Assimilator so that it is either (1) gridded and ready for plotting/analysis, or (2) combined by sensor.
+def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_points={},extra_obsdata_fields=None,useControl=False):
 	dates = list(bigy.keys())
 	specieslist = list(bigy[dates[0]].keys())
-	#Make obs/simulated obs arrays
-	simulated_obs_mean_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-	true_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-	#Make obs count arrays
-	total_obs_count = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
-	total_averaged_obs = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])
-	#Make optional arrays
-	if postprocess_save_albedo:
-		total_swir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-		total_nir = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-		total_blended = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-	if useControl:
-		control_obs_value = np.zeros([len(dates),len(specieslist),len(gclat),len(gclon)])*np.nan
-	#Loop through to fill arrays
-	for ind1, date in enumerate(dates):
-		daydict = bigy[date]
-		for ind2, species in enumerate(specieslist):
-			ydict = daydict[species]
-			latdict = np.array(ydict['Latitude'])
-			londict = np.array(ydict['Longitude'])
-			countdict = np.array(ydict['Num_Averaged'])
-			trueobsdict = np.array(ydict['Observations'])
-			simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
-			if postprocess_save_albedo:
-				swirdict = np.array(ydict['Albedo_SWIR'])
-				nirdict = np.array(ydict['Albedo_NIR'])
-				blendeddict = np.array(ydict['Blended_Albedo'])
+	to_return = {}
+	#Make dictionary to return; if averaged to GC grid, we are gridding for maps.
+	#If we aren't averaging to GC grid for DA, we do that here for plotting.
+	#However, for surface observations, we might treat these differently, and instead aggregate by id.
+	#The id used to aggregate is supplied as the value in the key/value pair OBSERVERS_TO_PLOT_AS_POINTS.
+	for species in specieslist:
+		to_return[species] = {}
+		is_Av = av_to_grid[species] == 'True'
+		if extra_obsdata_fields is not None:
+			bonus_fields = extra_obsdata_fields[species]
+		else:
+			bonus_fields = []
+		#If plotting as points, dictionary will have keys for location codes (given as values in observers_to_plot_as_points dictionary)
+		#Otherwise, we will be generating maps, and will prep them with empty arrys
+		if species in observers_to_plot_as_points:
+			to_return[species]['interpret_as'] = 'points'
+		else:
+			to_return[species]['interpret_as'] = 'map'
+			to_return[species]['sim_obs'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+			to_return[species]['obs'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+			to_return[species]['dates'] = dates
+			to_return[species]['obscount'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+			if is_Av:
+				to_return[species]['obscount_avg'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+			for field in bonus_fields:
+				to_return[species][field] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
 			if useControl:
-				controldict = np.array(ydict['Control'])
-			latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
-			latind = latind.argmin(axis=0)
-			lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
-			lonind = lonind.argmin(axis=0)
-			pairedind = ((latind+1)*10000)+(lonind+1)
-			uniqueind,countind = np.unique(pairedind,return_counts=True)
-			uniquelonind = (uniqueind % 10000)-1
-			uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
-			total_averaged_obs[ind1,ind2,uniquelatind,uniquelonind]=countind
-			for lonindval,latindval in zip(uniquelonind,uniquelatind):
-				dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
-				totalcount = np.sum(countdict[dictind])
-				total_obs_count[ind1,ind2,latindval,lonindval]=totalcount
-				true_obs_value[ind1,ind2,latindval,lonindval]=np.mean(trueobsdict[dictind])
-				simulated_obs_mean_value[ind1,ind2,latindval,lonindval]=np.mean(simobsdict[dictind])
-				if useControl:
-					control_obs_value[ind1,ind2,latindval,lonindval]=np.mean(controldict[dictind])
-				if postprocess_save_albedo:	
-					total_swir[ind1,ind2,latindval,lonindval]=np.mean(swirdict[dictind])
-					total_nir[ind1,ind2,latindval,lonindval]=np.mean(nirdict[dictind])
-					total_blended[ind1,ind2,latindval,lonindval]=np.mean(blendeddict[dictind])
-	#save arrays in dictionary form
-	arraysbase = {"obscount":total_obs_count,"obscount_avg":total_averaged_obs,"dates":dates,"species":specieslist,"obs":true_obs_value,"sim_obs":simulated_obs_mean_value}
-	if postprocess_save_albedo:
-		arraysbase['swir_albedo']=total_swir
-		arraysbase['nir_albedo']=total_nir
-		arraysbase['blended_albedo']=total_blended
+				to_return[species]['control'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+		#Go ahead and do the regridding or aggregation to point data.
+		for ind1, date in enumerate(dates): 
+			ydict = bigy[date][species]
+			#Regrid for maps
+			if to_return[species]['interpret_as'] == 'map':
+				to_return = gridYDictToLatLon(to_return, ind1, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields)
+			#Aggregate for points
+			elif to_return[species]['interpret_as'] == 'points':
+				agg_dict = np.array(ydict[observers_to_plot_as_points[species]]) #Get the point codes for aggregation
+				uniqueind,countind = np.unique(agg_dict,return_counts=True)
+				for station in uniqueind:
+					dictind = np.where(agg_dict==station)[0]
+					#If we've not seen this station before, create new entries
+					if station not in to_return[species]:
+						to_return[species][station] = {}
+						to_return[species][station]['obs'] = []
+						to_return[species][station]['sim_obs'] = []
+						to_return[species][station]['lat'] = []
+						to_return[species][station]['lon'] = []
+						to_return[species][station]['time'] = []
+						if useControl:
+							to_return[species][station]['control'] = []
+						for field in bonus_fields:
+							to_return[species][station][field] = []
+					#Append to existing lists, for concatenation later
+					to_return[species][station]['obs'].append(np.array(ydict['Observations'])[dictind])
+					to_return[species][station]['sim_obs'].append(np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1)[dictind])
+					to_return[species][station]['lat'].append(np.array(ydict['Latitude'])[dictind])
+					to_return[species][station]['lon'].append(np.array(ydict['Longitude'])[dictind])
+					to_return[species][station]['time'].append(np.array(ydict['time'])[dictind])
+					if useControl:
+						to_return[species][station]['control'].append(np.array(ydict['Control'])[dictind])
+					for field in bonus_fields:
+						to_return[species][station][field].append(np.array(ydict[field])[dictind])
+		#If this is a map, we're done. If this is a point, we need to concatenate and sort by date.
+		if to_return[species]['interpret_as'] == 'point':
+			for station in to_return[species]:
+				if station == 'interpret_as': #this is the one entry that is not a station in this dictionary
+					continue
+				else:
+					for field in to_return[species][station]: #Go through each field and concatenate
+						to_return[species][station][field] = np.concatenate(to_return[species][station][field])
+					sorted_time_inds = to_return[species][station]['time'].argsort() #Get sorted indices by time. 
+					for field in to_return[species][station]: #Go through each field and sort in time order.
+						to_return[species][station][field] = to_return[species][station][field][sorted_time_inds]
+	#Done!
+	return to_return
+
+
+#For a single assimilation period, grid Y dictionary output.
+def gridYDictToLatLon(to_return, date_index, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields):
+	latdict = np.array(ydict['Latitude'])
+	londict = np.array(ydict['Longitude'])
+	trueobsdict = np.array(ydict['Observations'])
+	simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
+	if is_Av:
+		countdict = np.array(ydict['Num_Averaged'])
 	if useControl:
-		arraysbase['control']=control_obs_value
-	#Return dictionary
-	return arraysbase
+		controldict = np.array(ydict['Control'])
+	#Aggregate to map
+	latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
+	latind = latind.argmin(axis=0)
+	lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
+	lonind = lonind.argmin(axis=0)
+	pairedind = ((latind+1)*10000)+(lonind+1)
+	uniqueind,countind = np.unique(pairedind,return_counts=True)
+	uniquelonind = (uniqueind % 10000)-1
+	uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
+	#Number of matches is interpreted differently if we have already averaged to the GC grid in assimilation
+	if is_Av: 
+		to_return[species]['obscount_avg'][date_index,uniquelatind,uniquelonind]=countind
+	else:
+		to_return[species]['obscount'][date_index,uniquelatind,uniquelonind]=countind
+	#Aggregate everything at matching latvals and lonvals
+	for lonindval,latindval in zip(uniquelonind,uniquelatind):
+		dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
+		if is_Av:
+			totalcount = np.sum(countdict[dictind])
+			to_return[species]['obscount'][date_index,latindval,lonindval]=totalcount
+		to_return[species]['obs'][date_index,latindval,lonindval]=np.mean(trueobsdict[dictind])
+		to_return[species]['sim_obs'][date_index,latindval,lonindval]=np.mean(simobsdict[dictind])
+		if useControl:
+			to_return[species]['control'][date_index,latindval,lonindval]=np.mean(controldict[dictind])
+		for field in bonus_fields:
+			to_return[species][field][date_index,latindval,lonindval] = np.mean(np.array(ydict[field])[dictind])
+	return to_return
 
 
 
