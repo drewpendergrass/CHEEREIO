@@ -166,7 +166,8 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		return met
 	def gcCompare(self,specieskey,ObsPack,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
-		toreturn = obsop.ObsData(GC[species].values,ObsPack['value'],ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+		#Have to convert to PPB
+		toreturn = obsop.ObsData(GC[species].values*1e9,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
 		toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'])
 		return toreturn
 
