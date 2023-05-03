@@ -47,6 +47,8 @@ obs_units = data['OBSERVATION_UNITS']
 useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
 OBSERVERS_TO_PLOT_AS_POINTS=data['OBSERVERS_TO_PLOT_AS_POINTS']
+extra_obsdata_fields=data['EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT']
+
 av_to_gc_grid = data['AV_TO_GC_GRID']
 
 if useControl and controlInEns:
@@ -66,7 +68,7 @@ gclat = np.array(gclat)
 gclon = np.array(gclon)
 
 print('Gridding simulated observation and observation dictionaries...')
-pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=OBSERVERS_TO_PLOT_AS_POINTS,extra_obsdata_fields={},useControl=do_control)
+pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=OBSERVERS_TO_PLOT_AS_POINTS,extra_obsdata_fields=extra_obsdata_fields,useControl=do_control)
 
 f = open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl',"wb")
 pickle.dump(arraysbase,f)
