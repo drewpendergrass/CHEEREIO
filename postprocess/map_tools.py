@@ -163,14 +163,15 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 				if station == 'interpret_as':
 					continue
 				else:
-					times = spec_dict['time']
+					station_dict = spec_dict[station]
+					times = station_dict['time']
 					inds = np.where((times >= timeperiod[0]) & (times < timeperiod[1]))[0]
 					to_return[species]['stations'][counter] = station
-					to_return[species]['lat'][counter] = spec_dict['lat'][0] #Should be all identical
-					to_return[species]['lon'][counter] = spec_dict['lon'][0] #Should be all identical
-					sim_obs = spec_dict["sim_obs"][inds]
-					true_obs = spec_dict["obs"][inds]
-					ctrl_obs = spec_dict["control"][inds]
+					to_return[species]['lat'][counter] = station_dict['lat'][0] #Should be all identical
+					to_return[species]['lon'][counter] = station_dict['lon'][0] #Should be all identical
+					sim_obs = station_dict["sim_obs"][inds]
+					true_obs = station_dict["obs"][inds]
+					ctrl_obs = station_dict["control"][inds]
 					to_return[species]['assim_minus_obs'][counter]  = np.nanmean(sim_obs-true_obs)
 					to_return[species]['ctrl_minus_obs'][counter]  = np.nanmean(ctrl_obs-true_obs)
 					to_return[species]['total_obs_in_period'][counter]  = len(inds)

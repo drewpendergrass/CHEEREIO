@@ -446,7 +446,7 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 					for field in bonus_fields:
 						to_return[species][station][field].append(np.array(ydict[field])[dictind])
 		#If this is a map, we're done. If this is a point, we need to concatenate and sort by date.
-		if to_return[species]['interpret_as'] == 'point':
+		if to_return[species]['interpret_as'] == 'points':
 			for station in to_return[species]:
 				if station == 'interpret_as': #this is the one entry that is not a station in this dictionary
 					continue
