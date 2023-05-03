@@ -165,16 +165,22 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 				else:
 					station_dict = spec_dict[station]
 					times = station_dict['time']
-					inds = np.where((times >= timeperiod[0]) & (times < timeperiod[1]))[0]
+					if timeperiod is not None: #Slice data down to timeperiod
+						inds = np.where((times >= timeperiod[0]) & (times < timeperiod[1]))[0]
+						sim_obs = station_dict["sim_obs"][inds]
+						true_obs = station_dict["obs"][inds]
+						ctrl_obs = station_dict["control"][inds]
+						to_return[species]['total_obs_in_period'][counter]  = len(inds)
+					else:
+						sim_obs = station_dict["sim_obs"]
+						true_obs = station_dict["obs"]
+						ctrl_obs = station_dict["control"]
+						to_return[species]['total_obs_in_period'][counter]  = len(ctrl_obs)
 					to_return[species]['stations'][counter] = station
 					to_return[species]['lat'][counter] = station_dict['lat'][0] #Should be all identical
 					to_return[species]['lon'][counter] = station_dict['lon'][0] #Should be all identical
-					sim_obs = station_dict["sim_obs"][inds]
-					true_obs = station_dict["obs"][inds]
-					ctrl_obs = station_dict["control"][inds]
 					to_return[species]['assim_minus_obs'][counter]  = np.nanmean(sim_obs-true_obs)
 					to_return[species]['ctrl_minus_obs'][counter]  = np.nanmean(ctrl_obs-true_obs)
-					to_return[species]['total_obs_in_period'][counter]  = len(inds)
 					to_return[species]['mean_obs'][counter]  = np.nanmean(true_obs)
 					counter+=1
 		elif spec_dict['interpret_as'] == 'map':
