@@ -42,9 +42,9 @@ def plotMapPoints(m, lat, lon, zvals, labelname,outfile,clim=None,cmap=None,useL
 			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
 		else:
 			flat[flat<=0] = np.nan
-		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,norm=LogNorm())
+		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,norm=LogNorm(),edgecolors='black')
 	else:
-		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap)
+		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,edgecolors='black')
 	if clim is not None:
 		plt.clim(clim[0],clim[1])
 	else:
