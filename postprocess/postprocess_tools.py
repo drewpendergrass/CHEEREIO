@@ -383,7 +383,7 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 			ydict = bigy[date][species]
 			#Regrid for maps
 			if to_return[species]['interpret_as'] == 'map':
-				to_return = gridYDictToLatLon(to_return, ind1, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields)
+				to_return[species] = gridYDictToLatLon(to_return[species], ind1, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields)
 			#Aggregate for points
 			elif to_return[species]['interpret_as'] == 'points':
 				agg_dict = np.array(ydict[observers_to_plot_as_points[species]]) #Get the point codes for aggregation
@@ -448,21 +448,21 @@ def gridYDictToLatLon(to_return, date_index, gclat,gclon, ydict, nEnsemble, is_A
 	uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
 	#Number of matches is interpreted differently if we have already averaged to the GC grid in assimilation
 	if is_Av: 
-		to_return[species]['obscount_avg'][date_index,uniquelatind,uniquelonind]=countind
+		to_return['obscount_avg'][date_index,uniquelatind,uniquelonind]=countind
 	else:
-		to_return[species]['obscount'][date_index,uniquelatind,uniquelonind]=countind
+		to_return['obscount'][date_index,uniquelatind,uniquelonind]=countind
 	#Aggregate everything at matching latvals and lonvals
 	for lonindval,latindval in zip(uniquelonind,uniquelatind):
 		dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
 		if is_Av:
 			totalcount = np.sum(countdict[dictind])
-			to_return[species]['obscount'][date_index,latindval,lonindval]=totalcount
-		to_return[species]['obs'][date_index,latindval,lonindval]=np.mean(trueobsdict[dictind])
-		to_return[species]['sim_obs'][date_index,latindval,lonindval]=np.mean(simobsdict[dictind])
+			to_return['obscount'][date_index,latindval,lonindval]=totalcount
+		to_return['obs'][date_index,latindval,lonindval]=np.mean(trueobsdict[dictind])
+		to_return['sim_obs'][date_index,latindval,lonindval]=np.mean(simobsdict[dictind])
 		if useControl:
-			to_return[species]['control'][date_index,latindval,lonindval]=np.mean(controldict[dictind])
+			to_return['control'][date_index,latindval,lonindval]=np.mean(controldict[dictind])
 		for field in bonus_fields:
-			to_return[species][field][date_index,latindval,lonindval] = np.mean(np.array(ydict[field])[dictind])
+			to_return[field][date_index,latindval,lonindval] = np.mean(np.array(ydict[field])[dictind])
 	return to_return
 
 
