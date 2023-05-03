@@ -144,8 +144,8 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 	to_return = {}
 	for species in bigy:
 		to_return[species] = {}
-		to_return[species]['interpret_as'] = spec_dict['interpret_as']
 		spec_dict = bigy[species]
+		to_return[species]['interpret_as'] = spec_dict['interpret_as']
 		#Handle point data
 		if spec_dict['interpret_as'] == 'points':
 			num_stations = len(list(spec_dict.keys()))-1 #Number of stations in dataset
