@@ -383,7 +383,40 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 			ydict = bigy[date][species]
 			#Regrid for maps
 			if to_return[species]['interpret_as'] == 'map':
-				to_return[species] = gridYDictToLatLon(to_return[species], ind1, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields)
+				latdict = np.array(ydict['Latitude'])
+				londict = np.array(ydict['Longitude'])
+				trueobsdict = np.array(ydict['Observations'])
+				simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
+				if is_Av:
+					countdict = np.array(ydict['Num_Averaged'])
+				if useControl:
+					controldict = np.array(ydict['Control'])
+				#Aggregate to map
+				latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
+				latind = latind.argmin(axis=0)
+				lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
+				lonind = lonind.argmin(axis=0)
+				pairedind = ((latind+1)*10000)+(lonind+1)
+				uniqueind,countind = np.unique(pairedind,return_counts=True)
+				uniquelonind = (uniqueind % 10000)-1
+				uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
+				#Number of matches is interpreted differently if we have already averaged to the GC grid in assimilation
+				if is_Av: 
+					to_return[species]['obscount_avg'][date_index,uniquelatind,uniquelonind]=countind
+				else:
+					to_return[species]['obscount'][date_index,uniquelatind,uniquelonind]=countind
+				#Aggregate everything at matching latvals and lonvals
+				for lonindval,latindval in zip(uniquelonind,uniquelatind):
+					dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
+					if is_Av:
+						totalcount = np.sum(countdict[dictind])
+						to_return[species]['obscount'][date_index,latindval,lonindval]=totalcount
+					to_return[species]['obs'][date_index,latindval,lonindval]=np.mean(trueobsdict[dictind])
+					to_return[species]['sim_obs'][date_index,latindval,lonindval]=np.mean(simobsdict[dictind])
+					if useControl:
+						to_return[species]['control'][date_index,latindval,lonindval]=np.mean(controldict[dictind])
+					for field in bonus_fields:
+						to_return[species][field][date_index,latindval,lonindval] = np.mean(np.array(ydict[field])[dictind])
 			#Aggregate for points
 			elif to_return[species]['interpret_as'] == 'points':
 				agg_dict = np.array(ydict[observers_to_plot_as_points[species]]) #Get the point codes for aggregation
@@ -425,45 +458,4 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 						to_return[species][station][field] = to_return[species][station][field][sorted_time_inds]
 	#Done!
 	return to_return
-
-
-#For a single assimilation period, grid Y dictionary output.
-def gridYDictToLatLon(to_return, date_index, gclat,gclon, ydict, nEnsemble, is_Av, useControl, bonus_fields):
-	latdict = np.array(ydict['Latitude'])
-	londict = np.array(ydict['Longitude'])
-	trueobsdict = np.array(ydict['Observations'])
-	simobsdict = np.mean(np.array(ydict.iloc[:,0:nEnsemble]),axis=1) #Get the ensemble sim obs values, average to get sim obs dict
-	if is_Av:
-		countdict = np.array(ydict['Num_Averaged'])
-	if useControl:
-		controldict = np.array(ydict['Control'])
-	#Aggregate to map
-	latind = np.abs(latdict.reshape((1, -1)) - gclat.reshape((-1, 1)))
-	latind = latind.argmin(axis=0)
-	lonind = np.abs(londict.reshape((1, -1)) - gclon.reshape((-1, 1)))
-	lonind = lonind.argmin(axis=0)
-	pairedind = ((latind+1)*10000)+(lonind+1)
-	uniqueind,countind = np.unique(pairedind,return_counts=True)
-	uniquelonind = (uniqueind % 10000)-1
-	uniquelatind = np.floor(uniqueind / 10000).astype(int)-1
-	#Number of matches is interpreted differently if we have already averaged to the GC grid in assimilation
-	if is_Av: 
-		to_return['obscount_avg'][date_index,uniquelatind,uniquelonind]=countind
-	else:
-		to_return['obscount'][date_index,uniquelatind,uniquelonind]=countind
-	#Aggregate everything at matching latvals and lonvals
-	for lonindval,latindval in zip(uniquelonind,uniquelatind):
-		dictind = np.where((latdict==gclat[latindval])&(londict==gclon[lonindval]))[0]
-		if is_Av:
-			totalcount = np.sum(countdict[dictind])
-			to_return['obscount'][date_index,latindval,lonindval]=totalcount
-		to_return['obs'][date_index,latindval,lonindval]=np.mean(trueobsdict[dictind])
-		to_return['sim_obs'][date_index,latindval,lonindval]=np.mean(simobsdict[dictind])
-		if useControl:
-			to_return['control'][date_index,latindval,lonindval]=np.mean(controldict[dictind])
-		for field in bonus_fields:
-			to_return[field][date_index,latindval,lonindval] = np.mean(np.array(ydict[field])[dictind])
-	return to_return
-
-
 
