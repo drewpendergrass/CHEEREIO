@@ -52,6 +52,7 @@ def plotMapPoints(m, lat, lon, zvals, labelname,outfile,clim=None,cmap=None,useL
 	plt.colorbar(label=labelname)
 	fig.savefig(outfile)
 
+
 def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True, min_emis=None,min_emis_std=None, clim=None, clim_std=None,plotcontrol=True,useLognormal = False, aggToMonthly=True,conversion_factor=None):
 	hemcodiag = xr.open_dataset(f'{ppdir}/combined_HEMCO_diagnostics.nc')
 	if plotcontrol:
@@ -135,39 +136,75 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plo
 		for i,dateval in enumerate(timelabels):
 			plotMap(m,lat,lon,scalar[i,:,:],'Scaling factor',f'{ppdir}/{name}_{dateval}_scalefactor.png',clim=clim,cmap=cmap,useLog=plot_on_log_scale)
 
-def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
-	dates = bigy["dates"]
-	datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
-	specieslist = bigy["species"]
-	total_satellite_obs=bigy["obscount"]
-	true_obs = bigy["obs"]
-	sim_obs = bigy["sim_obs"]
-	ctrl_obs = bigy["control"]
-	if timeperiod is not None: #Slice data down to timeperiod
-		inds = [i for i, e in enumerate(datevals) if (e >= timeperiod[0]) & (e < timeperiod[1])]
-		total_satellite_obs=total_satellite_obs[inds,:,:,:]
-		true_obs = true_obs[inds,:,:,:]
-		sim_obs = sim_obs[inds,:,:,:]
-		ctrl_obs = ctrl_obs[inds,:,:,:]
-	#Arrays to return
-	total_obs_in_period = np.sum(total_satellite_obs,axis=0)
-	total_weighted_mean_true_obs = np.zeros(np.shape(total_obs_in_period))
-	assim_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
-	ctrl_minus_obs = np.zeros(np.shape(total_obs_in_period))*np.nan
-	#loop through and fill.
-	for i,species in enumerate(specieslist):
-		for j in range(len(gclat)):
-			for k in range(len(gclon)):
-				if np.sum(~np.isnan(true_obs[:,i,j,k]))>0:
-					assim_minus_obs[i,j,k] = np.nanmean(sim_obs[:,i,j,k]-true_obs[:,i,j,k])
-					ctrl_minus_obs[i,j,k] = np.nanmean(ctrl_obs[:,i,j,k]-true_obs[:,i,j,k])
-				if np.sum(total_satellite_obs[:,i,j,k]) == 0:
-					total_weighted_mean_true_obs[i,j,k] = np.nan
-				else:
-					indices = np.where(np.logical_not(np.isnan(true_obs[:,i,j,k])))[0]
-					total_weighted_mean_true_obs[i,j,k] = np.average(true_obs[indices,i,j,k],weights=total_satellite_obs[indices,i,j,k])
-	return [total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs]
 
+#Takes regridded bigy data; goes through and calculates key fields to plot (OmF etc)
+#Handles both gridded and station data, though treatments of each are distinct
+#Control is required for this function
+def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
+	to_return = {}
+	for species in bigy:
+		to_return[species] = {}
+		to_return[species]['interpret_as'] = spec_dict['interpret_as']
+		spec_dict = bigy[species]
+		#Handle point data
+		if spec_dict['interpret_as'] == 'points':
+			num_stations = len(list(spec_dict.keys()))-1 #Number of stations in dataset
+			#Create empty arrays to fill later
+			to_return[species]['stations'] = np.zeros(num_stations)*np.nan #List of stations
+			to_return[species]['lat'] = np.zeros(num_stations)*np.nan #station lat
+			to_return[species]['lon'] = np.zeros(num_stations)*np.nan #station lon
+			to_return[species]['assim_minus_obs'] = np.zeros(num_stations)*np.nan #posterior minus observations
+			to_return[species]['ctrl_minus_obs'] = np.zeros(num_stations)*np.nan #prior minus observations
+			to_return[species]['total_obs_in_period'] = np.zeros(num_stations)*np.nan #total number of observations
+			to_return[species]['mean_obs'] = np.zeros(num_stations)*np.nan #mean obs in period
+			counter = 0
+			#Loop through stations
+			for station in spec_dict:
+				if station == 'interpret_as':
+					continue
+				else:
+					times = spec_dict['time']
+					inds = np.where((times >= timeperiod[0]) & (times < timeperiod[1]))[0]
+					to_return[species]['stations'][counter] = station
+					to_return[species]['lat'][counter] = spec_dict['lat'][0] #Should be all identical
+					to_return[species]['lon'][counter] = spec_dict['lon'][0] #Should be all identical
+					sim_obs = spec_dict["sim_obs"][inds]
+					true_obs = spec_dict["obs"][inds]
+					ctrl_obs = spec_dict["control"][inds]
+					to_return[species]['assim_minus_obs'][counter]  = np.nanmean(sim_obs-true_obs)
+					to_return[species]['ctrl_minus_obs'][counter]  = np.nanmean(ctrl_obs-true_obs)
+					to_return[species]['total_obs_in_period'][counter]  = len(inds)
+					to_return[species]['mean_obs'][counter]  = np.nanmean(true_obs)
+					counter+=1
+		elif spec_dict['interpret_as'] == 'map':
+			dates = spec_dict["dates"]
+			datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
+			total_satellite_obs=spec_dict["obscount"]
+			true_obs = spec_dict["obs"]
+			sim_obs = spec_dict["sim_obs"]
+			ctrl_obs = spec_dict["control"]
+			if timeperiod is not None: #Slice data down to timeperiod
+				inds = [i for i, e in enumerate(datevals) if (e >= timeperiod[0]) & (e < timeperiod[1])]
+				total_satellite_obs=total_satellite_obs[inds,:,:]
+				true_obs = true_obs[inds,:,:]
+				sim_obs = sim_obs[inds,:,:]
+				ctrl_obs = ctrl_obs[inds,:,:]
+			total_obs_in_period = np.sum(total_satellite_obs,axis=0)
+			to_return[species]['total_obs_in_period'] = total_obs_in_period
+			to_return[species]['total_weighted_mean_true_obs'] = np.zeros(np.shape(total_obs_in_period))
+			to_return[species]['assim_minus_obs'] = np.zeros(np.shape(total_obs_in_period))*np.nan
+			to_return[species]['ctrl_minus_obs'] = np.zeros(np.shape(total_obs_in_period))*np.nan
+			for j in range(len(gclat)):
+				for k in range(len(gclon)):
+					if np.sum(~np.isnan(true_obs[:,j,k]))>0:
+						to_return[species]['assim_minus_obs'][j,k] = np.nanmean(sim_obs[:,j,k]-true_obs[:,j,k])
+						to_return[species]['ctrl_minus_obs'][j,k] = np.nanmean(ctrl_obs[:,j,k]-true_obs[:,j,k])
+					if np.sum(total_satellite_obs[:,j,k]) == 0:
+						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.nan
+					else:
+						indices = np.where(np.logical_not(np.isnan(true_obs[:,j,k])))[0]
+						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.average(true_obs[indices,j,k],weights=total_satellite_obs[indices,j,k])
+	return to_return
 
 def agg_to_monthly(dates, to_agg):
 	agg_dim = len(np.shape(to_agg))

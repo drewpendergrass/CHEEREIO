@@ -48,17 +48,22 @@ print('Generating observation and control minus observation maps...')
 with open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
-specieslist = pickledata["species"]
-total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs = regridBigYdata(pickledata,gclat,gclon)
+regridded_bigy = regridBigYdata(pickledata,gclat,gclon)
 
 print('')
 
-for i,species in enumerate(specieslist):
-	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
-	plotMap(m,gclat,gclon,assim_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
-	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(assim_minus_obs[i,:,:])}')
-	plotMap(m,gclat,gclon,ctrl_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
-	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(ctrl_minus_obs[i,:,:])}')
+for species in regridded_bigy:
+	assim_minus_obs = regridded_bigy[species]['assim_minus_obs']
+	ctrl_minus_obs = regridded_bigy[species]['ctrl_minus_obs']
+	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs)),np.nanmax(np.abs(ctrl_minus_obs))])
+	if regridded_bigy[species]['interpret_as'] == 'map':
+		plotMap(m,gclat,gclon,assim_minus_obs,species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMap(m,gclat,gclon,ctrl_minus_obs,species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	elif regridded_bigy[species]['interpret_as'] == 'points':
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], assim_minus_obs, species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], ctrl_minus_obs, species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs)} and a standard deviation of {np.nanstd(assim_minus_obs)}')
+	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs)} and a standard deviation of {np.nanstd(ctrl_minus_obs)}')
 	print('')
 
 
@@ -117,7 +122,7 @@ for sf in sfs:
 
 	#SAVE 
 	Writer = animation.writers['ffmpeg']
-	writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
+	writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
 	sf_nodot = sf.split('.')[0]
 	file_out = f'{pp_dir}/{sf_nodot}_mean_SNAPSHOT.mp4'
 	anim.save(file_out, writer=writer)
