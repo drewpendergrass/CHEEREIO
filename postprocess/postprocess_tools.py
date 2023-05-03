@@ -371,15 +371,15 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 			to_return[species]['sim_obs'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
 			to_return[species]['obs'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
 			to_return[species]['dates'] = dates
-			to_return[species]['obscount'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+			to_return[species]['obscount'] = np.zeros([len(dates),len(gclat),len(gclon)])
 			if is_Av:
-				to_return[species]['obscount_avg'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
+				to_return[species]['obscount_avg'] = np.zeros([len(dates),len(gclat),len(gclon)])
 			for field in bonus_fields:
 				to_return[species][field] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
 			if useControl:
 				to_return[species]['control'] = np.zeros([len(dates),len(gclat),len(gclon)])*np.nan
 		#Go ahead and do the regridding or aggregation to point data.
-		for ind1, date in enumerate(dates): 
+		for date_index, date in enumerate(dates): 
 			ydict = bigy[date][species]
 			#Regrid for maps
 			if to_return[species]['interpret_as'] == 'map':
