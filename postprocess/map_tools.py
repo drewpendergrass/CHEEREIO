@@ -150,7 +150,7 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 		if spec_dict['interpret_as'] == 'points':
 			num_stations = len(list(spec_dict.keys()))-1 #Number of stations in dataset
 			#Create empty arrays to fill later
-			to_return[species]['stations'] = np.zeros(num_stations)*np.nan #List of stations
+			to_return[species]['stations'] = [] #List of stations
 			to_return[species]['lat'] = np.zeros(num_stations)*np.nan #station lat
 			to_return[species]['lon'] = np.zeros(num_stations)*np.nan #station lon
 			to_return[species]['assim_minus_obs'] = np.zeros(num_stations)*np.nan #posterior minus observations
@@ -176,13 +176,14 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 						true_obs = station_dict["obs"]
 						ctrl_obs = station_dict["control"]
 						to_return[species]['total_obs_in_period'][counter]  = len(ctrl_obs)
-					to_return[species]['stations'][counter] = station
+					to_return[species]['stations'].append(station)
 					to_return[species]['lat'][counter] = station_dict['lat'][0] #Should be all identical
 					to_return[species]['lon'][counter] = station_dict['lon'][0] #Should be all identical
 					to_return[species]['assim_minus_obs'][counter]  = np.nanmean(sim_obs-true_obs)
 					to_return[species]['ctrl_minus_obs'][counter]  = np.nanmean(ctrl_obs-true_obs)
 					to_return[species]['mean_obs'][counter]  = np.nanmean(true_obs)
 					counter+=1
+			to_return[species]['stations'] = np.array(to_return[species]['stations'])
 		elif spec_dict['interpret_as'] == 'map':
 			dates = spec_dict["dates"]
 			datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
