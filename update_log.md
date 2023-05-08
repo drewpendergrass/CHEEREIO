@@ -1,25 +1,29 @@
 # Update log
 
-## Version 1.2 (in development)
+## Version 1.1.1 (in development)
 
-**Action items for users updating to version 1.2:**
+**Action items for users updating to version 1.1.1:**
 
 * Update ens_config.json by comparing with templates, as new fields are now expected!
 
-**Updates under version 1.2**
+**Updates under version 1.1.1**
 
-* Revamp the postprocess workflow
+* Revamped the postprocess workflow
   * Add option to plot sites (e.g. obspack) rather than gridding everything.
-  * Remove separate TROPOMI albedo postprocessing routines and replace with generalized method for adding 
+  * Remove separate TROPOMI albedo postprocessing routines and replace with generalized method for adding additional data fields to be plotted. 
+  * Postprocess workflow now debugged for experiments with multiple observers.
+* Improved and expanded documentation.
+* Bug fixes. 
 
-## Version 1.1
 
-**Action items for users updating to version 1.1:**
+## Version 1.1.0
+
+**Action items for users updating to version 1.1.0:**
 
 * Update ens_config.json by comparing with templates, as new fields are now expected!
 * Update CHEEREIO conda environment using the cheereio.yml file in the environments folder, as new packages are required!
 
-**Updates under version 1.1:**
+**Updates under version 1.1.0:**
 
 * Add validation script for ens_config.json, to be filled out over time. Checks at install time if ensemble settings are valid, including some syntax!
 * Add rerun support from *Varon et. al.*, 2023, which is a lower cost approximation of run-in-place type methods.
@@ -30,6 +34,6 @@
 * Add ObsPack support for GC >=14.1.0
   * New ObsPack observation operator released and ready for either use in assimilation or validation.
 
-## Version 1.0
+## Version 1.0.0
 
 * Initial release, as described in the *Pendergrass et. al.*, 2023 model description paper.
