@@ -29,6 +29,9 @@ def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 		# Save out a platform variable
 		platform = data.attrs['dataset_project'].split('-')[0]
 		data['platform'] = xr.DataArray([platform]*len(data.obs), dims=('obs'))
+		#Save out the site code
+		site_code = data.attrs['site_code']
+		data['site_code'] = xr.DataArray([site_code]*len(data.obs), dims=('obs'))
 		# Correct to local timezone if it's an in situ or surface observation
 		if (len(data.obs) > 0) and (platform in ['surface', 'tower']):
 			utc_conv = data.attrs['site_utc2lst']
@@ -109,6 +112,7 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		# Data type fix
 		daily['obspack_id'] = daily['obspack_id'].astype('S200')
 		daily['platform'] = daily['platform'].astype('S50')
+		daily['site_code'] = daily['site_code'].astype('S50')
 		# Time fix
 		daily['time'].encoding['units'] = 'seconds since 1970-01-01 00:00:00 UTC'
 		daily['time'].encoding['calendar'] = 'proleptic_gregorian'
@@ -121,7 +125,7 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		daily.to_netcdf(f'{gc_obspack_dir}/{name_str}{day.year:04d}{day.month:02d}{day.day:02d}.nc',unlimited_dims=['obs'])
 
 def filter_postprocess_obspack_from_file(data):
-	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'utc_conv', 'platform']]
+	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'utc_conv', 'platform','site_code']]
 
 class ObsPack_Translator(obsop.Observation_Translator):
 	def __init__(self,verbose=1):
@@ -163,11 +167,12 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		met['utc_conv'] = obspack['utc_conv'].values
 		met['platform'] = obspack['platform'].values
 		met['obspack_id'] = obspack['obspack_id'].values
+		met['site_code'] = obspack['site_code'].values
 		return met
 	def gcCompare(self,specieskey,ObsPack,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		#Have to convert to PPB
 		toreturn = obsop.ObsData(GC[species].values*1e9,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-		toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'])
+		toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		return toreturn
 
