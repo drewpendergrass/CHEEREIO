@@ -101,13 +101,13 @@ if "histprocess" in sys.argv:
 	try: 		
 		with open(f"{pp_dir}/bigy_arrays_for_plotting.pkl",'rb') as f:
 			arraysbase=pickle.load(f)
-		except FileNotFoundError:
-			print('Gridded observation postprocessing (Y) files not detected; generating now.')
-			arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,extra_obsdata_fields=extra_obsdata_fields,useControl=useControl)
-			file = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
-			pickle.dump(arraysbase,file)
-			file.close()
-		print('Observation postprocessing (Y) files regridded and loaded.')
+	except FileNotFoundError:
+		print('Gridded observation postprocessing (Y) files not detected; generating now.')
+		arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,extra_obsdata_fields=extra_obsdata_fields,useControl=useControl)
+		file = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
+		pickle.dump(arraysbase,file)
+		file.close()
+	print('Observation postprocessing (Y) files regridded and loaded.')
 
 
 if useControl:
