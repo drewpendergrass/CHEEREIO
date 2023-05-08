@@ -262,7 +262,8 @@
 			"blended_albedo"
 		],
 		"CH4_OBSPACK" : [
-			"obspack_id"
+			"obspack_id",
+			"site_code"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
