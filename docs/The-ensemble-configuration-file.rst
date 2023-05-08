@@ -75,6 +75,10 @@ Basic GEOS-Chem and ensemble settings
 
 The first section of the ``ens_config.json`` file (i.e. between the first two comments) mostly controls settings analagous to those set during normal GEOS-Chem run directory creation. However, there are a few unique options in this setting particular to CHEEREIO. We'll consider these one-by-one.
 
+.. option:: GC_VERSION
+	
+	GEOS-Chem model version (e.g. "14.1.1"). Different behaviors are required for different model versions, so this field is essential.
+
 .. option:: RES
 	
 	The resolution of the GEOS-Chem model. Options are available on the `GEOS-Chem website <http://wiki.seas.harvard.edu/geos-chem/index.php/GEOS-Chem_horizontal_grids>`__ and include 4.0x5.0, 2.0x2.5, 0.5x0.625, 0.25x0.3125 and nested grid settings in format TwoLetterCode_MetCode (e.g. AS_MERRA2, EU_GEOSFP). Custom nested domains are not currently supported by the automated scaling factor creation utility but can be manually added by the user. If there is enough interest I will add more automated support in a later CHEEREIO update. 
@@ -165,7 +169,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: CONTROL_START
 	
-	Start date for the control run (YYYYMMDD).
+	Start date for the control run (YYYYMMDD). (Unnecessary if ``DO_CONTROL_WITHIN_ENSEMBLE_RUNS`` is set to ``true``)
 
 .. option:: CONTROL_END
 	
@@ -406,6 +410,20 @@ HISTORY.rc settings
 			"Met_T"
 		],
 
+.. option:: HistoryXXXXXToSave
+	
+	For every collection in ``HISTORY_collections_to_customize`` that has not already been discussed (SpeciesConc, LevelEdgeDiags, StateMet), the user can create a new entry in the configuration file following the pattern of ``HistoryLevelEdgeDiagsToSave`` or ``HistoryStateMetToSave`` but with the names and entries of their collection of interest. For example, if the user included ``Restart`` in ``HISTORY_collections_to_customize``, they might write the following:
+	::
+
+		"HistoryRestartToSave" : [
+			"SpeciesRst_?ALL?",
+			"Met_PS1DRY",
+			"Met_TMPU1",
+			"Met_BXHEIGHT",
+			"Met_TropLev"
+		],
+
+
 Observation settings
 ~~~~~~~~~~~~~
 
@@ -416,6 +434,10 @@ Observation settings
 .. option:: OBS_TYPE
 	
 	A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
+
+.. option:: ASSIMILATE_OBS
+
+	A dictionary linking a label for observations (key) with a switch ("True" or "False") indicating whether or not those observations will be used in the LETKF calculation (value). If observations are not used in the LETKF (i.e. set to "False"), then CHEEREIO will use the observations only for making postprocessing plots and calculations; the user can treat these observations as an external data source for validation.
 
 .. option:: TROPOMI_dirs
 	
@@ -433,6 +455,10 @@ Observation settings
 	
 	As in TROPOMI_dirs, but for OMI. Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page. 
 
+.. option:: filter_obs_poleward_of_n_degrees
+
+	TKTKTKT
+
 .. option:: SaveDOFS
 	
 	Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
@@ -444,6 +470,31 @@ Observation settings
 .. option:: DOFS_filter
 	
 	What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
+
+	.. attention::
+
+		*Note: per previous note, leave set to "nan" (DP, 2022/11/07).*
+
+.. option:: ACTIVATE_OBSPACK
+	
+	TKTKTKT
+
+.. option:: raw_obspack_path
+	
+	TKTKTKT
+
+.. option:: gc_obspack_path
+	
+	TKTKTKT
+
+.. option:: obspack_gc_input_file
+	
+	TKTKTKT
+
+.. option:: HistoryObsPackToSave
+	
+	TKTKTKT
+
 
 Scaling factor settings
 ~~~~~~~~~~~~~
@@ -541,6 +592,15 @@ LETKF settings
 	
 	A dictionary of regularization factors, with a key corresponding with each key in ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`.
 
+.. option:: USE_DIFFERENT_GAMMA_FOR_BURN_IN
+
+	TKTKTKT
+
+.. option:: GAMMA_FOR_BURN_IN
+
+	TKTKTKT
+
+
 .. option:: OBS_ERROR
 	
 	An dictionary of error information, with a key corresponding with each key in ``OBSERVED_SPECIES`` and a float value. The value is interpreted as one of three categories: "relative", "absolute", or "product". This information represents uncertainty in observations. If error is relative, it is given as a decimal (0.1 means 10% relative error). If error is absolute, it is given as the same units as the observations are in (CHEEREIO will square these values for the covariance matrix). If error is "product," then CHEEREIO uses the error from the observation product. In the product case, the number recorded under OBS_ERROR will not be used. For clarity, only diagonal observational covariance matrices are supported at this time.
@@ -569,6 +629,8 @@ LETKF settings
 		},
 
 .. option:: AV_TO_GC_GRID
+
+	TKTKTKTKTK CHANGE TO DICTIONARY
 	
 	"True" or "False", should observations be averaged to the GEOS-Chem grid? If "false", the above three entries and the below entry are all ignored. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
 
@@ -644,6 +706,11 @@ Run-in-place settings
 	
 	In hours, the run-in-place assimilation window during the burn in period only.
 
+.. option:: DO_VARON_RERUN
+	
+	``True`` or ``False``, should we do a rerun simulation. See :ref:`Rerun` for more information.
+
+
 Postprocessing settings
 ~~~~~~~~~~~~~
 
@@ -684,6 +751,22 @@ Postprocessing settings
 	
 	A dictionary with keys from ``OBSERVED_SPECIES`` and values representing the units will be plotted. This is governed by how the observation operator is defined. 
 
+.. option:: EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y
+	
+	TKTKTKT.
+
+.. option:: EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT
+	
+	TKTKTKT.
+
+.. option:: extra_plot_field_units
+	
+	TKTKTKT.
+
+.. option:: OBSERVERS_TO_PLOT_AS_POINTS
+	
+	TKTKTKT. (CH4_OBSPACK":"obspack_id)
+
 .. option:: scalefactor_plot_freq
 	
 	The CHEEREIO postprocessing routine will save out maps of scale at this temporal resolution: either "all" for save out an image for every assimilation window, or "monthly" to save out monthly means.
@@ -692,11 +775,10 @@ Postprocessing settings
 Extensions
 ~~~~~~~~~~~~~
 
-Additional CHEEREIO settings, usually for specific observation types, can be loaded in through extensions. Extensions in CHEEREIO are extra JSON files that store additional settings in order to prevent clutter in the ``ens_config.json`` file. Extensions can easily be added by saving a file with name ``NAME_extension.json`` within the ``extensions/`` folder. To load in the settings within the ``NAME_extension.json`` file, add the key NAME to the "Extensions" dictionary in ``ens_config.json`` with value "True". Below is an example where we load in the settings in the ``TROPOMI_ALL_extension.json``, ``TROPOMI_CH4_extension.json``, and ``CH4_extension.json`` files. 
+Additional CHEEREIO settings, usually for specific observation types, can be loaded in through extensions. Extensions in CHEEREIO are extra JSON files that store additional settings in order to prevent clutter in the ``ens_config.json`` file. Extensions can easily be added by saving a file with name ``NAME_extension.json`` within the ``extensions/`` folder. To load in the settings within the ``NAME_extension.json`` file, add the key NAME to the "Extensions" dictionary in ``ens_config.json`` with value "True". Below is an example where we load in the settings in the ``TROPOMI_CH4_extension.json`` and ``CH4_extension.json`` files. 
 ::
 
 	"Extensions": {
-		"TROPOMI_ALL":"True",
 		"TROPOMI_CH4":"True",
 		"CH4":"True"
 	}
@@ -738,14 +820,6 @@ Below we list the settings that you can set with extensions.
 	.. option:: TROPOMI_CH4_filter_swir_aot
 	
 		Filter out TROPOMI methane observations with a SWIR AOT above this value. Set to "nan" to ignore.
-
-.. option:: TROPOMI_ALL extension
-	
-	Specialized TROPOMI settings shared across all simulations.
-
-	.. option:: postprocess_save_albedo
-	
-		Should the postprocessing workflow save out albedo? "True" or "False".
 
 .. option:: CH4 extension
 	

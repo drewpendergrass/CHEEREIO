@@ -86,6 +86,13 @@ To activate run-in-place simulations, set the ``DO_RUN_IN_PLACE`` variable in ``
 
 CHEEREIO allows users to optionally use a different assimilation window for run-in-place during the burn-in period. This can be activated by setting ``DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN`` to ``True`` and providing the assimilation window for the burn in period in the ``rip_burnin_update_time`` variable.
 
+.. _Rerun:
+
+Re-running simulations
+-------------
+
+TKTKTKT
+
 Starting the run
 -------------
 
