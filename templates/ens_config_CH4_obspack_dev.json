@@ -279,7 +279,7 @@
 		"blended_albedo":"Albedo"
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
-		"CH4_OBSPACK":"obspack_id"
+		"CH4_OBSPACK":"site_code"
 	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
