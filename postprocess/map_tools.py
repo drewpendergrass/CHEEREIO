@@ -39,9 +39,9 @@ def plotMapPoints(m, lat, lon, zvals, labelname,outfile,clim=None,cmap=None,useL
 		cmap = plt.cm.jet
 	if useLog:
 		if minval is not None:
-			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
+			zvals[zvals<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
 		else:
-			flat[flat<=0] = np.nan
+			zvals[zvals<=0] = np.nan
 		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,norm=LogNorm(),edgecolors='black')
 	else:
 		mesh = m.scatter(lon, lat, c=zvals,latlon=True,cmap=cmap,edgecolors='black')

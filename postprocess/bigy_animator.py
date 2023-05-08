@@ -39,9 +39,10 @@ for species in bigy_arrays:
 		if field not in bigy_arrays[species]:
 			continue #Skip if field is not present
 		arrayval = bigy_arrays[species][field]
+		dates = bigy_arrays[species]['dates']
 		#Define animation function
 		def animate(i):
-			daystring = bigy_arrays[species]['dates'][i]
+			daystring = dates[i]
 			titlestring = f'{daystring}'
 			plt.title(titlestring)
 			temp = arrayval[i,:,:]
