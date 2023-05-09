@@ -179,8 +179,8 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1",
-		"CH4_OBSPACK":"0.1"
+		"CH4_TROPOMI":"0.01",
+		"CH4_OBSPACK":"0.01"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False",
