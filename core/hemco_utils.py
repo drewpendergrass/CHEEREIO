@@ -30,7 +30,7 @@ def getHEMCOSwitches(spc_config, lines):
 		#Leave after end of opening switches
 		if line.startswith('### END SECTION EXTENSION SWITCHES'):
 			break
-		elif line.startswith('# ----- REGIONAL'):
+		elif line.startswith('# ----- REGIONAL') or line.startswith('# ----- CH4'):
 			emisregion = 1
 		elif line.startswith('# ----- NON-EMISSIONS'):
 			emisregion = 2

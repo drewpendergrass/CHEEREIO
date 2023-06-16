@@ -92,7 +92,7 @@ BC_FILES="$(jq -r ".BC_FILES" ens_config.json)"
 
 RUN_TEMPLATE="template_run"
 
-valid_sims=("fullchem" "aerosol" "CH4" "CO2" "Hg" "POPs" "tagCH4" "tagCO" "tagO3" "TransportTracers")
+valid_sims=("fullchem" "aerosol" "CH4" "CO2" "Hg" "POPs" "tagCH4" "tagCO" "tagO3" "TransportTracers","carbon")
 sim_name="$(jq -r ".sim_name" ens_config.json)"
 
 if [[ ! " ${valid_sims[@]} " =~ " ${sim_name} " ]]; then
