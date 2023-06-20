@@ -1,18 +1,20 @@
 # Update log
 
-## Version 1.1.1 (in development)
+## Version 1.2.0 (in development)
 
-**Action items for users updating to version 1.1.1:**
+**Action items for users updating to version 1.2:**
 
 * Update ens_config.json by comparing with templates, as new fields are now expected!
 
-**Updates under version 1.1.1**
+**Updates under version 1.2.0:**
 
+* TROPOMI CO operator added for the tagCO simulation (thanks to Sina Voshtani)
 * Revamped the postprocess workflow
   * Add option to plot sites (e.g. obspack) rather than gridding everything.
   * Remove separate TROPOMI albedo postprocessing routines and replace with generalized method for adding additional data fields to be plotted. 
-  * Postprocess workflow now debugged for experiments with multiple observers.
+  * Postprocess workflow debugged for experiments with multiple observers.
 * Improved and expanded documentation.
+  * Compatibility updates with ReadTheDocs (thanks to Bob Yantosca)
 * Bug fixes. 
 
 
