@@ -13,7 +13,7 @@ The CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is
 
 ## Installation
 
-Follow the guide on the [documentation](https://cheereio.readthedocs.io/en/latest/Installing-CHEEREIO.html) for installation. When you clone this repository, we recommend that you check out the latest release of CHEEREIO rather than using the main branch; this ensures reproducability and minimizes bugs.
+Follow the guide on the [documentation](https://cheereio.readthedocs.io/en/latest/Installing-CHEEREIO.html) for installation. When you clone this repository, we recommend that you check out the latest release of CHEEREIO rather than using the main branch; this ensures reproducibility and minimizes bugs.
 
 ## Documentation
 Detailed documentation is available on [ReadTheDocs](https://cheereio.readthedocs.io), including installation instructions. If you encounter any problems not covered by the documentation, please open an [issue](https://github.com/drewpendergrass/CHEEREIO/issues) on GitHub.
