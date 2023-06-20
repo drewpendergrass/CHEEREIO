@@ -120,7 +120,7 @@
 		"CH4_OBSPACK":"False"
 	},
 	"TROPOMI_dirs" : {
-		"CH4" : "/n/holylfs05/LABS/jacob_lab/nbalasus/blended_tropomi_gosat_methane/blended_tropomi_gosat"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/imi/ch4/blended"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
