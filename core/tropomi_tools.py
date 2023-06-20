@@ -2,6 +2,8 @@
 #and other contributors to the integrated methane inversion workflow. I am indebted to them and to Elise Penn and Alba Lorente for 
 #explaining much of TROPOMI.
 
+#TROPOMI CO operator is added by Sina Voshtani (2023/06/23)
+
 from datetime import datetime
 from glob import glob
 import pickle
@@ -47,6 +49,9 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		sl,gp=np.where(qa>0.75)
 	elif species=="CH4":
 		sl,gp=np.where(qa>0.5)
+	elif species=="CO":
+                sl,gp=np.where(qa>0.75)
+#               sl,gp=np.where(qa>0.5)
 	else:
 		raise ValueError('Species not supported')
 	met['qa_value'] = qa[sl,gp]
@@ -57,6 +62,8 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,sl,gp]
 	elif species=='CH4':
 		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
+	elif species=='CO':
+                met[species] = data['carbonmonoxide_total_column_corrected'].values[0,sl,gp] #time,scanline,groundpixel
 	else:
 		raise ValueError('Species not supported')
 
@@ -65,6 +72,8 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 			met['Error'] = data['nitrogendioxide_tropospheric_column_precision'].values[0,sl,gp]
 		elif species=='CH4':
 			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
+		elif species=='CO':
+                        met['Error'] = data['carbonmonoxide_total_column_precision'].values[0,sl,gp]
 	
 	met['longitude'] = data['longitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['latitude'] = data['latitude'].values[0,sl,gp] #time,scanline,groundpixel
@@ -90,6 +99,12 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
 		met['swir_aot'] = data['aerosol_optical_thickness_SWIR'].values[0,sl,gp]
 		data.close()
+        # Store CO averaging_kernel (missing in older version of TROPOMI CO!)
+	if species=='CO':
+                data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
+                met['column_AK'] = data['column_averaging_kernel'].values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
+                pressure_levels = data['pressure_levels'].values[0,sl,gp,::-1]/100 #time,scanline,groundpixel
+                data.close()
 
 	# Store methane prior profile, dry air subcolumns. Not needed for NO2, though surface pressure is
 	if species=='CH4':
@@ -104,6 +119,13 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 		surface_pressure = data['surface_pressure'].values[0,sl,gp] #time,scanline,groundpixel				# Leave Pa
 		data.close()
+	# Store CO prior profile (missing in older version of TROPOMI CO!)  
+	if species=='CO':
+                data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+                met['carbonmonoxide_profile_apriori']=data['carbonmonoxide_profile_apriori'].values[0,sl,gp,::-1] # in mol/m2
+                met['surface_elevation']=data['surface_altitude'].values[0,sl,gp] #in m
+                surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel                              # Pa -> hPa
+                data.close()
 
 
 	# Store lat, lon bounds for pixels
@@ -123,6 +145,11 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		pressures.fill(np.nan)
 		for i in range(13):
 			pressures[:,i]=surface_pressure-(i*pressure_interval)
+	elif species=='CO':
+#               pressures = np.zeros([len(sl),51],dtype=np.float)
+                pressures = np.zeros([len(sl),51],dtype=float)
+                pressures[:, :50] = pressure_levels
+                pressures[:, 50]=0
 	
 	met['pressures'] = pressures
 	
@@ -260,43 +287,92 @@ def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsE
 
 	return met
 
-
 #This seems to be the memory bottleneck
-def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
+#This is customized for CO due to the more serious memory bottleneck. It processes a chunk of observations at a time and concatenates the outputs,
+#thus keeping the memory usage low depending on the "chunk_size". This can be adaptable to other species and especially in case of memory shortage.
+def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	# We want to account for the case when the GEOS-Chem surface
-	# is above the satellite surface (altitude wise) or the GEOS-Chem
-	# top is below the satellite top.. We do this by adjusting the
-	# GEOS-Chem surface pressure up to the TROPOMI surface pressure
-	idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
-	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
-	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
-	GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
-	#Low mem calculation avoids allocating large arrays but runs slower.
-	#This is accomplished by iterating over the nobs axis.
-	#Default, higher memory calculation exploits vectorization for speed
-	#But can result in enormous matrices for some experiments. 
-	# Define vectors that give the "low" and "high" pressure
-	# values for each GEOS-Chem and satellite layer.
-	GC_lo = GC_edges[:, 1:][:, :, None]
-	GC_hi = GC_edges[:, :-1][:, :, None]
-	sat_lo = sat_edges[:, 1:][:, None, :]
-	sat_hi = sat_edges[:, :-1][:, None, :]
-	# Get the indices where the GC-to-satellite mapping, which is
-	# a nobs x ngc x nsat matrix, is non-zero
-	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
-	# Find the fraction of each GC level that contributes to each
-	# TROPOMI level. We should first divide (to normalize) and then
-	# multiply (to apply the map to the column) by the GC pressure
-	# difference, but we exclude this (since it's the same as x1).
-	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
-	GC_to_sat[~idx] = 0
-	# Now map the GC CH4 to the satellite levels
-	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
-	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
+	if species=="CO":
+		nobs = GC_SPC.shape[0]
+		GC_on_sat_list = []
+		for k in range(0, nobs, chunk_size):
+			GC_SPC_chunk = GC_SPC[k:k+chunk_size]
+			GC_edges_chunk = GC_edges[k:k+chunk_size]
+			sat_edges_chunk = sat_edges[k:k+chunk_size]
+			# We want to account for the case when the GEOS-Chem surface
+			# is above the satellite surface (altitude wise) or the GEOS-Chem
+			# top is below the satellite top.. We do this by adjusting the
+			# GEOS-Chem surface pressure up to the TROPOMI surface pressure
+			idx_bottom = np.less(GC_edges_chunk[:, 0], sat_edges_chunk[:, 0])
+			idx_top = np.greater(GC_edges_chunk[:, -1], sat_edges_chunk[:, -1])
+			GC_edges_chunk[idx_bottom, 0] = sat_edges_chunk[idx_bottom, 0]
+			GC_edges_chunk[idx_top, -1] = sat_edges_chunk[idx_top, -1]
+			#Low mem calculation avoids allocating large arrays but runs slower.
+			#This is accomplished by iterating over the nobs axis.
+			#Default, higher memory calculation exploits vectorization for speed
+			#But can result in enormous matrices for some experiments.
+			# Define vectors that give the "low" and "high" pressure
+			# values for each GEOS-Chem and satellite layer.
+			GC_lo = GC_edges_chunk[:, 1:][:, :, None]
+			GC_hi = GC_edges_chunk[:, :-1][:, :, None]
+			sat_lo = sat_edges_chunk[:, 1:][:, None, :]
+			sat_hi = sat_edges_chunk[:, :-1][:, None, :]
+			# Get the indices where the GC-to-satellite mapping, which is
+			# a nobs x ngc x nsat matrix, is non-zero
+			idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+			# Find the fraction of each GC level that contributes to each
+			# TROPOMI level. We should first divide (to normalize) and then
+			# multiply (to apply the map to the column) by the GC pressure
+			# difference, but we exclude this (since it's the same as x1).
+			GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+			GC_to_sat[~idx] = 0
+			# Now map the GC CH4 to the satellite levels
+			GC_on_sat_chunk = (GC_to_sat*GC_SPC_chunk[:, :, None]).sum(axis=1)
+			GC_to_sat_sum = GC_to_sat.sum(axis=1)
+			mask = GC_to_sat_sum != 0
+			GC_on_sat_chunk[mask] = GC_on_sat_chunk[mask] / GC_to_sat_sum[mask]
+	
+			GC_on_sat_list.append(GC_on_sat_chunk)
+	
+		GC_on_sat = np.concatenate(GC_on_sat_list, axis=0)
+	else:
+		'''
+		The provided edges for GEOS-Chem and the satellite should
+		have dimension number of observations x number of edges
+		'''
+		# We want to account for the case when the GEOS-Chem surface
+		# is above the satellite surface (altitude wise) or the GEOS-Chem
+		# top is below the satellite top.. We do this by adjusting the
+		# GEOS-Chem surface pressure up to the TROPOMI surface pressure
+		idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
+		idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
+		GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
+		GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
+		#Low mem calculation avoids allocating large arrays but runs slower.
+		#This is accomplished by iterating over the nobs axis.
+		#Default, higher memory calculation exploits vectorization for speed
+		#But can result in enormous matrices for some experiments. 
+		# Define vectors that give the "low" and "high" pressure
+		# values for each GEOS-Chem and satellite layer.
+		GC_lo = GC_edges[:, 1:][:, :, None]
+		GC_hi = GC_edges[:, :-1][:, :, None]
+		sat_lo = sat_edges[:, 1:][:, None, :]
+		sat_hi = sat_edges[:, :-1][:, None, :]
+		# Get the indices where the GC-to-satellite mapping, which is
+		# a nobs x ngc x nsat matrix, is non-zero
+		idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+		# Find the fraction of each GC level that contributes to each
+		# TROPOMI level. We should first divide (to normalize) and then
+		# multiply (to apply the map to the column) by the GC pressure
+		# difference, but we exclude this (since it's the same as x1).
+		GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+		GC_to_sat[~idx] = 0
+		# Now map the GC CH4 to the satellite levels
+		GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
+		GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
 def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None):
@@ -305,6 +381,7 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None
 	Inputs:
 		sat_avker			The averaging kernel for the satellite
 		sat_prior			The satellite prior profile in ppb, optional (used for CH4)
+		sat_prior (CO)			The satellite prior profile in mol/m2, converted to ppb (used for CO)
 		sat_pressure_weight  The relative pressure weights for each level
 		GC_SPC			   The GC species on the satellite levels
 		filt				 A filter, optional
@@ -391,6 +468,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if species=='CH4':
 			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
 				filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+		elif species=='CO':
+                        if (self.spc_config['Extensions']['TROPOMI_CO']=="True") and (self.spc_config['TROPOMI_CO_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
+                                filterinfo["TROPOMI_CO"] = [float(self.spc_config['TROPOMI_CO_filter_blended_albedo']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CO_filter_winter_lat']),float(self.spc_config['TROPOMI_CO_filter_roughness']),float(self.spc_config['TROPOMI_CO_filter_swir_aot'])]
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
@@ -406,12 +486,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		return met
 	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
-		if species=='CH4':
-			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-			synthetic_partial_columns = False
-		elif species=='NO2':
-			TROP_PRIOR=None
-			synthetic_partial_columns = True
 		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
 		GC_col_data = obsop.getGCCols(GC,TROPOMI,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
@@ -420,13 +494,40 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		i,j,t = GC_col_data['indices']
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
-		GC_on_sat = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'])
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat,TROP_PRIOR)
+			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
+			synthetic_partial_columns = False
+		elif species=='NO2':
+			TROP_PRIOR=None
+			synthetic_partial_columns = True
+		elif species=='CO':
+			GC_SPC*=1e9 #scale to mol/mol
+			TROP_P0=TROPOMI['pressures'][:,0]
+			TROP_z0=TROPOMI['surface_elevation'] #  (m)
+			TROP_T0=GC_col_data['Met_T'][:,0]
+			TROP_z = np.zeros_like(TROPOMI['carbonmonoxide_profile_apriori'])
+			for l in range(50):
+			        TROP_z[:,l]= TROP_z0 + 500 + l*1000
+			TROP_P_mid=TROPOMI['pressures']+np.diff(TROPOMI['pressures'],axis=1,append=0)/2.0
+			TROP_P_mid=TROP_P_mid[:,0:-1]
+			TROP_PRIOR_mol = (TROPOMI['carbonmonoxide_profile_apriori']) # mole/m2
+			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+			AIRMOL_COL=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']).sum(axis=1) # convert to column mol/m2 of dry air
+			TROP_PRIOR_ppb = ((TROP_PRIOR_mol) / (np.repeat(AIRMOL_COL[:, np.newaxis], TROP_PW.shape[1], axis=1)*TROP_PW)) *1e9 # convert prior in mol/m2 to ppbv
+			TROP_PRIOR = TROP_PRIOR_ppb
+			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
+			synthetic_partial_columns = False
+		GC_on_sat_l = np.zeros_like(TROP_PRIOR)
+		GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
+		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
+		nan_indices = np.argwhere(np.isnan(GC_on_sat))
+		GC_on_sat = np.nan_to_num(GC_on_sat)
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
 			if doErrCalc:
 				if useObserverError:
+					if species=='CO':
+						TROPOMI['Error']=1e9*TROPOMI['Error']/AIRMOL_COL # convert tropomi errro from mol/m2 to ppbv
 					additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
 					additional_args_avgGC['modelTransportError'] = transportError
 				elif prescribed_error is not None:
