@@ -19,6 +19,8 @@ ENS_SPINUP_END = spc_config['ENS_SPINUP_END']
 DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN = spc_config['DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN']=='True'
 ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
 DO_RERUN = spc_config["DO_VARON_RERUN"] == "True"
+if DO_RERUN:
+	number_of_windows_to_rerun = int(spc_config["number_of_windows_to_rerun"])
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
@@ -54,9 +56,9 @@ else:
 	ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
 	ig_endstring = lines[1].rstrip()
 	ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
-	if DO_RERUN: #if we are doing the Varon rerun, we start one assimilation period before and end one after current end slot.
+	if DO_RERUN: #if we are doing the Varon rerun, we start n assimilation periods before (default 1, set by user) and end one after current end slot.
 		delta = timedelta(hours=int(ASSIM_TIME))
-		start_datetime = ig_end_datetime-delta
+		start_datetime = ig_end_datetime-(number_of_windows_to_rerun*delta)
 		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
 		end_datetime = ig_end_datetime+delta
 		end_string = end_datetime.strftime("%Y%m%d %H%M%S")

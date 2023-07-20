@@ -239,6 +239,7 @@
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
 	"DO_VARON_RERUN" : "True",
+	"number_of_windows_to_rerun" : "3", 
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",
