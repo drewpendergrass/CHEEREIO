@@ -15,6 +15,7 @@
   * Postprocess workflow debugged for experiments with multiple observers.
 * Extended rerun option to support a reprocessing an arbitrary number of assimilation windows.
 * Option to add additional uncorrelated initial perturbations to scaling factor fields according to prior emissions.
+* Option to smooth included observations by distance weighting according to the gaspari cohn function.
 * Improved and expanded documentation.
   * Compatibility updates with ReadTheDocs (thanks to Bob Yantosca)
 * Bug fixes. 

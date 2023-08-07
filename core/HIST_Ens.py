@@ -91,16 +91,16 @@ class HIST_Ens(object):
 		self.makeObsTrans()
 		self.getObsData()
 		self.bigYDict = self.getCols()
-	#Gamma^-1 applied in this stage.
+	#Gamma^-1 applied in this stage. All calculations on a diagonal (vector) until return time
 	def makeRforSpecies(self,species,latind,lonind):
 		errval = float(self.spc_config['OBS_ERROR'][species])
 		errtype = self.spc_config['OBS_ERROR_TYPE'][species]
-		inds = self.getIndsOfInterest(species,latind,lonind)
+		inds,distances = self.getIndsOfInterest(species,latind,lonind,return_dist=True)
 		if self.spc_config['AV_TO_GC_GRID'][species]=="True": #If we are averaging to GC grid, the errors will be stored in the ObsData object.
 			obsdat = self.bigYDict[species]
 			err_av = obsdat.getDataByKey('err_av')
 			err_av = err_av[inds]
-			to_return = np.diag(err_av**2)
+			to_return = err_av**2
 		else:
 			if errtype=='absolute':
 				to_return = np.diag(np.repeat(errval**2,len(inds))) #we are assuming the user provides the square root of variance
@@ -108,16 +108,23 @@ class HIST_Ens(object):
 				obsdat = self.bigYDict[species]
 				obscol = obsdat.getObsCol()
 				obscol = obscol[inds]
-				to_return = np.diag((obscol*errval)**2) #multiply measurements by relative error, then square it.
+				to_return = (obscol*errval)**2#multiply measurements by relative error, then square it.
 			elif errtype=='product':
 				obsdat = self.bigYDict[species]
 				err_av = obsdat.getDataByKey('err_av')
 				err_av = err_av[inds]
-				to_return = np.diag(err_av**2)
+				to_return = err_av**2
+		#Apply gaspari cohn localization.
+		if self.spc_config['smooth_localization_with_gaspari_cohn'].lower()=='true':
+			loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
+			gaco = make_gaspari_cohn(loc_rad/2)
+			weights = gaco(distances) #will be between 0 and 1, shouldn't have anything at zero.
+			weights[weights<=0.001] = 0.001 #Set a floor so inverse doesn't explode
+			to_return = (weights*to_return**-1)**-1 #Apply gaspari cohn to inverse of R.
 		#Apply gamma^-1, so that in the cost function we go from gamma^-1*R to gamma*R^-1
 		invgamma = self.getGamma(species)**-1
 		to_return*=invgamma
-		return to_return
+		return np.diag(to_return) #Return as a diagonal matrix.
 	def getGamma(self,species):
 		diffburnin = self.spc_config['USE_DIFFERENT_GAMMA_FOR_BURN_IN'][species] == "True"
 		doburnin = self.spc_config['SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD'] == "true"
