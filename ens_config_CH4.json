@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_rerun_v04",
+	"RUN_NAME" : "METHANE_rerun_v05",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -31,7 +31,7 @@
 	"ENS_SPINUP_START" : "20180701",
 	"ENS_SPINUP_END" : "20181101",
 	"START_DATE" : "20181101",
-	"ASSIM_START_DATE" : "20181115",
+	"ASSIM_START_DATE" : "20181129",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20200110",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
@@ -62,10 +62,8 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
-		"CH4"
 	],
 	"CONTROL_VECTOR_CONC" : [
-		"CH4"
 	],
 	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
@@ -152,6 +150,16 @@
 		"CH4":"500"
 	},
 	"speedyCorrelationApprox" : "True",
+	"additional_init_perturbation_from_emis" : {
+		"CH4" : {
+			"do_add_pert":"True",
+			"file":{
+				"file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
+				"variable" : "EmisCH4_Total"
+			},
+			"max_pert":"0.2"
+		}
+	},
 	"lognormalErrors" : "True",
 	"MaskOceanScaleFactor" : {
 		"CH4":"True"

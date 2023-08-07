@@ -37,7 +37,7 @@ correlatedInitialScalings = spc_config['correlatedInitialScalings']
 speedyCorrelationApprox = spc_config['speedyCorrelationApprox'] == 'True'
 corrDistances = spc_config['corrDistances']
 useLognormal = spc_config['lognormalErrors'] == 'True'
-
+add_perts = {}
 
 timestamp = str(sys.argv[1]) #Time for scaling factor time dimension. Format assumed to be YYYYMMDD
 timestamp = timestamp[0:4]+'-'+timestamp[4:6]+'-'+timestamp[6:8]
@@ -50,10 +50,17 @@ else:
 lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel)
 
 #Check that the user-inputed perturbations are sensible given user-supplied interpretation rule
+#Also set up tools for adding additional emissions perturbation per prior.
 for emis in emis_scaling_factors:
 	p = float(perturbation[emis])
 	if (p <= 0): #perturbation, standard deviation from a normal distribution. i.e. if it is 0.5 scaling factors will be centered at 1 with standard deviation 0.5.
 		raise ValueError('Standard deviation perturbation must be positive.')
+	if spc_config['additional_init_perturbation_from_emis'][emis]['do_add_pert'].lower()=='true':
+		settings = spc_config['additional_init_perturbation_from_emis'][emis]
+		add_perts[emis]={}
+		add_perts[emis]['field'] = xr.load_dataset(settings['file']['file'])[settings['file']['variable']].values #Get numpy array of emissions
+		add_perts[emis]['field'] = add_perts[emis]['field']/np.nanmax(add_perts[emis]['field']) #Normalize to 0-1 scale
+		add_perts[emis]['maxpert'] = float(settings['max_pert'])
 
 scaling_factor_cube = np.zeros((len(subdir_numstring), len(emis_scaling_factors),len(lat),len(lon)))
 subdircount = 0
@@ -83,6 +90,10 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 				scaling_factors = np.random.normal(loc=0,scale=p,size=[len(lat),len(lon)])
 			else: #center on 1
 				scaling_factors = np.random.normal(loc=1,scale=p,size=[len(lat),len(lon)])
+		#Add additional perturbation according to prior emissions inventory, if set to true.
+		if emis_name in add_perts:
+			uniform = (np.random.rand(len(lat),len(lon))*add_perts[emis_name]['maxpert']*2)-add_perts[emis_name]['maxpert'] #generate uniform sample from -maxpert to maxpert
+			scaling_factors += (uniform*add_perts[emis_name]['field'])
 		if useLognormal: #Sampled normal initially; if lognormal, use exp to transform sample
 			scaling_factors = np.exp(scaling_factors)
 		if ~np.isnan(minval): #Enforce minimum sf.
