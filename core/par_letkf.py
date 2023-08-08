@@ -10,7 +10,7 @@ path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM, UTC time.
 DO_RERUN = data["DO_VARON_RERUN"] == "True"
 if DO_RERUN:
-	number_of_windows_to_rerun = int(spc_config["number_of_windows_to_rerun"])
+	number_of_windows_to_rerun = int(data["number_of_windows_to_rerun"])
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
