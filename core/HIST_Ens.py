@@ -192,7 +192,7 @@ class HIST_Ens(object):
 				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 				obsdata_toreturn[species].addData(control=col)
 		return obsdata_toreturn
-	def getIndsOfInterest(self,species,latind,lonind):
+	def getIndsOfInterest(self,species,latind,lonind,return_dist=False):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
 		origlat,origlon = si.getLatLonVals(self.spc_config)
 		latval = origlat[latind]
@@ -202,7 +202,10 @@ class HIST_Ens(object):
 		inds = np.where(distvec<=loc_rad)[0]
 		if len(inds) > self.maxobs:
 			inds = np.random.choice(inds, self.maxobs,replace=False) #Randomly subset down to appropriate number of observations
-		return inds
+		if return_dist:
+			return [inds,distvec[inds]]
+		else:
+			return inds
 	def getScaling(self,species):
 			gccol,obscol = self.bigYDict[species].getCols()
 			obsmean = np.mean(gccol,axis=1)
