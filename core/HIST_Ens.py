@@ -117,7 +117,7 @@ class HIST_Ens(object):
 		#Apply gaspari cohn localization.
 		if self.spc_config['smooth_localization_with_gaspari_cohn'].lower()=='true':
 			loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
-			gaco = make_gaspari_cohn(loc_rad/2)
+			gaco = tx.make_gaspari_cohn(loc_rad/2)
 			weights = gaco(distances) #will be between 0 and 1, shouldn't have anything at zero.
 			weights[weights<=0.001] = 0.001 #Set a floor so inverse doesn't explode
 			to_return = (weights*to_return**-1)**-1 #Apply gaspari cohn to inverse of R.
