@@ -188,12 +188,13 @@ def make_gaspari_cohn(c):
 				raise ValueError('r must be positive')
 		#Vector case
 		else:
-			to_return = np.zeros(len(r))
+			to_return = np.zeros(len(r)) #note: default is 0 in the far field.
 			farbranchloc = (r>=1) & (r<2)
 			rfar = r[farbranchloc]
 			to_return[farbranchloc] = 4-(5*rfar)+((5/3)*rfar**2)+((5/8)*rfar**3)-((1/2)*rfar**4)+((1/12)*rfar**5)-((2/3)*rfar**-1)
 			nearbranchloc = (r>=0) & (r<1)
 			rnear = r[nearbranchloc]
-			to_return[farbranchloc] = 1-((5/3)*rnear**2)+((5/8)*rnear**3)+((1/2)*rnear**4)-((1/4)*rnear**5)
+			to_return[nearbranchloc] = 1-((5/3)*rnear**2)+((5/8)*rnear**3)+((1/2)*rnear**4)-((1/4)*rnear**5)
+			return to_return
 	return gasp_cohn
 
