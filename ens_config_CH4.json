@@ -157,7 +157,7 @@
 				"file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
 				"variable" : "EmisCH4_Total"
 			},
-			"max_pert":"0.2",
+			"max_pert":"0.5",
 			"saturation":"0.5e-9"
 		}
 	},
