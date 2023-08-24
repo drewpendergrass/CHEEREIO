@@ -276,7 +276,7 @@ def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsE
 
 	qa = data['qa_value'].values
 
-	landflag = data['surface_classification'].values
+	landflag = np.bitwise_and(data['surface_classification'].values.astype(int),3) #Get landflag, apply bitwise and of mask value (3) to get 0=land,1=water,2=someland,3=coastline
 	goodvals=np.where((qa>0.5) & (landflag==0))[0] #Only include land values (landflag=0); no coasts or ocean retrievals
 
 	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
