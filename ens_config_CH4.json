@@ -121,7 +121,7 @@
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/imi/ch4/blended"
 	},
 	"OMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
 		"CH4_TROPOMI":"60",
@@ -130,8 +130,8 @@
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
 	"ACTIVATE_OBSPACK" : "true",
-	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
-	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
+	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/obspack",
+	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/obspack_gc",
 	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
 	"HistoryObsPackToSave" : [
 		"pressure",
@@ -188,8 +188,8 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.04",
-		"CH4_OBSPACK":"0.04"
+		"CH4_TROPOMI":"0.1",
+		"CH4_OBSPACK":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False",
