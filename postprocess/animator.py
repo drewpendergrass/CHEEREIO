@@ -107,22 +107,23 @@ anim_fps_vals = []
 #Get necessary data
 
 #CONCENTRATIONS
-ds = xr.open_dataset(concpp)
-time = np.array(ds['time'])
-timestr = [str(t)[0:16] for t in time]
-lat = np.array(ds['lat'])
-lon = np.array(ds['lon'])
-anim_fps_val = anim_fps_conc
-for conc_val in data['CONTROL_VECTOR_CONC']:
-    variable = f'{spcconc_name}_{conc_val}'
-    variables.append(variable)
-    das.append(np.array(ds[variable]))
-    outfiles.append(f"{pp_dir}/SpeciesConc_{conc_val}{ending}")
-    times.append(time)
-    timestrs.append(timestr)
-    lons.append(lon)
-    lats.append(lat)
-    anim_fps_vals.append(anim_fps_val)
+if len(data['CONTROL_VECTOR_CONC']) > 0:
+    ds = xr.open_dataset(concpp)
+    time = np.array(ds['time'])
+    timestr = [str(t)[0:16] for t in time]
+    lat = np.array(ds['lat'])
+    lon = np.array(ds['lon'])
+    anim_fps_val = anim_fps_conc
+    for conc_val in data['CONTROL_VECTOR_CONC']:
+        variable = f'{spcconc_name}_{conc_val}'
+        variables.append(variable)
+        das.append(np.array(ds[variable]))
+        outfiles.append(f"{pp_dir}/SpeciesConc_{conc_val}{ending}")
+        times.append(time)
+        timestrs.append(timestr)
+        lons.append(lon)
+        lats.append(lat)
+        anim_fps_vals.append(anim_fps_val)
 
 #EMISSIONS
 anim_fps_val = anim_fps_emis

@@ -77,12 +77,13 @@ except FileNotFoundError:
 print('HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 print('Starting concentration (surface) postprocessing.')
 
-try:
-	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
-except FileNotFoundError:
-	print('Surface concentration postprocessing file not detected; generating now.')
-	_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
-	ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')	
+if len(controlvec) > 0:
+	try:
+		ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')
+	except FileNotFoundError:
+		print('Surface concentration postprocessing file not detected; generating now.')
+		_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,fullpath_output_name=f'{pp_dir}/controlvar_pp.nc')
+		ds = xr.open_dataset(f'{pp_dir}/controlvar_pp.nc')	
 
 print('Surface concentration data postprocessed and loaded.')
 
@@ -122,13 +123,14 @@ if useControl:
 		pt.tsPlotTotalEmissions(ds_ensemble=hemcodiag,ds_prior=hemcocontroldiag,area=area,collectionName=collection,useLognormal = lognormalErrors,timeslice=[POSTPROCESS_START_DATE,POSTPROCESS_END_DATE], outfile=f'{pp_dir}/timeseries_totalemissions_{collection}_against_prior.png')
 	print('Control run HEMCO diagnostic (e.g. emissions) postprocessed and loaded.')
 
-if "calc850" in sys.argv:
-	print('Calculating/loading 850hPa pressure level')
-	try:
-		ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
-	except FileNotFoundError:
-		_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,subset_rule="850",fullpath_output_name=f'{pp_dir}/controlvar_pp_850hPa.nc')
-		ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
+if len(controlvec) > 0:
+	if "calc850" in sys.argv:
+		print('Calculating/loading 850hPa pressure level')
+		try:
+			ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
+		except FileNotFoundError:
+			_ = pt.makeDatasetForEnsemble(ens_dir,controlvec,timeperiod,subset_rule="850",fullpath_output_name=f'{pp_dir}/controlvar_pp_850hPa.nc')
+			ds850 = xr.open_dataset(f'{pp_dir}/controlvar_pp_850hPa.nc')
 
 
 for spec in controlvec:
