@@ -56,7 +56,7 @@
 	"ControlWallTime" : "3-00\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheerio",
-	"AnimationEnv" : "geoplt_2",
+	"AnimationEnv" : "animation",
 	"MaxPar" : "2",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
