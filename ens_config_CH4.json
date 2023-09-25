@@ -188,8 +188,8 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1",
-		"CH4_OBSPACK":"0.1"
+		"CH4_TROPOMI":"0.5",
+		"CH4_OBSPACK":"0.5"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False",
@@ -245,7 +245,7 @@
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
 	"DO_RUN_IN_PLACE" : "True",
-	"rip_update_time" : "120",
+	"rip_update_time" : "168",
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
 	"DO_VARON_RERUN" : "False",
