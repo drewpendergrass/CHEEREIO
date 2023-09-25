@@ -11,6 +11,7 @@ timestamp = str(sys.argv[1]) #Time to assimilate. Expected in form YYYYMMDD_HHMM
 
 data = si.getSpeciesConfig()
 path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
+
 DO_RERUN = data["DO_VARON_RERUN"] == "True"
 if DO_RERUN:
 	number_of_windows_to_rerun = int(data["number_of_windows_to_rerun"])
