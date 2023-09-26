@@ -3,6 +3,7 @@ from glob import glob
 import tropomi_tools as tt
 import omi_tools as ot
 import scipy.linalg as la
+from scipy.stats import linregress
 import toolbox as tx 
 import settings_interface as si
 import os.path
@@ -70,7 +71,6 @@ class HIST_Ens(object):
 			self.AREA = self.ht[1].getArea()
 		else:
 			self.AREA = None
-		self.makeBigY()
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
@@ -143,6 +143,38 @@ class HIST_Ens(object):
 			if self.assimilate_observation[spec]: #If assimilation is turned on, add it to R.
 				errmats.append(self.makeRforSpecies(spec,latind,lonind))
 		return la.block_diag(*errmats)
+	def calcExtrapolationCoefficients(self,species_to_extrapolate):
+		gc_version = float(self.spc_config['GC_VERSION'][0:-2])
+		if gc_version>=14.1:
+			spcconc_name = "SpeciesConcVV"
+		else:
+			spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+		extraps = {}
+		for i in self.ensemble_numbers: 
+			hist4D_allspecies = self.ht[i].combineHist(False,False,False)
+			time = hist4D_allspecies.time.values.astype('datetime64[s]').astype('int')
+			extraps[i] = {}
+			for species in species_to_extrapolate:
+				spec4D = hist4D_allspecies[f'{spcconc_name}_{species}'].values
+				extraps[i][species] = np.zeros(spec4D.shape[1::])*np.nan
+				for j in range(spec4D.shape[1]):
+					for k in range(spec4D.shape[2]):
+						for l in range(spec4D.shape[3]):
+							slope, intercept, r, p, se = linregress(time,spec4D[:,j,k,l])
+							extraps[i][species][j,k,l] = slope*60*60 #convert to per hour rather than per second.
+		if self.useControl:
+			hist4D_allspecies = self.control_ht.combineHist(False,False,False)
+			time = hist4D_allspecies.time.values.astype('datetime64[s]').astype('int')
+			extraps['control'] = {}
+			for species in species_to_extrapolate:
+				spec4D = hist4D_allspecies[f'{spcconc_name}_{species}'].values
+				extraps['control'][species] = np.zeros(spec4D.shape[1::])*np.nan
+				for j in range(spec4D.shape[1]):
+					for k in range(spec4D.shape[2]):
+						for l in range(spec4D.shape[3]):
+							slope, intercept, r, p, se = linregress(time,spec4D[:,j,k,l])
+							extraps['control'][species][j,k,l] = slope*60*60 #convert to per hour rather than per second.
+		return extraps
 	def getCols(self):
 		obsdata_toreturn = {}
 		conc2Ds = {}

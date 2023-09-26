@@ -102,6 +102,21 @@ class Assimilator(object):
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
+		if (spc_config['DO_VARON_RERUN'] == 'True') and (spc_config['APPROXIMATE_VARON_RERUN'] == 'True'):
+			do_approx = False
+			with open(f"{path_to_scratch}/APPOXIMATION_STAGE") as f:
+				lines = f.readlines()
+				if lines[0] == 'true':
+					do_approx = True
+		else:
+			do_approx = False
+		if do_approx:
+			self.species_to_extrapolate = spc_config['species_to_approximate_for_rerun']
+			self.ASSIM_TIME = int(spc_config['ASSIM_TIME'])
+			self.number_of_windows_to_rerun = int(spc_config['number_of_windows_to_rerun'])-1 #Already ran 1.
+			self.extrapolation_coefs = self.histens.calcExtrapolationCoefficients(self.species_to_extrapolate)
+		else:
+			self.histens.makeBigY()
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -396,6 +411,16 @@ class Assimilator(object):
 			if self.control is not None: #scale control if we are using.
 				scaled_species = self.control.getSpecies3Dconc(species)*scaling_factor 
 				self.control.setSpecies3Dconc(species, scaled_species)
+	def extrapolateRestarts(self):
+		if self.verbose>=1:
+			print(f"Extrapolating restarts to approximate the rerun method.")
+		for species in self.species_to_extrapolate: #Now we can actually go and extrapolate
+			for i in self.ensemble_numbers:
+				extrapolated_spec = self.gt[i].getSpecies3Dconc(species)+(self.extrapolation_coefs[i][species]*self.ASSIM_TIME*self.number_of_windows_to_rerun)
+				self.gt[i].setSpecies3Dconc(species, extrapolated_spec)
+			if self.control is not None: #extrapolate control if we are using.
+				extrapolated_spec = self.control.getSpecies3Dconc(species)+(self.extrapolation_coefs['control'][species]*self.ASSIM_TIME*self.number_of_windows_to_rerun)
+				self.control.setSpecies3Dconc(species, extrapolated_spec)
 	def amplifySpreads(self):
 		if self.verbose>=1:
 			print(f"Amplifying ensemble spread of concentrations.")

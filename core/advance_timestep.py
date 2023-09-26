@@ -21,6 +21,13 @@ ENS_END_DATE_datetime = datetime.strptime(ENS_END_DATE, "%Y%m%d")
 DO_RERUN = spc_config["DO_VARON_RERUN"] == "True"
 if DO_RERUN:
 	number_of_windows_to_rerun = int(spc_config["number_of_windows_to_rerun"])
+	do_approx = False
+	APPROXIMATE_VARON_RERUN = data["APPROXIMATE_VARON_RERUN"] == "True"
+	if APPROXIMATE_VARON_RERUN:
+		with open(f"{path_to_scratch}/APPOXIMATION_STAGE") as f:
+    		lines = f.readlines()
+    		if lines[0] == 'true':
+    			do_approx = True
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
@@ -56,12 +63,24 @@ else:
 	ig_start_datetime = datetime.strptime(ig_startstring, "%Y%m%d %H%M%S")
 	ig_endstring = lines[1].rstrip()
 	ig_end_datetime = datetime.strptime(ig_endstring, "%Y%m%d %H%M%S")
-	if DO_RERUN: #if we are doing the Varon rerun, we start n assimilation periods before (default 1, set by user) and end one after current end slot.
+	if DO_RERUN:
 		delta = timedelta(hours=int(ASSIM_TIME))
-		start_datetime = ig_end_datetime-(number_of_windows_to_rerun*delta)
-		start_string = start_datetime.strftime("%Y%m%d %H%M%S")
-		end_datetime = ig_end_datetime+delta
-		end_string = end_datetime.strftime("%Y%m%d %H%M%S")
+		if APPROXIMATE_VARON_RERUN: 
+			if do_approx: #If we approximated, then the restart is now extrapolated. Advance one period ahead.
+				start_datetime = ig_end_datetime
+				start_string = ig_endstring
+				end_datetime = start_datetime+delta
+				end_string = end_datetime.strftime("%Y%m%d %H%M%S")
+			else: #If we are approximating but didn't this time, then we did the assimilation. Advance as if Varon rerun with 1 assimilation period
+				start_datetime = ig_end_datetime-delta
+				start_string = start_datetime.strftime("%Y%m%d %H%M%S")
+				end_datetime = ig_end_datetime+delta
+				end_string = end_datetime.strftime("%Y%m%d %H%M%S")
+		else: #if we are doing the Varon rerun but not approximating, we start n assimilation periods before (default 1, set by user) and end one after current end slot.
+			start_datetime = ig_end_datetime-(number_of_windows_to_rerun*delta)
+			start_string = start_datetime.strftime("%Y%m%d %H%M%S")
+			end_datetime = ig_end_datetime+delta
+			end_string = end_datetime.strftime("%Y%m%d %H%M%S")
 	else: 
 		if do_rip_aw and (periodstr=="ASSIM"): #Do RIP if we are in a normal phase.
 			start_datetime = ig_start_datetime+timedelta(hours=int(actual_aw)) #Advance start by assimilation window
@@ -98,6 +117,15 @@ if DO_BURN_IN:
 if start_datetime >= ENS_END_DATE_datetime:
 	with open(f"{parent_dir}/scratch/ENSEMBLE_COMPLETE", "w") as j:
 		f.write("Ensemble completed; delete this file if you want to re-run.\n") #If so, save flag file to ensemble folder
+
+#Toggle approximation stage if rerunning with approximation; don't do this for the first run period
+if DO_RERUN and periodstr!="FIRST":
+	if do_approx:
+		with open(f"{path_to_scratch}/APPOXIMATION_STAGE", "w") as f:
+			f.write("false") #Approximated this time; next time we won't
+	else:
+		with open(f"{path_to_scratch}/APPOXIMATION_STAGE", "w") as f:
+			f.write("true") #Assimilated this time; next time we approximate
 
 with open(f"{parent_dir}/scratch/INPUT_GEOS_TEMP", "w") as f:
 	f.write(f"{start_string}\n")

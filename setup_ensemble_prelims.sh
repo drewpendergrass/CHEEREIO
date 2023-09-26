@@ -38,6 +38,9 @@ ENS_SPINUP_END=$(jq -r ".ENS_SPINUP_END" ens_config.json)
 CONTROL_START=$(jq -r ".CONTROL_START" ens_config.json)
 CONTROL_END=$(jq -r ".CONTROL_END" ens_config.json)
 
+# rerun status
+APPROXIMATE_VARON_RERUN=$(jq -r ".APPROXIMATE_VARON_RERUN" ens_config.json)
+DO_VARON_RERUN=$(jq -r ".DO_VARON_RERUN" ens_config.json)
 
 # Start and end date for the production simulations
 START_DATE=$(jq -r ".START_DATE" ens_config.json)

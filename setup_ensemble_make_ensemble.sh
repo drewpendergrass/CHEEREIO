@@ -119,6 +119,11 @@ else
   bash change_hemcodiag_freq.sh "ensemble" #update hemco diagnostics frequency for ensemble
 fi
 
+#Create signal file for approximate rerun case.
+if [[ ${APPROXIMATE_VARON_RERUN} = "True" ]] && [[ ${DO_VARON_RERUN} = "True" ]]; then
+  echo 'true' > ${MY_PATH}/${RUN_NAME}/scratch/APPOXIMATION_STAGE
+fi
+
 ### Navigate back to top-level directory
 cd ${MY_PATH}/${RUN_NAME}
 

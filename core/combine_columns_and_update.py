@@ -15,6 +15,7 @@ path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 DO_RERUN = data["DO_VARON_RERUN"] == "True"
 if DO_RERUN:
 	number_of_windows_to_rerun = int(data["number_of_windows_to_rerun"])
+	APPROXIMATE_VARON_RERUN = data["APPROXIMATE_VARON_RERUN"] == "True"
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
@@ -28,9 +29,12 @@ if not np.isnan(actual_aw):
 
 #Calculate time to use for restart load if we are doing run in place or rerun; different from timestamp
 if DO_RERUN:
-	delta = timedelta(hours=int(data['ASSIM_TIME']))
 	timestamp_datetime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
-	timestamp_restart_dt = timestamp_datetime-(number_of_windows_to_rerun*delta) #Restart we are assimilating is n timesteps behind current timestamp (default 1, because rerunning from n assimilation periods behind).
+	delta = timedelta(hours=int(data['ASSIM_TIME']))
+	if APPROXIMATE_VARON_RERUN: #Not extrapolating this time, so go back one period
+		timestamp_restart_dt = timestamp_datetime-delta
+	else:
+		timestamp_restart_dt = timestamp_datetime-(number_of_windows_to_rerun*delta) #Restart we are assimilating is n timesteps behind current timestamp (default 1, because rerunning from n assimilation periods behind).
 	timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d_%H%M") 
 elif do_rip_aw:
 	ASSIM_TIME = int(data['ASSIM_TIME'])
