@@ -25,9 +25,9 @@ if DO_RERUN:
 	APPROXIMATE_VARON_RERUN = data["APPROXIMATE_VARON_RERUN"] == "True"
 	if APPROXIMATE_VARON_RERUN:
 		with open(f"{path_to_scratch}/APPOXIMATION_STAGE") as f:
-    		lines = f.readlines()
-    		if lines[0] == 'true':
-    			do_approx = True
+			lines = f.readlines()
+			if lines[0] == 'true':
+				do_approx = True
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
