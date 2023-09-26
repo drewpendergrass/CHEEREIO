@@ -22,7 +22,7 @@ DO_RERUN = spc_config["DO_VARON_RERUN"] == "True"
 if DO_RERUN:
 	number_of_windows_to_rerun = int(spc_config["number_of_windows_to_rerun"])
 	do_approx = False
-	APPROXIMATE_VARON_RERUN = data["APPROXIMATE_VARON_RERUN"] == "True"
+	APPROXIMATE_VARON_RERUN = spc_config["APPROXIMATE_VARON_RERUN"] == "True"
 	if APPROXIMATE_VARON_RERUN:
 		with open(f"{path_to_scratch}/APPOXIMATION_STAGE") as f:
 			lines = f.readlines()
