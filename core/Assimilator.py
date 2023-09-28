@@ -104,7 +104,7 @@ class Assimilator(object):
 			self.bigYpostprocess = False
 		if (spc_config['DO_VARON_RERUN'] == 'True') and (spc_config['APPROXIMATE_VARON_RERUN'] == 'True'):
 			do_approx = False
-			with open(f"{path_to_scratch}/APPOXIMATION_STAGE") as f:
+			with open(f"{self.path_to_scratch}/APPOXIMATION_STAGE") as f:
 				lines = f.readlines()
 				if lines[0] == 'true':
 					do_approx = True
