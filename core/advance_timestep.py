@@ -119,7 +119,7 @@ if start_datetime >= ENS_END_DATE_datetime:
 		f.write("Ensemble completed; delete this file if you want to re-run.\n") #If so, save flag file to ensemble folder
 
 #Toggle approximation stage if rerunning with approximation; don't do this for the first run period
-if DO_RERUN and periodstr!="FIRST":
+if DO_RERUN and APPROXIMATE_VARON_RERUN and periodstr!="FIRST":
 	if do_approx:
 		with open(f"{path_to_scratch}/APPOXIMATION_STAGE", "w") as f:
 			f.write("false") #Approximated this time; next time we won't

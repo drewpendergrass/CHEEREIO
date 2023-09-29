@@ -8,6 +8,8 @@ import pickle
 from datetime import date,datetime,timedelta
 from GC_Translator import GC_Translator
 from HIST_Ens import HIST_Ens
+from os.path import isfile
+
 
 #Contains a dictionary referencing GC_Translators for every run directory.
 #In the case where there is a control run present (with number 0)
@@ -107,10 +109,11 @@ class Assimilator(object):
 			with open(f"{self.path_to_scratch}/APPOXIMATION_STAGE") as f:
 				lines = f.readlines()
 				if lines[0] == 'true':
-					do_approx = True
+					if not isfile(f"{self.path_to_scratch}/IS_FIRST"): #If we are in the first run, don't do an approximation
+						do_approx = True
 		else:
 			do_approx = False
-		if do_approx:
+		if do_approx :
 			self.species_to_extrapolate = spc_config['species_to_approximate_for_rerun']
 			self.ASSIM_TIME = int(spc_config['ASSIM_TIME'])
 			self.number_of_windows_to_rerun = int(spc_config['number_of_windows_to_rerun'])-1 #Already ran 1.
