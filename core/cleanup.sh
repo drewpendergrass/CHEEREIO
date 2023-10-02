@@ -32,7 +32,3 @@ rm ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
 
 #Remove columns
 find ${MY_PATH}/${RUN_NAME}/scratch/ -name "*.npy" -type f -delete
-
-if [[ ${do_approx} = "false" ]]; then
-	echo 'woohoo'
-fi
