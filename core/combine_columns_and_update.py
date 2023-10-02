@@ -29,13 +29,13 @@ if not np.isnan(actual_aw):
 
 #Calculate time to use for restart load if we are doing run in place or rerun; different from timestamp
 if DO_RERUN:
-	timestamp_datetime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
-	delta = timedelta(hours=int(data['ASSIM_TIME']))
-	if APPROXIMATE_VARON_RERUN: #Not extrapolating this time, so go back one period
-		timestamp_restart_dt = timestamp_datetime-delta
+	if APPROXIMATE_VARON_RERUN: #never pass along a different restart time if approximating, regardless of approximation stage.
+		timestamp_restart = None
 	else:
+		timestamp_datetime = datetime.strptime(timestamp, "%Y%m%d_%H%M")
+		delta = timedelta(hours=int(data['ASSIM_TIME']))
 		timestamp_restart_dt = timestamp_datetime-(number_of_windows_to_rerun*delta) #Restart we are assimilating is n timesteps behind current timestamp (default 1, because rerunning from n assimilation periods behind).
-	timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d_%H%M") 
+		timestamp_restart = timestamp_restart_dt.strftime("%Y%m%d_%H%M") 
 elif do_rip_aw:
 	ASSIM_TIME = int(data['ASSIM_TIME'])
 	backwards = ASSIM_TIME-actual_aw #How many hours backwards should we look from current timestamp for restart to use in building state vector?
