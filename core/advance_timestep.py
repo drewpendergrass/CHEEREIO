@@ -72,10 +72,16 @@ else:
 				end_datetime = start_datetime+delta
 				end_string = end_datetime.strftime("%Y%m%d %H%M%S")
 			else: #If we are approximating but didn't this time, then we did the assimilation. Next run will rerun previous period to simulate conc changes.
-				start_datetime = ig_start_datetime
-				start_string = ig_startstring
-				end_datetime = ig_end_datetime
-				end_string = ig_endstring
+				if periodstr=="POSTFIRST": #This is the only time we don't rerun the previous window. Advance forward one window to kick things off.
+					start_datetime = ig_end_datetime
+					start_string = ig_endstring
+					end_datetime = start_datetime+delta
+					end_string = end_datetime.strftime("%Y%m%d %H%M%S") #Will run LETKF next.
+				else:
+					start_datetime = ig_start_datetime
+					start_string = ig_startstring
+					end_datetime = ig_end_datetime
+					end_string = ig_endstring
 		else: #if we are doing the Varon rerun but not approximating, we start n assimilation periods before (default 1, set by user) and end one after current end slot.
 			start_datetime = ig_end_datetime-(number_of_windows_to_rerun*delta)
 			start_string = start_datetime.strftime("%Y%m%d %H%M%S")
