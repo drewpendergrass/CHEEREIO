@@ -48,7 +48,7 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"NumCtrlCores" : "24",
-	"Partition" : "huce_intel",
+	"Partition" : "huce_cascade,seas_compute,intermediate",
 	"Memory" : "64000",
 	"EnsCtrlSpinupMemory" : "8000",
 	"WallTime" : "12-00\\:00",
