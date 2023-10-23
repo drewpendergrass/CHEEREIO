@@ -263,28 +263,20 @@ def updateOHforCH4(spc_config,lines):
 	return lines
 
 #Write HEMCO Config file. Save different names if it's spinup or nature (only update background) or main (adds scaling factors).
-def writeHEMCOConfig(hemco_config_path,lines,spinup_or_nature = False):
-	if spinup_or_nature:
-		with open(hemco_config_path+'HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc', 'w') as f:
-			for line in lines:
-				f.write(line)
-	else:
-		with open(hemco_config_path+'HEMCO_Config.rc', 'w') as f:
-			for line in lines:
-				f.write(line)
+def writeHEMCOConfig(hemco_config_path,lines):
+	with open(hemco_config_path+'HEMCO_Config.rc', 'w') as f:
+		for line in lines:
+			f.write(line)
 
 
-def fullWorkflow(useString, foldername=None):
+def fullWorkflow(foldername=None):
 	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc = HEMCOsetup(foldername,returnStartEndDict=False)
 	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
 	lines = ensureRestartsInTLD(lines) #make sure we are reading restart from TLD, not Restarts folder.
 	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
-	if useString == 'ENSEMBLE':
-		#Add updates for scaling factors
-		lines,species_scalid=addScalingFactorNumbers(spc_config,speciesloc,lines)
-		lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
-		writeHEMCOConfig(hemco_config_path,lines,False)
-	elif useString == 'NATURE':
-		writeHEMCOConfig(hemco_config_path,lines,True)
+	#Add updates for scaling factors
+	lines,species_scalid=addScalingFactorNumbers(spc_config,speciesloc,lines)
+	lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
+	writeHEMCOConfig(hemco_config_path,lines)
 
 

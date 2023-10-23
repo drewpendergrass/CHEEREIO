@@ -31,8 +31,7 @@ ln -s ../${RUN_TEMPLATE}/gcclassic .
 ln -s $RESTART_FILE GEOSChem.Restart.${SPINUP_START}_0000z.nc4
 
 #Switch HEMCO_Config to base/nature one.
-rm HEMCO_Config.rc #This one has updated scaling factors.
-mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates BCs.
+python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
 
 ### Update settings in input.geos
 sed -i -e "s:{DATE1}:${SPINUP_START}:g" \

@@ -33,8 +33,7 @@ if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = false ]; then
     ln -s $RESTART_FILE GEOSChem.Restart.${CONTROL_START}_0000z.nc4
 
     #Switch HEMCO_Config to base/nature one.
-    rm HEMCO_Config.rc #This one has updated scaling factors.
-    mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates a few settings.
+    python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
     if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
         sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc #If we are spinning up from BCs, handle this
     fi
