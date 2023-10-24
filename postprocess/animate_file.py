@@ -52,7 +52,7 @@ time = np.array(ds['time'])
 timestr = [str(t)[0:16] for t in time]
 lat = np.array(ds['lat'])
 lon = np.array(ds['lon'])
-ensmean = getEnsMean(args.func,args.variable,da,args.lognormal_errors)
+ensmean = getEnsMean(args.statistical_function,args.variable,da,args.lognormal_errors)
 
 
 animateData(m,ensmean,args.file_out,lon,lat,anim_fps = args.anim_fps, variable = args.variable,timestr = timestr, cmin = cmin, cmax=cmax, bwr_cmap=args.bwr_cmap)
