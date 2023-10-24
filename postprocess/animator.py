@@ -160,26 +160,6 @@ for hemco_val in data['hemco_diags_to_process']:
     lats.append(lat)
     anim_fps_vals.append(anim_fps_val)
 
-
-def getEnsMean(func,variable,da):
-    if func=='mean':
-        if lognormalErrors and (variable=='Scalar'):
-            ensmean = np.exp(np.mean(np.log(da),axis=0))
-        else:
-            ensmean = np.mean(da,axis=0)
-    elif func=='sd':
-        if lognormalErrors and (variable=='Scalar'):
-            ensmean = np.std(np.log(da),axis=0)
-        else:
-            ensmean = np.std(da,axis=0)
-    elif func=='max':
-        ensmean = np.max(da,axis=0)
-    elif func=='min':
-        ensmean = np.min(da,axis=0)
-    elif func=='range':
-        ensmean = np.max(da,axis=0)-np.min(da,axis=0)
-    return ensmean
-
 #####GLOBAL or full nested region########
 # call the animator.  blit=True means only re-draw the parts that have changed.
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=totallat_minmax[0], urcrnrlat=totallat_minmax[1],llcrnrlon=totallon_minmax[0], urcrnrlon=totallon_minmax[1])
@@ -195,7 +175,7 @@ for variable,da,file_out,time,timestr,lon,lat,anim_fps in zip(variables,das,outf
         else:
             outfile = file_out
 
-        ensmean = getEnsMean(func,variable,da)
+        ensmean = getEnsMean(func,variable,da,lognormalErrors=lognormalErrors)
 
         if variable == 'Scalar':
             bwr_cmap=True
@@ -222,7 +202,7 @@ if is_global:
                 else:
                     outfile = file_out
 
-                ensmean = getEnsMean(func,variable,da)[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]
+                ensmean = getEnsMean(func,variable,da,lognormalErrors=lognormalErrors)[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]
 
                 if variable == 'Scalar':
                     bwr_cmap=True

@@ -8,6 +8,7 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 import pickle
 from map_tools import *
+from animation_tools import *
 import sys
 sys.path.append('../core')
 import settings_interface as si 
@@ -90,42 +91,7 @@ for sf in sfs:
 	lon = np.array(ds['lon'])
 	da = np.array(ds['Scalar'])
 	ensmean = np.mean(da,axis=0)
-
-	def animate(i):
-		daystring = timestr[i]
-		titlestring = f'Scaling factor for {daystring}'
-		plt.title(titlestring)
-		temp = ensmean[i,:,:]
-		temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-		#mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-		mesh.set_array(temp.ravel())
-		return mesh
-
-	#####GLOBAL#########
-	# call the animator.  blit=True means only re-draw the parts that have changed.
-	fig = plt.figure(figsize=(10, 6))
-	m.drawcountries(color='lightgray')
-	m.drawcoastlines(color='lightgray')
-
-	#custom bwr colormap for scalings
-	cvals  = [0.0, 1.0, np.max([np.max(ensmean),1.1])]
-	colors = ["blue","white","red"]
-	pltnorm=plt.Normalize(min(cvals),max(cvals))
-	tuples = list(zip(map(pltnorm,cvals), colors))
-	cmap = LinearSegmentedColormap.from_list("", tuples)
-	clim = [0.0, np.max([np.max(ensmean),1.1])]
-
-	mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=cmap)
-	plt.clim(clim[0],clim[1])
-	plt.colorbar(label='Scalar');
-	anim = animation.FuncAnimation(fig, animate,len(time), blit=False)
-
-	#SAVE 
-	Writer = animation.writers['ffmpeg']
-	writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
-	sf_nodot = sf.split('.')[0]
-	file_out = f'{pp_dir}/{sf_nodot}_mean_SNAPSHOT.mp4'
-	anim.save(file_out, writer=writer)
+	animateData(m,ensmean,file_out = f'{pp_dir}/{sf_nodot}_mean_SNAPSHOT.mp4',lon,lat,anim_fps = anim_fps, variable = 'Scaling factor',timestr = timestr, bwr_cmap=True)
 	print('')
 	print('')
 	print(f'Saved {sf} movie of ensemble mean scalefactors out at {file_out}')

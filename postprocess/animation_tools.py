@@ -4,6 +4,26 @@ import matplotlib.animation as animation
 from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 
+
+def getEnsMean(func,variable,da,lognormalErrors):
+    if func=='mean':
+        if lognormalErrors and (variable=='Scalar'):
+            ensmean = np.exp(np.mean(np.log(da),axis=0))
+        else:
+            ensmean = np.mean(da,axis=0)
+    elif func=='sd':
+        if lognormalErrors and (variable=='Scalar'):
+            ensmean = np.std(np.log(da),axis=0)
+        else:
+            ensmean = np.std(da,axis=0)
+    elif func=='max':
+        ensmean = np.max(da,axis=0)
+    elif func=='min':
+        ensmean = np.min(da,axis=0)
+    elif func=='range':
+        ensmean = np.max(da,axis=0)-np.min(da,axis=0)
+    return ensmean
+
 #Animate data 
 def animateData(m,data,file_out,lon,lat,anim_fps = 8, variable = 'Variable',timestr = None, cmin = None, cmax=None, bwr_cmap=False):
 
