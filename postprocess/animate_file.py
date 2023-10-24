@@ -54,7 +54,7 @@ lat = np.array(ds['lat'])
 lon = np.array(ds['lon'])
 ensmean = getEnsMean(args.statistical_function,args.variable,da,args.lognormal_errors)
 
-
+m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 animateData(m,ensmean,args.file_out,lon,lat,anim_fps = args.anim_fps, variable = args.variable,timestr = timestr, cmin = cmin, cmax=cmax, bwr_cmap=args.bwr_cmap)
 
 
