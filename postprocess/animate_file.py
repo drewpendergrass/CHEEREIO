@@ -47,7 +47,7 @@ if args.start_date != 'None':
 	end_date=datetime.strptime(args.end_date, "%Y%m%d")
 	ds = ds.sel(time=slice(start_date, end_date))
 
-da = ds[args.variable]
+da = ds[args.variable].values
 time = np.array(ds['time'])
 timestr = [str(t)[0:16] for t in time]
 lat = np.array(ds['lat'])
