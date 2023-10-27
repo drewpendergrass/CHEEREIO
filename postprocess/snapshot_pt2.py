@@ -91,7 +91,8 @@ for sf in sfs:
 	lon = np.array(ds['lon'])
 	da = np.array(ds['Scalar'])
 	ensmean = np.mean(da,axis=0)
-	animateData(m,ensmean,f'{pp_dir}/{sf.split(".")[0]}_mean_SNAPSHOT.mp4',lon,lat,anim_fps = anim_fps, variable = 'Scaling factor',timestr = timestr, bwr_cmap=True)
+	file_out = f'{pp_dir}/{sf.split(".")[0]}_mean_SNAPSHOT.mp4'
+	animateData(m,ensmean,file_out,lon,lat,anim_fps = anim_fps, variable = 'Scaling factor',timestr = timestr, bwr_cmap=True)
 	print('')
 	print('')
 	print(f'Saved {sf} movie of ensemble mean scalefactors out at {file_out}')
