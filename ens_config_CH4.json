@@ -31,7 +31,7 @@
 	"ENS_SPINUP_START" : "20180101",
 	"ENS_SPINUP_END" : "20180501",
 	"START_DATE" : "20180501",
-	"ASSIM_START_DATE" : "20180508",
+	"ASSIM_START_DATE" : "20180529",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
@@ -182,7 +182,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.5"
+		"CH4_TROPOMI":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False"
@@ -221,8 +221,8 @@
 	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
-	"AverageScaleFactorPosteriorWithPrior" : "True",
-	"PriorWeightinSFAverage" : "0.1",
+	"AverageScaleFactorPosteriorWithPrior" : "False",
+	"PriorWeightinSFAverage" : "0.01",
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
@@ -233,7 +233,7 @@
 	"DO_VARON_RERUN" : "True",
 	"APPROXIMATE_VARON_RERUN" : "False",
 	"species_to_approximate_for_rerun" : ["CH4"],
-	"number_of_windows_to_rerun" : "1", 
+	"number_of_windows_to_rerun" : "3", 
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",
