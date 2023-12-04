@@ -157,22 +157,38 @@ class ObsPack_Translator(obsop.Observation_Translator):
 	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		obs_list = self.globObs(species,timeperiod,interval)
-		obspack = xr.open_mfdataset(obs_list, concat_dim='obs', combine='nested', mask_and_scale=False, preprocess=filter_postprocess_obspack_from_file)
-		met = {}
-		met['value'] = obspack['value'].values
-		met['longitude'] = obspack['longitude'].values
-		met['latitude'] = obspack['latitude'].values
-		met['altitude'] = obspack['altitude'].values
-		met['utctime'] = obspack['time'].values
-		met['utc_conv'] = obspack['utc_conv'].values
-		met['platform'] = obspack['platform'].values
-		met['obspack_id'] = obspack['obspack_id'].values
-		met['site_code'] = obspack['site_code'].values
+		if len(obs_list)>0:
+			obspack = xr.open_mfdataset(obs_list, concat_dim='obs', combine='nested', mask_and_scale=False, preprocess=filter_postprocess_obspack_from_file)
+			met = {}
+			met['value'] = obspack['value'].values
+			met['longitude'] = obspack['longitude'].values
+			met['latitude'] = obspack['latitude'].values
+			met['altitude'] = obspack['altitude'].values
+			met['utctime'] = obspack['time'].values
+			met['utc_conv'] = obspack['utc_conv'].values
+			met['platform'] = obspack['platform'].values
+			met['obspack_id'] = obspack['obspack_id'].values
+			met['site_code'] = obspack['site_code'].values
+		else: #If no observations, return something empty
+			met = {}
+			met['value'] = np.array([])
+			met['longitude'] = np.array([])
+			met['latitude'] = np.array([])
+			met['altitude'] = np.array([])
+			met['utctime'] = np.array([])
+			met['utc_conv'] = np.array([])
+			met['platform'] = np.array([])
+			met['obspack_id'] = np.array([])
+			met['site_code'] = np.array([])
 		return met
 	def gcCompare(self,specieskey,ObsPack,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		#Have to convert to PPB
-		toreturn = obsop.ObsData(GC[species].values*1e9,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-		toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+		if len(ObsPack['value'])==0:
+			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+		else:
+			toreturn = obsop.ObsData(GC[species].values*1e9,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		return toreturn
 
