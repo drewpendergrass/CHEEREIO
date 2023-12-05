@@ -72,8 +72,9 @@ class HIST_Translator(object):
 							to_merge[lecoll].append(le_ds[lecoll])
 					#Concatenate collections, merge doesn't like ragged arrays.
 					for lecoll in self.spc_config[subdict['diags']]:
-						data_val = xr.concat(to_merge[lecoll],'obs')
-						dataset.append(data_val)
+						if len(to_merge[lecoll]) > 0: #Not always obspack files
+							data_val = xr.concat(to_merge[lecoll],'obs')
+							dataset.append(data_val)
 				else:
 					to_merge=[]
 					for ind in range(len(subdir_lists[coll])):
