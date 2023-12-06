@@ -792,6 +792,7 @@ Run-in-place settings
 	
 	If ``DO_VARON_RERUN`` is set to ``True``, how many assimilation windows should we rerun? For most users, this value should be 1. See :ref:`Rerun` for more information.
 
+.. _postprocessing settings:
 
 Postprocessing settings
 ~~~~~~~~~~~~~
@@ -866,6 +867,8 @@ Postprocessing settings
 		},
 
 	This is because the ObsPack ID information is not useful to plot.
+
+	If you are writing a new observation operator and would like to ensure that postprocessing routines will plot an important observational quantity (e.g. albedo), see the :ref:`New field in postprocessing` page.
 
 .. option:: extra_plot_field_units
 	

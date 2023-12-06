@@ -71,8 +71,6 @@ CHEEREIO uses HIST_Ensemble object to (1) gather the raw GEOS-Chem output data a
 
 The most powerful method within the HIST_Ensemble object is ``getCols()``. If you trawl through the CHEEREIO code, you will find references to objects called bigY (meaning :math:`Y^b`). bigY is a dictionary stored within HIST_Ens, with keys corresponding to each observed species. The values for each key is an object of class ObsData, discussed in the :ref:`ObsData` entry. The ObsData class is a glorified dictionary, containing actual observations paired with simulated observations from GEOS-Chem, along with corresponding data such as errors. The ``getCols()`` method is what produces bigY. 
 
-If you want to add a new dataset to the postprocessing workflow (such as an observational data quantity), the best way to do it is by storing the data as a labeled entry in ObsData using the ``addData`` and ``getDataByKey`` methods, and adding a line in ``getCols()`` to ensure that the data is added to bigY. See :ref:`New field in postprocessing` for more information.
-
 All this data is calculated and supplied as requested by :ref:`Assimilator`. There is only one HIST_Ensemble class produced per assimilator; it holds and processes the data for the entire ensemble.
 
 The Observation Translator class type
@@ -97,4 +95,7 @@ The Assimilator class
 CHEEREIO puts all the pieces together for the LETKF algorithm in the Assimilator class. The Assimilator class contains (1) an array of GC Translator objects, which it uses to produce state vectors (:math:`X^b`); (2) a HIST Ensemble object, which it uses to interface with observations and GEOS-Chem history files to produce arrays of simulated observations (:math:`Y^b`), the difference between the mean simulated observations and actual observations (:math:`\bar{y}-y`), and observational error (:math:`R`); and (3) the code, in the ``LETKF()`` method, to put all the pieces together and conduct the LETKF assimilation.
 
 The bulk of the description of what the ``LETKF()`` method does is outlined here: :ref:`parallelization`. Most of the other methods in the Assimilator class just support the LETKF method, such as assembling the matrices mentioned in the previous paragraph. In addition, the Assimilator class contains methods to do corrections to the assimilated output beyond the LETKF scope. These include (1) enforcing minimum or maximum scale factors (e.g. a non-negativity constraint); and (2) limiting the change allowed in each assimilation calculation, such as by nudging towards the prior or amplifying the ensemble spread more flexibly than the :math:`\Delta` parameter allows. The user specifies all these settings in the ensemble configuration file.
+
+The Assimilator class saves out observer data beyond the observations themselves as the LETKF algorithm proceeds. For example, users might want to save albedo data from the observer file; these data can be added to the postprocessing workflow to automatically plot. If you want to add a new dataset to the postprocessing workflow (such as an observational data quantity), the best way to do it is by storing the data as a labeled entry in ObsData using the ``addData`` and ``getDataByKey`` methods within a given Observation Operator. See :ref:`New field in postprocessing` for more information.
+
 
