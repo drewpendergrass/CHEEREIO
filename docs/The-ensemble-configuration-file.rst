@@ -495,6 +495,7 @@ Observation settings
 	
 	TKTKTKT
 
+.. _Scaling factor settings:
 
 Scaling factor settings
 ~~~~~~~~~~~~~
@@ -584,6 +585,8 @@ Scaling factor settings
 .. option:: MaximumScaleFactorRelativeChangePerAssimilationPeriod
 	
 	The maximum relative change per assimilation period allowed for scaling factors. For example, a value "0.5" means that no more than a 50% change is allowed for a given scaling factor in a given assimilation period. A dictionary with keys matching ``CONTROL_VECTOR_EMIS`` and with float values for each entry, where "nan" ignores this setting.
+
+.. _LETKF settings:
 
 LETKF settings
 ~~~~~~~~~~~~~

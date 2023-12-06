@@ -80,6 +80,7 @@ If the postprocessing workflow runs successfully, then the following figures and
 	
 	These plots, one generated for each diagnostic in the HEMCO Diagnostic plot list (``hemco_diags_to_process`` within ``ens_config.json``), show the post-assimilation total emissions against the prior total emissions over time. The files are named with pattern ``timeseries_totalemissions_{HEMCO_Diag}_against_prior.png``.
 
+.. _postprocessed files:
 
 The postprocessed data files
 ~~~~~~~~~~~~~
