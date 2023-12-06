@@ -177,6 +177,17 @@
 	},
 	"speedyCorrelationApprox" : "True",
 	"lognormalErrors" : "True",
+	"additional_init_perturbation_from_emis" : {
+		"NOx" : {
+			"do_add_pert":"False",
+			"file":{
+				"file" : "",
+				"variable" : ""
+			},
+			"max_pert":"",
+			"saturation":""
+		}
+	},
 	"MaskOceanScaleFactor" : {
 		"NOx":"True"
 	},
@@ -239,6 +250,7 @@
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "500",
+	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
@@ -251,6 +263,9 @@
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
 	"DO_VARON_RERUN" : "True",
+	"APPROXIMATE_VARON_RERUN" : "False",
+	"species_to_approximate_for_rerun" : [],
+	"number_of_windows_to_rerun" : "1", 
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",

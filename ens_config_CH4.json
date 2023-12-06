@@ -126,6 +126,7 @@
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
 	"ACTIVATE_OBSPACK" : "false",
+	"preprocess_raw_obspack_files" : "true",
 	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/obspack",
 	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/obspack_gc",
 	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
@@ -144,6 +145,7 @@
 		"CH4":"500"
 	},
 	"speedyCorrelationApprox" : "True",
+	"lognormalErrors" : "True",
 	"additional_init_perturbation_from_emis" : {
 		"CH4" : {
 			"do_add_pert":"True",
@@ -155,7 +157,6 @@
 			"saturation":"0.5e-9"
 		}
 	},
-	"lognormalErrors" : "True",
 	"MaskOceanScaleFactor" : {
 		"CH4":"True"
 	},

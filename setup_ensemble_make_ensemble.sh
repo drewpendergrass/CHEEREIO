@@ -102,7 +102,8 @@ fi
 python prep_par.py "PRODUCTION" #Figure out who should assimilate which cores. 
 python setup_obs_dates.py #Create date dictionaries for rapid reference at assimilation time.
 
-if [ "${ACTIVATE_OBSPACK}" = true ]; then #Preprocess obspack if that's what we do.
+#Preprocess obspack if that's what we do.
+if [[ ${ACTIVATE_OBSPACK} = "true" ]] && [[ ${preprocess_raw_obspack_files} = "true" ]]; then
   python preprocess_obspack.py
 fi
 

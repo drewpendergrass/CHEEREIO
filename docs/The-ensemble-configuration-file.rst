@@ -127,6 +127,10 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 		This option is functional but currently causes GEOS-Chem crashes with an unknown cause (DP, 2022/03/09).
 
+.. option:: USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config
+
+	See above entry.
+
 .. option:: RESTART_FILE
 	
 	Full path to the restart file for the simulation. If in the initialization process you selected ``SetupSpinupRun=true``, then this restart file will be used for the classic spin up routine (getting realistic atmospheric conditions for the entire ensemble). Otherwise, this will be the restart file used to initialize all ensemble members.
@@ -215,13 +219,17 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 	
 	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period. For more information on the burn-in period, see :ref:`Burn in period`.
 
+..option:: DO_BURN_IN
+
+	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. For more information on the burn-in period, see :ref:`Burn in period`.
+
 .. option:: SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD
 	
-	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. If this option is set to "true", then at the end of the burn-in period (given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
+	If this option and ``DO_BURN_IN`` are both set to "true", then at the end of the burn-in period (a date given by ``BURN_IN_END``) CHEEREIO will scale the ensemble mean to match the observational mean, as in the ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` option. This ensures that any biases introduced in the period where CHEEREIO emissions are "catching up" with observations are corrected. For more information on the burn-in period, see :ref:`Burn in period`.
 
 .. option:: BURN_IN_END
 	
-	If ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` is set to ``true``, then this is the date (YYYYMMDD) when the burn-in period ends.
+	If ``DO_BURN_IN`` is set to ``true``, then this is the date (YYYYMMDD) when the burn-in period ends.
 
 .. option:: POSTPROCESS_START_DATE
 	
@@ -233,7 +241,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: nEnsemble
 	
-	Number of ensemble members. 32 or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
+	Number of ensemble members. 24, 32, or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
 
 .. option:: verbose
 	
@@ -283,11 +291,11 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 
 .. option:: CondaEnv
 	
-	The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the YAML file that ships with CHEEREIO in the ``environments/`` folder.
+	The name of the Conda environment with all of the CHEEREIO packages installed. It is strongly recommended that you install an environment using the ``cheereio.yaml`` file that ships with CHEEREIO in the ``environments/`` folder.
 
 .. option:: AnimationEnv
 	
-	The name of the Conda environment that has the tools necessary to make animated postprocessing plots. A YAML file will be added to the ``environments/`` folder before release giving this Conda environment.
+	The name of the Conda environment that has the tools necessary to make animated postprocessing plots. It is strongly recommended that you install an environment using the ``animation.yml`` file that ships with CHEEREIO in the ``environments/`` folder.
 
 .. option:: MaxPar
 	
@@ -301,7 +309,7 @@ One useful feature of CHEEREIO is its distinction between "control" and "state" 
 
 .. option:: STATE_VECTOR_CONC
 	
-	Species from the restart files to be included in the state vector. It is generally recommended to include a range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array. This is an example for NO\ :sub:`x` data assimilation: 
+	Species from the restart files to be included in the state vector. It is generally recommended to include a range of species that might affect the species you are mainly interested in, but not so large a range that you end up analyzing noise. Given as an array. Note that this can be left empty to do a pure emissions optimization without adjusting concentrations. This is an example for NO\ :sub:`x` data assimilation: 
 	::
 
 		"STATE_VECTOR_CONC" : [
@@ -317,7 +325,7 @@ One useful feature of CHEEREIO is its distinction between "control" and "state" 
 
 .. option:: CONTROL_VECTOR_CONC
 	
-	A subset of the state vector concentration species that will be updated by assimilation. Although an update for all members of the state vector will be calculated, only the species listed in this array will have that update saved. This allows a wide range of species to be considered in the update calculation process but only a smaller, more tightly coupled subset of species to actually be changed and passed to GEOS-Chem. The goal is to tamp down on noise. Again, in many simulations the state vector and control vector entries will be identical.
+	A subset of the state vector concentration species that will be updated by assimilation. Although an update for all members of the state vector will be calculated, only the species listed in this array will have that update saved. This allows a wide range of species to be considered in the update calculation process but only a smaller, more tightly coupled subset of species to actually be changed and passed to GEOS-Chem. The goal is to tamp down on noise. Again, in many simulations the state vector and control vector entries will be identical. Note that this can be left empty to do a pure emissions optimization without adjusting concentrations.
 
 .. option:: STATE_VECTOR_CONC_REPRESENTATION
 	
@@ -374,15 +382,15 @@ HISTORY.rc settings
 
 .. option:: SaveStateMet
 	
-	Should the StateMet collection be turned on? "True" or "False". This is mandatory for assimilating some forms of satellite data, like OMI NO\ :sub:`2`\ .
-
+	Should the StateMet collection be turned on? "True" or "False". This is mandatory for assimilating some forms of satellite data, like OMI NO\ :sub:`2`\ . 
+ 
 .. option:: SaveArea
 	
 	Should grid cell areas be used in the assimilation process? "True" or "False".
 
 .. option:: HistorySpeciesConcToSave
 	
-	A list of species to save in the SpeciesConc collection. At minimum, this should encompass the concentration portion of the state vector. Below is an example: 
+	A list of species to save in the SpeciesConc collection. At minimum, this should encompass the concentration portion of the state vector and any concentrations needed for observation operators. Below is an example: 
 	::
 
 		"HistorySpeciesConcToSave" : [
@@ -433,11 +441,15 @@ Observation settings
 
 .. option:: OBS_TYPE
 	
-	A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
+	A dictionary linking a label for observations with the observer type, so that CHEEREIO knows how to interpret observation files. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Valid values include "OMI" and "TROPOMI", or any other observation operator type added to CHEEREIO by you or by other users listed in ``operators.json``. Instructions on how to add an observation operator to CHEEREIO such that it can be switched on from ``OBS_TYPE`` in the configuration file are given in the :ref:`New observation:` page.
 
 .. option:: ASSIMILATE_OBS
 
 	A dictionary linking a label for observations (key) with a switch ("True" or "False") indicating whether or not those observations will be used in the LETKF calculation (value). If observations are not used in the LETKF (i.e. set to "False"), then CHEEREIO will use the observations only for making postprocessing plots and calculations; the user can treat these observations as an external data source for validation.
+
+	.. attention::
+
+		*Note: Even if a value of False is given for a given observer, entries for that observer still need to be given in any dictionary setting referencing OBSERVED_SPECIES. In many cases (e.g. errors) the values will be ignored.*
 
 .. option:: TROPOMI_dirs
 	
@@ -453,11 +465,15 @@ Observation settings
 
 .. option:: OMI_dirs
 	
-	As in TROPOMI_dirs, but for OMI. Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page. 
+	As in TROPOMI_dirs, but for OMI. 
+
+.. option:: XXXXXXXX_dirs
+
+	With the exception of ObsPack observations (which are handled separately), users can link directories for any observer listed in ``operators.json`` using the above pattern from TROPOMI_dirs (e.g. OMI_dirs). Note that other observation operators can be added as separate key entries in this configuration file by following the instructions on the :ref:`New observation:` page.
 
 .. option:: filter_obs_poleward_of_n_degrees
 
-	TKTKTKT
+	A dictionary linking a label for observations with the maximum poleward extent of observations allowed. For example, a value of 60 would exclude all observations polewards of 60 degrees latitude. One entry is required for each entry in ``OBSERVED_SPECIES``, with every key from ``OBSERVED_SPECIES`` represented here. Set a given value to ``nan`` to ignore. 
 
 .. option:: SaveDOFS
 	
@@ -477,23 +493,43 @@ Observation settings
 
 .. option:: ACTIVATE_OBSPACK
 	
-	TKTKTKT
+	``true`` or ``false``, should we activate ObsPack? Set to ``true`` if and only if ObsPack is being used as an observed species in the assimilation (i.e. if and only if "OBSPACK" is listed as a value somewhere in the ``OBS_TYPE`` dictionary). Subsequent ObsPack entries are ignored if set to ``false``. More information on the ObsPack operator is given in the ``ObsPack tools`` entry.
+
+.. option:: preprocess_raw_obspack_files
+
+	``true`` or ``false``, would you like CHEEREIO to automatically process raw obspack observation files (as downloaded from NOAA) so that they are compatible to input into both CHEEREIO and GEOS-Chem? 
+
 
 .. option:: raw_obspack_path
 	
-	TKTKTKT
+	If ``preprocess_raw_obspack_files`` is set to ``true``, then supply the path to the location of raw obspack files, without any preprocessing applied, as downloaded from NOAA. CHEEREIO will handle these directly.
+
+	.. attention::
+
+		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. Manual adjustments may be necessary, as discussed in the below entry (DP, 2023/12/06).*
 
 .. option:: gc_obspack_path
 	
-	TKTKTKT
+	Path where CHEEREIO and GEOS-Chem should find preprocessed ObsPack observation files which are compatible with GEOS-Chem. If ``preprocess_raw_obspack_files`` is ``true``, this directory can be empty and will be populated automatically by CHEEREIO during a preprocessing step at ensemble installation time.
+
+	.. attention::
+
+		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. If you get an error the preprocessing step (performed during ensemble run directory creation in the installation workflow), or you already have ObsPack files processed, you should set the ``preprocess_raw_obspack_files`` to ``false`` and supply an already populated directory of manually preprocessed files. Details for how to do this are provided in the ObsPack documentation for GEOS-Chem. (DP, 2023/12/06).*
 
 .. option:: obspack_gc_input_file
 	
-	TKTKTKT
+	The file naming convention for obspack input data. This is used (1) by CHEEREIO in the pre-processing step when generating GEOS-Chem compatible ObsPack input files, and (2) by GEOS-Chem in the ObsPack diagnostic generation. For example, ``obspack_ch4.YYYYMMDD.nc`` might be appropriate for a methane simulation; the important part is that YYYYMMDD be present somewhere in the string.
 
 .. option:: HistoryObsPackToSave
 	
-	TKTKTKT
+	A list of data to save in the ObsPack collection.Below is an example used for a methane experiment:
+	::
+
+		"HistoryObsPackToSave" : [
+			"pressure",
+			"CH4"
+		],
+
 
 .. _Scaling factor settings:
 
@@ -554,6 +590,35 @@ Scaling factor settings
 		"speedyCorrelationApprox" : "True",
 		"lognormalErrors" : "True",
 
+.. option:: additional_init_perturbation_from_emis
+
+	Sometimes users would like to include additional initial emissions perturbations to regions of interest, such as areas with higher emissions; such perturbations allow more granularity in the posterior solution in these locations. The setting is supplied as a dictionary, where a key is present for every key in ``CONTROL_VECTOR_EMIS`` and corresponds to a value given as a subdictionary. Each subdictionary will contain the following values:
+
+	* ``do_add_pert``: ``True`` or ``False``, should additional initial perturbations be applied for this emission?
+	* ``file``: a dictionary listing two important pieces of information:
+		* ``file``: path to an input NetCDF file used to calculate additional perturbations
+		* ``variable``: variable within the NetCDF input file used to calculate perturbations
+	* ``max_pert``: the maximum perturbation applied to the initiaon scaling factors (applied additively). For example, a value of 0.5 means that at most a given grid cell will deviate by 0.5 from the default randomization.
+	* ``saturation``: all values within the NetCDF variable supplied above greater than this value will map to ``max_pert``. For example, if ``saturation`` is ``1e-9`` then any value greater than ``1e-9`` maps to ``max_pert``, while ``0.5e-9`` would map to half of ``max_pert`` and so on.
+
+	The idea here is that an emissions file can be supplied, and areas with greater emissions will be perturbed by a uniform random variable with a maximum range of :math:`[-\text{max_pert}, \text{max_pert}]`; in areas with lower emissions, the random variable will have a range given by the emission value over the saturation times max_pert.
+
+	An example entry for methane, where initial perturbations are modified sich that areas with greater emissions have greater perturbations, is given below:
+	:: 
+
+		"additional_init_perturbation_from_emis" : {
+			"CH4" : {
+				"do_add_pert":"True",
+				"file":{
+					"file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
+					"variable" : "EmisCH4_Total"
+				},
+				"max_pert":"0.5",
+				"saturation":"0.5e-9"
+			}
+		},
+
+
 .. option:: MaskOceanScaleFactor
 	
 	Should scaling factors be allowed to vary over the oceans? A dictionary with keys matching ``CONTROL_VECTOR_EMIS`` and with values of "True" or "False" for each entry. If "True", scaling factors for that species over the ocean are always set to 1 across all ensemble members (i.e. no assimilation calculated).
@@ -597,12 +662,11 @@ LETKF settings
 
 .. option:: USE_DIFFERENT_GAMMA_FOR_BURN_IN
 
-	TKTKTKT
+	``True`` or ``False``, should we use a different gamma value during the burn-in period. Supplied as a dictionary with a key corresponding with each key in ``OBSERVED_SPECIES`` and values of ``True`` or ``False``. Users might want to activate this setting to accelerate assimilation during burn-in. For more information on the burn-in period, see :ref:`Burn in period`.
 
 .. option:: GAMMA_FOR_BURN_IN
 
-	TKTKTKT
-
+	A dictionary of regularization factors applied during burn-in only, with a key corresponding with each key in ``OBSERVED_SPECIES``, which inflates observed error covariance by a factor of :math:`1/\gamma`. These can differ from the gamma used during assimilation, but are only applied if the corresponding entry in ``USE_DIFFERENT_GAMMA_FOR_BURN_IN`` is set to ``True``.
 
 .. option:: OBS_ERROR
 	
@@ -632,10 +696,8 @@ LETKF settings
 		},
 
 .. option:: AV_TO_GC_GRID
-
-	TKTKTKTKTK CHANGE TO DICTIONARY
 	
-	"True" or "False", should observations be averaged to the GEOS-Chem grid? If "false", the above three entries and the below entry are all ignored. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
+	"True" or "False", should observations be averaged to the GEOS-Chem grid? Supplied as a dictionary with a key corresponding with each key in ``OBSERVED_SPECIES`` and values of ``True`` or ``False``. If "False", the above three entries and the below entry are all ignored for this observation. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
 
 	.. option:: sqrt
 
@@ -673,6 +735,10 @@ LETKF settings
 	
 	When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
 
+.. option:: smooth_localization_with_gaspari_cohn
+
+	``True`` or ``False``, weight observations such that more distant ones count less and smoothly transition to a weight of zero at or exceeding the ``LOCALIZATION_RADIUS_km``. This leads to smoother behavior; weighting is supplied by the Gaspari-Cohn function, which is a piecewise function resembling a Gaussian with compact support.
+
 .. option:: AveragePriorAndPosterior
 	
 	"True" or "False", should the posterior be set to a weighted average of the prior and the posterior calculated in the LETKF algorithm? If set to true, the prior weight in the average is given by ``PriorWeightinPriorPosteriorAverage`` in the next setting.
@@ -689,6 +755,7 @@ LETKF settings
 	
 	The prior weight if averaging scaling factors with the posterior from the LETKF. A value between 0 and 1.
 
+.. _Run in place settings:
 
 Run-in-place settings
 ~~~~~~~~~~~~~
@@ -712,6 +779,18 @@ Run-in-place settings
 .. option:: DO_VARON_RERUN
 	
 	``True`` or ``False``, should we do a rerun simulation. See :ref:`Rerun` for more information.
+
+.. option:: APPROXIMATE_VARON_RERUN
+	
+	``True`` or ``False``, if using a rerun simulation with ``number_of_windows_to_rerun`` set to a value larger than 1, should we use linear regression to extrapolate GEOS-Chem results? This is an advanced setting. See :ref:`Rerun` for more information.
+
+.. option:: species_to_approximate_for_rerun
+	
+	A list of species concentrations. If ``APPROXIMATE_VARON_RERUN`` is ``True``, which species concentrations should we approximate with linear regression? This is an advanced setting. See :ref:`Rerun` for more information.
+
+.. option:: number_of_windows_to_rerun
+	
+	If ``DO_VARON_RERUN`` is set to ``True``, how many assimilation windows should we rerun? For most users, this value should be 1. See :ref:`Rerun` for more information.
 
 
 Postprocessing settings
@@ -756,19 +835,59 @@ Postprocessing settings
 
 .. option:: EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y
 	
-	TKTKTKT.
+	A dictionary with keys from ``OBSERVED_SPECIES`` and values listing entries within the ObsData class (created by observation operators) which should be saved to postprocessing. Available obsdata fields will differ by observation operators and are listed on the :ref:`Existing obs tools` page in the section corresponding with the observation operator you are using. For example, TROPOMI CH4 supports saving albedo information for diagnostic plots, while ObsPack CH4 has additional identification metrics. A user wishing to save three kinds of albedo from TROPOMI and obspack ids would supply the following:
+	::
+
+		"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
+			"CH4_TROPOMI" : [
+				"albedo_swir",
+				"albedo_nir",
+				"blended_albedo"
+			],
+			"CH4_OBSPACK" : [
+				"obspack_id",
+				"site_code"
+			]
+		},
+
 
 .. option:: EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT
 	
-	TKTKTKT.
+	A ditionary with keys from ``OBSERVED_SPECIES`` and values listing entries within the ObsData class (created by observation operators) that should be regridded and plotted in the postprocessing step. This usually is identical with the above entry unless users would like to save but not plot a given field (this is common for ObsPack data, where obspack_id may be saved but does not make sense to plot). The user in the above case might supply the following:
+	::
+
+		"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
+			"CH4_TROPOMI" : [
+				"albedo_swir",
+				"albedo_nir",
+				"blended_albedo"
+			],
+			"CH4_OBSPACK" : []
+		},
+
+	This is because the ObsPack ID information is not useful to plot.
 
 .. option:: extra_plot_field_units
 	
-	TKTKTKT.
+	If users are plotting additional ObsData fields supplied in the above entry, then this entry supplies the units that are the plots. Supplied as a dictionary where keys are all the ObsData fields listed above and values are units. An example for albedo is supplied below:
+	::
+
+		"extra_plot_field_units":{
+			"albedo_swir":"Albedo",
+			"albedo_nir":"Albedo",
+			"blended_albedo":"Albedo"
+		},
+
 
 .. option:: OBSERVERS_TO_PLOT_AS_POINTS
 	
-	TKTKTKT. (CH4_OBSPACK":"obspack_id)
+	A dictionary listing observers which the user would like plotted as points, rather than a grid. Keys can include any keys from ``OBSERVED_SPECIES`` and values are the the field listing individual observer locations. If a value is not listed, then it is assumed to be plotted as a field (default behavior). For example, in the example simulations above, we have  both tropomi and obspack observations (keyed as ``CH4_TROPOMI`` and ``CH4_OBSPACK`` respectively). This user might like to plot individual obspack sites but leave tropomi data to be plotted as a 2D field. Obspack sites are separated by ``site_code``, so the user would supply this entry as follows:
+	::
+
+		"OBSERVERS_TO_PLOT_AS_POINTS":{
+			"CH4_OBSPACK":"site_code"
+		},
+
 
 .. option:: scalefactor_plot_freq
 	

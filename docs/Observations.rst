@@ -265,7 +265,7 @@ All observation operators that are compatible with CHEEREIO must inherit from th
 Existing observation toolkits
 -------------
 
-This section is under construction, check back later!
+This section is under construction, check back later! BE SURE TO LIST AVAILABLE OBSDATA FIELDS TO SAVE.
 
 .. _TROPOMI tools:
 
