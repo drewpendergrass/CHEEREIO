@@ -49,6 +49,8 @@ Users never use the super observation function that is output by the ``produceSu
    :return: The reduced error which will be associated with the super observation in the LETKF calculation
    :rtype: float
 
+.. _The apply filters function:
+
 The apply_filters function
 ~~~~~~~~~~~~~
 
@@ -429,7 +431,20 @@ Now future users can point CHEEREIO towards their observational data without mod
 (6) [optional] Add observation filters via an extension
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function (documented at :ref:`The apply filters function`)is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. 
+
+The ``apply_filters`` function takes (1) a dictionary of observation data ``OBSDATA`` formatted for the standard gcCompare functions in observation operators, and (2) a dictionary of filter information called ``filterinfo``. Here we focus on ``filterinfo``.
+
+``filter_info`` is a dictionary. Keys are specific to a given observation type. By default, these are ``MAIN``, ``OMI_NO2``, and ``TROPOMI_CH4``. Values are a list of filter values, distinct for each observation type. The ``apply_filters`` function checks to see if a given key is present in ``filter_info``; if it is, it parses the list of filter values accordingly. In the OMI NO2 case, it looks for solar zenith angle, cloud radiance fraction, and surface albedo and removes data that do not match these filters.
+
+Filter thresholds are usually supplied by ensemble configuration extensions, discussed here: :ref:`Extensions`. Users supply filter values in an extension, which observation operators then load and pass to the ``apply_filters`` function. In the case of TROPOMI CH4, this works as follows:
+
+.. code-block:: console
+
+    if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
+            filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+
+First, the operator checks that filters are activated, then creates adds an entry to the filterinfo dictionary listing thresholds supplied by the user. Follow this pattern to add your own filters.
 
 .. _New superobservation:
 

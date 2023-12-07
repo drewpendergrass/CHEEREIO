@@ -885,6 +885,7 @@ Postprocessing settings
 	
 	The CHEEREIO postprocessing routine will save out maps of scale at this temporal resolution: either "all" for save out an image for every assimilation window, or "monthly" to save out monthly means.
 
+.. _Extensions:
 
 Extensions
 ~~~~~~~~~~~~~
