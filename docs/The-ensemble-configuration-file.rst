@@ -698,23 +698,11 @@ LETKF settings
 
 .. option:: AV_TO_GC_GRID
 	
-	"True" or "False", should observations be averaged to the GEOS-Chem grid? Supplied as a dictionary with a key corresponding with each key in ``OBSERVED_SPECIES`` and values of ``True`` or ``False``. If "False", the above three entries and the below entry are all ignored for this observation. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for this super observation aggregation is the adjustment of observational error. Users can specify one of several error reduction functions listed below, specified in the ``SUPER_OBSERVATION_FUNCTION`` entry.
-
-	.. option:: sqrt
-
-		A modified version of the familiar square root law, where if we aggregate :math:`n` observations (indexed by :math:`i`) with errors :math:`\sigma_i` together, the new error is :math:`\bar{\sigma}/\sqrt{n}` where :math:`\bar{\sigma}` is the mean of the :math:`\sigma_i`. The modification accounts for correlations :math:`c` between errors (e.g. due to correlated retrieval errors from shared surface type or similar albedo), and for a user-specified minimum error :math:`\sigma_{\min}`. Thus the equation that is actually applied is given by :math:`\max\left[\left(\bar{\sigma}\cdot\sqrt{\frac{1-c}{n}+c}\right),\sigma_{\min}\right]`. The correlation :math:`c` is taken from ``OBS_ERROR_SELF_CORRELATION`` with default value 0, and the minimum error :math:`\sigma_{\min}` is taken from ``MIN_OBS_ERROR`` with default value 0 (i.e. the normal square root law).
-
-	.. option:: default
-
-		As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irriducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` etnry.
-
-	.. option:: constant
-
-		No error reduction applied. In other words, no matter how many observations are averaged, this function just returns :math:`\bar{\sigma}
+	"True" or "False", should observations be averaged to the GEOS-Chem grid? Supplied as a dictionary with a key corresponding with each key in ``OBSERVED_SPECIES`` and values of ``True`` or ``False``. If "False", the above three entries and the below entry are all ignored for this observation. See the :ref:`New superobservation` entry for more information.
 
 .. option:: SUPER_OBSERVATION_FUNCTION
 	
-	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the ``AV_TO_GC_GRID`` entry. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
+	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the :ref:`New superobservation` entry. These include ``default``, ``sqrt``, or ``constant``. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
 
 .. option:: INFLATION_FACTOR
 	
