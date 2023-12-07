@@ -431,6 +431,7 @@ HISTORY.rc settings
 			"Met_TropLev"
 		],
 
+.. _Observation settings:
 
 Observation settings
 ~~~~~~~~~~~~~

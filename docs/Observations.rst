@@ -50,7 +50,7 @@ Users never use the super observation function that is output by the ``produceSu
 The apply_filters function
 ~~~~~~~~~~~~~
 
-CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. For a tutorial on how to add filters for your own observation operator, or on how to add additional filters to existing observation operators, see :ref:`Observation filters`.
+CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. For a more information, see :ref:`Observation filters`.
 
 .. py:function:: apply_filters(OBSDATA,filterinfo)
 
@@ -102,7 +102,7 @@ CHEEREIO allows users to specify if they want observations to be aggregated to t
 
 The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed errors (relative or absolute) or individual observational errors supplied with observation files. 
 
-.. py:function:: averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,albedo_swir=None,albedo_nir=None,blended_albedo=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None)
+.. py:function:: averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None)
 
    Average observational data and other parameters onto the GEOS-Chem grid. Returns an ObsData object, which is compatible with the rest of the CHEEREIO workflow (i.e. expected output of gcCompare()).
 
@@ -114,7 +114,7 @@ The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed e
    :param array obsvals: An array of observation data.
    :param bool doSuperObs: True or False, should we reduce error when we aggregate observations together. Supplied by user settings. 
    :param superObsFunction str: Name of the super observation function, fed into :py:func:`produceSuperObservationFunction`. Supplied by user settings.
-   :param array albedo_swir: An optional array of short wave infrared albedo from observations, of the same length as obsvals.
+   :param dict other_fields_to_avg: Other fields present in the ObsData object can be averaged to the GC grid (e.g. albedo from TROPOMI). Users wishing to do this can supply a dictionary with keys naming the fields in question (must be present in ObsData) and values storing an array of these fields. Note that CHEEREIO automatically will calculate and provide all fields provided in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json`` by default without any user code or input required (including for new observation operators).
    :param array albedo_nir: As with albedo_swir, but for near wave infrared albedo.
    :param array blended_albedo: As with albedo_swir, but for blended albedo.
    :param float prescribed_error: If working with prescribed errors, then this is either the percent or absolute error associated with the observational data.
@@ -259,40 +259,6 @@ All observation operators that are compatible with CHEEREIO must inherit from th
       :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
       :rtype: ObsData
       :raises NotImplementedError: if the user fails to implement this function.
-
-.. _Existing obs tools:
-
-Existing observation toolkits
--------------
-
-This section is under construction, check back later! BE SURE TO LIST AVAILABLE OBSDATA FIELDS TO SAVE.
-
-.. _TROPOMI tools:
-
-TROPOMI tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-.. _OMI tools:
-
-OMI tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-.. _ObsPack tools:
-
-ObsPack tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-
-Supplementing an existing observation type
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
 
 .. _New observation:
 
