@@ -87,7 +87,11 @@ if "$CompileTemplateRundir"; then
 
   cd ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}/build
   cmake ../CodeDir
-  cmake . -DRUNDIR=..
+  if [[ ${sim_name} = "carbon" ]]; then
+    cmake . -DMECH=carbon -DRUNDIR=..
+  else
+    cmake . -DRUNDIR=..
+  fi
   make -j
   make install
 

@@ -39,35 +39,37 @@ lognormalErrors=data['lognormalErrors']=="true"
 useLogScaleForEmissionsMaps = data['useLogScaleForEmissionsMaps']=="True"
 anim_fps = int(data['animation_fps_scalingfactor'])
 
-if "postprocess_save_albedo" in data:
-	postprocess_save_albedo = data['postprocess_save_albedo']=="True"
-else:
-	postprocess_save_albedo = False
-
 with open(f'{pp_dir}/bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
-dates = pickledata["dates"]
-specieslist = pickledata["species"]
-
-total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs = regridBigYdata(pickledata,gclat,gclon)
+regridded_bigy = regridBigYdata(pickledata,gclat,gclon)
 
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=-90, urcrnrlat=90,llcrnrlon=-180, urcrnrlon=180)
 
 #Plot observation means and counts
 #Plot assimilation minus obs and ctrl minus obs
-for i,species in enumerate(specieslist):
-	plotMap(m,gclat,gclon,total_obs_in_period[i,:,:],species,f'{pp_dir}/total_obs_count_{species}.png',useLog=True)
-	plotMap(m,gclat,gclon,total_weighted_mean_true_obs[i,:,:],species,f'{pp_dir}/weighted_mean_obs_{species}.png') 
-	#Remove pixels that are too low in observation (tend to be noisy)
-	pixels_to_remove = np.where(total_obs_in_period[i,:,:]<omit_diff_cells_with_fewer_than_n_observations)
-	assim_minus_obs[i,pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
-	ctrl_minus_obs[i,pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
-	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
-	plotMap(m,gclat,gclon,assim_minus_obs[i,:,:],species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
-	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(assim_minus_obs[i,:,:])}')
-	plotMap(m,gclat,gclon,ctrl_minus_obs[i,:,:],species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
-	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(ctrl_minus_obs[i,:,:])}')
+for species in regridded_bigy:
+	assim_minus_obs = regridded_bigy[species]['assim_minus_obs']
+	ctrl_minus_obs = regridded_bigy[species]['ctrl_minus_obs']
+	total_obs_in_period=regridded_bigy[species]['total_obs_in_period']
+	if regridded_bigy[species]['interpret_as'] == 'map':
+		plotMap(m,gclat,gclon,total_obs_in_period,species,f'{pp_dir}/total_obs_count_{species}.png',useLog=True)
+		plotMap(m,gclat,gclon,regridded_bigy[species]['total_weighted_mean_true_obs'],species,f'{pp_dir}/weighted_mean_obs_{species}.png') 
+		#Remove pixels that are too low in observation (tend to be noisy)
+		pixels_to_remove = np.where(total_obs_in_period<omit_diff_cells_with_fewer_than_n_observations)
+		assim_minus_obs[pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
+		ctrl_minus_obs[pixels_to_remove[0],pixels_to_remove[1]]=np.nan 
+		clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs)),np.nanmax(np.abs(ctrl_minus_obs))])
+		plotMap(m,gclat,gclon,assim_minus_obs,species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMap(m,gclat,gclon,ctrl_minus_obs,species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
+	elif regridded_bigy[species]['interpret_as'] == 'points':
+		clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs)),np.nanmax(np.abs(ctrl_minus_obs))])
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], total_obs_in_period, species,f'{pp_dir}/total_obs_count_{species}.png',useLog=True)
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], regridded_bigy[species]['mean_obs'], species,f'{pp_dir}/mean_obs_{species}.png')
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], assim_minus_obs, species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], ctrl_minus_obs, species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs)} and a standard deviation of {np.nanstd(assim_minus_obs)}')
+	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs)} and a standard deviation of {np.nanstd(ctrl_minus_obs)}')
 
 
 if scalefactor_plot_freq == 'monthly':

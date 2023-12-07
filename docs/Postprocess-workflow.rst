@@ -80,6 +80,7 @@ If the postprocessing workflow runs successfully, then the following figures and
 	
 	These plots, one generated for each diagnostic in the HEMCO Diagnostic plot list (``hemco_diags_to_process`` within ``ens_config.json``), show the post-assimilation total emissions against the prior total emissions over time. The files are named with pattern ``timeseries_totalemissions_{HEMCO_Diag}_against_prior.png``.
 
+.. _postprocessed files:
 
 The postprocessed data files
 ~~~~~~~~~~~~~
@@ -355,5 +356,12 @@ Here is the documentation for the postprocessing mapmaking toolkit, present in t
 Adding a new observation field to the postprocessing workflow
 -------------
 
-This section is under construction, check back later!
+For many observations, there are quantities other than the observation value itself that are relevant in the data assimilation problem. For example, albedo can impact remote sensing retrievals; users might want to automatically plot/store albedo values to see if they correlate with values of concern.
+
+Fortunately for you, CHEEREIO can handle any of these fields automatically without any user code! In the course of developing your Observation Operator, you might stored fields in an ObsData object other than observations (see :ref:`ObsData` for a description of this class). For example, the ObsPack operator stores fields such as altitude. These data are added to ObsData objects using the ``addData`` function with custom keys. Here is a relevant line of code from the ObsPack operator:
+:: 
+   toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+
+Any of these fields are automatically available to the postprocessing workflow. No code is required. The postprocessing routine will automatically try and plot any of these fields that the user lists under ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` and ``EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT`` in the ``ens_config.json`` file. See the :ref:`postprocessing settings` page for details on how these settings work. Again, there is no code required on your part! 
+
 

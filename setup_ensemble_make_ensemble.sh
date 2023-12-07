@@ -48,19 +48,16 @@ ln -s ../../${RUN_TEMPLATE}/gcclassic .
 
 if [ $x -eq 0 ]; then
 #Switch HEMCO_Config to base/nature one.
-rm HEMCO_Config.rc #This one has updated scaling factors.
-mv HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc HEMCO_Config.rc #This one only updates BCs.
-if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
-    sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc #If we are spinning up from BCs, handle this
-fi
+python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
 else 
 #Use HEMCO_Config with updated scaling factors
-rm HEMCO_Config_SPINUP_NATURE_TEMPLATE.rc
 sed_ie "s|template_run|ensemble_runs/${name}|"  HEMCO_Config.rc #Replace template_run with this folder in HEMCO_Config
+fi
+
 if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
     sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc
 fi
-fi
+
 
 # Link to restart file
 if [ "$DO_SPINUP" = true ] ; then
@@ -105,7 +102,8 @@ fi
 python prep_par.py "PRODUCTION" #Figure out who should assimilate which cores. 
 python setup_obs_dates.py #Create date dictionaries for rapid reference at assimilation time.
 
-if [ "${ACTIVATE_OBSPACK}" = true ]; then #Preprocess obspack if that's what we do.
+#Preprocess obspack if that's what we do.
+if [[ ${ACTIVATE_OBSPACK} = "true" ]] && [[ ${preprocess_raw_obspack_files} = "true" ]]; then
   python preprocess_obspack.py
 fi
 
@@ -117,6 +115,11 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
 else 
   bash update_input_geos.sh "FIRST" #Update input.geos to first assimilation period.
   bash change_hemcodiag_freq.sh "ensemble" #update hemco diagnostics frequency for ensemble
+fi
+
+#Create signal file for approximate rerun case.
+if [[ ${APPROXIMATE_VARON_RERUN} = "True" ]] && [[ ${DO_VARON_RERUN} = "True" ]]; then
+  echo 'false' > ${MY_PATH}/${RUN_NAME}/scratch/APPOXIMATION_STAGE
 fi
 
 ### Navigate back to top-level directory

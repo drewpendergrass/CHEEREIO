@@ -12,10 +12,9 @@ eval "$(conda shell.bash hook)"
 
 conda activate $(jq -r ".CondaEnv" ../ens_config.json) 
 python -u postprocess_workflow.py "histprocess" >> postprocess_prep_out.txt
-python bigy_prep.py
 conda deactivate 
 conda activate $(jq -r ".AnimationEnv" ../ens_config.json)
+python bigy_plots.py >> stats_out.txt
 python animator.py
 python bigy_animator.py
-python bigy_plots.py >> stats_out.txt
 conda deactivate

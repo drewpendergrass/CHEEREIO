@@ -7,6 +7,7 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 import sys
 import argparse
+from animation_tools import *
 sys.path.append('../core')
 import settings_interface as si
 
@@ -107,22 +108,23 @@ anim_fps_vals = []
 #Get necessary data
 
 #CONCENTRATIONS
-ds = xr.open_dataset(concpp)
-time = np.array(ds['time'])
-timestr = [str(t)[0:16] for t in time]
-lat = np.array(ds['lat'])
-lon = np.array(ds['lon'])
-anim_fps_val = anim_fps_conc
-for conc_val in data['CONTROL_VECTOR_CONC']:
-    variable = f'{spcconc_name}_{conc_val}'
-    variables.append(variable)
-    das.append(np.array(ds[variable]))
-    outfiles.append(f"{pp_dir}/SpeciesConc_{conc_val}{ending}")
-    times.append(time)
-    timestrs.append(timestr)
-    lons.append(lon)
-    lats.append(lat)
-    anim_fps_vals.append(anim_fps_val)
+if len(data['CONTROL_VECTOR_CONC']) > 0:
+    ds = xr.open_dataset(concpp)
+    time = np.array(ds['time'])
+    timestr = [str(t)[0:16] for t in time]
+    lat = np.array(ds['lat'])
+    lon = np.array(ds['lon'])
+    anim_fps_val = anim_fps_conc
+    for conc_val in data['CONTROL_VECTOR_CONC']:
+        variable = f'{spcconc_name}_{conc_val}'
+        variables.append(variable)
+        das.append(np.array(ds[variable]))
+        outfiles.append(f"{pp_dir}/SpeciesConc_{conc_val}{ending}")
+        times.append(time)
+        timestrs.append(timestr)
+        lons.append(lon)
+        lats.append(lat)
+        anim_fps_vals.append(anim_fps_val)
 
 #EMISSIONS
 anim_fps_val = anim_fps_emis
@@ -158,26 +160,6 @@ for hemco_val in data['hemco_diags_to_process']:
     lats.append(lat)
     anim_fps_vals.append(anim_fps_val)
 
-
-def getEnsMean(func,variable,da):
-    if func=='mean':
-        if lognormalErrors and (variable=='Scalar'):
-            ensmean = np.exp(np.mean(np.log(da),axis=0))
-        else:
-            ensmean = np.mean(da,axis=0)
-    elif func=='sd':
-        if lognormalErrors and (variable=='Scalar'):
-            ensmean = np.std(np.log(da),axis=0)
-        else:
-            ensmean = np.std(da,axis=0)
-    elif func=='max':
-        ensmean = np.max(da,axis=0)
-    elif func=='min':
-        ensmean = np.min(da,axis=0)
-    elif func=='range':
-        ensmean = np.max(da,axis=0)-np.min(da,axis=0)
-    return ensmean
-
 #####GLOBAL or full nested region########
 # call the animator.  blit=True means only re-draw the parts that have changed.
 m = Basemap(projection='cyl', resolution='l',llcrnrlat=totallat_minmax[0], urcrnrlat=totallat_minmax[1],llcrnrlon=totallon_minmax[0], urcrnrlon=totallon_minmax[1])
@@ -187,56 +169,20 @@ for variable,da,file_out,time,timestr,lon,lat,anim_fps in zip(variables,das,outf
     #Loop through functions if necessary
     for i in range(length):
 
-        fig = plt.figure(figsize=(10, 6))
-        m.drawcountries(color='lightgray')
-        m.drawcoastlines(color='lightgray')
-
         if looping:
             func = funcs[i]
+            outfile = f'{file_out}_{func}.mp4'
+        else:
+            outfile = file_out
 
-        ensmean = getEnsMean(func,variable,da)
+        ensmean = getEnsMean(func,variable,da,lognormalErrors=lognormalErrors)
 
-        def animate(i):
-            daystring = timestr[i]
-            titlestring = f'{variable} for {daystring}'
-            plt.title(titlestring)
-            temp = ensmean[i,:,:]
-            temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-            #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-            mesh.set_array(temp.ravel())
-            return mesh
-
-        
-        #custom bwr colormap for scalings
         if variable == 'Scalar':
-            cvals  = [0.0, 1.0, np.max([np.max(ensmean),1.1])]
-            colors = ["blue","white","red"]
-            pltnorm=plt.Normalize(min(cvals),max(cvals))
-            tuples = list(zip(map(pltnorm,cvals), colors))
-            cmap = LinearSegmentedColormap.from_list("", tuples)
-            clim = [0.0, np.max([np.max(ensmean),1.1])]
+            bwr_cmap=True
         else:
-            cmap=plt.cm.jet
-            clim = [np.min(ensmean), np.max(ensmean)]
+            bwr_cmap=False
 
-        mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=cmap)
-        plt.clim(clim[0],clim[1])
-        plt.colorbar(label=variable);
-        anim = animation.FuncAnimation(fig, animate,len(time), blit=False)
-        #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
-        #plt.show()
-
-        #save as GIF
-
-        Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
-        if looping:
-            anim.save(f'{file_out}_{func}.mp4', writer=writer)
-        else:
-            anim.save(file_out, writer=writer)
-
-        #Close figure
-        plt.close(fig)
+        animateData(m, data=ensmean, file_out=outfile, lon=lon, lat=lat, anim_fps = anim_fps, variable = variable, timestr = timestr, bwr_cmap=bwr_cmap)
 
 
 #####Regions for global simulation#########
@@ -249,57 +195,18 @@ if is_global:
         for variable,da,file_out,time,timestr,lon,lat,anim_fps in zip(variables,das,outfiles,times,timestrs,lons,lats,anim_fps_vals):
             #Loop through functions if necessary
             for i in range(length):
-                
-                fig = plt.figure(figsize=(10, 6))
-                m.drawcountries(color='lightgray')
-                m.drawcoastlines(color='lightgray')
 
                 if looping:
                     func = funcs[i]
+                    outfile = f'{file_out}_{func}_{rname}.mp4'
+                else:
+                    outfile = file_out
 
-                ensmean = getEnsMean(func,variable,da)
+                ensmean = getEnsMean(func,variable,da,lognormalErrors=lognormalErrors)[:,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]
 
-
-                def animate_region(i):
-                    daystring = timestr[i]
-                    titlestring = f'{variable} for {daystring}'
-                    plt.title(titlestring)
-                    temp = ensmean[i,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]
-                    temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-                    #mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-                    mesh.set_array(temp.ravel())
-                    return mesh
-
-
-                #custom bwr colormap for scalings
                 if variable == 'Scalar':
-                    cvals  = [0.0, 1.0, np.max([np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]),1.1])]
-                    colors = ["blue","white","red"]
-                    pltnorm=plt.Normalize(min(cvals),max(cvals))
-                    tuples = list(zip(map(pltnorm,cvals), colors))
-                    cmap = LinearSegmentedColormap.from_list("", tuples)
-                    clim = [0.0, np.max([np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]),1.1])]
+                    bwr_cmap=True
                 else:
-                    cmap=plt.cm.jet
-                    clim = [np.min(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)]), np.max(ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)])]
-                mesh = m.pcolormesh(lon[lonind], lat[latind], ensmean[0,latind[0]:(latind[-1]+1),lonind[0]:(lonind[-1]+1)],latlon=True,cmap=cmap)
-                plt.clim(clim[0],clim[1])
-                plt.colorbar(label=variable);
-                anim = animation.FuncAnimation(fig, animate_region,len(time), blit=False)
-                #anim = animation.FuncAnimation(fig, animate,300, blit=False) #for low memory plot
-                #plt.show()
+                    bwr_cmap=False
 
-                #save as GIF
-
-                Writer = animation.writers['ffmpeg']
-                writer = Writer(fps=anim_fps, metadata=dict(artist='CHEEREIO'), bitrate=800) #low res, small memory plot
-                if looping:
-                    anim.save(f'{file_out}_{func}_{rname}.mp4', writer=writer)
-                else:
-                    anim.save(file_out, writer=writer)
-
-                #Close figure
-                plt.close(fig)
-
-
-
+                animateData(m, data=ensmean, file_out=outfile, lon=lon[lonind], lat=lat[latind], anim_fps = anim_fps, variable = variable, timestr = timestr, bwr_cmap=bwr_cmap)

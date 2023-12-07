@@ -153,7 +153,7 @@ def sampleCorrelatedStructure(corrdist,cov,std, zerocenter, outshape):
 
 #Get index values within the localization range
 #If negate is true, then get index values outside the localization range
-def getIndsOfInterest(latind,lonind,negate=False):
+def getIndsOfInterest(latind,lonind,negate=False,return_dist=False):
 	data = getSpeciesConfig()
 	lat,lon = getLatLonVals(data)
 	latval = lat[latind]
@@ -167,4 +167,34 @@ def getIndsOfInterest(latind,lonind,negate=False):
 		valid_inds = np.where(distgrid>loc_rad)
 	else:
 		valid_inds = np.where(distgrid<=loc_rad)
-	return valid_inds
+	if return_dist:
+		return [valid_inds,distgrid[valid_inds[0],valid_inds[1]]]
+	else:
+		return valid_inds
+
+#Gaspari cohn function. c is equal to half of the radius
+def make_gaspari_cohn(c):
+	def gasp_cohn(dist):
+		r = dist/c
+		#Single number case
+		if isinstance(r,float):
+			if r >= 2:
+				return 0
+			elif r>=1:
+				return 4-(5*r)+((5/3)*r**2)+((5/8)*r**3)-((1/2)*r**4)+((1/12)*r**5)-((2/3)*r**-1)
+			elif r>=0:
+				return 1-((5/3)*r**2)+((5/8)*r**3)+((1/2)*r**4)-((1/4)*r**5)
+			else:
+				raise ValueError('r must be positive')
+		#Vector case
+		else:
+			to_return = np.zeros(len(r)) #note: default is 0 in the far field.
+			farbranchloc = (r>=1) & (r<2)
+			rfar = r[farbranchloc]
+			to_return[farbranchloc] = 4-(5*rfar)+((5/3)*rfar**2)+((5/8)*rfar**3)-((1/2)*rfar**4)+((1/12)*rfar**5)-((2/3)*rfar**-1)
+			nearbranchloc = (r>=0) & (r<1)
+			rnear = r[nearbranchloc]
+			to_return[nearbranchloc] = 1-((5/3)*rnear**2)+((5/8)*rnear**3)+((1/2)*rnear**4)-((1/4)*rnear**5)
+			return to_return
+	return gasp_cohn
+

@@ -38,6 +38,9 @@ ENS_SPINUP_END=$(jq -r ".ENS_SPINUP_END" ens_config.json)
 CONTROL_START=$(jq -r ".CONTROL_START" ens_config.json)
 CONTROL_END=$(jq -r ".CONTROL_END" ens_config.json)
 
+# rerun status
+APPROXIMATE_VARON_RERUN=$(jq -r ".APPROXIMATE_VARON_RERUN" ens_config.json)
+DO_VARON_RERUN=$(jq -r ".DO_VARON_RERUN" ens_config.json)
 
 # Start and end date for the production simulations
 START_DATE=$(jq -r ".START_DATE" ens_config.json)
@@ -92,7 +95,7 @@ BC_FILES="$(jq -r ".BC_FILES" ens_config.json)"
 
 RUN_TEMPLATE="template_run"
 
-valid_sims=("fullchem" "aerosol" "CH4" "CO2" "Hg" "POPs" "tagCH4" "tagCO" "tagO3" "TransportTracers")
+valid_sims=("fullchem" "aerosol" "CH4" "CO2" "Hg" "POPs" "tagCH4" "tagCO" "tagO3" "TransportTracers" "carbon")
 sim_name="$(jq -r ".sim_name" ens_config.json)"
 
 if [[ ! " ${valid_sims[@]} " =~ " ${sim_name} " ]]; then

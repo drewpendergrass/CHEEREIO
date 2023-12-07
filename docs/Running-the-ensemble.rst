@@ -73,7 +73,9 @@ The burn in period
 
 A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. Burn in periods are somewhat common in Kalman filter applications and are not unique to CHEEREIO. The reason why burn in periods can be necessary is that the data assimilation system has a certain inertia, and takes several assimilation windows to update emissions so that they are more consistent with observations. During the period when emissions rapidly updating from the prior to match observations, it would be incorrect to interpret the results as a timeseries of real changing emissions. Moreover, biases can emerge between modeled concentrations and observations during the burn-in window, as emissions are not yet consistent with observations. 
 
-CHEEREIO allows for a burn-in period, which does two things (1) assimilations that take place during the burn-in period are removed from postprocessing results, and (2) the CHEEREIO ensemble mean is scaled to match the observational mean at the end of the burn-in period, as described in :ref:`:Simple scale`. To enable a burn-in period, set ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` to ``true`` in ``ens_config.json`` and specify the burn-in period end date with the ``BURN_IN_END`` entry. Note that the burn-in period takes place during the normal LETKF run cycle, so the ``BURN_IN_END`` time has to be after ensemble spinup completes and after ``START_TIME``. You also have to specify the postprocessing dates so that they exclude the burn-in period, and can do so with the ``POSTPROCESS_START_DATE`` and ``POSTPROCESS_END_DATE`` entries. 
+CHEEREIO allows for a burn-in period, activated by setting ``DO_BURN_IN`` to ``true``. Doing so allows for CHEEREIO to do a few potentially useful things. First, assimilations that take place during the burn-in period are removed from postprocessing results (although they are still saved if needed). Second, some settings in ``ens_config.json`` allow values to be different during the burn-in period than the regular simulation; for example, these settings might allow the ensemble to more rapidly adjust to match observations during the burn in period. Finally, users can opt to have the CHEEREIO ensemble mean scaled to match the observational mean at the end of the burn-in period, as described in :ref:`:Simple scale`. To enable that scaling, set ``SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD`` to ``true`` in ``ens_config.json``
+
+To enable a burn-in period, set ``DO_BURN_IN`` to ``true``in ``ens_config.json`` and specify the burn-in period end date with the ``BURN_IN_END`` entry. Note that the burn-in period takes place during the normal LETKF run cycle, so the ``BURN_IN_END`` time has to be after ensemble spinup completes and after ``START_TIME``. You also have to specify the postprocessing dates so that they exclude the burn-in period, and can do so with the ``POSTPROCESS_START_DATE`` and ``POSTPROCESS_END_DATE`` entries. 
 
 .. _Run in place:
 
@@ -82,9 +84,27 @@ Running in place
 
 Following `Liu et al. [2019] <https://doi.org/10.5194/gmd-12-2899-2019>`_ , CHEEREIO supports run-in-place simulations. The idea with run-in-place is to calculate the LETKF assimilation update with a long period of observations (e.g. 1 week) but then advance the assimilation forward for a smaller amount of time (e.g. 1 day). Run-in-place simulations thus allow the period where the assimilation update is calculated to experience the emissions adjustment; in practice, this makes it less likely for the simulation to "chase errors" because the system has more time to respond to emissions updates. Running in place is a good idea for optimizing long lived gases such as carbon dioxide and methane. In run-in-place lingo we call the longer period (in which the assimilation is calculated) the observation window and the shorter period (in which the simulation is advanced) the assimilation window.
 
-To activate run-in-place simulations, set the ``DO_RUN_IN_PLACE`` variable in ``ens_config.json`` to ``True``. Now the usual assimilation window variable ``ASSIM_TIME`` will be interpreted as the abservation window; the ``rip_update_time`` variable is the assimilation window. For example, if ``ASSIM_TIME`` is 72 and ``rip_update_time`` is 24, we run the model for 3 days, calculate the assimilation increment, and then advance the model/emissions 1 day and repeat the process from the posterior emissions/concentrations calculated by CHEEREIO.
+To activate run-in-place simulations, set the ``DO_RUN_IN_PLACE`` variable in ``ens_config.json`` to ``True`` on the :ref:`Run in place settings` page. Now the usual assimilation window variable ``ASSIM_TIME`` will be interpreted as the abservation window; the ``rip_update_time`` variable is the assimilation window. For example, if ``ASSIM_TIME`` is 72 and ``rip_update_time`` is 24, we run the model for 3 days, calculate the assimilation increment, and then advance the model/emissions 1 day and repeat the process from the posterior emissions/concentrations calculated by CHEEREIO.
 
 CHEEREIO allows users to optionally use a different assimilation window for run-in-place during the burn-in period. This can be activated by setting ``DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN`` to ``True`` and providing the assimilation window for the burn in period in the ``rip_burnin_update_time`` variable.
+
+Note that run-in-place and rerun simulations are mutually exclusive; at most one can be set to ``True.``
+
+.. _Rerun:
+
+Re-run simulations
+-------------
+
+Following `Varon et al. [2023] <https://doi.org/10.5194/acp-23-7503-2023>`_ , CHEEREIO supports rerun simulations. The idea with rerun simulations is to allow emissions updates to propogate to concentrations before a new assimilation window is begun. Suppose, for example, that we have a weeklong assimilation window and that GEOS-Chem has just simulated July 1 through July 8. CHEEREIO will then calculate posterior emissions and concentrations, but, instead of resuming the simulation on July 8, the next simulation will begin on July 1. A week of simulation will be performed with no assimilation, so that the concentrations on July 8 are reflective of the previous emissions update. GEOS-Chem will continue to run from July 8 through July 15. Afterwards, CHEEREIO is called as usual.  
+
+To activate rerun simulations, set the ``DO_VARON_RERUN`` option to ``True`` on the :ref:`Run in place settings` page. 
+
+Note that run-in-place and rerun simulations are mutually exclusive; at most one can be set to ``True.``
+
+.. note::
+
+  **Advanced setting option.** Users have the option to re-run simulations for more than one assimilation window (the default case) by setting ``number_of_windows_to_rerun`` to an integer larger than 1. In this case, CHEEREIO will begin the next GEOS-Chem stage additional assimilation windows in the past, enabling the system to "forecast" the concentration effects of emission changes farther into the future. This is an advanced setting and should be used with caution. Finally, in the case where users have set ``number_of_windows_to_rerun`` to a value larger than 1, they have the option to use a linear regression to emulate GEOS-Chem for additional rerun periods. To activate this setting, set ``APPROXIMATE_VARON_RERUN`` to ``True`` and list the species concentrations to be approximated in the ``species_to_approximate_for_rerun`` setting.
+
 
 Starting the run
 -------------

@@ -58,7 +58,8 @@ do
                 -e "s:{TIME${counter}}:${time}:g" ${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}
          x=$[$x+1]
          #We have to do on the second counter because the yaml parser gets pissed about the default strings.
-         if [[ ("${ACTIVATE_OBSPACK}" = "true" && $counter -eq 2) ]]; then
+         #Don't activate obspack for spinup but every other time we do.
+         if [[ ("${ACTIVATE_OBSPACK}" = "true" && "${1}" != "SPINUP" && $counter -eq 2) ]]; then
             python obspack_switch.py "${MY_PATH}/${RUN_NAME}/ensemble_runs/${name}/${filename}"
          fi
        done

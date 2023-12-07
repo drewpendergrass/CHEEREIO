@@ -127,7 +127,8 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=Fals
 	return to_return
 
 #No index, puts loc at GC grid values
-def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,albedo_swir=None,albedo_nir=None,blended_albedo=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None):
+#other_fields_to_avg is a dictionary with keys "variable name" and values of arrays.
+def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -143,10 +144,11 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 	obslon_av = np.zeros(av_len)
 	obstime_av = np.zeros(av_len)
 	num_av = np.zeros(av_len)
-	if albedo_swir is not None:
-		swir_av = np.zeros(av_len)
-		nir_av = np.zeros(av_len)
-		blended_av = np.zeros(av_len)
+	if other_fields_to_avg is not None:
+		#Initialize additional fields
+		additional_fields = {}
+		for field in other_fields_to_avg:
+			additional_fields[field] = np.zeros(av_len)
 	if doSuperObs:
 		err_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
@@ -157,10 +159,10 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 		obslon_av[count] = lonvals[count]
 		obstime_av[count] = timevals[count]
 		num_av[count] = len(indmatch)
-		if albedo_swir is not None:
-			swir_av[count] = np.mean(albedo_swir[indmatch])
-			nir_av[count] = np.mean(albedo_nir[indmatch])
-			blended_av[count] = np.mean(blended_albedo[indmatch])
+		#Average the additional fields.
+		if other_fields_to_avg is not None:
+			for field in other_fields_to_avg:
+				additional_fields[field][count] = np.mean(other_fields_to_avg[field][indmatch])
 		if doSuperObs:
 			#SuperObservation function selected by user
 			obs_f = produceSuperObservationFunction(superObsFunction)
@@ -187,8 +189,8 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
 			err_av[count] = obs_f(mean_error=mean_err,num_obs=num_av[count],**obs_args)
 	to_return = ObsData(gc_av,obs_av,obslat_av,obslon_av,obstime_av,num_av=num_av)
-	if albedo_swir is not None:
-		to_return.addData(swir_av=swir_av,nir_av=nir_av,blended_av=blended_av)
+	if other_fields_to_avg is not None:
+		to_return.addData(**additional_fields)
 	if doSuperObs:
 		to_return.addData(err_av=err_av)
 	return to_return
@@ -209,7 +211,7 @@ class Observation_Translator(object):
 	#The function that gets the comparison between GEOS-Chem and the observations (OBSDATA, formatted in a dictionary as above).
 	#Please note that the "specieskey" variable MUST be the key in the dictionary OBSERVED_SPECIES in ens_config.
 	#). Inherited function must have this signature and return an ObsData object.
-	def gcCompare(self,specieskey,OBSDATA,GC,GC_area=None,saveAlbedo=False,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+	def gcCompare(self,specieskey,OBSDATA,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		#Returns an ObsData object
 		raise NotImplementedError
 

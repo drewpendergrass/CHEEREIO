@@ -8,6 +8,8 @@ import pickle
 from datetime import date,datetime,timedelta
 from GC_Translator import GC_Translator
 from HIST_Ens import HIST_Ens
+from os.path import isfile
+
 
 #Contains a dictionary referencing GC_Translators for every run directory.
 #In the case where there is a control run present (with number 0)
@@ -40,6 +42,7 @@ class Assimilator(object):
 		ensemble_numbers = []
 		self.control = None
 		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
+		self.obsdata_to_save = spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y']
 		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
 			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
 		self.emcount = len(spc_config['CONTROL_VECTOR_EMIS'])
@@ -96,15 +99,27 @@ class Assimilator(object):
 				self.avtogcgrid[a] = self.avtogcgrid[a]=="True" #parse as booleans
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
-			if 'postprocess_save_albedo' in spc_config:
-				self.postprocess_save_albedo = spc_config['postprocess_save_albedo'] #LIST OF OBSERVERS WHERE WE SAVE
-			else:
-				self.postprocess_save_albedo = None
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,saveAlbedo=self.postprocess_save_albedo,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
 			self.bigYpostprocess = False
+		if (spc_config['DO_VARON_RERUN'] == 'True') and (spc_config['APPROXIMATE_VARON_RERUN'] == 'True'):
+			do_approx = False
+			with open(f"{self.path_to_scratch}/APPOXIMATION_STAGE") as f:
+				lines = f.readlines()
+				if lines[0] == 'true':
+					if not isfile(f"{self.path_to_scratch}/IS_FIRST"): #If we are in the first run, don't do an approximation
+						do_approx = True
+		else:
+			do_approx = False
+		if do_approx :
+			self.species_to_extrapolate = spc_config['species_to_approximate_for_rerun']
+			self.ASSIM_TIME = int(spc_config['ASSIM_TIME'])
+			self.number_of_windows_to_rerun = int(spc_config['number_of_windows_to_rerun'])-1 #Already ran 1.
+			self.extrapolation_coefs = self.histens.calcExtrapolationCoefficients(self.species_to_extrapolate)
+		else:
+			self.histens.makeBigY()
 		if self.verbose>=2:
 			print(f"Assimilator construction complete")
 	def getLat(self):
@@ -399,6 +414,16 @@ class Assimilator(object):
 			if self.control is not None: #scale control if we are using.
 				scaled_species = self.control.getSpecies3Dconc(species)*scaling_factor 
 				self.control.setSpecies3Dconc(species, scaled_species)
+	def extrapolateRestarts(self):
+		if self.verbose>=1:
+			print(f"Extrapolating restarts to approximate the rerun method.")
+		for species in self.species_to_extrapolate: #Now we can actually go and extrapolate
+			for i in self.ensemble_numbers:
+				extrapolated_spec = self.gt[i].getSpecies3Dconc(species)+(self.extrapolation_coefs[i][species]*self.ASSIM_TIME*self.number_of_windows_to_rerun)
+				self.gt[i].setSpecies3Dconc(species, extrapolated_spec)
+			if self.control is not None: #extrapolate control if we are using.
+				extrapolated_spec = self.control.getSpecies3Dconc(species)+(self.extrapolation_coefs['control'][species]*self.ASSIM_TIME*self.number_of_windows_to_rerun)
+				self.control.setSpecies3Dconc(species, extrapolated_spec)
 	def amplifySpreads(self):
 		if self.verbose>=1:
 			print(f"Amplifying ensemble spread of concentrations.")
@@ -430,9 +455,9 @@ class Assimilator(object):
 				df['Num_Averaged'] = bigy[spec].getDataByKey('num_av')
 			else:
 				df['Num_Averaged'] = None
-			if self.postprocess_save_albedo is not None:
-				if spec in self.postprocess_save_albedo:
-					df['Albedo_SWIR'],df['Albedo_NIR'],df['Blended_Albedo'] = bigy[spec].getDataByKey(['swir_av','nir_av','blended_av'])
+			#Save out extra data.
+			for field in self.obsdata_to_save[spec]:
+				df[field] = bigy[spec].getDataByKey(field)
 			if self.useControl:
 				df['Control'] = bigy[spec].getDataByKey('control')
 			df['time'] = t

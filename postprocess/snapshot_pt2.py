@@ -8,6 +8,7 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib.colors import LinearSegmentedColormap
 import pickle
 from map_tools import *
+from animation_tools import *
 import sys
 sys.path.append('../core')
 import settings_interface as si 
@@ -48,17 +49,22 @@ print('Generating observation and control minus observation maps...')
 with open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl','rb') as f:
 	pickledata=pickle.load(f)
 
-specieslist = pickledata["species"]
-total_obs_in_period,total_weighted_mean_true_obs,assim_minus_obs,ctrl_minus_obs = regridBigYdata(pickledata,gclat,gclon)
+regridded_bigy = regridBigYdata(pickledata,gclat,gclon)
 
 print('')
 
-for i,species in enumerate(specieslist):
-	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs[i,:,:])),np.nanmax(np.abs(ctrl_minus_obs[i,:,:]))])
-	plotMap(m,gclat,gclon,assim_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
-	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(assim_minus_obs[i,:,:])}')
-	plotMap(m,gclat,gclon,ctrl_minus_obs[i,:,:],species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs]) 
-	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs[i,:,:])} and a standard deviation of {np.nanstd(ctrl_minus_obs[i,:,:])}')
+for species in regridded_bigy:
+	assim_minus_obs = regridded_bigy[species]['assim_minus_obs']
+	ctrl_minus_obs = regridded_bigy[species]['ctrl_minus_obs']
+	clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs)),np.nanmax(np.abs(ctrl_minus_obs))])
+	if regridded_bigy[species]['interpret_as'] == 'map':
+		plotMap(m,gclat,gclon,assim_minus_obs,species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMap(m,gclat,gclon,ctrl_minus_obs,species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	elif regridded_bigy[species]['interpret_as'] == 'points':
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], assim_minus_obs, species,f'{pp_dir}/SNAPSHOT_assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], ctrl_minus_obs, species,f'{pp_dir}/SNAPSHOT_ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs)} and a standard deviation of {np.nanstd(assim_minus_obs)}')
+	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs)} and a standard deviation of {np.nanstd(ctrl_minus_obs)}')
 	print('')
 
 
@@ -85,42 +91,8 @@ for sf in sfs:
 	lon = np.array(ds['lon'])
 	da = np.array(ds['Scalar'])
 	ensmean = np.mean(da,axis=0)
-
-	def animate(i):
-		daystring = timestr[i]
-		titlestring = f'Scaling factor for {daystring}'
-		plt.title(titlestring)
-		temp = ensmean[i,:,:]
-		temp = temp[:-1, :-1] #weird old bug fix found on stackoverflow
-		#mesh = m.pcolormesh(lon, lat, maptimeseries[:,:,i],latlon=True)
-		mesh.set_array(temp.ravel())
-		return mesh
-
-	#####GLOBAL#########
-	# call the animator.  blit=True means only re-draw the parts that have changed.
-	fig = plt.figure(figsize=(10, 6))
-	m.drawcountries(color='lightgray')
-	m.drawcoastlines(color='lightgray')
-
-	#custom bwr colormap for scalings
-	cvals  = [0.0, 1.0, np.max([np.max(ensmean),1.1])]
-	colors = ["blue","white","red"]
-	pltnorm=plt.Normalize(min(cvals),max(cvals))
-	tuples = list(zip(map(pltnorm,cvals), colors))
-	cmap = LinearSegmentedColormap.from_list("", tuples)
-	clim = [0.0, np.max([np.max(ensmean),1.1])]
-
-	mesh = m.pcolormesh(lon, lat, ensmean[0,:,:],latlon=True,cmap=cmap)
-	plt.clim(clim[0],clim[1])
-	plt.colorbar(label='Scalar');
-	anim = animation.FuncAnimation(fig, animate,len(time), blit=False)
-
-	#SAVE 
-	Writer = animation.writers['ffmpeg']
-	writer = Writer(fps=anim_fps, metadata=dict(artist='Drew Pendergrass'), bitrate=800) #low res, small memory plot
-	sf_nodot = sf.split('.')[0]
-	file_out = f'{pp_dir}/{sf_nodot}_mean_SNAPSHOT.mp4'
-	anim.save(file_out, writer=writer)
+	file_out = f'{pp_dir}/{sf.split(".")[0]}_mean_SNAPSHOT.mp4'
+	animateData(m,ensmean,file_out,lon,lat,anim_fps = anim_fps, variable = 'Scaling factor',timestr = timestr, bwr_cmap=True)
 	print('')
 	print('')
 	print(f'Saved {sf} movie of ensemble mean scalefactors out at {file_out}')

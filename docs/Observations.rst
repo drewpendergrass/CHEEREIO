@@ -19,6 +19,8 @@ Any class written with this strict Observation_Translator template will then plu
 
 In the below entries, we will briefly describe the functions and classes supplied in the observation operator toolkit (observation_operators.py).
 
+.. _super observation function:
+
 The produceSuperObservationFunction function
 ~~~~~~~~~~~~~
 
@@ -47,10 +49,12 @@ Users never use the super observation function that is output by the ``produceSu
    :return: The reduced error which will be associated with the super observation in the LETKF calculation
    :rtype: float
 
+.. _The apply filters function:
+
 The apply_filters function
 ~~~~~~~~~~~~~
 
-CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. For a tutorial on how to add filters for your own observation operator, or on how to add additional filters to existing observation operators, see :ref:`Observation filters`.
+CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. For a more information, see :ref:`Observation filters`.
 
 .. py:function:: apply_filters(OBSDATA,filterinfo)
 
@@ -102,7 +106,7 @@ CHEEREIO allows users to specify if they want observations to be aggregated to t
 
 The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed errors (relative or absolute) or individual observational errors supplied with observation files. 
 
-.. py:function:: averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,albedo_swir=None,albedo_nir=None,blended_albedo=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None)
+.. py:function:: averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None)
 
    Average observational data and other parameters onto the GEOS-Chem grid. Returns an ObsData object, which is compatible with the rest of the CHEEREIO workflow (i.e. expected output of gcCompare()).
 
@@ -114,7 +118,7 @@ The :py:func:`averageByGC` function accepts two kinds of errors --- prescribed e
    :param array obsvals: An array of observation data.
    :param bool doSuperObs: True or False, should we reduce error when we aggregate observations together. Supplied by user settings. 
    :param superObsFunction str: Name of the super observation function, fed into :py:func:`produceSuperObservationFunction`. Supplied by user settings.
-   :param array albedo_swir: An optional array of short wave infrared albedo from observations, of the same length as obsvals.
+   :param dict other_fields_to_avg: Other fields present in the ObsData object can be averaged to the GC grid (e.g. albedo from TROPOMI). Users wishing to do this can supply a dictionary with keys naming the fields in question (must be present in ObsData) and values storing an array of these fields. Note that CHEEREIO automatically will calculate and provide all fields provided in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json`` by default without any user code or input required (including for new observation operators).
    :param array albedo_nir: As with albedo_swir, but for near wave infrared albedo.
    :param array blended_albedo: As with albedo_swir, but for blended albedo.
    :param float prescribed_error: If working with prescribed errors, then this is either the percent or absolute error associated with the observational data.
@@ -259,40 +263,6 @@ All observation operators that are compatible with CHEEREIO must inherit from th
       :return: ObsData type object containing observation data, relevant metadata (lat/lon/time/etc), and GEOS-Chem data mapped via this function onto observation space.
       :rtype: ObsData
       :raises NotImplementedError: if the user fails to implement this function.
-
-.. _Existing obs tools:
-
-Existing observation toolkits
--------------
-
-This section is under construction, check back later!
-
-.. _TROPOMI tools:
-
-TROPOMI tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-.. _OMI tools:
-
-OMI tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-.. _ObsPack tools:
-
-ObsPack tools
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
-
-
-Supplementing an existing observation type
-~~~~~~~~~~~~~
-
-This section is under construction, check back later!
 
 .. _New observation:
 
@@ -461,14 +431,41 @@ Now future users can point CHEEREIO towards their observational data without mod
 (6) [optional] Add observation filters via an extension
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+CHEEREIO supports real-time filtering of input observations based on user settings; for example, removing observations with high albedo. The ``apply_filters()`` function (documented at :ref:`The apply filters function`)is the best way to perform this filtering, because it is able to connect seamlessly with the rest of the CHEEREIO codebase. 
+
+The ``apply_filters`` function takes (1) a dictionary of observation data ``OBSDATA`` formatted for the standard gcCompare functions in observation operators, and (2) a dictionary of filter information called ``filterinfo``. Here we focus on ``filterinfo``.
+
+``filter_info`` is a dictionary. Keys are specific to a given observation type. By default, these are ``MAIN``, ``OMI_NO2``, and ``TROPOMI_CH4``. Values are a list of filter values, distinct for each observation type. The ``apply_filters`` function checks to see if a given key is present in ``filter_info``; if it is, it parses the list of filter values accordingly. In the OMI NO2 case, it looks for solar zenith angle, cloud radiance fraction, and surface albedo and removes data that do not match these filters.
+
+Filter thresholds are usually supplied by ensemble configuration extensions, discussed here: :ref:`Extensions`. Users supply filter values in an extension, which observation operators then load and pass to the ``apply_filters`` function. In the case of TROPOMI CH4, this works as follows:
+
+.. code-block:: console
+
+    if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
+            filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
+
+First, the operator checks that filters are activated, then creates adds an entry to the filterinfo dictionary listing thresholds supplied by the user. Follow this pattern to add your own filters.
 
 .. _New superobservation:
 
 (7) [optional] Add a new super observation error function
 ~~~~~~~~~~~~~
 
-This section is under construction, check back later!
+In CHEEREIO, users can opt to average observations to the GEOS-Chem grid by setting the ``AV_TO_GC_GRID`` entry to be True. Your observation operator should consider supporting this functionality. The use of "super observations" is a useful technique to balance prior and observational errors while also reducing the computational complexity of the optimization (by reducing the size of the observational vectors and matrices in the LETKF calculation). The main subtlety that needs to be handled for super observation aggregation is the adjustment of observational error. By default, users can specify one of several error reduction functions in the ``SUPER_OBSERVATION_FUNCTION`` section:
+
+.. option:: sqrt
+
+   A modified version of the familiar square root law, where if we aggregate :math:`n` observations (indexed by :math:`i`) with errors :math:`\sigma_i` together, the new error is :math:`\bar{\sigma}/\sqrt{n}` where :math:`\bar{\sigma}` is the mean of the :math:`\sigma_i`. The modification accounts for correlations :math:`c` between errors (e.g. due to correlated retrieval errors from shared surface type or similar albedo), and for a user-specified minimum error :math:`\sigma_{\min}`. Thus the equation that is actually applied is given by :math:`\max\left[\left(\bar{\sigma}\cdot\sqrt{\frac{1-c}{n}+c}\right),\sigma_{\min}\right]`. The correlation :math:`c` is taken from ``OBS_ERROR_SELF_CORRELATION`` with default value 0, and the minimum error :math:`\sigma_{\min}` is taken from ``MIN_OBS_ERROR`` with default value 0 (i.e. the normal square root law).
+
+.. option:: default
+
+   As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irriducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` etnry.
+
+.. option:: constant
+
+   No error reduction applied. In other words, no matter how many observations are averaged, this function just returns :math:`\bar{\sigma}!
+
+To add a new super observation function, add an additional entry to ``produceSuperObservationFunction`` in the ``observation_operator.py`` file. This function is described on the :ref:`super observation function` entry. At a minimum, all super observation functions need to accept the following four arguments: (1) ``mean_error``, an array of individual observation error values generated by CHEEREIO; (2) ``num_obs``, an array showing the number of observations in a given grid cell; (3) ``errorCorr``, a float showing the correlation of observations to one another (set as a default of zero); and (4) ``min_error``, a float telling the function the minimum error acceptable in a grid cell (set as a default of zero). You do not need to use all four inputs (see the ``constant`` function) but you do need to accept all four for compatability. Additional inputs can be supplied from ``ens_config.json``, as in the case of the ``default`` function and its need for ``transport_error``.  Additional arguments arguments are supplied by users through the ``OTHER_OBS_ERROR_PARAMETERS`` parameter in ``ens_config.json``; just accept these parameters according to their key. See :ref:`LETKF settings` for an example for ``transport_error``.  
 
 (8) Share your operator with the CHEEREIO community
 ~~~~~~~~~~~~~

@@ -10,8 +10,6 @@ MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 CONDA_ENV="$(jq -r ".CondaEnv" ../ens_config.json)"
 
 source activate ${CONDA_ENV}
-#Save slightly modified default HEMCO_Config for nature/spinup run (no scaling factors read)
-python hemco_config_updater.py "NATURE"
-#Save CHEEREIO-compatible modified default HEMCO_Config for nature/spinup run (scaling factors linked)
-python hemco_config_updater.py "ENSEMBLE"
+#Save CHEEREIO-compatible modified default HEMCO_Config with scale factors linnked
+python hemco_config_updater.py
 conda deactivate
