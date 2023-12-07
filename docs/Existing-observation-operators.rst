@@ -13,14 +13,110 @@ CHEEREIO ships with observation operators that have produced by the community. U
 TROPOMI tools
 -------------
 
-This section is under construction, check back later!
+The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, CH\ :sub:`4`\ is the only TROPOMI operator written for CHEEREIO, but users can follow the pattern in ``tropomi_tools.py`` to add support for additional species. An NO\ :sub:`2`\ operator is partially written.
+
+To activate TROPOMI observations, list "TROPOMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
+
+TROPOMI fields available to save and plot in CHEEREIO
+~~~~~~~~~~~~~
+
+All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TROPOMI operator, all data read in by the ``read_tropomi`` function are available to be saved and/or plotted.** Below is a subset of the supported fields which users can save in TROPOMI:
+
+.. option:: qa_value
+   
+   Quality assurance value.
+
+.. option:: column_AK
+   
+   Satellite averaging kernel.
+
+.. option:: albedo_swir
+   
+   Shortwave infrared albedo.
+
+.. option:: albedo_nir
+   
+   Near infrared albedo.
+
+.. option:: blended_albedo
+   
+   Blended albedo.
+
+.. option:: methane_profile_apriori
+   
+   A priori methane profile.
+
+
+TROPOMI operator support functions
+~~~~~~~~~~~~~
+
+The TROPOMI observation operator calls a handful of utility functions to process observations from file and format them in such a way that the ``gcCompare`` method of the ``TROPOMI_Translator`` class can perform relevant computations. 
+
+The first two utility functions are designed to remap GEOS-Chem pressure levels to satellite pressure levels and apply the averaging kernel.
+
+.. py:function:: GC_to_sat_levels(GC_SPC, GC_edges, sat_edges)
+
+   Takes as input GEOS-Chem data and pressure level edges, as well as satellite pressure levels, and calculate GEOS-Chem data values on satellite pressure levels
+
+   :param array GC_SPC: A NumPy array containing GEOS-Chem columns. 
+   :param array GC_edges: A NumPy array containing GEOS-Chem pressure level edges.
+   :param array sat_edges: A NumPy array containing TROPOMI pressure level edges
+   :return: A NumPy array containing GEOS-Chem columns remapped to be on the TROPOMI pressure levels.
+   :rtype: array
+
+.. py:function:: apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None)
+
+   Apply the averaging kernel
+
+   :param array sat_avker: TROPOMI averaging kernel. 
+   :param array sat_prior: The satellite prior profile in ppb, optional (used for CH4).
+   :param array sat_pressure_weight: The relative pressure weights for each level
+   :param array GC_SPC: The GC species on the satellite levels, output by GC_to_sat_levels
+   :param array filt: A filter, optional
+   :return: A NumPy array containing simulated GEOS-Chem values such that they are directly comparable to TROPOMI (i.e. because the averaging kernel has been applied).
+   :rtype: array
+
+The remaining three utility functions are very similar. They read TROPOMI level 2 observations from file, but there are a variety of TROPOMI observations with a variety of formattings (operational, science product, Harvard-specific standard). Each function is designed to read a different formatting. Users can select which function they would like to use by specifying the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file. ``DEFAULT`` selects the TROPOMI operational product, ``ACMG`` for the ACMG/Harvard TROPOMI product, and ``BLENDED`` for Belasus et al., 2023 which also works for the TROPOMI science product. 
+
+.. py:function:: read_tropomi(filename, species, filterinfo=None, includeObsError = False)
+
+   **Designed for the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``DEFAULT`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+
+   :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
+   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
+   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
+   :param bool includeObsError: True or False, read the errors associated with individual observations. 
+   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :rtype: dict
+
+   .. py:function:: read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False)
+
+   **Designed for the Harvard/ACMG version of the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``ACMG`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+
+   :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
+   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
+   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
+   :param bool includeObsError: True or False, read the errors associated with individual observations. 
+   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :rtype: dict
+
+   .. py:function:: read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False)
+
+   **Designed for the Belasus et al., 2023 version of the TROPOMI operational level 2 product,** but also works for the TROPOMI science product. A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``BLENDED`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+
+   :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
+   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
+   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
+   :param bool includeObsError: True or False, read the errors associated with individual observations. 
+   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :rtype: dict
 
 .. _OMI tools:
 
 OMI tools
 -------------
 
-NASA's Ozone Monitoring Instrument (OMI) on board the Aura satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, NO\ :sub:`2`\ is the only OMI operator written for CHEEREIO, but users can follow the pattern in ``omi_tools.py`` to add support for additional species.
+NASA's Ozone Monitoring Instrument (OMI) onboard the Aura satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, NO\ :sub:`2`\ is the only OMI operator written for CHEEREIO, but users can follow the pattern in ``omi_tools.py`` to add support for additional species.
 
 To activate OMI observations, list "OMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
