@@ -51,9 +51,15 @@ Updates to scale factors but not emissions
 
 If SCALEFACTOR.nc files are changing over time, but ensemble GC simulations do not show any emission changes, there is likely a disconnect between CHEEREIO and GEOS-Chem. This is diagnosed most easily by comparing control emissions with ensemble emissions by using the relevant HEMCO diagnostics (e.g. total methane emissions for a methane inversion are identical between control and ensemble simulations). If this happens to you, it is usually because of a problem with the HEMCO_Config.rc file. In th Check to see that CHEEREIO successfully linked individual emissions with SCALEFACTOR.nc files in your template run directory. CHEEREIO scalefactor codes begin at 700 and increment by 1 for each emission you adjust. 
 
-Here is an example emission file adjusted by CHEEREIO in a methane assimilation simulation: ``0 GEPA_GAS_PRODUCTION   $ROOT/CH4/v2017-10/GEPA/GEPA_Annual.nc  emissions_1B2b_Natural_Gas_Production        2012/1/1/0    C xy molec/cm2/s CH4 1008/700    2 100``
+Here is an example emission file adjusted by CHEEREIO in a methane assimilation simulation:
+::
+  
+  0 GEPA_GAS_PRODUCTION   $ROOT/CH4/v2017-10/GEPA/GEPA_Annual.nc  emissions_1B2b_Natural_Gas_Production        2012/1/1/0    C xy molec/cm2/s CH4 1008/700    2 100
 
-This emissions file is scaled correctly farther down in the the HEMCO_Config.rc file: ``700 ASSIM_CH4  /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/METHANE_scale_v06/template_run/CH4_SCALEFACTOR.nc Scalar 2018-2020/1-12/1-31/0-23 RF xy 1  1``
+This emissions file is scaled correctly farther down in the the HEMCO_Config.rc file:
+::
+  
+  700 ASSIM_CH4  /n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/METHANE_scale_v06/template_run/CH4_SCALEFACTOR.nc Scalar 2018-2020/1-12/1-31/0-23 RF xy 1  1``
 
 This tells GEOS-Chem that it should scale natural gas production emissions by the CHEEREIO posterior scaling factor values stored in the CH4_SCALEFACTOR.nc file. Sometimes, especially in cases where emissions are grouped into chemical families, CHEEREIO does not successfully update HEMCO_Config.rc on its own and requires manual user correction.
 

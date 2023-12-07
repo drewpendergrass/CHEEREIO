@@ -219,7 +219,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 	
 	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period. For more information on the burn-in period, see :ref:`Burn in period`.
 
-..option:: DO_BURN_IN
+.. option:: DO_BURN_IN
 
 	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. For more information on the burn-in period, see :ref:`Burn in period`.
 
@@ -515,7 +515,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. If you get an error the preprocessing step (performed during ensemble run directory creation in the installation workflow), or you already have ObsPack files processed, you should set the ``preprocess_raw_obspack_files`` to ``false`` and supply an already populated directory of manually preprocessed files. Details for how to do this are provided in the ObsPack documentation for GEOS-Chem. (DP, 2023/12/06).*
+		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. If you get an error the preprocessing step (performed during ensemble run directory creation in the installation workflow), or you already have ObsPack files processed, you should set the preprocess_raw_obspack_files variable to false and supply an already populated directory of manually preprocessed files. Details for how to do this are provided in the ObsPack documentation for GEOS-Chem. (DP, 2023/12/06).*
 
 .. option:: obspack_gc_input_file
 	

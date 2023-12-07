@@ -20,7 +20,7 @@ To activate TROPOMI observations, list "TROPOMI" as an observation type in the `
 TROPOMI fields available to save and plot in CHEEREIO
 ~~~~~~~~~~~~~
 
-All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TROPOMI operator, all data read in by the ``read_tropomi`` function are available to be saved and/or plotted.** Below is a subset of the supported fields which users can save in TROPOMI:
+All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TROPOMI operator, all data read in by the read_tropomi function are available to be saved and/or plotted.** Below is a subset of the supported fields which users can save in TROPOMI:
 
 .. option:: qa_value
    
@@ -80,35 +80,35 @@ The remaining three utility functions are very similar. They read TROPOMI level 
 
 .. py:function:: read_tropomi(filename, species, filterinfo=None, includeObsError = False)
 
-   **Designed for the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``DEFAULT`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+   **Designed for the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``DEFAULT`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
 
    :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
    :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
    :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
    :rtype: dict
 
    .. py:function:: read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False)
 
-   **Designed for the Harvard/ACMG version of the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``ACMG`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+   **Designed for the Harvard/ACMG version of the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``ACMG`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
 
    :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
    :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
    :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
    :rtype: dict
 
    .. py:function:: read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False)
 
-   **Designed for the Belasus et al., 2023 version of the TROPOMI operational level 2 product,** but also works for the TROPOMI science product. A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``BLENDED`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+   **Designed for the Belasus et al., 2023 version of the TROPOMI operational level 2 product,** but also works for the TROPOMI science product. A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``BLENDED`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
 
    :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
    :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
    :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``TROPOMI_Translator`` class.
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
    :rtype: dict
 
 .. _OMI tools:
@@ -134,13 +134,13 @@ The OMI observation operator calls two utility functions to process observations
 
 .. py:function:: read_omi(filename, species, filterinfo=None, includeObsError = False)
 
-   A utility function which loads OMI observations from file, filters them, and returns a dictionary of important data formatted for input into the `gcCompare`` method of the ``OMI_Translator`` class.
+   A utility function which loads OMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``OMI_Translator`` class.
 
    :param str filename: NetCDF file containing OMI observations to be loaded. Expects standard level 2 data. 
    :param str species: Name of species to be loaded. Currently, only "NO2" is supported.
    :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the `gcCompare`` method of the ``OMI_Translator`` class.
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``OMI_Translator`` class.
    :rtype: dict
 
 .. py:function:: clearEdgesFilterByQAAndFlatten(met)
