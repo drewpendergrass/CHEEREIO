@@ -298,7 +298,6 @@
 	"comment028" : "******************************BEGIN SETTING EXTENSIONS****************************",
 	"comment029" : "**********************************************************************************",
 	"Extensions": {
-		"TROPOMI_ALL":"False",
 		"TROPOMI_CH4":"False",
 		"CH4":"False",
 		"OMI_NO2":"True"
