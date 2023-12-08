@@ -13,7 +13,7 @@ CHEEREIO ships with observation operators that have produced by the community. U
 TROPOMI tools
 -------------
 
-The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, CH\ :sub:`4`\ is the only TROPOMI operator written for CHEEREIO, but users can follow the pattern in ``tropomi_tools.py`` to add support for additional species. An NO\ :sub:`2`\ operator is partially written.
+The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are two TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\ and CO (the latter contributed by Sina Voshtani). Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species. An NO\ :sub:`2`\ operator is partially written but not yet functional as of version 1.2.
 
 To activate TROPOMI observations, list "TROPOMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
@@ -44,7 +44,7 @@ All observation operators save standard data from observations and GEOS-Chem and
 
 .. option:: methane_profile_apriori
    
-   A priori methane profile.
+   A priori methane profile. (Methane only)
 
 
 TROPOMI operator support functions
@@ -54,13 +54,15 @@ The TROPOMI observation operator calls a handful of utility functions to process
 
 The first two utility functions are designed to remap GEOS-Chem pressure levels to satellite pressure levels and apply the averaging kernel.
 
-.. py:function:: GC_to_sat_levels(GC_SPC, GC_edges, sat_edges)
+.. py:function:: GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000)
 
    Takes as input GEOS-Chem data and pressure level edges, as well as satellite pressure levels, and calculate GEOS-Chem data values on satellite pressure levels
 
    :param array GC_SPC: A NumPy array containing GEOS-Chem columns. 
    :param array GC_edges: A NumPy array containing GEOS-Chem pressure level edges.
    :param array sat_edges: A NumPy array containing TROPOMI pressure level edges
+   :param str species: Species to be processed.
+   :param int chunk_size: For CO, the number of observations to be processed at once. This is to save memory for TROPOMI observations with high vertical resolution.
    :return: A NumPy array containing GEOS-Chem columns remapped to be on the TROPOMI pressure levels.
    :rtype: array
 
@@ -76,7 +78,7 @@ The first two utility functions are designed to remap GEOS-Chem pressure levels 
    :return: A NumPy array containing simulated GEOS-Chem values such that they are directly comparable to TROPOMI (i.e. because the averaging kernel has been applied).
    :rtype: array
 
-The remaining three utility functions are very similar. They read TROPOMI level 2 observations from file, but there are a variety of TROPOMI observations with a variety of formattings (operational, science product, Harvard-specific standard). Each function is designed to read a different formatting. Users can select which function they would like to use by specifying the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file. ``DEFAULT`` selects the TROPOMI operational product, ``ACMG`` for the ACMG/Harvard TROPOMI product, and ``BLENDED`` for Belasus et al., 2023 which also works for the TROPOMI science product. 
+The remaining three utility functions are very similar. They read TROPOMI level 2 observations from file, but for methane there are a variety of TROPOMI observations with a variety of formattings (operational, science product, Harvard-specific standard). Each function is designed to read a different formatting. Users can select which function they would like to use by specifying the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file. ``DEFAULT`` selects the TROPOMI operational product, ``ACMG`` for the ACMG/Harvard TROPOMI product, and ``BLENDED`` for Belasus et al., 2023 which also works for the TROPOMI science product. For CO, users must select the ``DEFAULT`` option.
 
 .. py:function:: read_tropomi(filename, species, filterinfo=None, includeObsError = False)
 

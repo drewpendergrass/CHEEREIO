@@ -948,6 +948,43 @@ Below we list the settings that you can set with extensions.
 	
 		If USE_CUSTOM_CH4_OH_ENTRY is True, then we overwrite the OH field line in ``HEMCO_Config.rc`` with this entry. Note that backslashes need to be escaped with a front slash. Here is an example entry: ``* GLOBAL_OH  $ROOT\/OH\/v2014-09\/v5-07-08\/OH_3Dglobal.geos5.47L.4x5.nc OH           1985\/1-12\/1\/0 C xyz kg\/m3 * - 1 1`` 
 
+.. option:: TROPOMI_CO extension
+	
+	Specialized TROPOMI CO settings.
+
+	.. option:: WHICH_TROPOMI_PRODUCT
+
+		Which TROPOMI product should we use? Currently, only "DEFAULT" is supported. 
+
+	.. option:: TROPOMI_CO_FILTERS
+	
+		Apply specialized filters for TROPOMI CO? Set to "True" if doing a TROPOMI CO inversion, otherwise set to "False".
+	
+	.. option:: TROPOMI_CO_filter_blended_albedo
+	
+		Filter out TROPOMI CO observations with a blended albedo above this value. Set to "nan" to ignore.
+
+	.. option:: TROPOMI_CO_filter_swir_albedo_low
+	
+		Filter out TROPOMI CO observations with a SWIR albedo below this value. Set to "nan" to ignore.
+
+	.. option:: TROPOMI_CO_filter_swir_albedo_high
+	
+		Filter out TROPOMI CO observations with a SWIR albedo above this value. Set to "nan" to ignore.
+
+	.. option:: TROPOMI_CO_filter_winter_lat
+	
+		Filter out TROPOMI CO observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
+
+	.. option:: TROPOMI_CO_filter_roughness
+	
+		Filter out TROPOMI CO observations with a surface roughness above this value. Set to "nan" to ignore.
+
+	.. option:: TROPOMI_CO_filter_swir_aot
+	
+		Filter out TROPOMI CO observations with a SWIR AOT above this value. Set to "nan" to ignore.
+
+
 .. option:: OMI_NO2 extension
 	
 	Specialized settings for the OMI NO2 operator.
