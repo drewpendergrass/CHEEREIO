@@ -18,6 +18,8 @@ if DO_RERUN:
 			lines = f.readlines()
 			if lines[0] == 'true':
 				do_approx = True
+else:
+	do_approx = False
 
 with open(f"{path_to_scratch}/ACTUAL_RUN_IN_PLACE_ASSIMILATION_WINDOW") as f:
     lines = f.readlines()
