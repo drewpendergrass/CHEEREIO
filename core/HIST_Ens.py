@@ -23,6 +23,8 @@ class HIST_Ens(object):
 		self.useArea = useArea
 		self.useControl = useControl
 		self.spc_config = si.getSpeciesConfig()
+		if self.verbose >=2:
+			print(f'HIST_Ens constructor called with the following arguments: HIST_Ens({timestamp},useLevelEdge={useLevelEdge},useStateMet={useStateMet},useObsPack={useObsPack},useArea={useArea},fullperiod={fullperiod},interval={interval},verbose={verbose},useControl={useControl})')
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -38,6 +40,8 @@ class HIST_Ens(object):
 			delta = timedelta(hours=int(ASSIM_TIME))
 			starttime = endtime-delta
 		self.timeperiod = (starttime,endtime)
+		if self.verbose >=2:
+			print(f'HIST_Ens considering observations between {starttime.strftime("%Y/%m/%d %H:%M:%S")} and {endtime.strftime("%Y/%m/%d %H:%M:%S")}')
 		self.control_ht = None
 		self.ht = {}
 		self.observed_species = self.spc_config['OBSERVED_SPECIES']
@@ -71,6 +75,8 @@ class HIST_Ens(object):
 			self.AREA = self.ht[1].getArea()
 		else:
 			self.AREA = None
+		if self.verbose >=2:
+			print('HIST_Ens construction complete.')
 	def makeObsTrans(self):
 		self.OBS_TRANSLATOR = {}
 		self.obsSpecies = []
@@ -176,10 +182,15 @@ class HIST_Ens(object):
 							extraps['control'][species][j,k,l] = slope*60*60 #convert to per hour rather than per second.
 		return extraps
 	def getCols(self):
+		if self.verbose>=2:
+			print('HIST_Ens called getCols().')
 		obsdata_toreturn = {}
 		conc2Ds = {}
 		firstens = self.ensemble_numbers[0]
 		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
+		if self.verbose>=2:
+			print('Within getCols(), hist4D produced for the first ensemble member. Details are below:')
+			hist4D_allspecies.info()
 		for species in self.observed_species:
 			errval = float(self.spc_config['OBS_ERROR'][species])
 			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
@@ -202,18 +213,29 @@ class HIST_Ens(object):
 				transportError = None
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
 			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
+			if self.verbose>=2:
+				print(f'Within getCols() and for species {species} in the first ensemble member, ObsData generated from Observation Translator gcCompare function with call gcCompare(species={species},OBSDATA=withheld,hist4D_allspecies=withheld,{",".join([f"{key}={gccompare_kwargs[key]}" for key in gccompare_kwargs])})')
 			firstcol = obsdata_toreturn[species].getGCCol()
+			if self.verbose>=2:
+				print(f'Within getCols() and for species {species} in the first ensemble member, first column GC dimensions are {np.shape(firstcol)}')
 			shape2D = np.zeros(2)
 			shape2D[0] = len(firstcol)
 			shape2D[1]=len(self.ensemble_numbers)
 			shape2D = shape2D.astype(int)
 			conc2Ds[species] = np.zeros(shape2D)
 			conc2Ds[species][:,firstens-1] = firstcol
+			if self.verbose>=2:
+				print(f'Within getCols() and for species {species}, conc2D expected shape will be are {np.shape(conc2Ds[species])}')
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
+				if self.verbose>=2:
+					print(f'Within getCols(), hist4D produced for ensemble member number {i}. Details are below:')
+					hist4D_allspecies.info()
 				for species in self.observed_species:
 					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
+					if self.verbose>=2:
+						print(f'Within getCols() and for species {species} in ensemble member number {i}, column GC dimensions are {np.shape(col)}')
 					conc2Ds[species][:,i-1] = col
 		#Save full ensemble data in each of the obsdata objects
 		for species in self.observed_species:
