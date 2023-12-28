@@ -224,6 +224,8 @@
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
 	"PriorWeightinSFAverage" : "0.01",
+	"Activate_Relaxation_To_Prior_Spread" : "True",
+	"RTPS_parameter" : "0.4",
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",

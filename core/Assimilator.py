@@ -58,6 +58,8 @@ class Assimilator(object):
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.AverageScaleFactorPosteriorWithPrior = spc_config["AverageScaleFactorPosteriorWithPrior"] == "True"
+		self.RTPS = spc_config["Activate_Relaxation_To_Prior_Spread"] == "True"
+		self.RTPS_parameter = float(spc_config["RTPS_parameter"])
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
@@ -379,6 +381,15 @@ class Assimilator(object):
 			if self.verbose>=2:
 				print(f'Averaging prior and posterior, with prior weight of {priorweight} and posterior weight of {posteriorweight}.')
 			analysisSubset = (backgroundSubset*priorweight)+(analysisSubset*posteriorweight)
+		#Now do Relax to Prior Spread (RTPS calculation)
+		if self.RTPS:
+			if (self.RTPS_parameter<0) or (self.RTPS_parameter>1):
+				raise ValueError('Invalid RTPS parameter; must be between 0 and 1.')
+			sigma_a = np.std(analysisSubset,axis=1) 
+			sigma_b = np.std(backgroundSubset,axis=1) 
+			sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
+			meanrebalance = np.mean(analysisSubset,axis=1)*((sigma_RTPS/sigma_a)-1)
+			analysisSubset = analysisSubset*(sigma_RTPS/sigma_a)-meanrebalance #Scale so sd is new_std and mean is old mean
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
