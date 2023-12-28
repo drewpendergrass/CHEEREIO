@@ -125,10 +125,14 @@ fi
 ### Navigate back to top-level directory
 cd ${MY_PATH}/${RUN_NAME}
 
-cp ${ASSIM_PATH}/templates/restore_backup.batch scratch/
+if [ "${DO_ENS_SPINUP}" = true ]; then
 
-sed -i -e "s:{Partition}:${Partition}:g" \
-       -e "s:{ASSIM}:${ASSIM_PATH}:g" scratch/restore_backup.batch
+  cp ${ASSIM_PATH}/templates/restore_backup.batch scratch/
+
+  sed -i -e "s:{Partition}:${Partition}:g" \
+         -e "s:{ASSIM}:${ASSIM_PATH}:g" scratch/restore_backup.batch
+
+fi 
 
 echo "This file's existence indicates that this is the first assimilation period." > scratch/IS_FIRST
 
