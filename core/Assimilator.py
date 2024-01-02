@@ -388,8 +388,8 @@ class Assimilator(object):
 			sigma_a = np.std(analysisSubset,axis=1) 
 			sigma_b = np.std(backgroundSubset,axis=1) 
 			sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
-			meanrebalance = np.mean(analysisSubset,axis=1)*((sigma_RTPS/sigma_a)-1)
-			analysisSubset = analysisSubset*(sigma_RTPS/sigma_a)-meanrebalance #Scale so sd is new_std and mean is old mean
+			meanrebalance = np.expand_dims(np.mean(analysisSubset,axis=1)*((sigma_RTPS/sigma_a)-1),axis=1)
+			analysisSubset = analysisSubset*np.expand_dims((sigma_RTPS/sigma_a),axis=1)-meanrebalance #Scale so sd is new_std and mean is old mean
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
