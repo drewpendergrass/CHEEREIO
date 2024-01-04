@@ -388,7 +388,7 @@ class Assimilator(object):
 			sigma_a = np.std(analysisSubset,axis=1) 
 			sigma_b = np.std(backgroundSubset,axis=1) 
 			sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
-			inds_with_spread = np.where(sigma_a>0)
+			inds_with_spread = np.where(np.abs(sigma_a)>5e-16) #Machine precision can be a problem
 			if self.verbose>=2:
 				print(f'Performing relaxation to prior spread.')
 				print(f'Standard deviation of prior has shape {sigma_b.shape} with initial value {sigma_b[0]}')
@@ -396,10 +396,11 @@ class Assimilator(object):
 				print(f'Weighting standard deviations so prior has {np.round(self.RTPS_parameter*100,1)}% weight.')
 				print(f'A total of {len(inds_with_spread)} indices have nonzero spread. Calculating updated analysis ensemble now.')
 			if len(inds_with_spread)>0:
-				meanrebalance = np.expand_dims(np.mean(analysisSubset[inds_with_spread,:],axis=1)*((sigma_RTPS[inds_with_spread]/sigma_a[inds_with_spread])-1),axis=1)
+				newoverold = np.expand_dims((sigma_RTPS[inds_with_spread]/sigma_a[inds_with_spread]),axis=1)
+				meanrebalance = np.expand_dims(np.mean(analysisSubset[inds_with_spread,:],axis=1),axis=1)*(newoverold-1)
 				if self.verbose>=2:
 					print(f'Before RTPS adjustment, analysis values (with nonzero spread) are the following: {analysisSubset[inds_with_spread,:]}')
-				analysisSubset[inds_with_spread,:] = analysisSubset[inds_with_spread,:]*np.expand_dims((sigma_RTPS[inds_with_spread]/sigma_a[inds_with_spread]),axis=1)-meanrebalance #Scale so sd is new_std and mean is old mean
+				analysisSubset[inds_with_spread,:] = (analysisSubset[inds_with_spread,:]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
 				if self.verbose>=2:
 					print(f'After RTPS adjustment, analysis values (with nonzero spread) are the following: {analysisSubset[inds_with_spread,:]}')
 		return analysisSubset
