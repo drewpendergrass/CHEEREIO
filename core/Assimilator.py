@@ -388,7 +388,7 @@ class Assimilator(object):
 			sigma_a = np.std(analysisSubset,axis=1) 
 			sigma_b = np.std(backgroundSubset,axis=1) 
 			sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
-			inds_with_spread = np.where(np.abs(sigma_a)>5e-16) #Machine precision can be a problem
+			inds_with_spread = np.where(np.abs(sigma_a)>5e-16)[0] #Machine precision can be a problem
 			if self.verbose>=2:
 				print(f'Performing relaxation to prior spread.')
 				print(f'Standard deviation of prior has shape {sigma_b.shape} with initial value {sigma_b[0]}')
