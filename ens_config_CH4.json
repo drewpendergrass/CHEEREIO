@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_lpj_v04",
+	"RUN_NAME" : "METHANE_lpj_v05",
 	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -36,6 +36,9 @@
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
+	"species_to_amplify_not_in_statevec" : [
+		"CH4"	
+	],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
 	"BURN_IN_END" : "20180601",
@@ -136,7 +139,7 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"init_std_dev" : {
-		"CH4":"0.1"
+		"CH4":"0.15"
 	},
 	"correlatedInitialScalings" : {
 		"CH4":"True"
@@ -174,7 +177,7 @@
 		"CH4":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"CH4":"0.3"
+		"CH4":"0.5"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
 		"CH4":"nan"
@@ -183,7 +186,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1"
+		"CH4_TROPOMI":"1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False"
@@ -214,7 +217,7 @@
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
 	},
-	"INFLATION_FACTOR": "0.05",
+	"INFLATION_FACTOR": "0.0",
 	"ASSIM_TIME": "360",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
@@ -225,7 +228,10 @@
 	"AverageScaleFactorPosteriorWithPrior" : "False",
 	"PriorWeightinSFAverage" : "0.01",
 	"Activate_Relaxation_To_Prior_Spread" : "True",
-	"RTPS_parameter" : "0.4",
+	"RTPS_parameter" : "0.9",
+	"species_not_in_statevec_to_RTPS" : [
+		"CH4"
+	],
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",

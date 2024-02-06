@@ -42,6 +42,7 @@ class Assimilator(object):
 		ensemble_numbers = []
 		self.control = None
 		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
+		self.species_to_amplify = list(set(self.STATE_VECTOR_CONC+spc_config['species_to_amplify_not_in_statevec']))
 		self.obsdata_to_save = spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y']
 		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
 			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
@@ -450,8 +451,8 @@ class Assimilator(object):
 				self.control.setSpecies3Dconc(species, extrapolated_spec)
 	def amplifySpreads(self):
 		if self.verbose>=1:
-			print(f"Amplifying ensemble spread of concentrations.")
-		for species in self.STATE_VECTOR_CONC:
+			print(f"Amplifying ensemble spread of concentrations (those species listed in state vector only).")
+		for species in self.species_to_amplify:
 			conc4D = self.combineEnsembleForSpecies(species)
 			conc_mean = np.mean(conc4D,axis=0)
 			#Subtract the mean, multiply by new_std/old_std (just the amplification factor), add the mean back in

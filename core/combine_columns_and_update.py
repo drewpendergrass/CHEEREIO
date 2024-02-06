@@ -61,7 +61,9 @@ end = time.time()
 print(f'Core gathered columns and ensemble in {end - start} seconds. Begin saving.')
 start = time.time()
 wrapper.reconstructAnalysisEnsemble()
+wrapper.prepForInflation()
 wrapper.updateRestartsAndScalingFactors()
+wrapper.performAdditionalInflation()
 wrapper.saveRestartsAndScalingFactors()
 
 if SaveDOFS:
