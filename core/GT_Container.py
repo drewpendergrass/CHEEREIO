@@ -30,6 +30,7 @@ class GT_Container(object):
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
 		self.species_not_in_statevec_to_RTPS = []
+		self.verbose = int(spc_config['verbose'])
 		for species in spc_config['species_not_in_statevec_to_RTPS']:
 			#Don't inflate species in state_vector_conc.
 			if species not in spc_config['STATE_VECTOR_CONC']:
