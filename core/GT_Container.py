@@ -29,12 +29,15 @@ class GT_Container(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
-		self.species_not_in_statevec_to_RTPS = []
 		self.verbose = int(spc_config['verbose'])
+		#Check if we need to do bonus inflation, not handled by Assimilator
+		self.species_not_in_statevec_to_RTPS = []
 		for species in spc_config['species_not_in_statevec_to_RTPS']:
 			#Don't inflate species in state_vector_conc.
 			if species not in spc_config['STATE_VECTOR_CONC']:
 				self.species_not_in_statevec_to_RTPS.append(species)
+		if len(self.species_not_in_statevec_to_RTPS)>0:
+			self.RTPS_parameter = float(spc_config["RTPS_parameter"])
 	#Gets saved column and compares to the original files
 	def constructColStatevec(self,latind,lonind):
 		firstens = self.ensemble_numbers[0]
