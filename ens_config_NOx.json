@@ -2,20 +2,20 @@
 	"comment000" : "***************************************************************************",
 	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
 	"comment002" : "***************************************************************************",
-	"GC_VERSION" : "13.3.3",
-	"RES" : "4.0x5.0",
+	"GC_VERSION" : "14.0.0",
+	"RES" : "0.5x0.625",
 	"met_name" : "MERRA2",
 	"LEVS" : "47",
-	"NEST" : "F",
-	"REGION" : "",
-	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO_no2",
-	"RUN_NAME" : "NOx_log_v03",
-	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
+	"NEST" : "T",
+	"REGION" : "NA",
+	"ASSIM_PATH" : "/n/home11/yxtang/CHEEREIO",
+	"RUN_NAME" : "NOx_regional",
+	"MY_PATH" : "/n/holyscratch01/jacob_lab/yunxiaot/GC-LETKF",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20160101_0000z.nc4",
-	"BC_FILES" : "",
+	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/yunxiaot/GC-LETKF/input_data/GEOS.nc4",
+	"BC_FILES" : "/n/holyscratch01/jacob_lab/yunxiaot/Boundary/OutputDir/GEOSChem.BoundaryConditions.$YYYY$MM$DD_$HH$MNz.nc4",
 	"sim_name" : "fullchem",
 	"chemgrid" : "trop+strat",
 	"sim_extra_option" : "none",
@@ -30,54 +30,44 @@
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
 	"ENS_SPINUP_START" : "",
 	"ENS_SPINUP_END" : "",
-	"START_DATE" : "20160101",
-	"ASSIM_START_DATE" : "20160108",
+	"START_DATE" : "20190101",
+	"ASSIM_START_DATE" : "20190103",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20160201",
+	"END_DATE" : "20190112",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
 	"DO_BURN_IN" : "true",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
-	"BURN_IN_END" : "20160112",
-	"POSTPROCESS_START_DATE":"20160113",
-	"POSTPROCESS_END_DATE":"20160201",
-	"nEnsemble" : "24",
-	"verbose":"1",
+	"BURN_IN_END" : "20190106",
+	"POSTPROCESS_START_DATE":"20190107",
+	"POSTPROCESS_END_DATE":"20190112",
+	"nEnsemble" : "6",
+	"verbose":"2",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"NumCtrlCores" : "2",
 	"Partition" : "huce_cascade,seas_compute,intermediate",
-	"Memory" : "40000",
+	"Memory" : "80000",
 	"EnsCtrlSpinupMemory" : "8000",
 	"WallTime" : "7-00\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
 	"ControlWallTime" : "0-04\\:00",
 	"SpinupWallTime" : "",
-	"CondaEnv" : "cheerio",
-	"AnimationEnv" : "geoplt_2",
+	"CondaEnv" : "cheereio",
+	"AnimationEnv" : "animation",
 	"MaxPar" : "2",
 	"comment006" : "******************************************************************************",
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
 		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5"
+		"NO2"
 	],
 	"CONTROL_VECTOR_CONC" : [
 		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5"
+		"NO2"
 	],
 	"STATE_VECTOR_CONC_REPRESENTATION" : "trop_sum",
 	"CONTROL_VECTOR_EMIS" : {
@@ -88,7 +78,7 @@
 	"comment011" : "******************************************************************************",
 	"HISTORY_collections_to_customize" : [
 		"SpeciesConc",
-		"CH4",
+		"Restart",
 		"LevelEdgeDiags",
 		"StateMet"
 	],
@@ -136,29 +126,30 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
-		"NO2_OMI": "NO2"
+		"NO2_TROPOMI": "NO2"
 	},
 	"OBS_TYPE" : {
-		"NO2_OMI":"OMI"
+		"NO2_TROPOMI":"TROPOMI"
 	},
 	"ASSIMILATE_OBS" : {
-		"NO2_OMI":"True"
+		"NO2_TROPOMI":"True"
 	},
 	"TROPOMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/tropomi/NO2"
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/tropomi"
 	},
 	"OMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"NO2_OMI":"60"
+		"NO2_TROPOMI":"60"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
 	"ACTIVATE_OBSPACK" : "false",
-	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
-	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
-	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
+	"preprocess_raw_obspack_files" : "false",
+	"raw_obspack_path" : "",
+	"gc_obspack_path" :  "",
+	"obspack_gc_input_file" : "",
 	"HistoryObsPackToSave" : [
 		"pressure",
 		"CH4"
@@ -176,18 +167,19 @@
 		"NOx":"500"
 	},
 	"speedyCorrelationApprox" : "True",
-	"lognormalErrors" : "True",
 	"additional_init_perturbation_from_emis" : {
-		"NOx" : {
+		"NOx":{
 			"do_add_pert":"False",
 			"file":{
-				"file" : "",
-				"variable" : ""
+				"file":"",
+				"variable":""
 			},
 			"max_pert":"",
 			"saturation":""
 		}
+	
 	},
+	"lognormalErrors" : "True",
 	"MaskOceanScaleFactor" : {
 		"NOx":"True"
 	},
@@ -214,36 +206,36 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NO2_OMI":"1"
+		"NO2_TROPOMI":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
-		"NO2_OMI":"False"
+		"NO2_TROPOMI":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
-		"NO2_OMI":""
+		"NO2_TROPOMI":""
 	},
 	"OBS_ERROR": {
-		"NO2_OMI":"0.1"
+		"NO2_TROPOMI":"0.1"
 	},
 	"OBS_ERROR_TYPE":{
-		"NO2_OMI":"relative"
+		"NO2_TROPOMI":"relative"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"NO2_OMI":"0.15"
+		"NO2_TROPOMI":"0.15"
 	},
 	"MIN_OBS_ERROR":{
-		"NO2_OMI":"0"
+		"NO2_TROPOMI":"0"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
-		"NO2_OMI":{
+		"NO2_TROPOMI":{
 			"transport_error":"0"
 		}
 	},
 	"AV_TO_GC_GRID" : {
-		"NO2_OMI":"True"
+		"NO2_TROPOMI":"True"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
-		"NO2_OMI":"default"
+		"NO2_TROPOMI":"default"
 	},
 	"INFLATION_FACTOR": "0.04",
 	"ASSIM_TIME": "24",
@@ -265,7 +257,7 @@
 	"DO_VARON_RERUN" : "True",
 	"APPROXIMATE_VARON_RERUN" : "False",
 	"species_to_approximate_for_rerun" : [],
-	"number_of_windows_to_rerun" : "1", 
+	"number_of_windows_to_rerun" :"1",
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",
@@ -281,13 +273,13 @@
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
-		"NO2_OMI": "molec/cm2"
+		"NO2_TROPOMI": "molec/cm2"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
-		"NO2_OMI" : []
+		"NO2_TROPOMI" : []
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
-		"NO2_OMI" : []
+		"NO2_TROPOMI" : []
 	},
 	"extra_plot_field_units":{
 	},
@@ -300,6 +292,6 @@
 	"Extensions": {
 		"TROPOMI_CH4":"False",
 		"CH4":"False",
-		"OMI_NO2":"True"
+		"TROPOMI_NO2":"True"
 	}
 }
