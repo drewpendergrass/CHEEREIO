@@ -86,7 +86,7 @@ def makeLatLonGridWithMask(gridlabel,mask_coast_bool="True"):
 			mask = np.transpose(np.genfromtxt('../templates/landmask_0p25x0p3125_gcgrid.csv',delimiter=','))
 		lonok = np.where((fulllon>=np.min(lon)) & (fulllon<=np.max(lon)))[0]
 		latok = np.where((fulllat>=np.min(lat)) & (fulllat<=np.max(lat)))[0]
-		mask = mask[lonok,latok]
+		mask = mask[np.ix_(lonok,latok)]
 		mask = np.where(mask==0)
 	return [lon,lat,mask]
 
