@@ -233,7 +233,7 @@ def updateBoundaryConds(spc_config,lines,linenums,startlinedict,endlinedict):
 		lines_to_delete = linenums[(startlinedict['GC_BCs']+1):(endlinedict['GC_BCs'])]
 		for i in lines_to_delete:
 			lines[i]='' #delete lines
-		lines[startlinedict['GC_BCs']+1]=f"* BC_  {spc_config['BC_FILES']} SpeciesBC_?ADV?  1980-2021/1-12/1-31/* EFY xyz 1 * - 1 1"
+		lines[startlinedict['GC_BCs']+1]=f"* BC_  {spc_config['BC_FILES']} SpeciesBC_?ADV?  1980-2021/1-12/1-31/* EFY xyz 1 * - 1 1\n"
 	else:
 		print('Skipping boundary condition update in HEMCO_Config.')
 	return lines
@@ -273,7 +273,11 @@ def fullWorkflow(foldername=None):
 	spc_config,lines,hemco_config_path,scaleFactorLineAdd,speciesloc = HEMCOsetup(foldername,returnStartEndDict=False)
 	lines = updateOHforCH4(spc_config,lines) #ALL use this update OH script, which only applies if applicable
 	lines = ensureRestartsInTLD(lines) #make sure we are reading restart from TLD, not Restarts folder.
-	#self.updateBoundaryConds() #Currently BCs updated by setup Ensemble; no need.
+	#update Boundary Conditions for nested simulation
+	linenums = np.arange(0,len(lines))
+	switchnames,switchcategories,switchboolvals = getHEMCOSwitches(spc_config, lines)
+	startlinedict,endlinedict,scaleFactorLineAdd = getHEMCOLines(lines,switchnames,switchcategories,switchboolvals)
+	lines = updateBoundaryConds(spc_config, lines, linenums, startlinedict, endlinedict) #Currently BCs updated by setup Ensemble; no need.
 	#Add updates for scaling factors
 	lines,species_scalid=addScalingFactorNumbers(spc_config,speciesloc,lines)
 	lines = addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd)
