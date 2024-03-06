@@ -15,16 +15,17 @@ translators = si.importObsTranslators()
 
 #4D ensemble interface with satellite operators.
 class HIST_Ens(object):
-	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,fullperiod=False,interval=None,verbose=1,useControl=False):
+	def __init__(self,timestamp,useLevelEdge=False,useStateMet = False,useObsPack=False,useArea=False,useSatDiagn=False,fullperiod=False,interval=None,verbose=1,useControl=False):
 		self.verbose = verbose
 		self.useLevelEdge = useLevelEdge
 		self.useStateMet = useStateMet
 		self.useObsPack = useObsPack
 		self.useArea = useArea
+		self.useSatDiagn = useSatDiagn
 		self.useControl = useControl
 		self.spc_config = si.getSpeciesConfig()
 		if self.verbose >=2:
-			print(f'HIST_Ens constructor called with the following arguments: HIST_Ens({timestamp},useLevelEdge={useLevelEdge},useStateMet={useStateMet},useObsPack={useObsPack},useArea={useArea},fullperiod={fullperiod},interval={interval},verbose={verbose},useControl={useControl})')
+			print(f'HIST_Ens constructor called with the following arguments: HIST_Ens({timestamp},useLevelEdge={useLevelEdge},useStateMet={useStateMet},useObsPack={useObsPack},useArea={useArea},useSatDiagn={useSatDiagn},fullperiod={fullperiod},interval={interval},verbose={verbose},useControl={useControl})')
 		path_to_ensemble = f"{self.spc_config['MY_PATH']}/{self.spc_config['RUN_NAME']}/ensemble_runs"
 		subdirs = glob(f"{path_to_ensemble}/*/")
 		subdirs.remove(f"{path_to_ensemble}/logs/")
@@ -187,7 +188,7 @@ class HIST_Ens(object):
 		obsdata_toreturn = {}
 		conc2Ds = {}
 		firstens = self.ensemble_numbers[0]
-		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
+		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 		if self.verbose>=3:
 			print('Within getCols(), hist4D produced for the first ensemble member. Details are below:')
 			hist4D_allspecies.info()
@@ -228,7 +229,7 @@ class HIST_Ens(object):
 				print(f'Within getCols() and for species {species}, conc2D expected shape will be are {np.shape(conc2Ds[species])}')
 		for i in self.ensemble_numbers:
 			if i!=firstens:
-				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
+				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 				if self.verbose>=3:
 					print(f'Within getCols(), hist4D produced for ensemble member number {i}. Details are below:')
 					hist4D_allspecies.info()
@@ -241,7 +242,7 @@ class HIST_Ens(object):
 		for species in self.observed_species:
 			obsdata_toreturn[species].setGCCol(conc2Ds[species])
 		if self.useControl:
-			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack)
+			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 			for species in self.observed_species:
 				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
 				obsdata_toreturn[species].addData(control=col)

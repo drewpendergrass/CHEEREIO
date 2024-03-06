@@ -89,6 +89,7 @@
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "True",
 	"SaveArea" : "False",
+	"SaveSatDiagn" : "False",
 	"HistorySpeciesConcToSave" : [
 		"NO",
 		"NO2",
@@ -121,6 +122,8 @@
 		"Met_TropLev",
 		"Met_BXHEIGHT",
 		"Met_T"
+	],
+	"HistorySatDiagnToSave" : [
 	],
 	"comment012" : "******************************************************************************",
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",

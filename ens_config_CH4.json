@@ -89,6 +89,7 @@
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "False",
 	"SaveArea" : "False",
+	"SaveSatDiagn" : "False",
 	"HistorySpeciesConcToSave" : [
 		"CH4"
 	],
@@ -104,6 +105,8 @@
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD"
+	],
+	"HistorySatDiagnToSave" : [
 	],
 	"comment012" : "******************************************************************************",
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
