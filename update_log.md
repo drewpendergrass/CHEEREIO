@@ -1,6 +1,34 @@
 # Update log
 
-## Version 1.2.0 (in development)
+## Version 1.3.0 (under development)
+
+**Action items for users updating to version 1.3.0:**
+
+* Update ens_config.json by comparing with templates, as new fields are now expected!
+
+**Updates under version 1.3.0:**
+
+* Bug fixes for regional inversions (thanks to Yunxiao Tang)
+* Experimental support for custom regions for regional inversions (thanks to Jared Brewer)
+* Experimental observation operator for CrIS VOC products from U. Minnesota (thanks to Jared Brewer)
+* Added support for inversions utilizing the SatDiagn collection in GEOS-Chem
+* Added relaxation to prior spread (RTPS) inflation technique
+* Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.
+* Added convenience restore_backup.batch script to overwrite a failed run with the spun-up backup.
+
+
+## Version 1.2.1
+
+**Action items for users updating to version 1.2.1:**
+
+* None. This is a small update to fix bugs.
+
+**Updates under version 1.2.1:**
+
+* Bug leading some assimilations to fail is fixed.
+
+
+## Version 1.2.0
 
 **Action items for users updating to version 1.2:**
 
