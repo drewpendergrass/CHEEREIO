@@ -9,12 +9,12 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_lpj_v05",
-	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
+	"RUN_NAME" : "METHANE_paper_v01",
+	"MY_PATH" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/CHEEREIO",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180101_0000z.nc4",
+	"RESTART_FILE" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/GEOSChem.Restart.20180101_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -35,7 +35,7 @@
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"SPREAD_AMPLIFICATION_FACTOR" : "5",
+	"SPREAD_AMPLIFICATION_FACTOR" : "1.5",
 	"species_to_amplify_not_in_statevec" : [
 		"CH4"	
 	],
@@ -156,7 +156,7 @@
 		"CH4" : {
 			"do_add_pert":"True",
 			"file":{
-				"file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
+				"file" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
 				"variable" : "EmisCH4_Total"
 			},
 			"max_pert":"0.5",
