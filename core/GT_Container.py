@@ -86,25 +86,21 @@ class GT_Container(object):
 			lonind = int(split_name[-1].split('.')[0])
 			colinds = self.gt[1].getColumnIndicesFromFullStateVector(latind,lonind)
 			self.analysisEnsemble[colinds,:] = cols
-	#For some forms of additional inflation requested by user, we need to store out data from the background state
-	def prepForInflation(self):
-		#For RTPS, we need to save out background std
-		if len(self.species_not_in_statevec_to_RTPS)>0:
-			self.sigma_b = {}
-			for species in self.species_not_in_statevec_to_RTPS:
-				conc4D = self.combineEnsembleForSpecies(species)
-				self.sigma_b[species] = np.std(conc4D,axis=0) 
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
 	#In some cases, user requests inflation performed on species not in state vector. Do that now.
-	def performAdditionalInflation(self):
+	#For RTPS, requires timestamp representing the background state. 
+	def performAdditionalInflation(self, background_timestamp):
 		#Do RTPS for select species not in statevector
 		if len(self.species_not_in_statevec_to_RTPS)>0:
+			background_gt = GT_Container(background_timestamp,getAssimColumns=False, constructStateVecs=False)
 			for species in self.species_not_in_statevec_to_RTPS:
+				conc4D_background = background_gt.combineEnsembleForSpecies(species)
+				sigma_b = np.std(conc4D_background,axis=0) 
 				conc4D = self.combineEnsembleForSpecies(species)
 				sigma_a = np.std(conc4D,axis=0)
-				sigma_RTPS = (self.RTPS_parameter*self.sigma_b[species]) + ((1-self.RTPS_parameter)*sigma_a)
+				sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
 				ind0,ind1,ind2 = np.where(np.abs(sigma_a)>5e-16) #Machine precision can be a problem
 				if len(ind0)>0:
 					newoverold = sigma_RTPS[ind0,ind1,ind2]/sigma_a[ind0,ind1,ind2] #1D
