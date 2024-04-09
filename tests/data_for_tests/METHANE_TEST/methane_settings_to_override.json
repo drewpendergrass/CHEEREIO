@@ -91,5 +91,7 @@
 	"species_not_in_statevec_to_RTPS" : [
 	],
 	"Extensions": {
+		"TROPOMI_CH4":"True",
+		"CH4":"True"
 	}
 }
