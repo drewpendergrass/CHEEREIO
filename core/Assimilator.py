@@ -400,10 +400,12 @@ class Assimilator(object):
 				newoverold = np.expand_dims((sigma_RTPS[inds_with_spread]/sigma_a[inds_with_spread]),axis=1)
 				meanrebalance = np.expand_dims(np.mean(analysisSubset[inds_with_spread,:],axis=1),axis=1)*(newoverold-1)
 				if self.verbose>=2:
-					print(f'Before RTPS adjustment, analysis values (with nonzero spread) are the following: {analysisSubset[inds_with_spread,:]}')
+					print(f'Before RTPS adjustment, analysis values (with nonzero spread) have the following mean: {np.mean(analysisSubset[inds_with_spread,:],axis=1)}')
+					print(f'Before RTPS adjustment, analysis values (with nonzero spread) have the following st. dev.: {np.std(analysisSubset[inds_with_spread,:],axis=1)}')
 				analysisSubset[inds_with_spread,:] = (analysisSubset[inds_with_spread,:]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
 				if self.verbose>=2:
-					print(f'After RTPS adjustment, analysis values (with nonzero spread) are the following: {analysisSubset[inds_with_spread,:]}')
+					print(f'After RTPS adjustment, analysis values (with nonzero spread) have the following mean: {np.mean(analysisSubset[inds_with_spread,:],axis=1)}')
+					print(f'After RTPS adjustment, analysis values (with nonzero spread) have the following st. dev.: {np.std(analysisSubset[inds_with_spread,:],axis=1)}')
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)

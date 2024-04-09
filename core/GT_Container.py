@@ -96,6 +96,8 @@ class GT_Container(object):
 		if len(self.species_not_in_statevec_to_RTPS)>0:
 			background_gt = GT_Container(background_timestamp,getAssimColumns=False, constructStateVecs=False)
 			for species in self.species_not_in_statevec_to_RTPS:
+				if self.verbose>=2:
+					print(f'Performing RTPS for species {species} concentrations (not in state vector).')
 				conc4D_background = background_gt.combineEnsembleForSpecies(species)
 				sigma_b = np.std(conc4D_background,axis=0) 
 				conc4D = self.combineEnsembleForSpecies(species)
@@ -103,9 +105,19 @@ class GT_Container(object):
 				sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
 				ind0,ind1,ind2 = np.where(np.abs(sigma_a)>5e-16) #Machine precision can be a problem
 				if len(ind0)>0:
+					if self.verbose>=2:
+						print(f'Standard deviation of prior has shape {sigma_b.shape} with initial value {sigma_b[ind0[0],ind1[0],ind2[0]]}')
+						print(f'Standard deviation of posterior has shape {sigma_a.shape} with initial value {sigma_a[ind0[0],ind1[0],ind2[0]]}')
+						print(f'Weighting standard deviations so prior has {np.round(self.RTPS_parameter*100,1)}% weight.')
+						print(f'A total of {len(ind0)} indices have nonzero spread. Calculating updated analysis ensemble now.')
 					newoverold = sigma_RTPS[ind0,ind1,ind2]/sigma_a[ind0,ind1,ind2] #1D
 					meanrebalance = np.mean(conc4D[:,ind0,ind1,ind2],axis=0)*(newoverold-1)
+					if self.verbose>=2:
+						mean_before = 
+						print(f'Concentrations prior to RTPS have mean {np.mean(conc4D[:,ind0,ind1,ind2],axis=0)} and st. dev. {np.std(conc4D[:,ind0,ind1,ind2],axis=0)}')
 					conc4D[:,ind0,ind1,ind2] = (conc4D[:,ind0,ind1,ind2]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
+					if self.verbose>=2:
+						print(f'Concentrations after RTPS have mean {np.mean(conc4D[:,ind0,ind1,ind2],axis=0)} and st. dev. {np.std(conc4D[:,ind0,ind1,ind2],axis=0)}')
 					for i in self.ensemble_numbers: 
 						self.gt[i].setSpecies3Dconc(species, conc4D[i-1,:,:,:])
 	def saveRestartsAndScalingFactors(self,saveRestart=True, saveEmissions=True):
