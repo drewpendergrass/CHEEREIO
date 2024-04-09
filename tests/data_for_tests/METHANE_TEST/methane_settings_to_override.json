@@ -1,4 +1,5 @@
 {
+	"GC_VERSION" : "14.0.0",
 	"RUN_NAME" : "METHANE_TEST",
 	"MY_PATH" : "{ASSIM_PATH}/tests/data_for_tests",
 	"nEnsemble" : "2",
@@ -16,6 +17,7 @@
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "False",
 	"SaveArea" : "False",
+	"SaveSatDiagn" : "False",
 	"OBSERVED_SPECIES" : {
 		"CH4_TROPOMI": "CH4"
 	},
@@ -25,8 +27,8 @@
 	"TROPOMI_dirs" : {
 		"CH4" : "{ASSIM_PATH}/tests/data_for_tests/METHANE_TEST/tropomi"
 	},
-	"SaveDOFS" : "True",
-	"DOFS_filter" : "1",
+	"SaveDOFS" : "False",
+	"DOFS_filter" : "nan",
 	"TROPOMI_CH4_FILTERS" : "True",
 	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
 	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",
@@ -41,25 +43,33 @@
 		"CH4":"20"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"CH4":"0.3"
+		"CH4":"nan"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
-		"CH4":"0.5"
+		"CH4":"nan"
 	},
 	"REGULARIZING_FACTOR_GAMMA": {
 		"CH4_TROPOMI":"0.02"
 	},
 	"OBS_ERROR": {
-		"CH4_TROPOMI":"5"
+		"CH4_TROPOMI":"17"
 	},
 	"OBS_ERROR_TYPE":{
-		"CH4_TROPOMI":"product"
+		"CH4_TROPOMI":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"CH4_TROPOMI":"0.15"
+		"CH4_TROPOMI":"0.28"
 	},
 	"MIN_OBS_ERROR":{
 		"CH4_TROPOMI":"10"
+	},
+	"OTHER_OBS_ERROR_PARAMETERS":{
+		"CH4_TROPOMI":{
+			"transport_error":"6.1"
+		}
+	},
+	"AV_TO_GC_GRID" : {
+		"CH4_TROPOMI":"True"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
@@ -67,13 +77,19 @@
 	"INFLATION_FACTOR": "0.01",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
-	"AV_TO_GC_GRID" : "True",
+	"AV_TO_GC_GRID" : {
+		"CH4_TROPOMI":"True"
+	},
 	"LOCALIZATION_RADIUS_km" : "500",
+	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
+	"AverageScaleFactorPosteriorWithPrior" : "False",
+	"PriorWeightinSFAverage" : "0.01",
+	"Activate_Relaxation_To_Prior_Spread" : "True",
+	"RTPS_parameter" : "0.9",
+	"species_not_in_statevec_to_RTPS" : [
+	],
 	"Extensions": {
-		"TROPOMI_ALL":"True",
-		"TROPOMI_CH4":"True",
-		"CH4":"True"
 	}
 }
