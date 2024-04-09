@@ -14,6 +14,8 @@
 	"CONTROL_VECTOR_EMIS" : {
 		"CH4":"CH4"
 	},
+	"DO_CONTROL_RUN" : "false",
+	"DO_CONTROL_WITHIN_ENSEMBLE_RUNS" : "true",
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "False",
 	"SaveArea" : "False",
