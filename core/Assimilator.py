@@ -506,6 +506,8 @@ class Assimilator(object):
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:
 				#If we don't have enough observations, set posterior equal to prior
+				if self.verbose>=2:
+					print(f"Fewer than {self.MINNUMOBS} observations for {(latval,lonval)}; setting posterior equal to prior.")
 				analysisSubset = self.setPosteriorEqualToPrior(latval,lonval,returnSubset=True)
 				if self.SaveDOFS:
 					dofs = -1
