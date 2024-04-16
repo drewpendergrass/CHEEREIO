@@ -12,7 +12,7 @@ import testing_tools
 #This test also implicitly makes sure that assimilator constructor works.
 def test_LETKF_calculation():
 	testing_tools.setupPytestSettings('methane')
-	assim = prepTestAssimilator()
+	assim = testing_tools.prepTestAssimilator()
 	assim_answer = assim.analysisEnsemble
 	#calculate actual answer, using assumption of 2 ensemble members and 0 inflation.
 	ptilde = la.inv(np.diag(np.ones(2)) + (np.transpose(assim.Ypert_background)@la.inv(assim.R)@assim.Ypert_background))
@@ -36,7 +36,7 @@ def testStateVecSF():
 #Test that we are correctly
 def test_LETKF_emis_SF():
 	testing_tools.setupPytestSettings('methane')
-	assim = prepTestAssimilator(59,101)
+	assim = testing_tools.prepTestAssimilator(59,101)
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False)
 	assert True
 	# colinds = assim.gt[1].getColumnIndicesFromLocalizedStateVector(59,101)
