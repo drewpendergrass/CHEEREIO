@@ -56,16 +56,16 @@ def setupAssimilatorForAnalysisCorrectionUnitTest(assim,test,setting_value):
 	for emis in assim.emis_names:
 		for s in nan_settings:
 			if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
-				eval(f"assim.{s}[emis] = {setting_value}")
+				exec(f"assim.{s}[emis] = {setting_value}")
 			else:
-				eval(f"assim.{s}[emis] = np.nan")
+				exec(f"assim.{s}[emis] = np.nan")
 	for s in bool_settings:
 		if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
-			eval(f"assim.{s} = True")
+			exec(f"assim.{s} = True")
 			for keys in setting_value:
-				eval(f"assim.{keys} = {setting_value[keys]}")
+				exec(f"assim.{keys} = {setting_value[keys]}")
 		else:
-			eval(f"assim.{s} = False")
+			exec(f"assim.{s} = False")
 	return assim
 
 
