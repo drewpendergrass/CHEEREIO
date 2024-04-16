@@ -41,3 +41,20 @@ def test_LETKF_calculation():
 		real_answer[:,i] = (assim.Xpert_background@w) + assim.xbar_background
 	assert np.allclose(assim_answer,real_answer)
 
+#Check that localized statevector puts emission sf at end of column
+def testStateVecSF():
+	testing_tools.setupPytestSettings('methane')
+	assim = Assimilator('20190108_0000',1,1)
+	sv = assim.combineEnsemble(19,43) #StateVec for a random location
+	colinds = assim.gt[1].getColumnIndicesFromLocalizedStateVector(19,43) #Column indices of localized statevec
+	sf_from_statevec = sv[colinds,0][-1] #last column entry in localized statevec should be the emission sf for ensemble member 1
+	assert np.abs(sf_from_statevec-assim.gt[1].getEmisSF('CH4')[19,43])<1e-16 #check the above
+
+def test_LETKF_bonuses():
+	assert True
+	# testing_tools.setupPytestSettings('methane')
+	# assim = Assimilator('20190108_0000',1,1)
+	# assim.prepareMeansAndPerts(59,101)
+
+	# colinds = assim.gt[1].getColumnIndicesFromLocalizedStateVector(59,101)
+

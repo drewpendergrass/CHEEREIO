@@ -15,6 +15,8 @@
 * Added relaxation to prior spread (RTPS) inflation technique
 * Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.
 * Added convenience restore_backup.batch script to overwrite a failed run with the spun-up backup.
+* Brought tests folder up to date and added more comprehensive testing of assimilation workflow.
+* Improved CHEEREIO error catching and run control.
 
 
 ## Version 1.2.1
