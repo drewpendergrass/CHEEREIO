@@ -5,6 +5,8 @@
 
 source activate $(jq -r ".CondaEnv" ../ens_config.json)
 python advance_timestep.py "${1}"
+py_exit_status=$?
+
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"
@@ -12,6 +14,11 @@ ASSIM_TIME=$(jq -r ".ASSIM_TIME" ../ens_config.json)
 nEnsemble=$(jq -r ".nEnsemble" ../ens_config.json)
 GC_VERSION="$(jq -r ".GC_VERSION" ../ens_config.json)"
 ACTIVATE_OBSPACK="$(jq -r ".ACTIVATE_OBSPACK" ../ens_config.json)"
+
+if [ $py_exit_status != 0 ]; then
+    printf "Python advance timestep script exited without code 0. \n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS #This file's presence will break loop
+fi
+
 gc_major_version="${GC_VERSION:0:2}"
 
   if [ $gc_major_version = "13" ]; then
