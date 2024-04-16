@@ -44,6 +44,6 @@ def test_LETKF_emis_SF_scaling():
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'InflateScalingsToXOfInitialStandardDeviation',0.3)
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	trueAnalysisSubset = analysisSubset
-	trueAnalysisSubset[-1,:] = (np.array([1.2,1.3]-1.25)*3.6) + 1.25 
+	trueAnalysisSubset[-1,:] = ((np.array([1.2,1.3])-1.25)*3.6) + 1.25 
 	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
 
