@@ -58,18 +58,6 @@ def test_LETKF_emis_SF_scaling():
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	if not np.allclose(analysisSubset,correctedAnalysisSubset):
 		errors.append('Assimilator failed to leave scale factors at analysis standard deviation when this behavior was expected.')
-	assert not errors, "errors occured:\n{}".format("\n".join(errors)) 
-
-
-
-
-    # replace assertions by conditions
-    if not condition_1:
-        errors.append("an error message")
-    if not condition_2:
-        errors.append("an other error message")
-
-    # assert no error message has been registered, else print messages
-    
+	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
 
 
