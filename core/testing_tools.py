@@ -47,6 +47,28 @@ def prepTestAssimilator(latind=None,lonind=None):
 	assim.makeAnalysisCombinedEnsemble()
 	return assim
 
+#Set up assimilator for analysis unit tests. Setting value is a float if setting to test is in nan_settings, otherwise a dictionary of values to change
+def setupAssimilatorForAnalysisCorrectionUnitTest(assim,test,setting_value):
+	nan_settings = ['InflateScalingsToXOfInitialStandardDeviation','MaximumScaleFactorRelativeChangePerAssimilationPeriod','MinimumScalingFactorAllowed','MaximumScalingFactorAllowed']
+	bool_settings = ['AverageScaleFactorPosteriorWithPrior','AveragePriorAndPosterior','RTPS']
+	if test not in (nan_settings+bool_settings):
+		raise ValueError(f"Test {test} not recognized")
+	for emis in assim.emis_names:
+		for s in nan_settings:
+			if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
+				eval(f"assim.{s}[emis] = {setting_value}")
+			else:
+				eval(f"assim.{s}[emis] = np.nan")
+	for s in bool_settings:
+		if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
+			eval(f"assim.{s} = True")
+			for keys in setting_value:
+				eval(f"assim.{keys} = {setting_value[keys]}")
+		else:
+			eval(f"assim.{s} = False")
+	return assim
+
+
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
 def overrideSettings(settings_to_override, overwrite = False):
 	with open('../settings_to_override.json') as f:

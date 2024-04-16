@@ -33,11 +33,17 @@ def testStateVecSF():
 	sf_from_statevec = sv[colinds,0][-1] #last column entry in localized statevec should be the emission sf for ensemble member 1
 	assert np.abs(sf_from_statevec-assim.gt[1].getEmisSF('CH4')[19,43])<1e-16 #check the above
 
-#Test that we are correctly
-def test_LETKF_emis_SF():
+#Test that we are correctly scaling emissions to match initial standard deviation, if this is the only active analysis correction
+def test_LETKF_emis_SF_scaling():
 	testing_tools.setupPytestSettings('methane')
 	assim = testing_tools.prepTestAssimilator(59,101)
-	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False)
-	assert True
-	# colinds = assim.gt[1].getColumnIndicesFromLocalizedStateVector(59,101)
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	analysisSubset[-1,:] = np.array([1.2,1.3]) #Set posterior scale factors
+	backgroundSubset[-1,:] = np.array([1.0,1.5]) #Set prior scale factors
+	assim.InitEmisSTD['CH4'][59,101] = 0.6 #assume initial background std was 0.6
+	assim = setupAssimilatorForAnalysisCorrectionUnitTest(assim,'InflateScalingsToXOfInitialStandardDeviation',0.3)
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	trueAnalysisSubset = analysisSubset
+	trueAnalysisSubset[-1,:] = (np.array([1.2,1.3]-1.25)*3.6) + 1.25 
+	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
 
