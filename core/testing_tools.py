@@ -19,6 +19,34 @@ def makeAssimilator(date=None,rip_date = None):
 		a = Assimilator('20190108_0000',2,1, rip_date)
 	return a
 
+def prepTestAssimilator(latind=None,lonind=None):
+	assim = Assimilator('20190108_0000',1,1)
+	if latind is not None:
+		assim.prepareMeansAndPerts(latind,lonind)
+		Xshape = assim.Xpert_background.shape
+		Yshape = assim.Ypert_background.shape
+	else:
+		Xshape = (10,2)
+		Yshape = (5,2)
+	assim.Xpert_background = np.zeros(Xshape)
+	assim.Xpert_background[:,0] = np.ones(Xshape[0])*-1
+	assim.Xpert_background[:,1] = np.ones(Xshape[0])*1
+	assim.xbar_background = np.arange(Xshape[0])
+	assim.ybar_background = np.zeros(Yshape[0])
+	assim.Ypert_background = np.zeros(Yshape)
+	assim.Ypert_background[:,0] = np.ones(Yshape[0])*-1
+	assim.Ypert_background[:,1] = np.ones(Yshape[0])*1
+	assim.inflation = 0
+	assim.ydiff = np.ones(Yshape[0])
+	assim.R = np.diag(np.ones(Yshape[0])*2)
+	assim.makeC()
+	assim.makePtildeAnalysis()
+	assim.makeWAnalysis()
+	assim.makeWbarAnalysis()
+	assim.adjWAnalysis()
+	assim.makeAnalysisCombinedEnsemble()
+	return assim
+
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
 def overrideSettings(settings_to_override, overwrite = False):
 	with open('../settings_to_override.json') as f:

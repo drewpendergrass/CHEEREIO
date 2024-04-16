@@ -12,24 +12,7 @@ import testing_tools
 #This test also implicitly makes sure that assimilator constructor works.
 def test_LETKF_calculation():
 	testing_tools.setupPytestSettings('methane')
-	assim = Assimilator('20190108_0000',1,1)
-	assim.Xpert_background = np.zeros((10,2))
-	assim.Xpert_background[:,0] = np.ones(10)*-1
-	assim.Xpert_background[:,1] = np.ones(10)*1
-	assim.xbar_background = np.arange(10)
-	assim.ybar_background = np.zeros(5)
-	assim.Ypert_background = np.zeros((5,2))
-	assim.Ypert_background[:,0] = np.ones(5)*-1
-	assim.Ypert_background[:,1] = np.ones(5)*1
-	assim.inflation = 0
-	assim.ydiff = np.ones(5)
-	assim.R = np.diag(np.ones(5)*2)
-	assim.makeC()
-	assim.makePtildeAnalysis()
-	assim.makeWAnalysis()
-	assim.makeWbarAnalysis()
-	assim.adjWAnalysis()
-	assim.makeAnalysisCombinedEnsemble()
+	assim = prepTestAssimilator()
 	assim_answer = assim.analysisEnsemble
 	#calculate actual answer, using assumption of 2 ensemble members and 0 inflation.
 	ptilde = la.inv(np.diag(np.ones(2)) + (np.transpose(assim.Ypert_background)@la.inv(assim.R)@assim.Ypert_background))
@@ -50,11 +33,11 @@ def testStateVecSF():
 	sf_from_statevec = sv[colinds,0][-1] #last column entry in localized statevec should be the emission sf for ensemble member 1
 	assert np.abs(sf_from_statevec-assim.gt[1].getEmisSF('CH4')[19,43])<1e-16 #check the above
 
-def test_LETKF_bonuses():
+#Test that we are correctly
+def test_LETKF_emis_SF():
+	testing_tools.setupPytestSettings('methane')
+	assim = prepTestAssimilator(59,101)
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False)
 	assert True
-	# testing_tools.setupPytestSettings('methane')
-	# assim = Assimilator('20190108_0000',1,1)
-	# assim.prepareMeansAndPerts(59,101)
-
 	# colinds = assim.gt[1].getColumnIndicesFromLocalizedStateVector(59,101)
 
