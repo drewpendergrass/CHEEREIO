@@ -41,7 +41,7 @@ def test_LETKF_emis_SF_scaling():
 	analysisSubset[-1,:] = np.array([1.2,1.3]) #Set posterior scale factors
 	backgroundSubset[-1,:] = np.array([1.0,1.5]) #Set prior scale factors
 	assim.InitEmisSTD['CH4'][59,101] = 0.6 #assume initial background std was 0.6
-	assim = setupAssimilatorForAnalysisCorrectionUnitTest(assim,'InflateScalingsToXOfInitialStandardDeviation',0.3)
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'InflateScalingsToXOfInitialStandardDeviation',0.3)
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	trueAnalysisSubset = analysisSubset
 	trueAnalysisSubset[-1,:] = (np.array([1.2,1.3]-1.25)*3.6) + 1.25 
