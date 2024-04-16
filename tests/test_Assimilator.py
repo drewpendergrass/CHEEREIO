@@ -37,6 +37,8 @@ def testStateVecSF():
 def test_LETKF_emis_SF_scaling():
 	testing_tools.setupPytestSettings('methane')
 	assim = testing_tools.prepTestAssimilator(59,101)
+	errors = []
+	#Test that we successfully update SF if std collapses
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
 	analysisSubset[-1,:] = np.array([1.2,1.3]) #Set posterior scale factors
 	backgroundSubset[-1,:] = np.array([1.0,1.5]) #Set prior scale factors
@@ -45,5 +47,29 @@ def test_LETKF_emis_SF_scaling():
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	trueAnalysisSubset = analysisSubset
 	trueAnalysisSubset[-1,:] = ((np.array([1.2,1.3])-1.25)*3.6) + 1.25 
-	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
+	if not np.allclose(trueAnalysisSubset,correctedAnalysisSubset):
+		errors.append('Assimilator failed to update analysis scale factors to X of initial standard deviation')
+	#Test that no update happens if std does not collapse
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	analysisSubset[-1,:] = np.array([1.2,1.3]) #Set posterior scale factors
+	backgroundSubset[-1,:] = np.array([1.0,1.5]) #Set prior scale factors
+	assim.InitEmisSTD['CH4'][59,101] = 0.1 #assume initial background std was 0.1
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'InflateScalingsToXOfInitialStandardDeviation',0.3)
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	if not np.allclose(analysisSubset,correctedAnalysisSubset):
+		errors.append('Assimilator failed to leave scale factors at analysis standard deviation when this behavior was expected.')
+	assert not errors, "errors occured:\n{}".format("\n".join(errors)) 
+
+
+
+
+    # replace assertions by conditions
+    if not condition_1:
+        errors.append("an error message")
+    if not condition_2:
+        errors.append("an other error message")
+
+    # assert no error message has been registered, else print messages
+    
+
 
