@@ -61,3 +61,31 @@ def test_LETKF_emis_SF_scaling():
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
 
 
+#Test that we are correctly scaling emissions to match initial standard deviation, if this is the only active analysis correction
+def test_MinMaxSF():
+	testing_tools.setupPytestSettings('methane')
+	assim = testing_tools.prepTestAssimilator(59,101)
+	errors = []
+	#Test that we successfully update SF if std collapses
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	analysisSubset[-1,:] = np.array([-0.3,0.2]) #Set posterior scale factors
+	backgroundSubset[-1,:] = np.array([0.1,0.3]) #Set prior scale factors
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'MinimumScalingFactorAllowed',0.01)
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	trueAnalysisSubset = analysisSubset
+	trueAnalysisSubset[-1,:] = np.array([0.01,0.2])
+	if not np.allclose(trueAnalysisSubset,correctedAnalysisSubset):
+		errors.append('Assimilator failed to enforce minimum scale factor correctly.')
+	#Test that no update happens if std does not collapse
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	analysisSubset[-1,:] = np.array([12.2,25.3]) #Set posterior scale factors
+	backgroundSubset[-1,:] = np.array([19.2,15.6]) #Set prior scale factors
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'MaximumScalingFactorAllowed',20)
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	trueAnalysisSubset = analysisSubset
+	trueAnalysisSubset[-1,:] = np.array([12.2,20])
+	if not np.allclose(trueAnalysisSubset,correctedAnalysisSubset):
+		errors.append('Assimilator failed to enforce maximum scale factor correctly.')
+	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
+
+
