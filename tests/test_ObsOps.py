@@ -63,8 +63,6 @@ def testAverageByGC():
 	numresult = np.array_equal(testnum,correctnum)
 	assert lonresult and latresult and gcresult and obsresult and timeresult and numresult
 
-
-
 def testSuperObsFunctions():
 	GC = testing_tools.makeMiniFakeDataSet()
 	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
