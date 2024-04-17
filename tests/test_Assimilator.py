@@ -89,3 +89,26 @@ def test_MinMaxSF():
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
 
 
+#Test that we are correctly averaging scale factors with prior.
+def test_AverageSFWPrior():
+	testing_tools.setupPytestSettings('methane')
+	assim = testing_tools.prepTestAssimilator(59,101)
+	#Test that we successfully update SF if std collapses
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'AverageScaleFactorPosteriorWithPrior',{'PriorWeightinSFAverage':0.4})
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	trueAnalysisSubset = analysisSubset
+	trueAnalysisSubset[-1,:] = (analysisSubset[-1,:]*0.6)+(backgroundSubset[-1,:]*0.4)
+	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
+
+#Test that we are correctly averaging state vector with prior.
+def test_AverageWPrior():
+	testing_tools.setupPytestSettings('methane')
+	assim = testing_tools.prepTestAssimilator(59,101)
+	#Test that we successfully update SF if std collapses
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
+	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'AveragePriorAndPosterior',{'PriorWeightinPriorPosteriorAverage':0.3})
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	trueAnalysisSubset = (analysisSubset*0.7)+(backgroundSubset*0.3)
+	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
+
