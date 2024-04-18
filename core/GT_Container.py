@@ -60,7 +60,7 @@ class GT_Container(object):
 	#Same func as in Assimilator
 	def combineEnsembleForSpecies(self,species):
 		if self.verbose>=2:
-			print(f'combineEnsembleForSpecies called in Assimilator for species {species}')
+			print(f'combineEnsembleForSpecies called in GT_Container for species {species}')
 		conc3D = []
 		firstens = self.ensemble_numbers[0]
 		first3D = self.gt[firstens].getSpecies3Dconc(species)
