@@ -117,9 +117,9 @@ def test_RTPSinAssimilator():
 	assim = testing_tools.prepTestAssimilator(59,101)
 	#Test that we successfully update SF if std collapses
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
-	analysisSubset = np.random.rand(analysisSubset.shape)
+	analysisSubset = np.random.rand(*analysisSubset.shape)
 	analysisSubset[302,:] = [0,0]
-	backgroundSubset = np.random.rand(backgroundSubset.shape)*5
+	backgroundSubset = np.random.rand(*backgroundSubset.shape)*5
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'RTPS',{'RTPS_parameter':0.7})
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	errors = []
