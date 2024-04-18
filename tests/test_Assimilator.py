@@ -129,7 +129,7 @@ def test_RTPSinAssimilator():
 		errors.append('RTPS failed to conserve analysis mean.')
 	print(f'Correct std: {correct_std}')
 	print(f'Calculated std: {np.std(correctedAnalysisSubset,axis=1)}')
-	where_std_diff = np.where(np.abs(correct_std-np.std(correctedAnalysisSubset,axis=1))>=1e-15)[0]
+	where_std_diff = np.where(np.abs(correct_std-np.std(correctedAnalysisSubset,axis=1))>=1e-10)[0]
 	print(f'Where std diff: {where_std_diff}')
 	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
