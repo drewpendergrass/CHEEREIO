@@ -33,6 +33,9 @@ def testStateVecSF():
 	sf_from_statevec = sv[colinds,0][-1] #last column entry in localized statevec should be the emission sf for ensemble member 1
 	assert np.abs(sf_from_statevec-assim.gt[1].getEmisSF('CH4')[19,43])<1e-16 #check the above
 
+
+#UNIT TESTS FOR POST ASSIMILATION CORRECTIONS
+
 #Test that we are correctly scaling emissions to match initial standard deviation, if this is the only active analysis correction
 def test_LETKF_emis_SF_scaling():
 	testing_tools.setupPytestSettings('methane')
@@ -112,6 +115,7 @@ def test_AverageWPrior():
 	trueAnalysisSubset = (analysisSubset*0.7)+(backgroundSubset*0.3)
 	assert np.allclose(trueAnalysisSubset,correctedAnalysisSubset)
 
+#Test RTPS
 def test_RTPSinAssimilator():
 	testing_tools.setupPytestSettings('methane')
 	assim = testing_tools.prepTestAssimilator(59,101)
@@ -134,5 +138,3 @@ def test_RTPSinAssimilator():
 	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
-
-
