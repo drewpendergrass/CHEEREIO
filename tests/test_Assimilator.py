@@ -119,17 +119,17 @@ def test_RTPSinAssimilator():
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
 	analysisSubset = np.random.rand(*analysisSubset.shape)
 	analysisSubset[32,:] = [0,0]
-	print(analysisSubset)
 	backgroundSubset = np.random.rand(*backgroundSubset.shape) #odds are very good we'll get some stuff that needs inflation.
-	print(backgroundSubset)
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'RTPS',{'RTPS_parameter':0.7})
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
-	print(correctedAnalysisSubset)
 	errors = []
 	if not np.allclose(np.mean(correctedAnalysisSubset,axis=1),np.mean(analysisSubset,axis=1)):
 		errors.append('RTPS failed to conserve analysis mean.')
 	correct_std = (np.std(backgroundSubset,axis=1)*0.7) + (np.std(analysisSubset,axis=1)*0.3)
+	print(f'Correct std: {correct_std}')
+	print(f'Calculated std: {np.std(correctedAnalysisSubset,axis=1)}')
 	where_std_diff = np.where(np.abs(correct_std-np.std(correctedAnalysisSubset,axis=1))>=1e-15)[0]
+	print(f'Where std diff: {where_std_diff}')
 	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
