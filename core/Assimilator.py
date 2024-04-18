@@ -392,8 +392,8 @@ class Assimilator(object):
 			inds_with_spread = np.where(np.abs(sigma_a)>5e-16)[0] #Machine precision can be a problem
 			if self.verbose>=2:
 				print(f'Performing relaxation to prior spread.')
-				print(f'Standard deviation of prior has shape {sigma_b.shape} with initial value {sigma_b[0]}')
-				print(f'Standard deviation of posterior has shape {sigma_a.shape} with initial value {sigma_a[0]}')
+				print(f'Standard deviation of prior has shape {sigma_b.shape} with value {sigma_b}')
+				print(f'Standard deviation of posterior has shape {sigma_a.shape} with initial value {sigma_a}')
 				print(f'Weighting standard deviations so prior has {np.round(self.RTPS_parameter*100,1)}% weight.')
 				print(f'A total of {len(inds_with_spread)} indices have nonzero spread. Calculating updated analysis ensemble now.')
 			if len(inds_with_spread)>0:
