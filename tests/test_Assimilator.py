@@ -121,12 +121,12 @@ def test_RTPSinAssimilator():
 	analysisSubset = np.random.rand(*analysisSubset.shape)
 	analysisSubset[32,:] = [0,0]
 	backgroundSubset = np.random.rand(*backgroundSubset.shape) #odds are very good we'll get some stuff that needs inflation.
+	correct_std = (np.std(backgroundSubset,axis=1)*0.7) + (np.std(analysisSubset,axis=1)*0.3)
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'RTPS',{'RTPS_parameter':0.7})
-	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
+	correctedAnalysisSubset = assim.applyAnalysisCorrections(np.copy(analysisSubset),np.copy(backgroundSubset),59,101)
 	errors = []
 	if not np.allclose(np.mean(correctedAnalysisSubset,axis=1),np.mean(analysisSubset,axis=1)):
 		errors.append('RTPS failed to conserve analysis mean.')
-	correct_std = (np.std(backgroundSubset,axis=1)*0.7) + (np.std(analysisSubset,axis=1)*0.3)
 	print(f'Correct std: {correct_std}')
 	print(f'Calculated std: {np.std(correctedAnalysisSubset,axis=1)}')
 	where_std_diff = np.where(np.abs(correct_std-np.std(correctedAnalysisSubset,axis=1))>=1e-15)[0]
