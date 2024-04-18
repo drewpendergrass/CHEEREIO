@@ -35,9 +35,8 @@
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"SPREAD_AMPLIFICATION_FACTOR" : "1.5",
+	"SPREAD_AMPLIFICATION_FACTOR" : "1.0",
 	"species_to_amplify_not_in_statevec" : [
-		"CH4"	
 	],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
@@ -51,10 +50,10 @@
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"NumCtrlCores" : "24",
-	"Partition" : "huce_cascade,seas_compute,intermediate",
-	"Memory" : "64000",
+	"Partition" : "huce_cascade,seas_compute,shared,sapphire",
+	"Memory" : "92000",
 	"EnsCtrlSpinupMemory" : "8000",
-	"WallTime" : "6-12\\:00",
+	"WallTime" : "2-20\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
 	"ControlWallTime" : "3-00\\:00",
 	"SpinupWallTime" : "",
@@ -220,7 +219,7 @@
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
 	},
-	"INFLATION_FACTOR": "0.0",
+	"INFLATION_FACTOR": "0.03",
 	"ASSIM_TIME": "360",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
@@ -233,7 +232,6 @@
 	"Activate_Relaxation_To_Prior_Spread" : "True",
 	"RTPS_parameter" : "0.9",
 	"species_not_in_statevec_to_RTPS" : [
-		"CH4"
 	],
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
