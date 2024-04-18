@@ -131,8 +131,13 @@ def test_RTPSinAssimilator():
 	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
 	where_std_match = np.where(rawOverBackground<=0.7)[0]
+	print(where_std_match)
 	where_std_not_match = np.where(rawOverBackground>0.7)[0]
+	print(where_std_not_match)
 	where_std_match = np.delete(where_std_match,np.where(where_std_match==32)[0]) #Delete spot 32, which has std 0 and isn't adjusted
+	print(where_std_match)
+	print(np.abs(corrOverBackground[where_std_match]-0.7))
+	print(corrOverBackground[where_std_not_match]-rawOverBackground[where_std_not_match])
 	if np.any(np.abs(corrOverBackground[where_std_match]-0.7)<1e-15) or ~np.allclose(corrOverBackground[where_std_not_match],rawOverBackground[where_std_not_match]):
 		errors.append('RTPS failed to inflate to background std where expected.')
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
