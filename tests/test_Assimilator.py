@@ -115,6 +115,7 @@ def test_AverageWPrior():
 def test_RTPSinAssimilator():
 	testing_tools.setupPytestSettings('methane')
 	assim = testing_tools.prepTestAssimilator(59,101)
+	assim.verbose = 2
 	#Test that we successfully update SF if std collapses
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
 	analysisSubset = np.random.rand(*analysisSubset.shape)
