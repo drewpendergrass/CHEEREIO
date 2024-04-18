@@ -119,15 +119,22 @@ def test_RTPSinAssimilator():
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
 	analysisSubset = np.random.rand(*analysisSubset.shape)
 	analysisSubset[32,:] = [0,0]
-	backgroundSubset = np.random.rand(*backgroundSubset.shape)*5
+	backgroundSubset = np.random.rand(*backgroundSubset.shape)*10
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'RTPS',{'RTPS_parameter':0.7})
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
 	errors = []
 	if not np.allclose(np.mean(correctedAnalysisSubset,axis=1),np.mean(analysisSubset,axis=1)):
 		errors.append('RTPS failed to conserve analysis mean.')
-	where_std_diff = np.where(np.abs(np.std(correctedAnalysisSubset,axis=1)/np.std(backgroundSubset,axis=1))<0.7)[0]
+	corrOverBackground = np.std(correctedAnalysisSubset,axis=1)/np.std(backgroundSubset,axis=1)
+	rawOverBackground = np.std(analysisSubset,axis=1)/np.std(backgroundSubset,axis=1)
+	where_std_diff = np.where(corrOverBackground<0.7)[0]
 	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
+	where_std_match = np.where(rawOverBackground<=0.7)[0]
+	where_std_not_match = np.where(rawOverBackground>0.7)[0]
+	where_std_match = np.delete(where_std_match,np.where(where_std_match==32)[0]) #Delete spot 32, which has std 0 and isn't adjusted
+	if np.any(np.abs(corrOverBackground[where_std_match]-0.7)<1e-15) or ~np.allclose(corrOverBackground[where_std_not_match],rawOverBackground[where_std_not_match]):
+		errors.append('RTPS failed to inflate to background std where expected.')
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
 
 
