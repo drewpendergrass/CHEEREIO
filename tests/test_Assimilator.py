@@ -118,7 +118,7 @@ def test_RTPSinAssimilator():
 	#Test that we successfully update SF if std collapses
 	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(59,101,doBackground=True,doPerts=False) #Get column subsets
 	analysisSubset = np.random.rand(*analysisSubset.shape)
-	analysisSubset[302,:] = [0,0]
+	analysisSubset[32,:] = [0,0]
 	backgroundSubset = np.random.rand(*backgroundSubset.shape)*5
 	assim = testing_tools.setupAssimilatorForAnalysisCorrectionUnitTest(assim,'RTPS',{'RTPS_parameter':0.7})
 	correctedAnalysisSubset = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,59,101)
@@ -126,7 +126,7 @@ def test_RTPSinAssimilator():
 	if not np.allclose(np.mean(correctedAnalysisSubset,axis=1),np.mean(analysisSubset,axis=1)):
 		errors.append('RTPS failed to conserve analysis mean.')
 	where_std_diff = np.where(np.abs(np.std(correctedAnalysisSubset,axis=1)/np.std(backgroundSubset,axis=1))<0.7)[0]
-	if (len(where_std_diff)!=1) or (where_std_diff[0]!=302) :
+	if (len(where_std_diff)!=1) or (where_std_diff[0]!=32) :
 		errors.append('RTPS failed to inflate to background std.')
 	assert not errors, "errors occured:\n{}".format("\n".join(errors))     
 
