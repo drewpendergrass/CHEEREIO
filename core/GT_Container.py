@@ -113,7 +113,6 @@ class GT_Container(object):
 					newoverold = sigma_RTPS[ind0,ind1,ind2]/sigma_a[ind0,ind1,ind2] #1D
 					meanrebalance = np.mean(conc4D[:,ind0,ind1,ind2],axis=0)*(newoverold-1)
 					if self.verbose>=2:
-						mean_before = 
 						print(f'Concentrations prior to RTPS have mean {np.mean(conc4D[:,ind0,ind1,ind2],axis=0)} and st. dev. {np.std(conc4D[:,ind0,ind1,ind2],axis=0)}')
 					conc4D[:,ind0,ind1,ind2] = (conc4D[:,ind0,ind1,ind2]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
 					if self.verbose>=2:
