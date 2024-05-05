@@ -17,9 +17,7 @@ cp -r ${ASSIM_PATH}/extensions CHEEREIO/
 cp -r ${ASSIM_PATH}/postprocess CHEEREIO/
 cp -r ${ASSIM_PATH}/tests CHEEREIO/
 cp -r ${ASSIM_PATH}/templates CHEEREIO/
-cp ${ASSIM_PATH}/ens_config.json CHEEREIO/
-cp ${ASSIM_PATH}/operators.json CHEEREIO/
-cp ${ASSIM_PATH}/settings_to_override.json CHEEREIO/
+cp ${ASSIM_PATH}/*.json CHEEREIO/
 cp ${ASSIM_PATH}/*.sh CHEEREIO/
 
 if [ "${SaveDOFS}" = "True" ]; then
