@@ -21,7 +21,7 @@ mkdir -p ${runDir}
 
 ### Copy and point to the necessary data
 cp -r ${RUN_TEMPLATE}/*  ${runDir}
-cp -RLv ${ASSIM_PATH}/templates/ensemble_run.template ${runDir}
+cp -RLv ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/ensemble_run.template ${runDir}
 cd $runDir
 
 ### Link to GEOS-Chem executable instead of having a copy in each rundir
@@ -31,7 +31,7 @@ ln -s ../${RUN_TEMPLATE}/gcclassic .
 ln -s $RESTART_FILE GEOSChem.Restart.${SPINUP_START}_0000z.nc4
 
 #Switch HEMCO_Config to base/nature one.
-python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
+python ${MY_PATH}/${RUN_NAME}/CHEEREIO/core/hemco_delink_scalefactors.py $(pwd) 
 
 ### Update settings in input.geos
 sed -i -e "s:{DATE1}:${SPINUP_START}:g" \

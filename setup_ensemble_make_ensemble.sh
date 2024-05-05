@@ -48,7 +48,7 @@ ln -s ../../${RUN_TEMPLATE}/gcclassic .
 
 if [ $x -eq 0 ]; then
 #Switch HEMCO_Config to base/nature one.
-python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
+python ${MY_PATH}/${RUN_NAME}/CHEEREIO/core/hemco_delink_scalefactors.py $(pwd) 
 else 
 #Use HEMCO_Config with updated scaling factors
 sed_ie "s|template_run|ensemble_runs/${name}|"  HEMCO_Config.rc #Replace template_run with this folder in HEMCO_Config
@@ -89,7 +89,7 @@ printf "${thinline}CREATED: ${name}${thinline}"
 
 done
 
-cd ${ASSIM_PATH}
+cd ${MY_PATH}/${RUN_NAME}/CHEEREIO
 source activate $(jq -r ".CondaEnv" ens_config.json) #Activate conda environment.
 
 #Create initial scaling factors
@@ -127,10 +127,10 @@ cd ${MY_PATH}/${RUN_NAME}
 
 if [ "${DO_ENS_SPINUP}" = true ]; then
 
-  cp ${ASSIM_PATH}/templates/restore_backup.batch scratch/
+  cp ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/restore_backup.batch scratch/
 
   sed -i -e "s:{Partition}:${Partition}:g" \
-         -e "s:{ASSIM}:${ASSIM_PATH}:g" scratch/restore_backup.batch
+         -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}/CHEEREIO:g" scratch/restore_backup.batch
 
 fi 
 

@@ -50,7 +50,7 @@ if "$SetupTemplateRundir"; then
   fi
 
   #Modify HEMCO_Config so that GEOS-Chem will read in assimilated scaling factors.
-  cd ${ASSIM_PATH}/core
+  cd ${MY_PATH}/${RUN_NAME}/CHEEREIO/core
   bash prepare_template_hemco_config.sh
   printf "${thinline}"
 
@@ -107,7 +107,7 @@ fi
 ##=======================================================================
 if  "$SetupSpinupRun"; then
 
-  cd ${ASSIM_PATH}
+  cd ${MY_PATH}/${RUN_NAME}/CHEEREIO
   source setup_ensemble_spinup.sh
 
 fi # SetupSpinupRun
@@ -117,7 +117,7 @@ fi # SetupSpinupRun
 ##=======================================================================
 if  "$SetupControlRun"; then
 
-  cd ${ASSIM_PATH}
+  cd ${MY_PATH}/${RUN_NAME}/CHEEREIO
   source setup_ensemble_control.sh
     
 fi # SetupConrolRun
@@ -128,7 +128,7 @@ fi # SetupConrolRun
 ##=======================================================================
 if "$SetupEnsembleRuns"; then
 
-    cd ${ASSIM_PATH}
+    cd ${MY_PATH}/${RUN_NAME}/CHEEREIO
     source setup_ensemble_make_ensemble.sh
 
 fi  # SetupEnsembleRuns
