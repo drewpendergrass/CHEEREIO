@@ -17,6 +17,7 @@ cp -r ${ASSIM_PATH}/extensions CHEEREIO/
 cp -r ${ASSIM_PATH}/postprocess CHEEREIO/
 cp -r ${ASSIM_PATH}/tests CHEEREIO/
 cp -r ${ASSIM_PATH}/templates CHEEREIO/
+cp -r ${ASSIM_PATH}/environments CHEEREIO/
 cp ${ASSIM_PATH}/*.json CHEEREIO/
 cp ${ASSIM_PATH}/*.sh CHEEREIO/
 
