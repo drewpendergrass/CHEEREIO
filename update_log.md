@@ -18,6 +18,7 @@
 * Brought tests folder up to date and added more comprehensive testing of assimilation workflow. Documented testing suite.
 * Improved CHEEREIO error catching and run control.
 * Fixed CHEEREIO conda environment to replace removed packages (thanks to Lee Murray)
+* CHEEREIO now installs a copy of code in the run folder, so multiple runs can be tested at once and modified independently from one CHEEREIO code folder.
 
 ## Version 1.2.1
 
