@@ -130,7 +130,7 @@ if [ "${DO_ENS_SPINUP}" = true ]; then
   cp ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/restore_backup.batch scratch/
 
   sed -i -e "s:{Partition}:${Partition}:g" \
-         -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}/CHEEREIO:g" scratch/restore_backup.batch
+         -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}_BACKUP/CHEEREIO:g" scratch/restore_backup.batch
 
 fi 
 
