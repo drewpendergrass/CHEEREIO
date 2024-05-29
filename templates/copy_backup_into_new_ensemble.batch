@@ -54,6 +54,9 @@ mv ${RUN_NAME}_${xstr} ${NEW_RUN_NAME}_${xstr}
 #Replace emissions references
 sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" ${NEW_RUN_NAME}_${xstr}/HEMCO_Config.rc
 
+### Increment
+x=$[$x+1]
+
 done
 
 #Replace run script references
