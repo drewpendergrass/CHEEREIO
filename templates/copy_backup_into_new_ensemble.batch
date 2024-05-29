@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#SBATCH -c 1
+#SBATCH -N 1
+#SBATCH -p {Partition}
+#SBATCH --mem 4000
+#SBATCH -t 1-00:00
+#SBATCH -o backup_%j.out    # File to which STDOUT will be written, %j inserts jobid       
+#SBATCH -e backup_%j.err    # File to which STDERR will be written, %j inserts jobid
+
+NEW_RUN_NAME="REPLACE_ME"
+PRODUCE_BACKUP=true
+
+if [[ ${NEW_RUN_NAME} = "REPLACE_ME" ]]; then
+	echo "MUST SUPPLY ENSEMBLE NAME TO SCRIPT BEFORE RUNNING; edit this file and put new name for ensemble in variable NEW_RUN_NAME"
+	exit 1
+fi
+
+source {ASSIM}/environments/cheereio.env #This is specific to the Harvard cluster; rewrite for yours
+eval "$(conda shell.bash hook)"
+
+MY_PATH="$(jq -r ".MY_PATH" {ASSIM}/ens_config.json)"
+RUN_NAME="$(jq -r ".RUN_NAME" {ASSIM}/ens_config.json)"
+DO_CONTROL_WITHIN_ENSEMBLE_RUNS="$(jq -r ".DO_CONTROL_WITHIN_ENSEMBLE_RUNS" {ASSIM}/ens_config.json)"
+nEnsemble="$(jq -r ".nEnsemble" {ASSIM}/ens_config.json)"
+
+cp -r ${MY_PATH}/${RUN_NAME}_BACKUP ${MY_PATH}/${NEW_RUN_NAME} 
+
+# Initialize (x=0 is nature run (if used), i.e. no perturbation; x=1 is ensemble member 1; etc.)
+if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = true ]; then
+  x=0
+else
+  x=1
+fi
+
+cd ${MY_PATH}/${NEW_RUN_NAME}/ensemble_runs
+
+# Rename each run directory
+while [ $x -le $nEnsemble ];do
+
+### Add zeros to string name
+if [ $x -lt 10 ]; then
+  xstr="000${x}"
+elif [ $x -lt 100 ]; then
+  xstr="00${x}"
+elif [ $x -lt 1000 ]; then
+  xstr="0${x}"
+else
+  xstr="${x}"
+fi
+
+mv ${RUN_NAME}_${xstr} ${NEW_RUN_NAME}_${xstr}
+
+#Replace emissions references
+sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" ${NEW_RUN_NAME}_${xstr}/HEMCO_Config.rc
+
+done
+
+#Replace run script references
+sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" run_ensemble_spinup_simulations.sh
+sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" run_ensemble_simulations.sh
+
+#Change template run emissions reference
+sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" ${MY_PATH}/${NEW_RUN_NAME}/template_run/HEMCO_Config.rc
+
+#Fix ens_config
+sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" ${MY_PATH}/${NEW_RUN_NAME}/CHEEREIO/ens_config.json
+
+if [ "${PRODUCE_BACKUP}" = true ]; then
+	#Fix restore backup script
+	sed -i -e "s:${RUN_NAME}:${NEW_RUN_NAME}:g" ${MY_PATH}/${NEW_RUN_NAME}/scratch/restore_backup.batch
+
+	#Copy into backup
+	cp -r ${MY_PATH}/${NEW_RUN_NAME} ${MY_PATH}/${NEW_RUN_NAME}_BACKUP
+else 
+	rm ${MY_PATH}/${NEW_RUN_NAME}/scratch/restore_backup.batch
+fi 
+
+
+
