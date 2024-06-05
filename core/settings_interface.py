@@ -3,16 +3,16 @@ from importlib import import_module
 
 #Load in settings from ens_config.json. If settings_to_override is active (entry override is True)
 #the overwrite entries provided
-def getSpeciesConfig():
-	with open('../ens_config.json') as f:
+def getSpeciesConfig(folder='..'):
+	with open(f'{folder}/ens_config.json') as f:
 		data = json.load(f)
 	#Load extensions and add if turned on
 	extensions = data['Extensions']
 	for key in list(extensions.keys()):
 		if extensions[key] == 'True':
-			data = addExtension(data,f'../extensions/{key}_extension.json')
+			data = addExtension(data,f'{folder}/extensions/{key}_extension.json')
 	#Override settings --- mostly used by the automated testing utility.
-	with open('../settings_to_override.json') as f:
+	with open(f'{folder}/settings_to_override.json') as f:
 		over_data = json.load(f)
 	if over_data['override'] == "True":
 		for key in list(over_data.keys()):
