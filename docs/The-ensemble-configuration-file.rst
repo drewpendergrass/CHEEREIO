@@ -754,8 +754,7 @@ LETKF settings
 
 .. option:: Activate_Relaxation_To_Prior_Spread
 
-	"True" or "False", should we perform Relaxation to Prior Spread (RTPS) inflation in the LETKF assimilation? RTPS is a common form of ensemble inflation (can be done in lieu of ``INFLATION_FACTOR``) where the ensemble is reinflated after assimilation such that the standard deviation of the inflated analysis perturbation matrix :math:`\mathbf{X}^a_\text{infl}` equals the weighted average of the standard deviation (:math:`\sigma^b`) of the background perturbation matrix :math:`\mathbf{X}^b` and the standard deviation (:math:`\sigma^a`) of the analysis posterior ensemble standard deviation :math:`\mathbf{X}^a`, as in the following equation: :math:`\mathbf{X}^a_\text{infl}=\frac{\alpha\sigma^b+(1-\alpha)\sigma^a}{\sigma^a}\mathbf{X}^a`
-	Here, :math:`\alpha` is a weighting parameter ranging from 0 to 1. 
+	"True" or "False", should we perform Relaxation to Prior Spread (RTPS) inflation in the LETKF assimilation? RTPS is a common form of ensemble inflation (can be done in lieu of ``INFLATION_FACTOR``) where the ensemble is reinflated after assimilation such that the standard deviation of the inflated analysis perturbation matrix :math:`\mathbf{X}^a_\text{infl}` equals the weighted average of the standard deviation (:math:`\sigma^b`) of the background perturbation matrix :math:`\mathbf{X}^b` and the standard deviation (:math:`\sigma^a`) of the analysis posterior ensemble standard deviation :math:`\mathbf{X}^a`, as in the following equation: :math:`\mathbf{X}^a_\text{infl}=\frac{\alpha\sigma^b+(1-\alpha)\sigma^a}{\sigma^a}\mathbf{X}^a`. Here, :math:`\alpha` is a weighting parameter ranging from 0 to 1. 
 
 .. option:: RTPS_parameter
 
