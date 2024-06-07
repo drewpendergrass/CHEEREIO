@@ -105,7 +105,11 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: ASSIM_PATH
 	
-	**Full path** to the directory where the CHEEREIO repository is installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.** Again, when in doubt follow the provided templates.
+	**Full path** to the directory where the CHEEREIO repository was originally installed (e.g. ``/n/home12/drewpendergrass/CHEEREIO``). Directories in the ``ens_config.json`` file **should not have trailing forward slashes.** Again, when in doubt follow the provided templates.
+
+	.. attention::
+
+		CHEEREIO at runtime will not reference this directory, but rather the version which was copied into your ensemble folder (same level as ``ensemble_runs/`` or ``template_run/``) including that copy of the ens_config.json file. This entry is used only at the beginning of the installation process.
 
 .. option:: RUN_NAME
 	

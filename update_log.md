@@ -13,7 +13,7 @@
 * Added relaxation to prior spread (RTPS) inflation technique
 * Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.
 * Added convenience restore_backup.batch script (stored in scratch) to overwrite a failed run with the spun-up backup.
-* Brought tests folder up to date and added more comprehensive testing of assimilation workflow. Documented testing suite.
+* Brought tests folder up to date and added more comprehensive testing of assimilation workflow.
 * Improved CHEEREIO error catching and run control.
 * Fixed CHEEREIO conda environment to replace removed packages (thanks to Lee Murray)
 * CHEEREIO now installs a copy of LETKF model code in the run folder, so multiple runs can be tested at once and modified independently from one CHEEREIO code folder (analagous to GC run directory system).
