@@ -83,6 +83,8 @@ for b in upper_case_boolean_dicts:
 if (spc_config["DO_RUN_IN_PLACE"] == "True") and (spc_config["DO_VARON_RERUN"] == "True"):
 	raise ValueError('Run-in-place and Varon et. al. rerun cannot both be turned on. Set one or both to False.')
 
+if (spc_config["DO_VARON_RERUN"] == "False") and (spc_config["APPROXIMATE_VARON_RERUN"] == "True"):
+	raise ValueError('DO_VARON_RERUN cannot be False while APPROXIMATE_VARON_RERUN is True.')
 
 ############################################################
 ##################CHECK OBSPACK STUFF#######################

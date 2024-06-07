@@ -16,13 +16,14 @@ class HIST_Translator(object):
 		self.hist_dir = f'{path_to_rundir}OutputDir'
 		self.timeperiod = timeperiod
 		self.interval = interval
-	def makeCollDict(self,useLevelEdge = False, useStateMet = False, useObsPack = False):
+	def makeCollDict(self,useLevelEdge = False, useStateMet = False, useObsPack = False, useSatDiagn = False):
 		colls_to_grab = {'StateMet': {'use' : useStateMet, 'glob' : f'{self.hist_dir}/GEOSChem.StateMet*.nc4', 'diags' : 'HistoryStateMetToSave'},
 		'LevelEdgeDiags': {'use' : useLevelEdge, 'glob' : f'{self.hist_dir}/GEOSChem.LevelEdgeDiags*.nc4', 'diags' : 'HistoryLevelEdgeDiagsToSave'},
-		'ObsPack': {'use' : useObsPack, 'glob' : f'{self.hist_dir}/GEOSChem.ObsPack*.nc4','diags' : 'HistoryObsPackToSave'}
+		'ObsPack': {'use' : useObsPack, 'glob' : f'{self.hist_dir}/GEOSChem.ObsPack*.nc4','diags' : 'HistoryObsPackToSave'},
+		'SatDiagn': {'use' : useSatDiagn, 'glob' : f'{self.hist_dir}/GEOSChem.SatDiagn*.nc4','diags' : 'HistorySatDiagnToSave'},
 		}
 		return colls_to_grab
-	def globSubDir(self,timeperiod,useLevelEdge = False, useStateMet = False, useObsPack = False):
+	def globSubDir(self,timeperiod,useLevelEdge = False, useStateMet = False, useObsPack = False, useSatDiagn = False):
 		subdir_lists = {}
 		specconc_list = glob(f'{self.hist_dir}/GEOSChem.SpeciesConc*.nc4')
 		specconc_list.sort()
@@ -33,7 +34,7 @@ class HIST_Translator(object):
 			specconc_list = [spc for spc,t in zip(specconc_list,ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
 		subdir_lists['SpeciesConc'] = specconc_list
 		#Grab additional collections which users might switch on
-		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack)
+		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack, useSatDiagn)
 		for coll in colls_to_grab:
 			subdict = colls_to_grab[coll]
 			if subdict['use']:
@@ -43,11 +44,11 @@ class HIST_Translator(object):
 				met_list = [met for met,t in zip(met_list,met_ts) if (t>=timeperiod[0]) and (t<timeperiod[1])]
 				subdir_lists[coll] = met_list
 		return subdir_lists
-	def combineHist(self,useLevelEdge=False, useStateMet = False, useObsPack = False):
+	def combineHist(self,useLevelEdge=False, useStateMet = False, useObsPack = False, useSatDiagn = False):
 		dataset=[]
 		to_merge=[]
-		subdir_lists=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet,useObsPack)
-		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack)
+		subdir_lists=self.globSubDir(self.timeperiod,useLevelEdge,useStateMet,useObsPack, useSatDiagn)
+		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack, useSatDiagn)
 		#Get species concentrations
 		for ind, specfile in enumerate(subdir_lists['SpeciesConc']):
 			hist_ds = xr.load_dataset(specfile)

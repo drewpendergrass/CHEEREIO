@@ -17,13 +17,11 @@ if [[ ${APPROXIMATE_VARON_RERUN} = "True" ]] && [[ ${DO_VARON_RERUN} = "True" ]]
 		end_timestamp="${end_timestamp%??}" #Clear last two characters
 		end_timestamp="${end_timestamp// /_}" #Replace space with underscore
 		rst_filename="GEOSChem.Restart.${end_timestamp}z.nc4"
+		rm ${MY_PATH}/${RUN_NAME}/ensemble_runs/${RUN_NAME}_*/${rst_filename}
 	fi
 fi
 
 bash update_input_geos.sh ${1} #Overwrite the input.geos files.
-
-
-rm ${MY_PATH}/${RUN_NAME}/ensemble_runs/${RUN_NAME}_*/${rst_filename}
 
 #Remove signal files
 rm ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE

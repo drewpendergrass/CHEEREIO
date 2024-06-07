@@ -42,6 +42,7 @@ class Assimilator(object):
 		ensemble_numbers = []
 		self.control = None
 		self.STATE_VECTOR_CONC = spc_config['STATE_VECTOR_CONC']
+		self.species_to_amplify = list(set(self.STATE_VECTOR_CONC+spc_config['species_to_amplify_not_in_statevec']))
 		self.obsdata_to_save = spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y']
 		if spc_config['AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD'] == "true":
 			self.SPREAD_AMPLIFICATION_FACTOR = float(spc_config['SPREAD_AMPLIFICATION_FACTOR'])
@@ -58,6 +59,8 @@ class Assimilator(object):
 		self.MaximumScaleFactorRelativeChangePerAssimilationPeriod=spc_config["MaximumScaleFactorRelativeChangePerAssimilationPeriod"]
 		self.AveragePriorAndPosterior = spc_config["AveragePriorAndPosterior"] == "True"
 		self.AverageScaleFactorPosteriorWithPrior = spc_config["AverageScaleFactorPosteriorWithPrior"] == "True"
+		self.RTPS = spc_config["Activate_Relaxation_To_Prior_Spread"] == "True"
+		self.RTPS_parameter = float(spc_config["RTPS_parameter"])
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
@@ -379,6 +382,30 @@ class Assimilator(object):
 			if self.verbose>=2:
 				print(f'Averaging prior and posterior, with prior weight of {priorweight} and posterior weight of {posteriorweight}.')
 			analysisSubset = (backgroundSubset*priorweight)+(analysisSubset*posteriorweight)
+		#Now do Relax to Prior Spread (RTPS calculation)
+		if self.RTPS:
+			if (self.RTPS_parameter<0) or (self.RTPS_parameter>1):
+				raise ValueError('Invalid RTPS parameter; must be between 0 and 1.')
+			sigma_a = np.std(analysisSubset,axis=1) 
+			sigma_b = np.std(backgroundSubset,axis=1) 
+			sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
+			inds_with_spread = np.where(np.abs(sigma_a)>5e-16)[0] #Machine precision can be a problem
+			if self.verbose>=2:
+				print(f'Performing relaxation to prior spread.')
+				print(f'Standard deviation of prior has shape {sigma_b.shape} with value {sigma_b}')
+				print(f'Standard deviation of posterior has shape {sigma_a.shape} with initial value {sigma_a}')
+				print(f'Weighting standard deviations so prior has {np.round(self.RTPS_parameter*100,1)}% weight.')
+				print(f'A total of {len(inds_with_spread)} indices have nonzero spread. Calculating updated analysis ensemble now.')
+			if len(inds_with_spread)>0:
+				newoverold = np.expand_dims((sigma_RTPS[inds_with_spread]/sigma_a[inds_with_spread]),axis=1)
+				meanrebalance = np.expand_dims(np.mean(analysisSubset[inds_with_spread,:],axis=1),axis=1)*(newoverold-1)
+				if self.verbose>=2:
+					print(f'Before RTPS adjustment, analysis values (with nonzero spread) have the following mean: {np.mean(analysisSubset[inds_with_spread,:],axis=1)}')
+					print(f'Before RTPS adjustment, analysis values (with nonzero spread) have the following st. dev.: {np.std(analysisSubset[inds_with_spread,:],axis=1)}')
+				analysisSubset[inds_with_spread,:] = (analysisSubset[inds_with_spread,:]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
+				if self.verbose>=2:
+					print(f'After RTPS adjustment, analysis values (with nonzero spread) have the following mean: {np.mean(analysisSubset[inds_with_spread,:],axis=1)}')
+					print(f'After RTPS adjustment, analysis values (with nonzero spread) have the following st. dev.: {np.std(analysisSubset[inds_with_spread,:],axis=1)}')
 		return analysisSubset
 	def saveColumn(self,latval,lonval,analysisSubset):
 		np.save(f'{self.path_to_scratch}/{str(self.ensnum).zfill(3)}/{str(self.corenum).zfill(3)}/{self.parfilename}_lat_{latval}_lon_{lonval}.npy',analysisSubset)
@@ -426,8 +453,8 @@ class Assimilator(object):
 				self.control.setSpecies3Dconc(species, extrapolated_spec)
 	def amplifySpreads(self):
 		if self.verbose>=1:
-			print(f"Amplifying ensemble spread of concentrations.")
-		for species in self.STATE_VECTOR_CONC:
+			print(f"Amplifying ensemble spread of concentrations (those species listed in state vector only).")
+		for species in self.species_to_amplify:
 			conc4D = self.combineEnsembleForSpecies(species)
 			conc_mean = np.mean(conc4D,axis=0)
 			#Subtract the mean, multiply by new_std/old_std (just the amplification factor), add the mean back in
@@ -479,6 +506,8 @@ class Assimilator(object):
 			self.prepareMeansAndPerts(latval,lonval)
 			if len(self.ybar_background)<self.MINNUMOBS:
 				#If we don't have enough observations, set posterior equal to prior
+				if self.verbose>=2:
+					print(f"Fewer than {self.MINNUMOBS} observations for {(latval,lonval)}; setting posterior equal to prior.")
 				analysisSubset = self.setPosteriorEqualToPrior(latval,lonval,returnSubset=True)
 				if self.SaveDOFS:
 					dofs = -1

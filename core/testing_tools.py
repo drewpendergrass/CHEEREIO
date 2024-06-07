@@ -19,6 +19,56 @@ def makeAssimilator(date=None,rip_date = None):
 		a = Assimilator('20190108_0000',2,1, rip_date)
 	return a
 
+def prepTestAssimilator(latind=None,lonind=None):
+	assim = Assimilator('20190108_0000',1,1)
+	if latind is not None:
+		assim.prepareMeansAndPerts(latind,lonind)
+		Xshape = assim.Xpert_background.shape
+		Yshape = assim.Ypert_background.shape
+	else:
+		Xshape = (10,2)
+		Yshape = (5,2)
+	assim.Xpert_background = np.zeros(Xshape)
+	assim.Xpert_background[:,0] = np.ones(Xshape[0])*-1
+	assim.Xpert_background[:,1] = np.ones(Xshape[0])*1
+	assim.xbar_background = np.arange(Xshape[0])
+	assim.ybar_background = np.zeros(Yshape[0])
+	assim.Ypert_background = np.zeros(Yshape)
+	assim.Ypert_background[:,0] = np.ones(Yshape[0])*-1
+	assim.Ypert_background[:,1] = np.ones(Yshape[0])*1
+	assim.inflation = 0
+	assim.ydiff = np.ones(Yshape[0])
+	assim.R = np.diag(np.ones(Yshape[0])*2)
+	assim.makeC()
+	assim.makePtildeAnalysis()
+	assim.makeWAnalysis()
+	assim.makeWbarAnalysis()
+	assim.adjWAnalysis()
+	assim.makeAnalysisCombinedEnsemble()
+	return assim
+
+#Set up assimilator for analysis unit tests. Setting value is a float if setting to test is in nan_settings, otherwise a dictionary of values to change
+def setupAssimilatorForAnalysisCorrectionUnitTest(assim,test,setting_value):
+	nan_settings = ['InflateScalingsToXOfInitialStandardDeviation','MaximumScaleFactorRelativeChangePerAssimilationPeriod','MinimumScalingFactorAllowed','MaximumScalingFactorAllowed']
+	bool_settings = ['AverageScaleFactorPosteriorWithPrior','AveragePriorAndPosterior','RTPS']
+	if test not in (nan_settings+bool_settings):
+		raise ValueError(f"Test {test} not recognized")
+	for emis in assim.emis_names:
+		for s in nan_settings:
+			if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
+				exec(f"assim.{s}[emis] = {setting_value}")
+			else:
+				exec(f"assim.{s}[emis] = np.nan")
+	for s in bool_settings:
+		if test == s: #If test is deactivated by nan and otherwise set by value, go ahead and set that value now. Otherwise, set to nan 
+			exec(f"assim.{s} = True")
+			for keys in setting_value:
+				exec(f"assim.{keys} = {setting_value[keys]}")
+		else:
+			exec(f"assim.{s} = False")
+	return assim
+
+
 #Overrides settings without modifying ens_config. If overwrite is true, it deletes previous adjustments
 def overrideSettings(settings_to_override, overwrite = False):
 	with open('../settings_to_override.json') as f:
@@ -139,15 +189,13 @@ def walkThroughAssimilation(assim,latind=65,lonind=24): #default is a point in n
 	assim.makeWbarAnalysis()
 	assim.adjWAnalysis()
 	assim.makeAnalysisCombinedEnsemble()
-	analysisSubset,backgroundSubset,analysisPertSubset,backgroundPertSubset = assim.getAnalysisAndBackgroundColumn(latind,lonind,doBackground=True,doPerts=True)
+	analysisSubset,backgroundSubset = assim.getAnalysisAndBackgroundColumn(latind,lonind,doBackground=True,doPerts=False)
 	meananalysis = np.mean(analysisSubset,axis=1)
 	meanbackground = np.mean(backgroundSubset,axis=1)
 	print(f'Background column has dimension {np.shape(backgroundSubset)} and ensemble mean value {meanbackground}')
 	print(f'Analysis column has dimension {np.shape(analysisSubset)} and ensemble mean value {meananalysis}')
 	print(f'Ensemble mean analysis minus ens mean background has value {meananalysis-meanbackground}')
 	print(f'This represents a percent difference of {100*((meananalysis-meanbackground)/meanbackground)}%')
-	dofs = assim.calculateDOFS(analysisPertSubset,backgroundPertSubset)
-	print(f'DOFS has value {dofs}')
 	analysisSubsetAdjusted = assim.applyAnalysisCorrections(analysisSubset,backgroundSubset,latind,lonind)
 	meananalysisSubsetAdjusted = np.mean(analysisSubsetAdjusted,axis=1)
 	print(f'Old analysis ensemble mean for column was {meananalysis}.')

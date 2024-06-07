@@ -69,7 +69,7 @@ def plotEmissions(m,lat,lon,ppdir, hemco_diags_to_process,plotWithLogScale=True,
 		if len(np.shape(hemcofield)) == 5: #we have emissions at higher levels (e.g. aircraft)
 			hemcofield = np.sum(hemcofield,axis=2) #ensemble gone, dim 0 is ens, dim 1 is time, dim 2 is lev. Sum up.
 			if plotcontrol:
-				ctrlfield = np.sum(hemcofield,axis=1) #dim 0 is time, dim 1 is lev.
+				ctrlfield = np.sum(ctrlfield,axis=1) #dim 0 is time, dim 1 is lev.
 		if aggToMonthly:
 			dates,scalar = agg_to_monthly(dates, hemcofield)
 			_,ctrlfield = agg_to_monthly(dates, ctrlfield)

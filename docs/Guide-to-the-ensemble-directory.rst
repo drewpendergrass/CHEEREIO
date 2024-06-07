@@ -3,6 +3,11 @@
 The structure of the ensemble directory
 ==========
 
+The CHEEREIO Directory
+-------------
+
+That looks familiar! CHEEREIO makes a copy of the CHEEREIO code and installs it inside the ensemble directory. When you run your ensemble, CHEEREIO always references this directory (not your original directory where you downloaded CHEEREIO). You can modify the ``ens_config.json`` file in this folder to change ensemble settings. Use this directory to execute postprocessing commands. 
+
 .. _Template:
 
 The Template Run Directory
@@ -59,7 +64,7 @@ The Spinup Run Directory
 
 The Spinup Run directory, if it is enabled, functions like a normal GEOS-Chem run directory with input settings specified by ``ens_config.json``. The Spinup Run directory is a true run directory and comes with a run script that the user must execute manually; the run is initialized by the restart linked in the ``RESTART_FILE`` entry. The idea of this run is to produce a spun up restart that reflects realistic atmospheric conditions; this is "traditional" model spinup and is distinct from the "ensemble spinup" procedure, unique to ensemble data assimilation methods, which is discussed more extensively in the :ref:`Run Ensemble Spinup Simulations` section. 
 
-The start and end times in ``input.geos`` are given by the ``SPINUP_START`` and ``SPINUP_END`` settings, while default cluster memory and wall time settings are specified by ``EnsCtrlSpinupMemory`` and ``SpinupWallTime`` respectively. See :ref:`Configuration` for more information. The Spinup Run Directory created is created by ``setup_ensemble.sh`` so long as the ``SetupSpinupRun`` switch is set to ``true`` when that script is run and so long as ``DO_SPINUP`` is switched to ``true`` in ``ens_config.json``.  
+The start and end times in ``input.geos`` or ``geoschem_config.yml`` are given by the ``SPINUP_START`` and ``SPINUP_END`` settings, while default cluster memory and wall time settings are specified by ``EnsCtrlSpinupMemory`` and ``SpinupWallTime`` respectively. See :ref:`Configuration` for more information. The Spinup Run Directory created is created by ``setup_ensemble.sh`` so long as the ``SetupSpinupRun`` switch is set to ``true`` when that script is run and so long as ``DO_SPINUP`` is switched to ``true`` in ``ens_config.json``.  
 
 When the spinup run terminates, the end restart file generated will automatically be used to initialize the ensemble run directories. No copying on the user's part is necessary.
 
@@ -79,13 +84,27 @@ Note that there are two ways to do a control simulation in CHEEREIO.
 The Scratch Directory
 -------------
 
-Although the user should **never modify anything in the scratch directory**, it may still be useful to know how CHEEREIO makes use of this folder throughout run time. There are three main types of file in the scratch directory:
+Although the user should **never modify anything in the scratch directory (except the two batch scripts below)**, it may still be useful to know how CHEEREIO makes use of this folder throughout run time. There are three main types of file in the scratch directory:
 
 * Column files (``.npy``): Column files contain assimilated columns which will eventually be combined and used to update ensemble restarts and scaling factors. Each core on each run instance calculates some number of columns at assimilation time and saves them to the scratch directory in a relevant subfolder, until finally all are computed and can be used to adjust the ensemble. 
 * Internal state files: these files track things like the current date, lat/lon coordinates, and columns assigned to each core in the ensemble parallelization routine.
 * Flag files: these files are used to couple the many jobs that are running simultaneously during a CHEEREIO assimilation routine. They track ensemble members as they finish GEOS-Chem, as columns are being saved, and as assimilation and clean up processes complete. If an ensemble member fails, it can generate a kill file that terminates the entire ensemble, saving computational resources. The reason these files are necessary is because GEOS-Chem is run as an array of jobs without any memory sharing or coordination, which allows for parallelization across many nodes without MPI. Coordination takes place by each job independently checking for these signal files and modifying their behavior accordingly. This procedure is discussed extensively in the :ref:`Run Ensemble Simulations` section.
 
-The only reason to view the scratch directory is (1) to monitor run progress, and (2) debugging in the event of ensemble failure. In the latter case, the ``KILL_ENS`` file may contain a short error message that can help the user identify the most relevant log file for debugging. See the :ref:`Fix Kill Ens` section for more details on how to debug CHEEREIO and repair the ensemble for eventual resubmission.
+There are three reasons to view the scratch directory: (1) to monitor run progress, (2) restoring an ensemble from a spun-up backup or duplicating a backup into a new ensemble, or (3) debugging in the event of ensemble failure. In the final case, the ``KILL_ENS`` file may contain a short error message that can help the user identify the most relevant log file for debugging. See the :ref:`Fix Kill Ens` section for more details on how to debug CHEEREIO and repair the ensemble for eventual resubmission.
+
+.. _restore backup:
+
+The restore backup script
+~~~~~~~~~~~~~~
+
+For users who have executed an ensemble spinup (recommended), CHEEREIO will create a script called restore_backup.batch in the scratch directory of the ensemble. If you need to restart your ensemble, but don't need to reinstall the ensemble (and repeat the spinup process), execute this script. It will delete your current ensemble and copy your backup to replace it. If you would like to archive your current ensemble, rename the top-level directory (the parent folder of the scratch directory) before submitting this script.
+
+.. _duplicate backup:
+
+The copy backup into new ensemble script script
+~~~~~~~~~~~~~~
+
+For users who have executed an ensemble spinup (recommended), CHEEREIO will create a script called copy_backup_into_new_ensemble.batch in the scratch directory of the ensemble. If you would like to run multiple assimilation experiments with slightly different parameters, edit the ``NEW_RUN_NAME`` variable in the copy_backup_into_new_ensemble.batch file to name your new ensemble. Execute the script, and CHEEREIO will copy the ensemble backup into a new ensemble and backup with your new run name. Edit the new copy of the CHEEREIO code inside the new run directory (e.g. ens_config.json) to define your new settings, and you're good to go!
 
 .. _Ensemble Runs:
 

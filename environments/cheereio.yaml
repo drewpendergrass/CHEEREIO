@@ -42,8 +42,8 @@ dependencies:
   - libev=4.33=h516909a_1
   - libffi=3.3=he6710b0_2
   - libgcc-ng=9.3.0=h5101ec6_17
-  - libgfortran-ng=11.1.0=h69a702a_0
-  - libgfortran5=11.1.0=h6c583b3_0
+  - libgfortran-ng=11.1.0=h69a702a_4
+  - libgfortran5=11.1.0=h6c583b3_4
   - libgomp=9.3.0=h5101ec6_17
   - liblapack=3.9.0=9_openblas
   - libnetcdf=4.8.0=nompi_hcd642e3_103

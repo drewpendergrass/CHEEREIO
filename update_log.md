@@ -1,6 +1,36 @@
 # Update log
 
-## Version 1.2.0 (in development)
+## Version 1.3.0 (under development)
+
+**Action items for users updating to version 1.3.0:**
+
+* Update ens_config.json by comparing with templates, as new fields are now expected!
+
+**Updates under version 1.3.0:**
+
+* Bug fixes for regional inversions (thanks to Yunxiao Tang)
+* Added experimental support for inversions utilizing the SatDiagn collection in GEOS-Chem
+* Added relaxation to prior spread (RTPS) inflation technique
+* Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.
+* Added convenience restore_backup.batch script (stored in scratch) to overwrite a failed run with the spun-up backup.
+* Brought tests folder up to date and added more comprehensive testing of assimilation workflow.
+* Improved CHEEREIO error catching and run control.
+* Fixed CHEEREIO conda environment to replace removed packages (thanks to Lee Murray)
+* CHEEREIO now installs a copy of LETKF model code in the run folder, so multiple runs can be tested at once and modified independently from one CHEEREIO code folder (analagous to GC run directory system).
+* Added convenience copy_backup_into_new_ensemble.batch script (stored in scratch) to duplicate a spun-up backup into a new ensemble, for easy sensitivity simulations
+
+## Version 1.2.1
+
+**Action items for users updating to version 1.2.1:**
+
+* None. This is a small update to fix bugs.
+
+**Updates under version 1.2.1:**
+
+* Bug leading some assimilations to fail is fixed.
+
+
+## Version 1.2.0
 
 **Action items for users updating to version 1.2:**
 

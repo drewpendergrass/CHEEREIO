@@ -20,7 +20,12 @@ if [ "${1}" = false ]; then
 
 	if [ -f ${MY_PATH}/${RUN_NAME}/scratch/ALL_COLUMNS_FOUND ]; then
 		python -u combine_columns_and_update.py ${end_timestamp} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_master.out
-		echo 'Done' > ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
+		py_exit_status=$?
+		if [ $py_exit_status != 0 ]; then
+			printf "Python combine columns script exited without code 0 \n" > ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS #This file's presence will break loop
+		else
+			echo 'Done' > ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
+		fi
 	fi
 
 	conda deactivate #Exit Conda environment

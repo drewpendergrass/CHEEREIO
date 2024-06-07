@@ -9,12 +9,12 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/n/home12/drewpendergrass/CHEEREIO",
-	"RUN_NAME" : "METHANE_lpj_v04",
-	"MY_PATH" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF",
+	"RUN_NAME" : "METHANE_paper_v01_ZERODIFF",
+	"MY_PATH" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/CHEEREIO",
 	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/GEOSChem.Restart.20180101_0000z.nc4",
+	"RESTART_FILE" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/GEOSChem.Restart.20180101_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -35,23 +35,25 @@
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"SPREAD_AMPLIFICATION_FACTOR" : "5",
+	"SPREAD_AMPLIFICATION_FACTOR" : "1.0",
+	"species_to_amplify_not_in_statevec" : [
+	],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
 	"BURN_IN_END" : "20180601",
 	"POSTPROCESS_START_DATE":"20180601",
 	"POSTPROCESS_END_DATE":"20191225",
 	"nEnsemble" : "32",
-	"verbose":"1",
+	"verbose":"2",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
 	"NumCtrlCores" : "24",
-	"Partition" : "huce_cascade,seas_compute,intermediate",
-	"Memory" : "64000",
+	"Partition" : "huce_cascade,seas_compute,shared,sapphire",
+	"Memory" : "92000",
 	"EnsCtrlSpinupMemory" : "8000",
-	"WallTime" : "6-12\\:00",
+	"WallTime" : "2-20\\:00",
 	"EnsSpinupWallTime" : "1-00\\:00",
 	"ControlWallTime" : "3-00\\:00",
 	"SpinupWallTime" : "",
@@ -86,6 +88,7 @@
 	"SaveLevelEdgeDiags" : "True",
 	"SaveStateMet" : "False",
 	"SaveArea" : "False",
+	"SaveSatDiagn" : "False",
 	"HistorySpeciesConcToSave" : [
 		"CH4"
 	],
@@ -101,6 +104,8 @@
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD"
+	],
+	"HistorySatDiagnToSave" : [
 	],
 	"comment012" : "******************************************************************************",
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
@@ -136,7 +141,7 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"init_std_dev" : {
-		"CH4":"0.1"
+		"CH4":"0.15"
 	},
 	"correlatedInitialScalings" : {
 		"CH4":"True"
@@ -150,7 +155,7 @@
 		"CH4" : {
 			"do_add_pert":"True",
 			"file":{
-				"file" : "/n/holyscratch01/jacob_lab/dpendergrass/GC-LETKF/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
+				"file" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
 				"variable" : "EmisCH4_Total"
 			},
 			"max_pert":"0.5",
@@ -174,7 +179,7 @@
 		"CH4":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"CH4":"0.3"
+		"CH4":"0.5"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
 		"CH4":"nan"
@@ -183,7 +188,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CH4_TROPOMI":"0.1"
+		"CH4_TROPOMI":"1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"CH4_TROPOMI":"False"
@@ -214,7 +219,7 @@
 	"SUPER_OBSERVATION_FUNCTION":{
 		"CH4_TROPOMI":"default"
 	},
-	"INFLATION_FACTOR": "0.05",
+	"INFLATION_FACTOR": "0.03",
 	"ASSIM_TIME": "360",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
@@ -224,6 +229,10 @@
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
 	"PriorWeightinSFAverage" : "0.01",
+	"Activate_Relaxation_To_Prior_Spread" : "True",
+	"RTPS_parameter" : "0.9",
+	"species_not_in_statevec_to_RTPS" : [
+	],
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",

@@ -59,7 +59,7 @@ else:
 	control_dir = None
 
 print('Loading simulated observation and observation dictionaries...')
-bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME))
+bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),fullpath_output_name=f'{pp_dir}/SNAPSHOT_bigY.pkl')
 print('Simulated observation and observation dictionaries loaded.')
 print('')
 

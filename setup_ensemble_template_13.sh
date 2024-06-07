@@ -23,7 +23,7 @@ cp ${GCC_RUN_FILES}/gitignore ${RUN_TEMPLATE}/.gitignore
 cp ${GCC_RUN_FILES}/input.geos.templates/input.geos.${sim_name} ${RUN_TEMPLATE}/input.geos
 cp ${GCC_RUN_FILES}/HISTORY.rc.templates/HISTORY.rc.${sim_name} ${RUN_TEMPLATE}/HISTORY.rc
 if [[ ${USE_CUSTOM_CH4} = "True" ]]; then
-  cp ${ASSIM_PATH}/templates/HEMCO_Config.rc.CH4_template13 ${RUN_TEMPLATE}/HEMCO_Config.rc
+  cp ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/HEMCO_Config.rc.CH4_template13 ${RUN_TEMPLATE}/HEMCO_Config.rc
 else
   cp ${GCC_RUN_FILES}/HEMCO_Config.rc.templates/HEMCO_Config.rc.${sim_name} ${RUN_TEMPLATE}/HEMCO_Config.rc
 fi

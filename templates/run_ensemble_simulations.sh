@@ -156,6 +156,12 @@ while [ ! -f ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE ]; do
       fi   
     fi
   fi
+
+  #If there is a problem, the KILL_ENS file will be produced. Break then
+  if [ -f ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS ]; then
+    break
+  fi
+
   #For all runs, switch off the first run marker by having the job controller delete the flag file
   if [ $x -eq 1 ] && [ -f ${MY_PATH}/${RUN_NAME}/scratch/IS_FIRST ]; then
     rm ${MY_PATH}/${RUN_NAME}/scratch/IS_FIRST

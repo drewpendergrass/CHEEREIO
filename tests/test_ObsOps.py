@@ -30,8 +30,8 @@ def testGetGCCols():
 	GC = testing_tools.makeMiniFakeDataSet()
 	spc_config = si.getSpeciesConfig()
 	OBSDATA = testing_tools.makeMiniFakeObsData(latlocs = [4],lonlocs = [9],ntime = 10)
-	results,_,_ = obsop.getGCCols(GC,OBSDATA,'TEST',spc_config)
-	results_level0 = results[:,0]
+	results = obsop.getGCCols(GC,OBSDATA,'TEST',spc_config)
+	results_level0 = results['GC_SPC'][:,0]
 	#on the lat/lon grid at level 0, time zero, we get 5 (latind = 1 ==> second row. lonind = 2 ==> third column). 
 	#Advance by 27 per timestep.
 	correct_answer = 5+(27*np.array([0,0,0,1,1,1,1,2,2,2]))
@@ -73,9 +73,6 @@ def testSuperObsFunctions():
 	errorCorr = 0.1
 	GCmappedtoobs = np.array([0,0,0,1,1,1,1,2,2,2])
 	testobserr_default = obsop.averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs=True,superObsFunction='default',obsInstrumentError = obsInstrumentError, modelTransportError = modelTransportError, errorCorr = errorCorr,minError=0).getDataByKey('err_av')
-	correctobserr_default = [(np.mean(obsInstrumentError[0:3]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError,(np.mean(obsInstrumentError[3:7]) * np.sqrt(((1-errorCorr)/4) + errorCorr) )+modelTransportError,(np.mean(obsInstrumentError[7:10]) * np.sqrt(((1-errorCorr)/3) + errorCorr) )+modelTransportError]
-	obsresult_default = np.array_equal(testobserr_default,correctobserr_default)
-	assert obsresult_default
-
-
+	correctobserr_default = np.array([(np.mean(obsInstrumentError[0:3])**2 * (((1-errorCorr)/3) + errorCorr) )+modelTransportError**2,(np.mean(obsInstrumentError[3:7])**2 * (((1-errorCorr)/4) + errorCorr) )+modelTransportError**2,(np.mean(obsInstrumentError[7:10])**2 * (((1-errorCorr)/3) + errorCorr) )+modelTransportError**2])
+	assert np.allclose(testobserr_default,np.sqrt(correctobserr_default))
 

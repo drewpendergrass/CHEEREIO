@@ -29,6 +29,15 @@ class GT_Container(object):
 				self.gt[ens] = GC_Translator(directory, timestamp, constructStateVecs)
 				ensemble_numbers.append(ens)
 		self.ensemble_numbers=np.array(ensemble_numbers)
+		self.verbose = int(spc_config['verbose'])
+		#Check if we need to do bonus inflation, not handled by Assimilator
+		self.species_not_in_statevec_to_RTPS = []
+		for species in spc_config['species_not_in_statevec_to_RTPS']:
+			#Don't inflate species in state_vector_conc.
+			if species not in spc_config['STATE_VECTOR_CONC']:
+				self.species_not_in_statevec_to_RTPS.append(species)
+		if len(self.species_not_in_statevec_to_RTPS)>0:
+			self.RTPS_parameter = float(spc_config["RTPS_parameter"])
 	#Gets saved column and compares to the original files
 	def constructColStatevec(self,latind,lonind):
 		firstens = self.ensemble_numbers[0]
@@ -48,6 +57,23 @@ class GT_Container(object):
 		backgroundEnsemble = self.constructColStatevec(latind,lonind)
 		diff = saved_col-backgroundEnsemble
 		return [saved_col,backgroundEnsemble,diff]
+	#Same func as in Assimilator
+	def combineEnsembleForSpecies(self,species):
+		if self.verbose>=2:
+			print(f'combineEnsembleForSpecies called in GT_Container for species {species}')
+		conc3D = []
+		firstens = self.ensemble_numbers[0]
+		first3D = self.gt[firstens].getSpecies3Dconc(species)
+		shape4D = np.zeros(4)
+		shape4D[1:4] = np.shape(first3D)
+		shape4D[0]=len(self.ensemble_numbers)
+		shape4D = shape4D.astype(int)
+		conc4D = np.zeros(shape4D)
+		conc4D[firstens-1,:,:,:] = first3D
+		for i in self.ensemble_numbers:
+			if i!=firstens:
+				conc4D[i-1,:,:,:] = self.gt[i].getSpecies3Dconc(species)
+		return conc4D
 	def constructBackgroundEnsemble(self):
 		self.backgroundEnsemble = np.zeros((len(self.gt[1].getStateVector()),len(self.ensemble_numbers)))
 		for i in self.ensemble_numbers:
@@ -63,6 +89,36 @@ class GT_Container(object):
 	def updateRestartsAndScalingFactors(self):
 		for i in self.ensemble_numbers:
 			self.gt[i].reconstructArrays(self.analysisEnsemble[:,i-1])
+	#In some cases, user requests inflation performed on species not in state vector. Do that now.
+	#For RTPS, requires timestamp representing the background state. 
+	def performAdditionalInflation(self, background_timestamp):
+		#Do RTPS for select species not in statevector
+		if len(self.species_not_in_statevec_to_RTPS)>0:
+			background_gt = GT_Container(background_timestamp,getAssimColumns=False, constructStateVecs=False)
+			for species in self.species_not_in_statevec_to_RTPS:
+				if self.verbose>=2:
+					print(f'Performing RTPS for species {species} concentrations (not in state vector).')
+				conc4D_background = background_gt.combineEnsembleForSpecies(species)
+				sigma_b = np.std(conc4D_background,axis=0) 
+				conc4D = self.combineEnsembleForSpecies(species)
+				sigma_a = np.std(conc4D,axis=0)
+				sigma_RTPS = (self.RTPS_parameter*sigma_b) + ((1-self.RTPS_parameter)*sigma_a)
+				ind0,ind1,ind2 = np.where(np.abs(sigma_a)>5e-16) #Machine precision can be a problem
+				if len(ind0)>0:
+					if self.verbose>=2:
+						print(f'Standard deviation of prior has shape {sigma_b.shape} with initial value {sigma_b[ind0[0],ind1[0],ind2[0]]}')
+						print(f'Standard deviation of posterior has shape {sigma_a.shape} with initial value {sigma_a[ind0[0],ind1[0],ind2[0]]}')
+						print(f'Weighting standard deviations so prior has {np.round(self.RTPS_parameter*100,1)}% weight.')
+						print(f'A total of {len(ind0)} indices have nonzero spread. Calculating updated analysis ensemble now.')
+					newoverold = sigma_RTPS[ind0,ind1,ind2]/sigma_a[ind0,ind1,ind2] #1D
+					meanrebalance = np.mean(conc4D[:,ind0,ind1,ind2],axis=0)*(newoverold-1)
+					if self.verbose>=2:
+						print(f'Concentrations prior to RTPS have mean {np.mean(conc4D[:,ind0,ind1,ind2],axis=0)} and st. dev. {np.std(conc4D[:,ind0,ind1,ind2],axis=0)}')
+					conc4D[:,ind0,ind1,ind2] = (conc4D[:,ind0,ind1,ind2]*newoverold)-meanrebalance #Scale so sd is new_std and mean is old mean
+					if self.verbose>=2:
+						print(f'Concentrations after RTPS have mean {np.mean(conc4D[:,ind0,ind1,ind2],axis=0)} and st. dev. {np.std(conc4D[:,ind0,ind1,ind2],axis=0)}')
+					for i in self.ensemble_numbers: 
+						self.gt[i].setSpecies3Dconc(species, conc4D[i-1,:,:,:])
 	def saveRestartsAndScalingFactors(self,saveRestart=True, saveEmissions=True):
 		for i in self.ensemble_numbers:
 			if saveRestart:

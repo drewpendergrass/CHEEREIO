@@ -23,7 +23,7 @@ if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = false ]; then
 
     ### Copy and point to the necessary data
     cp -r ${RUN_TEMPLATE}/*  ${runDir}
-    cp -RLv ${ASSIM_PATH}/templates/ensemble_run.template ${runDir}
+    cp -RLv ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/ensemble_run.template ${runDir}
     cd $runDir
 
     ### Link to GEOS-Chem executable instead of having a copy in each rundir
@@ -33,13 +33,13 @@ if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = false ]; then
     ln -s $RESTART_FILE GEOSChem.Restart.${CONTROL_START}_0000z.nc4
 
     #Switch HEMCO_Config to base/nature one.
-    python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
+    python ${MY_PATH}/${RUN_NAME}/CHEEREIO/core/hemco_delink_scalefactors.py $(pwd) 
     if [ "${ENS_SPINUP_FROM_BC_RESTART}" = true ]; then
         sed -i -e "s|SpeciesRst|SpeciesBC|g" HEMCO_Config.rc #If we are spinning up from BCs, handle this
     fi
 
     #CD to run core scripts
-    cd ${ASSIM_PATH}/core
+    cd ${MY_PATH}/${RUN_NAME}/CHEEREIO/core
 
     #update history collections for production-style run (not spinups)
     source activate $(jq -r ".CondaEnv" ../ens_config.json)
@@ -62,7 +62,7 @@ if [ "${DO_CONTROL_WITHIN_ENSEMBLE_RUNS}" = false ]; then
         -e "s:{NumCores}:${NumCtrlCores}:g" \
         -e "s:{Partition}:${Partition}:g" \
         -e "s:{Memory}:${EnsCtrlSpinupMemory}:g" \
-        -e "s:{ASSIM}:${ASSIM_PATH}:g" \
+        -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}/CHEEREIO:g" \
         -e "s:{SpinupWallTime}:${ControlWallTime}:g" ensemble_run.template > ${control_name}.run #change
     chmod 755 ${control_name}.run
     rm -f ensemble_run.template

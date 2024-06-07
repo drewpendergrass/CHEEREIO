@@ -48,7 +48,7 @@ ln -s ../../${RUN_TEMPLATE}/gcclassic .
 
 if [ $x -eq 0 ]; then
 #Switch HEMCO_Config to base/nature one.
-python ${ASSIM_PATH}/core/hemco_delink_scalefactors.py $(pwd) 
+python ${MY_PATH}/${RUN_NAME}/CHEEREIO/core/hemco_delink_scalefactors.py $(pwd) 
 else 
 #Use HEMCO_Config with updated scaling factors
 sed_ie "s|template_run|ensemble_runs/${name}|"  HEMCO_Config.rc #Replace template_run with this folder in HEMCO_Config
@@ -89,7 +89,7 @@ printf "${thinline}CREATED: ${name}${thinline}"
 
 done
 
-cd ${ASSIM_PATH}
+cd ${MY_PATH}/${RUN_NAME}/CHEEREIO
 source activate $(jq -r ".CondaEnv" ens_config.json) #Activate conda environment.
 
 #Create initial scaling factors
@@ -124,6 +124,19 @@ fi
 
 ### Navigate back to top-level directory
 cd ${MY_PATH}/${RUN_NAME}
+
+if [ "${DO_ENS_SPINUP}" = true ]; then
+
+  cp ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/restore_backup.batch scratch/
+  cp ${MY_PATH}/${RUN_NAME}/CHEEREIO/templates/copy_backup_into_new_ensemble.batch scratch/
+
+  sed -i -e "s:{Partition}:${Partition}:g" \
+         -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}_BACKUP/CHEEREIO:g" scratch/restore_backup.batch
+
+  sed -i -e "s:{Partition}:${Partition}:g" \
+         -e "s:{ASSIM}:${MY_PATH}/${RUN_NAME}_BACKUP/CHEEREIO:g" scratch/copy_backup_into_new_ensemble.batch
+
+fi 
 
 echo "This file's existence indicates that this is the first assimilation period." > scratch/IS_FIRST
 
