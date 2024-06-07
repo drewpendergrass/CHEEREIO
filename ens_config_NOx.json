@@ -36,6 +36,8 @@
 	"END_DATE" : "20190112",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
+	"species_to_amplify_not_in_statevec" : [
+	],
 	"DO_BURN_IN" : "true",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
 	"BURN_IN_END" : "20190106",
@@ -250,6 +252,10 @@
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
 	"PriorWeightinSFAverage" : "0.5",
+	"Activate_Relaxation_To_Prior_Spread" : "False",
+	"RTPS_parameter" : "0.9",
+	"species_not_in_statevec_to_RTPS" : [
+	],
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
