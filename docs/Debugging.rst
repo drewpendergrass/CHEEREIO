@@ -12,6 +12,8 @@ So you've found the dreaded KILL_ENS file in your ensemble's ``scratch`` folder.
   :width: 600
   :alt: Picture of terminal with KILL_ENS file present. 
 
+Please read this entire page before submitting a bug report. Open an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github if you think that your error is due to the base CHEEREIO software, or if you have a question best addressed by the developer (pendergrass [at] g [dot] harvard [dot] edu).
+
 
 GEOS-Chem problems
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,7 +41,7 @@ When all enemble members have a value in the state vector that clusters around a
 I think I solved it!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you conclude that the KILL_ENS file was produced by a minor problem, such as an out-of-memory error, bad Unix environment, a random cluster hiccup, or an easily-resolved fix to source code, you can run the ``cleanup_after_kill_ens.sh`` script from within the ``core/`` folder. This script will take care of some of the main technicalities that can cause a resubmitted CHEEREIO run to fail, such as making sure that all signal files are aligned. From there, you can simply resubmit the job array. However, CHEEREIO is a complex piece of code and sometimes errors can root themselves deeply in the ensemble in ways that are difficult to remove. If your second submission fails, it is easiest to (1) use the clean spun-up backup ensemble, or (2) fully redeploy the ensemble. This is the CHEEREIO equivalent of turning it off and back on again.
+If you conclude that the KILL_ENS file was produced by a minor problem, such as an out-of-memory error, bad Unix environment, a random cluster hiccup, or an easily-resolved fix to source code, you can run the ``cleanup_after_kill_ens.sh`` script from within the ``core/`` folder. This script will take care of some of the main technicalities that can cause a resubmitted CHEEREIO run to fail, such as making sure that all signal files are aligned. From there, you can simply resubmit the job array. However, CHEEREIO is a complex piece of code and sometimes errors can root themselves deeply in the ensemble in ways that are difficult to remove. If your second submission fails, it is easiest to (1) use the clean spun-up backup ensemble, or (2) fully redeploy the ensemble. To restore a clean spun-up back ensemble, execute the restore_backup.batch script in the scratch folder (WARNING: will delete your current ensemble; to preserve, rename top-level directory). More details on the restore_backup.batch script are available here: :ref:`restore backup`. This is the CHEEREIO equivalent of turning it off and back on again.
 
 CHEEREIO is running, but my ensemble is not updating
 -------------
@@ -86,10 +88,6 @@ In the case where neither scale factors nor emissions are updated, there may be 
 The testing suite
 -------------
 
-.. warning::
-  The testing suite is outdated as of version 1.1. Fixing it is on the development list but currently low-priority. 
-
-
 CHEEREIO comes with a testing suite that can be run using the pytest package. This testing workflow verifies that the most important aspects of the assimilation module are working properly. For example, it checks that state vectors are formed and subsetted properly, and that assimilation calculations are correct. It also verifies that satellite operators are working as expected and that data is being passed across modules correctly.
 
 However, not every scenario can be tested by this workflow, so please be careful! This workflow also does not test the full CHEEREIO run, which involves running GEOS-Chem. It only works on assimilation. Run this workflow every time you make modifications to the assimilation workflow, just to make sure you didn't break it!
@@ -98,6 +96,6 @@ To ensure that testing results are reproducible in different computing environme
 
 To execute the testing suite, navigate to the ``tests`` folder in the CHEEREIO code directory and activate your CHEEREIO conda environment. Then, run the command 'pytest' at the command line within this directory. Test results will be printed to the terminal.
 
-To add new tests to the testing suite, add functions with no input that with names that follow the format ``test_*()``. You can make use of the ``testing_tools.py`` module within the ``core/`` folder to ensure stable testing environments and to generate useful data structures. Every testing function should end with an ``assert`` command that takes a boolean. See the `Pytest documentation <https://docs.pytest.org/en/7.1.x/contents.html>`__ for more information.
+To add new tests to the testing suite, add functions with no input that with names that follow the format ``test_*()``. You can make use of the ``testing_tools.py`` module within the ``core/`` folder to ensure stable testing environments and to generate useful data structures. Every testing function should end with an ``assert`` command that takes a boolean. See the `Pytest documentation <https://docs.pytest.org/en/7.1.x/contents.html>`__ for more information. If you add new tests, please make a pull request into the main CHEEREIO code directory so everyone can make use of your work.
 
 

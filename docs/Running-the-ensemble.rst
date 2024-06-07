@@ -33,6 +33,9 @@ There are two ways to do ensemble spinup in CHEEREIO, which we will now discuss.
 Method 1: Longer run during the first assimilation period
 ~~~~~~~~~~~~~
 
+.. warning::
+  Method 1 is not recommended for most users. 
+
 The first and simplest method for ensemble spinup is having GEOS-Chem run for a longer period before the first assimilation period begins. This is implemented via the ``ASSIM_START_DATE`` entry in ``ens_config.json``. The idea is that, during this first GEOS-Chem run, CHEEREIO will run GEOS-Chem from time ``START_DATE`` to time ``ASSIM_START_DATE``. After all ensemble member GEOS-Chem runs reach the ``ASSIM_START_DATE`` time, the LETKF will begin processing an assimilation window beginning at date ``ASSIM_START_DATE`` minus ``ASSIM_TIME`` through ``ASSIM_START_DATE``. 
 
 For example, if ``START_DATE`` is set to January 1, 2019, ``ASSIM_START_DATE`` is set to February 2, 2019, and ``ASSIM_TIME`` is 24 hours, then CHEEREIO will allow every ensemble member to run GEOS-Chem with emissions perturbations applied from January 1, 2019 through February 2, 2019. After all models reach the date February 2, 2019, then CHEEREIO will run LETKF assimilation with assimilation window February 1, 2019 through February 2, 2019. After this point, the model/assimilation loop continues normally with a 24 hour assimilation window. 
@@ -47,6 +50,8 @@ The second method for ensemble spinup involves running an entirely separate ense
 Users indicate that they would like to use this ensemble spinup method by setting ``DO_ENS_SPINUP`` to ``true`` within the ``ens_config.json`` file, and also specify the start and end times of ensemble spinup with the ``ENS_SPINUP_START`` and ``ENS_SPINUP_END`` entries. History frequency and duration settings for ensemble spinup are set with the ``SPINUP_HISTORY_freq`` and ``SPINUP_HISTORY_dur`` entries, and in particular can be set to be much more coarse than the regular ensemble, saving disk space. Simulation wall time and memory are set with ``EnsSpinupWallTime`` and ``EnsCtrlSpinupMemory``; because assimilation is turned off for ensemble spinup, users can request much less memory (instead requesting an amount appropriate for a normal GEOS-Chem simulation)
 
 If you are using this approach, set the ``ASSIM_START_DATE`` entry in ``ens_config.json`` to time ``START_DATE`` plus ``ASSIM_TIME``. This is to avoid accidentally combining the two ensemble spinup methods, which would waste computational resources.
+
+If you use the separate ensemble spinup run, CHEEREIO will install two convenient utilities in the scratch folder: (1) ``restore_backup.batch``, which restores your ensemble to the backup condition when executed, and (2) ``copy_backup_into_new_ensemble.batch``, which makes an entirely new ensemble with a new name based on your backup (useful for sensitivity simulations). For more details, see the :ref:`restore backup` and :ref:`duplicate backup` sections respectively.
 
 .. _Spread amplification:
 

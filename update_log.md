@@ -11,14 +11,15 @@
 * Bug fixes for regional inversions (thanks to Yunxiao Tang)
 * Experimental support for custom regions for regional inversions (thanks to Jared Brewer)
 * Experimental observation operator for CrIS VOC products from U. Minnesota (thanks to Jared Brewer)
-* Added support for inversions utilizing the SatDiagn collection in GEOS-Chem
+* Added experimental support for inversions utilizing the SatDiagn collection in GEOS-Chem
 * Added relaxation to prior spread (RTPS) inflation technique
 * Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.
-* Added convenience restore_backup.batch script to overwrite a failed run with the spun-up backup.
+* Added convenience restore_backup.batch script (stored in scratch) to overwrite a failed run with the spun-up backup.
 * Brought tests folder up to date and added more comprehensive testing of assimilation workflow. Documented testing suite.
 * Improved CHEEREIO error catching and run control.
 * Fixed CHEEREIO conda environment to replace removed packages (thanks to Lee Murray)
-* CHEEREIO now installs a copy of code in the run folder, so multiple runs can be tested at once and modified independently from one CHEEREIO code folder.
+* CHEEREIO now installs a copy of LETKF model code in the run folder, so multiple runs can be tested at once and modified independently from one CHEEREIO code folder (analagous to GC run directory system).
+* Added convenience copy_backup_into_new_ensemble.batch script (stored in scratch) to duplicate a spun-up backup into a new ensemble, for easy sensitivity simulations
 
 ## Version 1.2.1
 
