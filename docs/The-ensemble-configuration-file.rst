@@ -62,12 +62,12 @@ However, CHEEREIO does expect all values in ``ens_config.json`` as strings. If a
 
 **Important**: Follow the capitalization conventions in the template ``ens_config.json`` file! CHEEREIO is case sensitive.
 
-More details on the JSON format are available on the JSON `website <https://www.json.org>`__. When in doubt, follow the conventions in the template ``ens_config.json`` file!
+More details on the JSON format are available on the JSON `website <https://www.json.org>`__. When in doubt, follow the conventions in the template ``ens_config.json`` files!
 
 A line-by-line guide to ensemble configuration
 -------------
 
-The rest of this section will cover the various parts of the ``ens_config.json`` file and the settings they control.
+The rest of this section will cover the various parts of the ``ens_config.json`` file and the settings they control. For a first simulation, it's usually not a bad idea to follow the settings in the template ``ens_config.json`` files.
 
 
 Basic GEOS-Chem and ensemble settings
@@ -213,11 +213,15 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD
 	
-	At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough. If this option is set to "true", then CHEEREIO will multiply the standard deviation of the ensemble after ensemble spinup is complete by the factor given in ``SPREAD_AMPLIFICATION_FACTOR``. This spread amplification is done after the first assimilation period, so it will work with either spinup method. For more information, see :ref:`Spread amplification`.
+	At the end of the ensemble spinup period, the spread in ensemble members may still not be great enough for species in the state vector. If this option is set to "true", then CHEEREIO will multiply the standard deviation of the ensemble after ensemble spinup is complete by the factor given in ``SPREAD_AMPLIFICATION_FACTOR``. This spread amplification is done after the first assimilation period, so it will work with either spinup method. For more information, see :ref:`Spread amplification`.
 
 .. option:: SPREAD_AMPLIFICATION_FACTOR
 	
 	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then this is the factor with which CHEEREIO will multiply the ensemble standard deviation at the end of the ensemble spinup period. For more information on the burn-in period, see :ref:`Burn in period`.
+
+.. option:: species_to_amplify_not_in_statevec
+
+	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then amplify the species listed here even if they aren't included in the statevector. This can be useful if you are assimilating emissions only but still would like to amplify the spread of observed species. 
 
 .. option:: DO_BURN_IN
 
@@ -388,6 +392,10 @@ HISTORY.rc settings
 	
 	Should grid cell areas be used in the assimilation process? "True" or "False".
 
+.. option:: SaveSatDiagn
+	
+	Should the SatDiagn collection be turned on? "True" or "False". This setting is useful for some developmental satellite operators, like for CrIS. 
+
 .. option:: HistorySpeciesConcToSave
 	
 	A list of species to save in the SpeciesConc collection. At minimum, this should encompass the concentration portion of the state vector and any concentrations needed for observation operators. Below is an example: 
@@ -420,7 +428,7 @@ HISTORY.rc settings
 
 .. option:: HistoryXXXXXToSave
 	
-	For every collection in ``HISTORY_collections_to_customize`` that has not already been discussed (SpeciesConc, LevelEdgeDiags, StateMet), the user can create a new entry in the configuration file following the pattern of ``HistoryLevelEdgeDiagsToSave`` or ``HistoryStateMetToSave`` but with the names and entries of their collection of interest. For example, if the user included ``Restart`` in ``HISTORY_collections_to_customize``, they might write the following:
+	For every collection in ``HISTORY_collections_to_customize`` that has not already been discussed (SpeciesConc, LevelEdgeDiags, StateMet, SatDiagn), the user can create a new entry in the configuration file following the pattern of ``HistoryLevelEdgeDiagsToSave`` or ``HistoryStateMetToSave`` but with the names and entries of their collection of interest. For example, if the user included ``Restart`` in ``HISTORY_collections_to_customize``, they might write the following:
 	::
 
 		"HistoryRestartToSave" : [
@@ -450,7 +458,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: Even if a value of False is given for a given observer, entries for that observer still need to be given in any dictionary setting referencing OBSERVED_SPECIES. In many cases (e.g. errors) the values will be ignored.*
+		*Note: Even if a value of False is given for a given observer, entries for that observer still need to be given in any dictionary setting referencing OBSERVED_SPECIES. In many cases (e.g. error specification) the values will be ignored.*
 
 .. option:: TROPOMI_dirs
 	
@@ -743,6 +751,19 @@ LETKF settings
 .. option:: PriorWeightinSFAverage
 	
 	The prior weight if averaging scaling factors with the posterior from the LETKF. A value between 0 and 1.
+
+.. option:: Activate_Relaxation_To_Prior_Spread
+
+	"True" or "False", should we perform Relaxation to Prior Spread (RTPS) inflation in the LETKF assimilation? RTPS is a common form of ensemble inflation (can be done in lieu of ``INFLATION_FACTOR``) where the ensemble is reinflated after assimilation such that the standard deviation of the inflated analysis perturbation matrix :math:`\mathbf{X}^a_\text{infl}` equals the weighted average of the standard deviation (:math:`\sigma^b`) of the background perturbation matrix :math:`\mathbf{X}^b` and the standard deviation (:math:`\sigma^a`) of the analysis posterior ensemble standard deviation (:math:`\mathbf{X}^a`): :math:`\mathbf{X}^a_\text{infl}=\frac{\alpha\sigma^b+(1-\alpha)\sigma^a}{\sigma^a}
+	Here, :math:`\alpha` is a weighting parameter ranging from 0 to 1. 
+
+.. option:: RTPS_parameter
+
+	If ``Activate_Relaxation_To_Prior_Spread`` is True, the parameter :math:`\alpha` from the above.
+
+.. option:: species_not_in_statevec_to_RTPS
+
+	If ``Activate_Relaxation_To_Prior_Spread`` is True, also inflate species not in the state vector? Normally RTPS is only applied to species in the statevector but users can optionally apply RTPS to other species simulated by GEOS-Chem and saved into the restart.
 
 .. _Run in place settings:
 
