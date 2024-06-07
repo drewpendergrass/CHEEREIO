@@ -114,7 +114,7 @@ Note that run-in-place and rerun simulations are mutually exclusive; at most one
 Starting the run
 -------------
 
-Once the ensemble is fully installed, and  ensemble spinup is complete (if using method 2 above), initiating the CHEEREIO run is simple. Navigate to the Ensemble Runs Directory (see the :ref:`Guide to the Ensemble Directory` entry for details on ensemble directory structure). Then, execute the ``run_ens.sh`` script with the command ``nohup bash run_ens.sh &``. That's it!
+Once the ensemble is fully installed, and  ensemble spinup is complete (if using method 2 above), initiating the CHEEREIO run is simple. Navigate to the Ensemble Runs Directory (see the :ref:`Guide to the Ensemble Directory` entry for details on ensemble directory structure). Then, execute the ``run_ens.sh`` script with the command ``nohup bash run_ens.sh &``. That's it! Note that CHEEREIO will use the copy of code (and the ens_config.json file) stored in the CHEEREIO subdirectory of the ensemble directory, not the original code directory you cloned from GitHub.
 
 .. _Monitoring run:
 
