@@ -9,8 +9,6 @@
 **Updates under version 1.3.0:**
 
 * Bug fixes for regional inversions (thanks to Yunxiao Tang)
-* Experimental support for custom regions for regional inversions (thanks to Jared Brewer)
-* Experimental observation operator for CrIS VOC products from U. Minnesota (thanks to Jared Brewer)
 * Added experimental support for inversions utilizing the SatDiagn collection in GEOS-Chem
 * Added relaxation to prior spread (RTPS) inflation technique
 * Added ability to amplify spreads and execute inflation methods like RTPS for species not in the state vector.

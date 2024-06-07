@@ -3,7 +3,7 @@
 Configuring your simulation
 ==========
 
-All ensemble configuration is set by the ``ens_config.json`` file in the main CHEEREIO code directory. This file contains all the information that the user would normally input in the process of making a GEOS-Chem run directory, in addition to other settings like cluster configuration, global assimilation variables (like the localization radius), the composition of the state and control vectors, links to observations, and details about which emissions can be assimilated. This file is in JSON format, which is a format that is human readable but enforces a strict syntax. 
+All ensemble configuration is set by the ``ens_config.json`` file in the CHEEREIO subdirectory of your ensemble folder (copied at installation time from the directory you cloned from GitHub). This file contains all the information that the user would normally input in the process of making a GEOS-Chem run directory, in addition to other settings like cluster configuration, global assimilation variables (like the localization radius), the composition of the state and control vectors, links to observations, and details about which emissions can be assimilated. This file is in JSON format, which is a format that is human readable but enforces a strict syntax. 
 
 Because CHEEREIO requires many of the ensemble settings to be globally available to many different types of scripts and programs, written in different languages and stored in in different directories, it expects a very particular kind of installation and run process and for user settings to be made available in a strict JSON format (so that they can be read by scripts in multiple languages). This page explains how to customize the ensemble to meet your needs. This isn't merely a technical process: the user makes important scientific assumptions in this step!
 
@@ -125,7 +125,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 	.. attention::
 
-		This option is functional but currently causes GEOS-Chem crashes with an unknown cause (DP, 2022/03/09).
+		This option is functional but currently causes GEOS-Chem crashes with an unknown cause.
 
 .. option:: USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config
 
@@ -490,7 +490,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: this option is functional but DOFS values are not easily interpretable; hold off use for now while we think of alternative definitions in our rank-deficient space (DP, 2022/11/07).*
+		*Note: this option is functional but DOFS values are not easily interpretable; hold off use for now while we think of alternative definitions in our rank-deficient space.*
 
 .. option:: DOFS_filter
 	
@@ -498,7 +498,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: per previous note, leave set to "nan" (DP, 2022/11/07).*
+		*Per previous note, leave set to "nan".*
 
 .. option:: ACTIVATE_OBSPACK
 	
@@ -515,7 +515,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. Manual adjustments may be necessary, as discussed in the below entry (DP, 2023/12/06).*
+		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. Manual adjustments may be necessary, as discussed in the below entry.*
 
 .. option:: gc_obspack_path
 	
@@ -523,7 +523,7 @@ Observation settings
 
 	.. attention::
 
-		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. If you get an error the preprocessing step (performed during ensemble run directory creation in the installation workflow), or you already have ObsPack files processed, you should set the preprocess_raw_obspack_files variable to false and supply an already populated directory of manually preprocessed files. Details for how to do this are provided in the ObsPack documentation for GEOS-Chem. (DP, 2023/12/06).*
+		*Note: Lee Murray reports that NOAA doesn't use consistent fields across ObsPack versions. If you get an error the preprocessing step (performed during ensemble run directory creation in the installation workflow), or you already have ObsPack files processed, you should set the preprocess_raw_obspack_files variable to false and supply an already populated directory of manually preprocessed files. Details for how to do this are provided in the ObsPack documentation for GEOS-Chem.*
 
 .. option:: obspack_gc_input_file
 	

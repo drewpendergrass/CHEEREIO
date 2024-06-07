@@ -23,7 +23,7 @@ If the postprocessing workflow runs successfully, then the following figures and
 
 	.. attention:: 
 
-		There are known issues with the colorbar in these movies, and will be debugged soon (DP: 2/3/2023). 
+		There are known issues with the colorbar in these movies, and will be debugged soon. 
 
 .. option:: Observation counts movies (total_aggregated_observation_count and total_raw_observation_counts)
 	

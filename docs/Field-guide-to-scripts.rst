@@ -191,7 +191,7 @@ If the ensemble fails at runtime for a relatively simple reason, like a cluster 
 Deprecated scripts
 -------------
 
-The following scripts have been deprecated and will be removed before the official release of CHEEREIO:
+The following scripts have been deprecated and will be removed:
 
 * regrid_landmask_fraction.py
 
