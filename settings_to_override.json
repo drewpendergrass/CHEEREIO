@@ -91,5 +91,5 @@
         "TROPOMI_CH4": "True",
         "CH4": "True"
     },
-    "override": "True"
+    "override": "False"
 }
