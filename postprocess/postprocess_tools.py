@@ -83,7 +83,7 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,flag_snapshot=Fa
 	if return_not_write:
 		return to_return
 
-def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
+def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None,prefix=''):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
 	combined_ds = []
 	for subdir in subdirs:
@@ -97,9 +97,9 @@ def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	if timeperiod is not None:
 		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
-	ds.to_netcdf(output_dir+'/combined_HEMCO_diagnostics.nc')
+	ds.to_netcdf(f'{output_dir}/{prefix}combined_HEMCO_diagnostics.nc')
 
-def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
+def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None,prefix=''):
 	paths = glob(f'{control_dir}/OutputDir/HEMCO_diagnostics.*.nc')
 	paths.sort()
 	ds_files = []
@@ -108,7 +108,7 @@ def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
 	ds = xr.concat(ds_files,'time')
 	if timeperiod is not None:
 		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
-	ds.to_netcdf(output_dir+'/control_HEMCO_diagnostics.nc')
+	ds.to_netcdf(f'{output_dir}/{prefix}control_HEMCO_diagnostics.nc')
 
 
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
