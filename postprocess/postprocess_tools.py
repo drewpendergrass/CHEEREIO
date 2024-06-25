@@ -11,13 +11,14 @@ import pandas as pd
 sys.path.append('../core')
 import settings_interface as si 
 
-spc_config = si.getSpeciesConfig()
-
-gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
-if gc_version>=14.1:
-	spcconc_name = "SpeciesConcVV"
-else:
-	spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+def getSpcConcName():
+	spc_config = si.getSpeciesConfig()
+	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
+	if gc_version>=14.1:
+		spcconc_name = "SpeciesConcVV"
+	else:
+		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+	return spcconc_name
 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
@@ -112,7 +113,7 @@ def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None,prefix=''):
 
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
 	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
-	concstrings = [f'{spcconc_name}_{name}' for name in species_names]
+	concstrings = [f'{getSpcConcName()}_{name}' for name in species_names]
 	ds = xr.open_mfdataset(specconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
 	ds = ds[concstrings]
 	if subset_rule=='SURFACE':
@@ -202,7 +203,7 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includ
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'{spcconc_name}_{species_name}'].isel(lat=latind,lon=lonind)
+	da = ds[f'{getSpcConcName()}_{species_name}'].isel(lat=latind,lon=lonind)
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
@@ -223,7 +224,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'{spcconc_name}_{species_name}'].mean(axis=(2,3))
+	da = ds[f'{getSpcConcName()}_{species_name}'].mean(axis=(2,3))
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
