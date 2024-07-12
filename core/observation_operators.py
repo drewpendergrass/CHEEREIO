@@ -249,7 +249,7 @@ def averageFieldsToGC(iGC, jGC, tGC, GC, obsvals, doSuperObs=False,superObsFunct
 			for field in other_fields_to_avg:
 				to_return['additional_fields'][field][count] = np.mean(other_fields_to_avg[field][indmatch])
 		for k in kwargs:
-			to_return[k][simple_slice(to_return[k],count,obsaxis[k])] = kwargs[k][simple_slice(kwargs[k],indmatch,obsaxis[k])]
+			to_return[k][simple_slice(to_return[k],count,obsaxis[k])] = np.mean(kwargs[k][simple_slice(kwargs[k],indmatch,obsaxis[k])],axis=obsaxis[k])
 		if doSuperObs:
 			#SuperObservation function selected by user
 			obs_f = produceSuperObservationFunction(superObsFunction)
