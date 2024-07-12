@@ -614,7 +614,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 				if doErrCalc:
 					toreturn.addData(err_av=agg_data['err'])
 				if 'additional_fields' in agg_data:
-					to_return.addData(**agg_data['additional_fields'])
+					toreturn.addData(**agg_data['additional_fields'])
 			else:
 				toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
