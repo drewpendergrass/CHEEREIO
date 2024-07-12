@@ -570,11 +570,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			TROP_PRIOR = TROP_PRIOR_ppb
 			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
 			synthetic_partial_columns = False
-		GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
-		nan_indices = np.argwhere(np.isnan(GC_on_sat))
-		GC_on_sat = np.nan_to_num(GC_on_sat)
+		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
+			superobs=True
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
 			if doErrCalc:
@@ -595,7 +593,30 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 				additional_args_avgGC['other_fields_to_avg'] = {}
 				for field in extra_obsdata_to_save:
 					additional_args_avgGC['other_fields_to_avg'][field] = TROPOMI[field]
-			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+		else:
+			superobs=False
+		#If user is taking super observations and wants to average before applying averaging kernel, do so now
+		if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
+			presuperobs=True
+			trop_agg_args = {'GC_SPC':GC_SPC,'GC_P':GC_P, 'T_press':TROPOMI['pressures'], 'ak':TROPOMI['column_AK'],'TROP_PW':TROP_PW,'TROP_PRIOR':TROP_PRIOR}
+			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
+			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
+			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,agg_data['TROP_PRIOR'])
+		else:
+			presuperobs=False
+			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
+			GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
+		nan_indices = np.argwhere(np.isnan(GC_on_sat))
+		GC_on_sat = np.nan_to_num(GC_on_sat)
+		if superobs:
+			if presuperobs:
+				toreturn = obsop.ObsData(GC_on_sat,agg_data['obs'],agg_data['lat'],agg_data['lon'], agg_data['time'])
+				if doErrCalc:
+					toreturn.addData(err_av=agg_data['err'])
+				if 'additional_fields' in agg_data:
+					to_return.addData(**agg_data['additional_fields'])
+			else:
+				toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			timevals = GC.time.values[t]
 			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],timevals)
