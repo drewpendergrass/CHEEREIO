@@ -347,7 +347,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	if species=="CO" or "NO2":
+	if species in ["CO", "NO2"]:
 		nobs = GC_SPC.shape[0]
 		GC_on_sat_list = []
 		for k in range(0, nobs, chunk_size):
@@ -386,10 +386,13 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 			GC_to_sat_sum = GC_to_sat.sum(axis=1)
 			mask = GC_to_sat_sum != 0
 			GC_on_sat_chunk[mask] = GC_on_sat_chunk[mask] / GC_to_sat_sum[mask]
-	
+			#add to list
 			GC_on_sat_list.append(GC_on_sat_chunk)
-	
-		GC_on_sat = np.concatenate(GC_on_sat_list, axis=0)
+		#Concatenate list
+		if len(GC_on_sat_list) > 0: #If there are observations
+			GC_on_sat = np.concatenate(GC_on_sat_list, axis=0)
+		else: #No observations
+			GC_on_sat = np.zeros((nobs,sat_edges.shape[1]-1))
 	else:
 		'''
 		The provided edges for GEOS-Chem and the satellite should
