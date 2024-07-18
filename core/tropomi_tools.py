@@ -613,7 +613,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		GC_on_sat = np.nan_to_num(GC_on_sat)
 		if superobs:
 			if presuperobs:
-				toreturn = obsop.ObsData(GC_on_sat,agg_data['obs'],agg_data['lat'],agg_data['lon'], agg_data['time'])
+				toreturn = obsop.ObsData(GC_on_sat,agg_data['obs'],agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
 				if doErrCalc:
 					toreturn.addData(err_av=agg_data['err'])
 				if 'additional_fields' in agg_data:
