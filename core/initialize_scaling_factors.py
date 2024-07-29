@@ -59,7 +59,7 @@ for emis in emis_scaling_factors:
 		settings = spc_config['additional_init_perturbation_from_emis'][emis]
 		add_perts[emis]={}
 		add_perts[emis]['saturation'] = float(settings['saturation']) #Get value where we "saturate" emissions with the purposes of randomization.
-		add_perts[emis]['field'] = xr.load_dataset(settings['file']['file'])[settings['file']['variable']].values #Get numpy array of emissions
+		add_perts[emis]['field'] = xr.open_dataset(settings['file']['file'])[settings['file']['variable']].values #Get numpy array of emissions
 		if np.isnan(add_perts[emis]['saturation']):
 			add_perts[emis]['field'] = add_perts[emis]['field']/np.nanmax(add_perts[emis]['field']) #Normalize to 0-1 scale, no saturation
 		else:

@@ -146,7 +146,7 @@ class GC_Translator(object):
 #Class exists to prevent mutual dependencies.
 class DataBundle(object):
 	def __init__(self,rst_filename,emis_sf_filenames,species_config,timestamp_as_string,timestamp_as_date,useLognormal,verbose,num=None):
-		self.restart_ds = xr.load_dataset(rst_filename)
+		self.restart_ds = xr.open_dataset(rst_filename)
 		self.species_config = species_config
 		self.verbose = verbose
 		self.timestamp = timestamp_as_string
@@ -157,7 +157,7 @@ class DataBundle(object):
 		self.emis_ds_list = {}
 		for file in emis_sf_filenames:
 			name = '_'.join(file.split('/')[-1].split('_')[0:-1])
-			self.emis_ds_list[name] = xr.load_dataset(file)
+			self.emis_ds_list[name] = xr.open_dataset(file)
 			if self.useLognormal:
 				self.emis_ds_list[name]['Scalar'] = np.log(self.emis_ds_list[name]['Scalar']) #If we are using lognormal errors, convert to gaussian space immediately on import.
 				if self.verbose>=3:
