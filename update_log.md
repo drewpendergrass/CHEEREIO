@@ -3,6 +3,8 @@
 ## In development
 
 * Bug fix for SatDiagn assimilation.
+* General performance and memory improvements
+* Add option, in super observation case, to average data before applying observation operator for performance improvements.
 
 ## Version 1.3.1
 
