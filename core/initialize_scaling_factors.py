@@ -148,10 +148,10 @@ def saveNetCDF(scalefactor2D, stringnum, emis_name):
 	ds.to_netcdf(f"{outdir}/{name}.nc")
 	print(f"Scaling factors \'{name}.nc\' in folder {spc_config['RUN_NAME']}_{stringnum} initialized successfully!")
 
-#subtract mean to avoid biased initial conditions (e.g. mean one), save out initial std for entire ensemble, save out scalefactors for each ensemble member
+#divide by mean to avoid biased initial conditions (e.g. mean one), save out initial std for entire ensemble, save out scalefactors for each ensemble member
 for ind,emis_name in enumerate(emis_scaling_factors):
 	scaling_factor_mean = np.mean(scaling_factor_cube[:,ind,:,:],axis=0)
-	scaling_factor_cube[:,ind,:,:] -= (scaling_factor_mean-1) #transform to mean of 1
+	scaling_factor_cube[:,ind,:,:] /= scaling_factor_mean #transform to mean of 1
 	#If we are in the lognormal case, do the log for the std. Had to exponentiate first for corrections
 	if useLognormal: #Sampled normal initially; if lognormal, use exp to transform sample
 		scaling_factor_sd = np.std(np.log(scaling_factor_cube[:,ind,:,:]),axis=0)
