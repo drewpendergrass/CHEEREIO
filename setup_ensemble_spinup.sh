@@ -33,11 +33,21 @@ ln -s $RESTART_FILE GEOSChem.Restart.${SPINUP_START}_0000z.nc4
 #Switch HEMCO_Config to base/nature one.
 python ${MY_PATH}/${RUN_NAME}/CHEEREIO/core/hemco_delink_scalefactors.py $(pwd) 
 
+gc_major_version="${GC_VERSION:0:2}"
+if [ $gc_major_version = "13" ]; then
+filename='input.geos'
+elif [ $gc_major_version = "14" ]; then
+filename='geoschem_config.yml'
+else
+printf "\n ERROR: CANNOT WORK WITH GEOS-CHEM VERSION SUPPLIED; must be 13 or later."
+exit 1
+fi
+
 ### Update settings in input.geos
 sed -i -e "s:{DATE1}:${SPINUP_START}:g" \
        -e "s:{DATE2}:${SPINUP_END}:g" \
        -e "s:{TIME1}:000000:g" \
-       -e "s:{TIME2}:000000:g" input.geos
+       -e "s:{TIME2}:000000:g" ${filename}
 
 ### Create run script from template
 sed -e "s:namename:${spinup_name}:g" \
