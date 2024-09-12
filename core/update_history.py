@@ -184,6 +184,10 @@ class HISTORY_Translator():
 			if collection in ['SpeciesConc','StateMet','LevelEdgeDiags']:
 				continue #already handled
 			else:
+				for num,line in enumerate(self.lines):
+					if f"#'{collection}'," in line:
+						self.lines[num] = self.lines[num].replace('#','')
+						break
 				if f"History{collection}ToSave" in list(self.spc_config.keys()):
 					self.customizeSection(collection)
 	def writeHistoryConfig(self):
