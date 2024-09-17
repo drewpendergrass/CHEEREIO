@@ -1,0 +1,10 @@
+{
+	"WHICH_TROPOMI_PRODUCT" : "DEFAULT",
+	"TCCON_CO_FILTERS" : "False",
+	"TCCON_CO_filter_blended_albedo" : "0.75",
+	"TCCON_CO_filter_swir_albedo_low" : "0.05",
+	"TCCON_CO_filter_swir_albedo_high" : "0.4",
+	"TCCON_CO_filter_winter_lat" : "nan",
+	"TCCON_CO_filter_roughness" : "60",
+	"TCCON_CO_filter_swir_aot" : "0.1"
+}

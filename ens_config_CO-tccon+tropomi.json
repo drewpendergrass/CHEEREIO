@@ -3,18 +3,18 @@
 	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
 	"comment002" : "***************************************************************************",
 	"GC_VERSION" : "14.1.1",
-	"RES" : "4.0x5.0",
+	"RES" : "2.0x2.5",
 	"met_name" : "MERRA2",
 	"LEVS" : "47",
 	"NEST" : "F",
 	"REGION" : "",
-	"ASSIM_PATH" : "/users/jk/21/sinavo/cheereio_tagCO_t5/CHEEREIO",
+	"ASSIM_PATH" : "/gpfs/fs0/scratch/d/dylan/sinavo/github_tccon/test4/CHEEREIO",
 	"RUN_NAME" : "CO_rerun_v02",
-	"MY_PATH" : "/users/jk/21/sinavo/cheereio_tagCO_t5/GC-LETKF",
-	"DATA_PATH" : "/data/ctm/ExtData",
-	"CH4_HEMCO_ROOT" : "/data/ctm/ExtData/HEMCO",
+	"MY_PATH" : "/gpfs/fs0/scratch/d/dylan/sinavo/github_tccon/test4/GC-LETKF",
+	"DATA_PATH" : "/home/d/dylan/sinavo/scratch/ExtData",
+	"CH4_HEMCO_ROOT" : "/home/d/dylan/sinavo/scratch/ExtData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/users/jk/21/sinavo/restart_carbon/GEOSChem.Restart.20190101_0000z.nc4",
+	"RESTART_FILE" : "/gpfs/fs0/scratch/d/dylan/sinavo/restart/2023/2/GEOSChem.Restart.20230202_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "tagCO",
 	"chemgrid" : "trop+strat",
@@ -28,22 +28,22 @@
 	"CONTROL_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
-	"ENS_SPINUP_START" : "20190101",
-	"ENS_SPINUP_END" : "20190201",
-	"START_DATE" : "20190201",
-	"ASSIM_START_DATE" : "20190202",
+	"ENS_SPINUP_START" : "20230202",
+	"ENS_SPINUP_END" : "20230203",
+	"START_DATE" : "20230203",
+	"ASSIM_START_DATE" : "20230204",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20190301",
+	"END_DATE" : "20230206",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
 	"species_to_amplify_not_in_statevec" : [
 	],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
-	"BURN_IN_END" : "20190202",
-	"POSTPROCESS_START_DATE":"20190202",
-	"POSTPROCESS_END_DATE":"20190301",
-	"nEnsemble" : "2",
+	"BURN_IN_END" : "20230204",
+	"POSTPROCESS_START_DATE":"20230204",
+	"POSTPROCESS_END_DATE":"20230206",
+	"nEnsemble" : "24",
 	"verbose":"1",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
@@ -64,10 +64,8 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
-		"CO"
 	],
 	"CONTROL_VECTOR_CONC" : [
-		"CO"
 	],
 	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
@@ -83,7 +81,7 @@
 		"StateMet",
 		"Restart"
 	],
-	"HISTORY_freq" : "00000000 040000",
+	"HISTORY_freq" : "00000000 010000",
 	"HISTORY_dur" : "00000001 000000",
 	"SPINUP_HISTORY_freq" : "00000001 000000",
 	"SPINUP_HISTORY_dur" : "00000001 000000",
@@ -110,7 +108,10 @@
 		"Met_AD",
 		"Met_BXHEIGHT",
 		"Met_AIRDEN",
-		"Met_T"
+		"Met_T",
+                "Met_AVGW",
+                "Met_PMID",
+                "Met_PMIDDRY"
 	],
 	"HistorySatDiagnToSave" : [
 	],
@@ -118,26 +119,34 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
+		"CO_TCCON": "CO",
 		"CO_TROPOMI": "CO"
 	},
 	"OBS_TYPE" : {
+		"CO_TCCON":"TCCON",
 		"CO_TROPOMI":"TROPOMI"
 	},
 	"ASSIMILATE_OBS" : {
+		"CO_TCCON":"True",
 		"CO_TROPOMI":"True"
 	},
+        "TCCON_dirs" : {
+                "CO" : "/home/d/dylan/sinavo/scratch/TCCON_AGRT_2023"
+        },
 	"TROPOMI_dirs" : {
-		"CO" : "/users/jk/21/sinavo/TROPOMI_CO_mod"
+		"CO" : "/home/d/dylan/sinavo/scratch/TROPOMI_CO_AGRT2x2.5_2023"
 	},
 	"OMI_dirs" : {
 		"NO2" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/omi/NO2"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
+		"CO_TCCON":"nan",
 		"CO_TROPOMI":"60"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
 	"ACTIVATE_OBSPACK" : "false",
+	"preprocess_raw_obspack_files" : "false",
 	"raw_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack",
 	"gc_obspack_path" : "/n/holylfs05/LABS/jacob_lab/dpendergrass/obspack_gc",
 	"obspack_gc_input_file" : "obspack_ch4.YYYYMMDD.nc",
@@ -149,7 +158,7 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"init_std_dev" : {
-		"CO":"0.2"
+		"CO":"0.17"
 	},
 	"correlatedInitialScalings" : {
 		"CO":"True"
@@ -187,7 +196,7 @@
 		"CO":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"CO":"0.3"
+		"CO":"0.95"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
 		"CO":"nan"
@@ -196,43 +205,55 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"CO_TROPOMI":"0.1"
+		"CO_TCCON":"5",
+		"CO_TROPOMI":"0.2"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
+		"CO_TCCON":"False",
 		"CO_TROPOMI":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
+		"CO_TCCON":"5",
 		"CO_TROPOMI":"0.2"
 	},
 	"OBS_ERROR": {
+		"CO_TCCON":"0.10",
 		"CO_TROPOMI":"0.10"
 	},
 	"OBS_ERROR_TYPE":{
+		"CO_TCCON":"product",
 		"CO_TROPOMI":"product"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
+		"CO_TCCON":"0",
 		"CO_TROPOMI":"0.28"
 	},
 	"MIN_OBS_ERROR":{
+		"CO_TCCON":"0.01",
 		"CO_TROPOMI":"10"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
+                "CO_TCCON":{
+                        "transport_error":"0"
+                },
 		"CO_TROPOMI":{
-			"transport_error":"6.1"
+			"transport_error":"0"
 		}
 	},
 	"AV_TO_GC_GRID" : {
+		"CO_TCCON":"True",
 		"CO_TROPOMI":"True"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
+		"CO_TCCON":"default",
 		"CO_TROPOMI":"default"
 	},
-	"INFLATION_FACTOR": "0.05",
+	"INFLATION_FACTOR": "0.08",
 	"ASSIM_TIME": "24",
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "500",
-	"smooth_localization_with_gaspari_cohn" : "False",
+	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
@@ -250,7 +271,7 @@
 	"rip_burnin_update_time" : "24",
 	"DO_VARON_RERUN" : "False",
 	"APPROXIMATE_VARON_RERUN" : "False",
-	"species_to_approximate_for_rerun" : [],
+	"species_to_approximate_for_rerun" : ["CO"],
 	"number_of_windows_to_rerun" : "1", 
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
@@ -265,12 +286,15 @@
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
+		"CO_TCCON": "ppb",
 		"CO_TROPOMI": "ppb"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
+		"CO_TCCON" : [],
 		"CO_TROPOMI" : []
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
+		"CO_TCCON" : [],
 		"CO_TROPOMI" : []
 	},
 	"extra_plot_field_units":{
@@ -283,6 +307,8 @@
 	"comment029" : "**********************************************************************************",
 	"Extensions": {
 		"TROPOMI_CO":"True",
-		"CH4":"False"
+		"TROPOMI_ALL":"False",
+		"CH4":"False",
+		"TCCON_CO":"True"
 	}
 }

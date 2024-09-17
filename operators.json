@@ -13,5 +13,10 @@
 		"module_name" : "obspack_tools",
 		"translator_name" : "ObsPack_Translator",
 		"implements_initialReadDate" : "True"
+	},
+	"TCCON" : {
+		"module_name" : "tccon_tools",
+		"translator_name" : "TCCON_Translator",
+		"implements_initialReadDate" : "True"
 	}
 }

@@ -114,6 +114,7 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=Fals
 	to_return = {}
 	to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
 	to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
+	to_return['GC_H2O'] = GC[f'Met_AVGW'].values[t,:,j,i] # water vapor valumn mixing ratio in dry air
 	if returnStateMet:
 		for metcoll in spc_config['HistoryStateMetToSave']:
 			if len(np.shape(GC[metcoll].values))==3:
