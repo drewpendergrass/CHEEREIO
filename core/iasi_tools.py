@@ -157,7 +157,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			raise ValueError('ERROR: missing met fields. Ensure Met_BXHEIGHT and Met_AIRDEN are saved out in HistoryRC and listed in ens_config.')
 		GC_bxheight = GC_col_data['Met_BXHEIGHT']
 		GC_AIRDEN = GC_col_data['Met_AIRDEN']
-		IASI_EDGES = IASI['levels']*1e-3 #km to m
+		IASI_EDGES = IASI['level_edge']*1e-3 #km to m
 		IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
 		#Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
 		GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
