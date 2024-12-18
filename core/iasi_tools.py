@@ -40,9 +40,9 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
 
 	met['qa_value'] = qa[ind]
-	met['utc_time'] = data['AERIStime'].values[ind]
-	met['lat'] = data['latitude'].values[ind]
-	met['lon'] = data['longitude'].values[ind]
+	met['utctime'] = data['AERIStime'].values[ind]
+	met['latitude'] = data['latitude'].values[ind]
+	met['longitude'] = data['longitude'].values[ind]
 	met['level_edge'] = data['levels'].values #in km, same for all obs (length 15)
 	met['level_middle'] = data['midlevels'].values #in km, same for all obs (length 14)
 	met[species] = data['nh3_total_column'].values[ind]
@@ -50,17 +50,23 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
 	met['column_AK'] = (data['nh3_AvKnorm']**-1)*(met[species]/data['nh3_Zcolumn'].values[ind,:]) #Eqn 10, B is zero for NH3.
 	met['HRI'] = data['HRI'] #For new postfilter
-	
+
+	if filterinfo is not None:
+		met = obsop.apply_filters(met,filterinfo)
+
 	return met
 
 
 #We only have height from surface, so we will use GC Boxheight diagnostic to do a regrid approximation.
+#Sat edges from iasi are 1d vector (same for all points) so we will convert
 def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
+	#Make conversions into compatible matrices.
+	GC_edges = np.column_stack([np.zeros(GC_bxheight.shape[0]),np.cumsum(GC_bxheight,axis=1)])*1e-3 #Put a 0 at the bottom of the cumsum, convert to km
+	sat_edges = np.tile(sat_edges,(GC_bxheight.shape[0],1))
 	'''
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	GC_edges = np.concatenate([np.array([0]),np.cumsum(GC_bxheight,axis=1)]) #Try to put a 0 at the bottom of the cumsum
 	# We want to account for the case when the GEOS-Chem surface
 	# is above the satellite surface (altitude wise) or the GEOS-Chem
 	# top is below the satellite top. We do this by adjusting the
@@ -69,7 +75,7 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
 	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
 	GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
-	# Define vectors that give the "low" and "high" pressure
+	# Define vectors that give the "low" and "high" altitude
 	# values for each GEOS-Chem and satellite layer.
 	GC_lo = GC_edges[:, 1:][:, :, None]
 	GC_hi = GC_edges[:, :-1][:, :, None]
@@ -87,30 +93,19 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	# Now map the GC NH3 to the satellite levels
 	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
-	return GC_on_sat
+	return [GC_on_sat,AD_on_sat]
 
-def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None):
-	'''
-	Apply the averaging kernel
-	Inputs:
-		sat_avker			The averaging kernel for the satellite
-		sat_prior			The satellite prior profile in ppb, optional (used for CH4)
-		sat_prior (CO)			The satellite prior profile in mol/m2, converted to ppb (used for CO)
-		sat_pressure_weight  The relative pressure weights for each level
-		GC_SPC			   The GC species on the satellite levels
-		filt				 A filter, optional
-	'''
-	if filt is None:
-		filt = np.ones(sat_avker.shape[1])
-	else:
-		filt = filt.astype(int)
-	if sat_prior is None:
-		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
-	else:
-		GC_col = (filt*sat_pressure_weight
-				  *(sat_prior + sat_avker*(GC_SPC - sat_prior)))
-	GC_col = GC_col.sum(axis=1)
-	return GC_col 
+#Map GC data (in molec/cm3), already on sat levels, to be equivalent to IASI. Both are changed. 
+#Returns GC data in mol/m2 (Mm) and IASI column retrieved with GC prior (Xm), which are comparable.
+def apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI_AK,IASI_col):
+	#Convert GC from mol/m3 to mol/m2 with IASI box height
+	Mzm=GC_on_sat_l*IASI_BXHEIGHT # convert to column mol/m2 of dry air but keep binned. M_z^m in eq 11
+	Mm=np.copy(Mzm).sum(axis=1) #Sum for total column. M^m in eq 11
+	#Normalized modelled profile m_z defined in eq 11: mz = (M_z^m - Bz)/(M^m - B). No B for ammonia
+	mz = Mzm / Mm
+	#Calculate Xm (IASI column retrieved with GC normalized profile), defined in eq 13.
+	Xm = IASI_col/(mz*IASI_AK).sum(axis=1)
+	return [Mm,Xm]
 
 class IASI_Translator(obsop.Observation_Translator):
 	def __init__(self,verbose=1):
@@ -140,66 +135,35 @@ class IASI_Translator(obsop.Observation_Translator):
 		obs_dates = IASI_date_dict[species]
 		obs_list = glob(f'{sourcedir}/**/IASI_*.nc', recursive=True)
 		obs_list.sort()
-		obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1])]
+		obs_list = [obs for obs,t in zip(obs_list,obs_dates) if (t>=timeperiod[0]) and (t<=timeperiod[1])]
 		return obs_list
 	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
-		obs_list = self.globObs(species,timeperiod,interval)
-		trop_obs = []
+		obs_list = self.globObs(species,timeperiod)
+		iasi_obs = []
 		filterinfo = {}
-		if species=='CH4':
-			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
-				filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
-		elif species=='CO':
-			if (self.spc_config['Extensions']['TROPOMI_CO']=="True") and (self.spc_config['TROPOMI_CO_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
-				filterinfo["TROPOMI_CO"] = [float(self.spc_config['TROPOMI_CO_filter_blended_albedo']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CO_filter_winter_lat']),float(self.spc_config['TROPOMI_CO_filter_roughness']),float(self.spc_config['TROPOMI_CO_filter_swir_aot'])]
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'ACMG':
-				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
-			elif self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED':
-				trop_obs.append(read_tropomi_gosat_corrected(obs,species,filterinfo,includeObsError=includeObsError))
-			else:
-				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
+			iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
 		for key in list(trop_obs[0].keys()):
-			met[key] = np.concatenate([metval[key] for metval in trop_obs])
+			met[key] = np.concatenate([metval[key] for metval in iasi_obs])
 		return met
-	def gcCompare(self,specieskey,TROPOMI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
+	def gcCompare(self,specieskey,IASI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		extra_obsdata_to_save = self.spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y'][specieskey]
-		TROP_PW = (-np.diff(TROPOMI['pressures'])/(TROPOMI['pressures'][:, 0] - TROPOMI['pressures'][:, -1])[:, None])
-		GC_col_data = obsop.getGCCols(GC,TROPOMI,species,self.spc_config,returninds=True,returnStateMet=True,GC_area=GC_area)
+		GC_col_data = obsop.getGCCols(GC,IASI,species,self.spc_config,returninds=True,returnLevelEdge=False,returnStateMet=True,GC_area=GC_area)
 		GC_SPC = GC_col_data['GC_SPC']
-		if 'Met_BXHEIGHT' not in GC_col_data:
-			raise ValueError('ERROR: Met_BXHEIGHT not found. Ensure Met_BXHEIGHT is saved out in HistoryRC and listed in ens_config.')
+		if ('Met_BXHEIGHT' not in GC_col_data) or ('Met_AIRDEN' not in GC_col_data):
+			raise ValueError('ERROR: missing met fields. Ensure Met_BXHEIGHT and Met_AIRDEN are saved out in HistoryRC and listed in ens_config.')
 		GC_bxheight = GC_col_data['Met_BXHEIGHT']
+		GC_AIRDEN = GC_col_data['Met_AIRDEN']
+		IASI_EDGES = IASI['levels']*1e-3 #km to m
+		IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
+		#Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
+		GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
 		i,j,t = GC_col_data['indices']
-		if species=='CH4':
-			GC_SPC*=1e9 #scale to mol/mol
-			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-			synthetic_partial_columns = False
-		elif species=='NO2':
-			TROP_PRIOR=None
-			synthetic_partial_columns = True
-		elif species=='CO':
-			GC_SPC*=1e9 #scale to mol/mol
-			TROP_P0=TROPOMI['pressures'][:,0]
-			TROP_z0=TROPOMI['surface_elevation'] #  (m)
-			TROP_T0=GC_col_data['Met_T'][:,0]
-			TROP_z = np.zeros_like(TROPOMI['carbonmonoxide_profile_apriori'])
-			for l in range(50):
-				TROP_z[:,l]= TROP_z0 + 500 + l*1000
-			TROP_P_mid=TROPOMI['pressures']+np.diff(TROPOMI['pressures'],axis=1,append=0)/2.0
-			TROP_P_mid=TROP_P_mid[:,0:-1]
-			TROP_PRIOR_mol = (TROPOMI['carbonmonoxide_profile_apriori']) # mole/m2
-			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
-			AIRMOL_COL=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']).sum(axis=1) # convert to column mol/m2 of dry air
-			TROP_PRIOR_ppb = ((TROP_PRIOR_mol) / (np.repeat(AIRMOL_COL[:, np.newaxis], TROP_PW.shape[1], axis=1)*TROP_PW)) *1e9 # convert prior in mol/m2 to ppbv
-			TROP_PRIOR = TROP_PRIOR_ppb
-			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
-			synthetic_partial_columns = False
 		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 			superobs=True
@@ -207,9 +171,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			additional_args_avgGC = {}
 			if doErrCalc:
 				if useObserverError:
-					if species=='CO':
-						TROPOMI['Error']=1e9*TROPOMI['Error']/AIRMOL_COL # convert tropomi errro from mol/m2 to ppbv
-					additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
+					additional_args_avgGC['obsInstrumentError'] = IASI['Error']
 					additional_args_avgGC['modelTransportError'] = transportError
 				elif prescribed_error is not None:
 					additional_args_avgGC['prescribed_error'] = prescribed_error
@@ -222,42 +184,42 @@ class IASI_Translator(obsop.Observation_Translator):
 			if len(extra_obsdata_to_save)>0:
 				additional_args_avgGC['other_fields_to_avg'] = {}
 				for field in extra_obsdata_to_save:
-					additional_args_avgGC['other_fields_to_avg'][field] = TROPOMI[field]
+					additional_args_avgGC['other_fields_to_avg'][field] = IASI[field]
 		else:
 			superobs=False
 		#If user is taking super observations and wants to average before applying averaging kernel, do so now
 		if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
 			presuperobs=True
-			trop_agg_args = {'GC_SPC':GC_SPC,'GC_P':GC_P, 'T_press':TROPOMI['pressures'], 'ak':TROPOMI['column_AK'],'TROP_PW':TROP_PW,'TROP_PRIOR':TROP_PRIOR}
-			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
-			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
-			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,agg_data['TROP_PRIOR'])
+			iasi_agg_args = {'GC_SPC':GC_SPC, 'ak':IASI['column_AK'],'GC_bxheight':GC_bxheight}
+			agg_data = obsop.averageFieldsToGC(i,j,t,GC,IASI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**iasi_agg_args)
+			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'],agg_data['GC_bxheight'], IASI_EDGES)
+			GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'])
 		else:
 			presuperobs=False
-			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
-			GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
-		nan_indices = np.argwhere(np.isnan(GC_on_sat))
-		GC_on_sat = np.nan_to_num(GC_on_sat)
+			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_bxheight, IASI_EDGES)
+			GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI['column_AK'],IASI[species])
+		nan_indices = np.argwhere(np.isnan(GC_SPC_final))
+		GC_SPC_final = np.nan_to_num(GC_SPC_final)
 		if superobs:
 			if presuperobs:
-				toreturn = obsop.ObsData(GC_on_sat,agg_data['obs'],agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
+				toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
 				if doErrCalc:
 					toreturn.addData(err_av=agg_data['err'])
 				if 'additional_fields' in agg_data:
 					toreturn.addData(**agg_data['additional_fields'])
 			else:
-				toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+				toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			timevals = GC.time.values[t]
-			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],timevals)
+			toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
 			#If saving extra fields, add them here
 			if len(extra_obsdata_to_save)>0:
 				data_to_add = {}
 				for field in extra_obsdata_to_save:
-					data_to_add[field] = TROPOMI[field]
+					data_to_add[field] = IASI[field]
 				toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
-				toreturn.addData(err_av=TROPOMI['Error'])
+				toreturn.addData(err_av=IASI['Error'])
 		return toreturn
 
 
