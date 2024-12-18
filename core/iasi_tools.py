@@ -28,8 +28,8 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 							- Averaging kernel
 	"""
 
-	if (filterinfo is not None) or (species != 'NH3'):
-		raise ValueError('Only supports NH3 with no filter info at this time.')
+	if (species != 'NH3'):
+		raise ValueError('Only supports NH3 at this time.')
 
 	# Initialize list for TROPOMI data
 	met = {}
