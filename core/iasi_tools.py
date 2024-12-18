@@ -47,7 +47,8 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
 	numerator = met[species]/data['nh3_AvKnorm'].values[ind]
 	met['column_AK'] = numerator[:, np.newaxis]*(data['nh3_Zcolumn'].values[ind,:]**-1) #Eqn 10, B is zero for NH3.
-	met['HRI'] = data['HRI'] #For new postfilter
+	met['HRI'] = data['HRI'].values #For new postfilter
+	data.close()
 	#Apply main filter
 	if filterinfo is not None:
 		filterinfo["TO_SKIP"] = ['level_edge','level_middle'] #exclude these; no need to filter.
