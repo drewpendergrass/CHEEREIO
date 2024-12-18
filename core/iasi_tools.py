@@ -1,4 +1,4 @@
-#Tools for reading IASI NH3
+#Tools for reading IASI NH3. Lieven Clarisse and Shixian Zhai helped me out on this (DCP 2024 Dec 18)
 
 from datetime import datetime
 from glob import glob
@@ -11,34 +11,32 @@ import observation_operators as obsop
 def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	"""
 	Read IASI data and save important variables to dictionary.
-
 	Arguments
 		filename [str]  : IASI netcdf data file to read
 		species [str]   : Species string (currently only NH3 supplorted)
-		filterinfo [list] : NOT CURRENTLY SUPPORTED; leave as None
+		filterinfo [list] : Currently only support the MAIN filters.
 		includeObsError [bool] : if True, combine systematic and random uncertainty in one number
-
 	Returns
-		met	  [dict] : Dictionary of important variables from TROPOMI:
-							- species
+		met	  [dict] : Dictionary of important variables from IASI:
+							- species column
  							- Latitude
 							- Longitude
 	   						- QA value
  							- UTC time
 							- Averaging kernel
+							- HRI
 	"""
-
 	if (species != 'NH3'):
 		raise ValueError('Only supports NH3 at this time.')
-
 	# Initialize list for TROPOMI data
 	met = {}
-	
 	# Store species, QA, lat, lon, time, averaging kernel
+	if filename=='test':
+		filename='/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/IASI_NH3/v4/2019_07/IASI_METOPB_L2_NH3_20190701_ULB-LATMOS_V4.0.0.nc'
 	data = xr.open_dataset(filename)
 	qa = data['prefilter'].values
 	ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
-
+	#Store data with prefilter applied
 	met['qa_prefilter'] = qa[ind]
 	met['utctime'] = data['AERIStime'].values[ind]
 	met['latitude'] = data['latitude'].values[ind]
@@ -46,16 +44,14 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	met['level_edge'] = data['levels'].values #in km, same for all obs (length 15)
 	met['level_middle'] = data['midlevels'].values #in km, same for all obs (length 14)
 	met[species] = data['nh3_total_column'].values[ind]
-
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
-	met['column_AK'] = (data['nh3_AvKnorm']**-1)*(met[species]/data['nh3_Zcolumn'].values[ind,:]) #Eqn 10, B is zero for NH3.
+	numerator = met[species]/data['nh3_AvKnorm'].values[ind]
+	met['column_AK'] = numerator[:, np.newaxis]*(data['nh3_Zcolumn'].values[ind,:]**-1) #Eqn 10, B is zero for NH3.
 	met['HRI'] = data['HRI'] #For new postfilter
-
+	#Apply main filter
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
-
 	return met
-
 
 #We only have height from surface, so we will use GC Boxheight diagnostic to do a regrid approximation.
 #Sat edges from iasi are 1d vector (same for all points) so we will convert
