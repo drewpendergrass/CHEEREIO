@@ -31,7 +31,7 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	# Initialize list for TROPOMI data
 	met = {}
 	# Store species, QA, lat, lon, time, averaging kernel
-	if filename=='test':
+	if filename=='test': #for developer only.
 		filename='/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/IASI_NH3/v4/2019_07/IASI_METOPB_L2_NH3_20190701_ULB-LATMOS_V4.0.0.nc'
 	data = xr.open_dataset(filename)
 	qa = data['prefilter'].values
@@ -50,6 +50,7 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	met['HRI'] = data['HRI'] #For new postfilter
 	#Apply main filter
 	if filterinfo is not None:
+		filterinfo["TO_SKIP"] = ['level_edge','level_middle'] #exclude these; no need to filter.
 		met = obsop.apply_filters(met,filterinfo)
 	return met
 
@@ -231,4 +232,7 @@ class IASI_Translator(obsop.Observation_Translator):
 				to_return.addData(**{field:to_edit[valid_after_postfilter]})
 		return toreturn
 
+#Testing zone.
+# import testing_tools as tt
+# a = tt.makeAssimilator(date='20190704_0000')
 
