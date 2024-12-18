@@ -36,10 +36,10 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	
 	# Store species, QA, lat, lon, time, averaging kernel
 	data = xr.open_dataset(filename)
-	qa_init = data['prefilter'].values
+	qa = data['prefilter'].values
 	ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
 
-	met['qa_value'] = qa[ind]
+	met['qa_prefilter'] = qa[ind]
 	met['utctime'] = data['AERIStime'].values[ind]
 	met['latitude'] = data['latitude'].values[ind]
 	met['longitude'] = data['longitude'].values[ind]
@@ -180,11 +180,11 @@ class IASI_Translator(obsop.Observation_Translator):
 					additional_args_avgGC['minError'] = minError
 				if errorCorr is not None:
 					additional_args_avgGC['errorCorr'] = errorCorr
-			#If saving extra fields, add them here
-			if len(extra_obsdata_to_save)>0:
-				additional_args_avgGC['other_fields_to_avg'] = {}
-				for field in extra_obsdata_to_save:
-					additional_args_avgGC['other_fields_to_avg'][field] = IASI[field]
+			additional_args_avgGC['other_fields_to_avg'] = {}
+			#save HRI for postfilter
+			additional_args_avgGC['other_fields_to_avg']['HRI'] = IASI['HRI']
+			for field in extra_obsdata_to_save:
+				additional_args_avgGC['other_fields_to_avg'][field] = IASI[field]
 		else:
 			superobs=False
 		#If user is taking super observations and wants to average before applying averaging kernel, do so now
@@ -212,14 +212,27 @@ class IASI_Translator(obsop.Observation_Translator):
 		else:
 			timevals = GC.time.values[t]
 			toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
+			data_to_add = {}
+			data_to_add['HRI'] = IASI['HRI']
 			#If saving extra fields, add them here
-			if len(extra_obsdata_to_save)>0:
-				data_to_add = {}
-				for field in extra_obsdata_to_save:
-					data_to_add[field] = IASI[field]
-				toreturn.addData(**data_to_add)
+			for field in extra_obsdata_to_save:
+				data_to_add[field] = IASI[field]
+			toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=IASI['Error'])
+		#Apply postfilter.
+		SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
+		valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
+		#go through elements of obsdata and apply filter.
+		toreturn.gccol = toreturn.gccol[valid_after_postfilter]
+		toreturn.obscol = toreturn.obscol[valid_after_postfilter]
+		toreturn.obslat = toreturn.obslat[valid_after_postfilter]
+		toreturn.obslon = toreturn.obslon[valid_after_postfilter]
+		toreturn.obstime = toreturn.obstime[valid_after_postfilter]
+		for field in toreturn.additional_data: #Apply filter to every other item with right dimensionality
+			to_edit = to_return.getDataByKey(field)
+			if len(to_edit)==len(valid_after_postfilter):
+				to_return.addData(**{field:to_edit[valid_after_postfilter]})
 		return toreturn
 
 
