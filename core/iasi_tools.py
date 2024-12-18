@@ -91,7 +91,7 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	# Now map the GC NH3 to the satellite levels
 	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
-	return [GC_on_sat,AD_on_sat]
+	return GC_on_sat
 
 #Map GC data (in molec/cm3), already on sat levels, to be equivalent to IASI. Both are changed. 
 #Returns GC data in mol/m2 (Mm) and IASI column retrieved with GC prior (Xm), which are comparable.
