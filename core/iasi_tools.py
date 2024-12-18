@@ -28,7 +28,7 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	"""
 	if (species != 'NH3'):
 		raise ValueError('Only supports NH3 at this time.')
-	# Initialize list for TROPOMI data
+	# Initialize list for IASI data
 	met = {}
 	# Store species, QA, lat, lon, time, averaging kernel
 	if filename=='test': #for developer only.
@@ -68,7 +68,7 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	# We want to account for the case when the GEOS-Chem surface
 	# is above the satellite surface (altitude wise) or the GEOS-Chem
 	# top is below the satellite top. We do this by adjusting the
-	# GEOS-Chem surface pressure up to the TROPOMI surface pressure
+	# GEOS-Chem surface pressure up to the IASI surface pressure
 	idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
 	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
 	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
@@ -83,7 +83,7 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	# a nobs x ngc x nsat matrix, is non-zero
 	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
 	# Find the fraction of each GC level that contributes to each
-	# TROPOMI level. We should first divide (to normalize) and then
+	# IASI level. We should first divide (to normalize) and then
 	# multiply (to apply the map to the column) by the GC pressure
 	# difference, but we exclude this (since it's the same as x1).
 	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
@@ -145,7 +145,7 @@ class IASI_Translator(obsop.Observation_Translator):
 		for obs in obs_list:
 			iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
-		for key in list(trop_obs[0].keys()):
+		for key in list(iasi_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in iasi_obs])
 		return met
 	def gcCompare(self,specieskey,IASI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
