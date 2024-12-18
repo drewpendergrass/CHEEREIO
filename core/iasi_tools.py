@@ -100,7 +100,7 @@ def apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI_AK,IASI_col):
 	Mzm=GC_on_sat_l*IASI_BXHEIGHT # convert to column mol/m2 of dry air but keep binned. M_z^m in eq 11
 	Mm=np.copy(Mzm).sum(axis=1) #Sum for total column. M^m in eq 11
 	#Normalized modelled profile m_z defined in eq 11: mz = (M_z^m - Bz)/(M^m - B). No B for ammonia
-	mz = Mzm / Mm
+	mz = Mzm / Mm[:,np.newaxis]
 	#Calculate Xm (IASI column retrieved with GC normalized profile), defined in eq 13.
 	Xm = IASI_col/(mz*IASI_AK).sum(axis=1)
 	return [Mm,Xm]
