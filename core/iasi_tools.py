@@ -59,7 +59,7 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 #Sat edges from iasi are 1d vector (same for all points) so we will convert
 def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	#Make conversions into compatible matrices.
-	GC_edges = np.column_stack([np.zeros(GC_bxheight.shape[0]),np.cumsum(GC_bxheight,axis=1)])*1e-3 #Put a 0 at the bottom of the cumsum, convert to km
+	GC_edges = np.column_stack([np.zeros(GC_bxheight.shape[0]),np.cumsum(GC_bxheight,axis=1)]) #Put a 0 at the bottom of the cumsum
 	sat_edges = np.tile(sat_edges,(GC_bxheight.shape[0],1))
 	'''
 	The provided edges for GEOS-Chem and the satellite should
@@ -152,7 +152,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			raise ValueError('ERROR: missing met fields. Ensure Met_BXHEIGHT and Met_AIRDEN are saved out in HistoryRC and listed in ens_config.')
 		GC_bxheight = GC_col_data['Met_BXHEIGHT']
 		GC_AIRDEN = GC_col_data['Met_AIRDEN']
-		IASI_EDGES = IASI['level_edge']*1e-3 #km to m
+		IASI_EDGES = IASI['level_edge']*1e3 #km to m
 		IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
 		#Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
 		GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
@@ -232,6 +232,7 @@ class IASI_Translator(obsop.Observation_Translator):
 #Full assimilator
 # import testing_tools as tt
 # a = tt.makeAssimilator(date='20190704_0000')
+# tt.walkThroughAssimilation(a,latind=33,lonind=17) #point in midwest US, near IOWA, in 4x5
 
 #Use HIST Ens to get data for testing
 # from HIST_Ens import HIST_Ens
@@ -241,6 +242,7 @@ class IASI_Translator(obsop.Observation_Translator):
 # he.makeObsTrans()
 # he.getObsData()
 # GC = he.ht[1].combineHist(False,True,False,False)
+# specieskey='NH3_IASI'
 # species='NH3'
 # IASI = he.OBS_DATA['NH3_IASI']
 # spc_config = si.getSpeciesConfig()
@@ -248,11 +250,21 @@ class IASI_Translator(obsop.Observation_Translator):
 # GC_SPC = GC_col_data['GC_SPC']
 # GC_bxheight = GC_col_data['Met_BXHEIGHT']
 # GC_AIRDEN = GC_col_data['Met_AIRDEN']
-# IASI_EDGES = IASI['level_edge']*1e-3 #km to m
+# IASI_EDGES = IASI['level_edge']*1e3 #km to m
 # IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
 # #Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
 # GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
 # i,j,t = GC_col_data['indices']
-
-
+# superObsFunction = spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+# additional_args_avgGC = {}
+# additional_args_avgGC['prescribed_error'] = 0.00001
+# additional_args_avgGC['prescribed_error_type'] = 'absolute'
+# additional_args_avgGC['minError'] = 0
+# additional_args_avgGC['errorCorr'] = 0
+# superObsFunction='default'
+# doErrCalc=True
+# iasi_agg_args = {'GC_SPC':GC_SPC, 'ak':IASI['column_AK'],'GC_bxheight':GC_bxheight}
+# agg_data = obsop.averageFieldsToGC(i,j,t,GC,IASI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**iasi_agg_args)
+# GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'],agg_data['GC_bxheight'], IASI_EDGES)
+# GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'])
 
