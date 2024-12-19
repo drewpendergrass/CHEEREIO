@@ -138,7 +138,10 @@ class IASI_Translator(obsop.Observation_Translator):
 			iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
 		for key in list(iasi_obs[0].keys()):
-			met[key] = np.concatenate([metval[key] for metval in iasi_obs])
+			if key in ['level_edge','level_middle']: #Don't concatenate these; all equal.
+				met[key] = iasi_obs[0][key]
+			else:
+				met[key] = np.concatenate([metval[key] for metval in iasi_obs])
 		return met
 	def gcCompare(self,specieskey,IASI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
@@ -226,6 +229,30 @@ class IASI_Translator(obsop.Observation_Translator):
 		return toreturn
 
 #Testing zone.
+#Full assimilator
 # import testing_tools as tt
 # a = tt.makeAssimilator(date='20190704_0000')
+
+#Use HIST Ens to get data for testing
+# from HIST_Ens import HIST_Ens
+# import settings_interface as si 
+# import observation_operators as obsop
+# he = HIST_Ens('20190704_0000')
+# he.makeObsTrans()
+# he.getObsData()
+# GC = he.ht[1].combineHist(False,True,False,False)
+# species='NH3'
+# IASI = he.OBS_DATA['NH3_IASI']
+# spc_config = si.getSpeciesConfig()
+# GC_col_data = obsop.getGCCols(GC,IASI,species,spc_config,returninds=True,returnLevelEdge=False,returnStateMet=True,GC_area=None)
+# GC_SPC = GC_col_data['GC_SPC']
+# GC_bxheight = GC_col_data['Met_BXHEIGHT']
+# GC_AIRDEN = GC_col_data['Met_AIRDEN']
+# IASI_EDGES = IASI['level_edge']*1e-3 #km to m
+# IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
+# #Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
+# GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+# i,j,t = GC_col_data['indices']
+
+
 
