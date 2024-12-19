@@ -65,14 +65,6 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	# We want to account for the case when the GEOS-Chem surface
-	# is above the satellite surface (altitude wise) or the GEOS-Chem
-	# top is below the satellite top. We do this by adjusting the
-	# GEOS-Chem surface pressure up to the IASI surface pressure
-	idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
-	idx_top = np.greater(GC_edges[:, -1], sat_edges[:, -1])
-	GC_edges[idx_bottom, 0] = sat_edges[idx_bottom, 0]
-	GC_edges[idx_top, -1] = sat_edges[idx_top, -1]
 	# Define vectors that give the "low" and "high" altitude
 	# values for each GEOS-Chem and satellite layer.
 	GC_lo = GC_edges[:, 1:][:, :, None]
@@ -81,19 +73,19 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	sat_hi = sat_edges[:, :-1][:, None, :]
 	# Get the indices where the GC-to-satellite mapping, which is
 	# a nobs x ngc x nsat matrix, is non-zero
-	idx = (np.less_equal(sat_lo, GC_hi) & np.greater_equal(sat_hi, GC_lo))
+	idx = (np.greater_equal(sat_lo, GC_hi) & np.less_equal(sat_hi, GC_lo))
 	# Find the fraction of each GC level that contributes to each
 	# IASI level. We should first divide (to normalize) and then
-	# multiply (to apply the map to the column) by the GC pressure
+	# multiply (to apply the map to the column) by the GC altitude
 	# difference, but we exclude this (since it's the same as x1).
-	GC_to_sat = np.minimum(sat_hi, GC_hi) - np.maximum(sat_lo, GC_lo)
+	GC_to_sat = np.maximum(sat_hi, GC_hi) - np.minimum(sat_lo, GC_lo)
 	GC_to_sat[~idx] = 0
 	# Now map the GC NH3 to the satellite levels
 	GC_on_sat = (GC_to_sat*GC_SPC[:, :, None]).sum(axis=1)
 	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
-#Map GC data (in molec/cm3), already on sat levels, to be equivalent to IASI. Both are changed. 
+#Map GC data (in mol/m3), already on sat levels, to be equivalent to IASI. Both are changed. 
 #Returns GC data in mol/m2 (Mm) and IASI column retrieved with GC prior (Xm), which are comparable.
 def apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI_AK,IASI_col):
 	#Convert GC from mol/m3 to mol/m2 with IASI box height
