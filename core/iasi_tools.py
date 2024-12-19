@@ -34,11 +34,10 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	if filename=='test': #for developer only.
 		filename='/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/IASI_NH3/v4/2019_07/IASI_METOPB_L2_NH3_20190701_ULB-LATMOS_V4.0.0.nc'
 	data = xr.open_dataset(filename)
-	qa = data['prefilter'].values+data['postfilter'].values
-	ind = np.where(qa==2)[0] #Passing both filters. 
-	# ind = np.where(qa==1)[0] #Keep only those
-	# qa = data['prefilter'].values
-	# ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
+	#qa = data['prefilter'].values+data['postfilter'].values
+	#ind = np.where(qa==2)[0] #Passing both filters. 
+	qa = data['prefilter'].values
+	ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
 	#Store data with prefilter applied
 	met['qa'] = qa[ind]
 	met['utctime'] = data['AERIStime'].values[ind]
@@ -217,20 +216,12 @@ class IASI_Translator(obsop.Observation_Translator):
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=IASI['Error'])
 		#Apply postfilter.
-		#Currently I do not do this because slightly different elements are filtered depending on GC profile.
-		#It's tricky for this in CHEEREIO because it leads to ragged arrays and hard to pass on info to fix this without adding a bunch of new infrastructure.
-		# SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
-		# valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
-		# #go through elements of obsdata and apply filter.
-		# toreturn.gccol = toreturn.gccol[valid_after_postfilter]
-		# toreturn.obscol = toreturn.obscol[valid_after_postfilter]
-		# toreturn.obslat = toreturn.obslat[valid_after_postfilter]
-		# toreturn.obslon = toreturn.obslon[valid_after_postfilter]
-		# toreturn.obstime = toreturn.obstime[valid_after_postfilter]
-		# for field in toreturn.additional_data: #Apply filter to every other item with right dimensionality
-		# 	to_edit = toreturn.getDataByKey(field)
-		# 	if len(to_edit)==len(valid_after_postfilter):
-		# 		toreturn.addData(**{field:to_edit[valid_after_postfilter]})
+		SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
+		valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
+		#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
+		#We do this because different ensemble members will allow slightly different observations
+		#Depending on column shape.
+		toreturn.addData(postfilter=valid_after_postfilter) 
 		return toreturn
 
 #Testing zone.

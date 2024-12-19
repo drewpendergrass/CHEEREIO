@@ -185,14 +185,15 @@ class HIST_Ens(object):
 	def getCols(self):
 		if self.verbose>=2:
 			print('HIST_Ens called getCols().')
-		obsdata_toreturn = {}
-		conc2Ds = {}
+		to_postprocess = {}
 		firstens = self.ensemble_numbers[0]
 		hist4D_allspecies = self.ht[firstens].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 		if self.verbose>=3:
 			print('Within getCols(), hist4D produced for the first ensemble member. Details are below:')
 			hist4D_allspecies.info()
 		for species in self.observed_species:
+			to_postprocess[species] = {}
+			#Prep all the error information, but just do it once for computational efficiency.
 			errval = float(self.spc_config['OBS_ERROR'][species])
 			errcorr = float(self.spc_config['OBS_ERROR_SELF_CORRELATION'][species])
 			minerror = float(self.spc_config['MIN_OBS_ERROR'][species])
@@ -213,20 +214,11 @@ class HIST_Ens(object):
 			else:
 				transportError = None
 			gccompare_kwargs = {"GC_area":self.AREA,"doErrCalc":True,"useObserverError":useObserverError,"prescribed_error":prescribed_error,"prescribed_error_type":prescribed_error_type,"transportError":transportError, "errorCorr":errcorr,"minError":minerror}
-			obsdata_toreturn[species] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
+			#Perform full retrieval with errors, just once
+			to_postprocess[species][firstens] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
 			if self.verbose>=3:
 				print(f'Within getCols() and for species {species} in the first ensemble member, ObsData generated from Observation Translator gcCompare function with call gcCompare(species={species},OBSDATA=withheld,hist4D_allspecies=withheld,{",".join([f"{key}={gccompare_kwargs[key]}" for key in gccompare_kwargs])})')
-			firstcol = obsdata_toreturn[species].getGCCol()
-			if self.verbose>=3:
-				print(f'Within getCols() and for species {species} in the first ensemble member, first column GC dimensions are {np.shape(firstcol)}')
-			shape2D = np.zeros(2)
-			shape2D[0] = len(firstcol)
-			shape2D[1]=len(self.ensemble_numbers)
-			shape2D = shape2D.astype(int)
-			conc2Ds[species] = np.zeros(shape2D)
-			conc2Ds[species][:,firstens-1] = firstcol
-			if self.verbose>=3:
-				print(f'Within getCols() and for species {species}, conc2D expected shape will be are {np.shape(conc2Ds[species])}')
+		#Perform the rest of the retrievals
 		for i in self.ensemble_numbers:
 			if i!=firstens:
 				hist4D_allspecies = self.ht[i].combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
@@ -234,18 +226,16 @@ class HIST_Ens(object):
 					print(f'Within getCols(), hist4D produced for ensemble member number {i}. Details are below:')
 					hist4D_allspecies.info()
 				for species in self.observed_species:
-					col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
-					if self.verbose>=3:
-						print(f'Within getCols() and for species {species} in ensemble member number {i}, column GC dimensions are {np.shape(col)}')
-					conc2Ds[species][:,i-1] = col
-		#Save full ensemble data in each of the obsdata objects
-		for species in self.observed_species:
-			obsdata_toreturn[species].setGCCol(conc2Ds[species])
+					to_postprocess[species][i] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False)
+		#Retrieve control, if user asks
 		if self.useControl:
 			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 			for species in self.observed_species:
-				col = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False).getGCCol()
-				obsdata_toreturn[species].addData(control=col)
+				to_postprocess[species]['control'] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False)
+		#Now apply filters to combine all these obs data objects into single dataset
+		obsdata_toreturn = {}
+		for species in self.observed_species:
+			obsdata_toreturn[species]=applyPostfilter(to_postprocess[species],self.ensemble_numbers)
 		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind,return_dist=False):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
@@ -290,3 +280,55 @@ class HIST_Ens(object):
 		full_obsperts = np.concatenate(obsperts,axis = 0)
 		full_obsdiffs = np.concatenate(obsdiffs)
 		return [full_obsmeans,full_obsperts,full_obsdiffs]
+
+#For a list of observation datasets (including control), combine columns into 2D array. 
+#If postfilter data is provided, use it to create single consistent array.
+#Supply dictionary of form ensnum:obsdata, where control replaces ensnum for control.
+def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
+	firstens = ensemble_numbers[0]
+	toreturn = dict_of_obsdatas[firstens]
+	if 'postfilter' in dict_of_obsdatas[firstens].additional_data:
+		#Get elements which all obsdatas agree to keep.
+		valid_after_postfilter = np.copy(dict_of_obsdatas[firstens].getDataByKey('postfilter'))
+		for key in dict_of_obsdatas:
+			if key != firstens:
+				valid_after_postfilter = np.logical_and(valid_after_postfilter,dict_of_obsdatas[key].getDataByKey('postfilter'))
+		#Apply postfilter to everything except gccol, which will come in next step
+		toreturn.obscol = toreturn.obscol[valid_after_postfilter]
+		toreturn.obslat = toreturn.obslat[valid_after_postfilter]
+		toreturn.obslon = toreturn.obslon[valid_after_postfilter]
+		toreturn.obstime = toreturn.obstime[valid_after_postfilter]
+		for field in toreturn.additional_data: #Apply filter to every other item with right dimensionality
+			to_edit = toreturn.getDataByKey(field)
+			if len(to_edit)==len(valid_after_postfilter): 
+				toreturn.addData(**{field:to_edit[valid_after_postfilter]})
+		#Apply postfilter to all the gccols and combine in 2d
+		shape2D = np.zeros(2)
+		shape2D[0] = len(toreturn.obscol)
+		shape2D[1]=len(ensemble_numbers)
+		shape2D = shape2D.astype(int)
+		conc2D = np.zeros(shape2D)
+		for ensnum in ensemble_numbers:
+			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()[valid_after_postfilter]
+		if 'control' in dict_of_obsdatas:
+			control = dict_of_obsdatas['control'].getGCCol()[valid_after_postfilter]
+		else:
+			control = None
+	else:
+		#Just combine conc2D and get history
+		shape2D = np.zeros(2)
+		shape2D[0] = len(toreturn.obscol)
+		shape2D[1]=len(ensemble_numbers)
+		shape2D = shape2D.astype(int)
+		conc2D = np.zeros(shape2D)
+		for ensnum in ensemble_numbers:
+			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()
+		if 'control' in dict_of_obsdatas:
+			control = dict_of_obsdatas['control'].getGCCol()
+		else:
+			control = None
+	#Store data
+	toreturn.setGCCol(conc2D)
+	if control is not None:
+		toreturn.addData(control=control)
+	return toreturn
