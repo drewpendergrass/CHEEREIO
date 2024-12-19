@@ -223,9 +223,9 @@ class IASI_Translator(obsop.Observation_Translator):
 		toreturn.obslon = toreturn.obslon[valid_after_postfilter]
 		toreturn.obstime = toreturn.obstime[valid_after_postfilter]
 		for field in toreturn.additional_data: #Apply filter to every other item with right dimensionality
-			to_edit = to_return.getDataByKey(field)
+			to_edit = toreturn.getDataByKey(field)
 			if len(to_edit)==len(valid_after_postfilter):
-				to_return.addData(**{field:to_edit[valid_after_postfilter]})
+				toreturn.addData(**{field:to_edit[valid_after_postfilter]})
 		return toreturn
 
 #Testing zone.
