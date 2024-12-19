@@ -46,6 +46,8 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	met['level_edge'] = data['levels'].values #in km, same for all obs (length 15)
 	met['level_middle'] = data['midlevels'].values #in km, same for all obs (length 14)
 	met[species] = data['nh3_total_column'].values[ind]
+	if includeObsError:
+		met['Error'] = np.sqrt(data['nh3_total_column_random_uncertainty'].values[ind]**2+data['nh3_total_column_systematic_uncertainty'].values[ind]**2)
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
 	numerator = met[species]/data['nh3_AvKnorm'].values[ind]
 	met['column_AK'] = numerator[:, np.newaxis]*(data['nh3_Zcolumn'].values[ind,:]**-1) #Eqn 10, B is zero for NH3.
