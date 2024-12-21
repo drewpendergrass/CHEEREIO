@@ -509,10 +509,17 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		#If user is taking super observations and wants to average before applying averaging kernel, do so now
 		if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
 			presuperobs=True
-			trop_agg_args = {'GC_SPC':GC_SPC,'GC_P':GC_P, 'T_press':TROPOMI['pressures'], 'ak':TROPOMI['column_AK'],'TROP_PW':TROP_PW,'TROP_PRIOR':TROP_PRIOR}
+			trop_agg_args = {'GC_SPC':GC_SPC,'GC_P':GC_P, 'T_press':TROPOMI['pressures'], 'ak':TROPOMI['column_AK'],'TROP_PW':TROP_PW}
+			if TROP_PRIOR is not None: #only include prior in averaging if there is a prior
+				trop_agg_args['TROP_PRIOR']=TROP_PRIOR
 			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
 			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
-			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,agg_data['TROP_PRIOR'])
+			#If trop prior is provided, use it in the averaging kernel. otherwise, pass in None.
+			if TROP_PRIOR is not None: 
+				tp = agg_data['TROP_PRIOR']
+			else:
+				tp = None
+			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,tp)
 		else:
 			presuperobs=False
 			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
