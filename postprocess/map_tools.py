@@ -27,7 +27,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 		plt.clim(clim[0],clim[1])
 	else:
 		plt.clim(np.nanmin(flat), np.nanmax(flat))
-	plt.colorbar(label=labelname)
+	plt.colorbar(label=labelname,extend='both')
 	fig.savefig(outfile)
 
 #Plot points on a map, with color codes
