@@ -118,7 +118,7 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plo
 		if aggToMonthly:
 			dates,scalar = agg_to_monthly(dates, scalar)
 		if useLognormal:
-			scalar = np.exp(np.mean(np.log(scalar),axis=0)) #average across ensemble
+			scalar = np.median(scalar,axis=0) #average across ensemble
 		else:
 			scalar = np.mean(scalar,axis=0) #average across ensemble
 		timelabels = [str(timeval)[0:13] for timeval in dates]
