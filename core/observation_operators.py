@@ -113,6 +113,8 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=Tru
 		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 	to_return = {}
 	to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
+  #TOFIX H2O FOR CO ONLY
+	to_return['GC_H2O'] = GC[f'Met_AVGW'].values[t,:,j,i] # water vapor valumn mixing ratio in dry air
 	if returnLevelEdge:
 		to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
