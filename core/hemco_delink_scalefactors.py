@@ -12,7 +12,7 @@ with open(f'{path_to_HEMCO}/HEMCO_Config.rc') as f:
 for i in range(len(lines)):
 	if lines[i].startswith('7') and ('ASSIM' in lines[i]):
 		code, label = lines[i].split()[0:2]
-		lines[i] = f'{code} {label} 1.0 - - - - 1 1' #this just replaces with a constant scalefactor of 1
+		lines[i] = f'{code} {label} 1.0 - - - - 1 1\n' #this just replaces with a constant scalefactor of 1
 
 with open(f'{path_to_HEMCO}/HEMCO_Config.rc', 'w') as f:
 	for line in lines:

@@ -51,7 +51,7 @@ class HIST_Translator(object):
 		colls_to_grab = self.makeCollDict(useLevelEdge, useStateMet, useObsPack, useSatDiagn)
 		#Get species concentrations
 		for ind, specfile in enumerate(subdir_lists['SpeciesConc']):
-			hist_ds = xr.load_dataset(specfile)
+			hist_ds = xr.open_dataset(specfile)
 			for species in self.spc_config['HistorySpeciesConcToSave']:
 				to_merge.append(hist_ds[f'{self.spcconc_name}_{species}'])
 		#Merge species concentrations and add to overall dataset
@@ -68,7 +68,7 @@ class HIST_Translator(object):
 						to_merge[lecoll] = []
 					for ind in range(len(subdir_lists[coll])):
 						lefile = subdir_lists[coll][ind]
-						le_ds = xr.load_dataset(lefile)
+						le_ds = xr.open_dataset(lefile)
 						for lecoll in self.spc_config[subdict['diags']]:
 							to_merge[lecoll].append(le_ds[lecoll])
 					#Concatenate collections, merge doesn't like ragged arrays.
@@ -80,7 +80,7 @@ class HIST_Translator(object):
 					to_merge=[]
 					for ind in range(len(subdir_lists[coll])):
 						lefile = subdir_lists[coll][ind]
-						le_ds = xr.load_dataset(lefile)
+						le_ds = xr.open_dataset(lefile)
 						for lecoll in self.spc_config[subdict['diags']]:
 							to_merge.append(le_ds[lecoll])
 					data_val = xr.merge(to_merge)
@@ -94,5 +94,5 @@ class HIST_Translator(object):
 		return combinedHist
 	def getArea(self):
 		specconc_list=self.globSubDir(self.timeperiod,useLevelEdge=False,useStateMet=False)
-		AREA = xr.load_dataset(specconc_list[0])[f'AREA']
+		AREA = xr.open_dataset(specconc_list[0])[f'AREA']
 		return AREA

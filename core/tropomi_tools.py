@@ -47,6 +47,15 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	qa = data['qa_value'].values[0,:,:] #time,scanline,groundpixel
 	if species=='NO2':
 		sl,gp=np.where(qa>0.75)
+		with xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA') as flag:
+			with xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS') as flag2:
+				with xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/GEOLOCATIONS') as flag3:
+					ocean_flag = flag['snow_ice_flag'].values[0,sl,gp]
+					cloud_flag = flag2['cloud_radiance_fraction_nitrogendioxide_window'].values[0, sl, gp]
+					sza_flag = flag3['solar_zenith_angle'].values[0, sl, gp]
+					land_mask = np.where((ocean_flag == 0) & (cloud_flag < 0.3) & (sza_flag < 70))
+					sl = sl[land_mask]
+					gp = gp[land_mask]
 	elif species=="CH4":
 		sl,gp=np.where(qa>0.5)
 	elif species=="CO":
@@ -209,82 +218,6 @@ def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = Fals
 
 	return met
 
-#FORMATTING OF BALASUS ET AL HAS CHANGED. Old tools replaced
-# #Read the Belasus et al 2023 version of TROPOMI CH4, corrected using GOSAT
-# #no albedo, make sure it is set to nan in ens_config.
-# def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False):
-
-# 	if species !='CH4':
-# 		raise ValueError('Species not supported.')
-# 	# Initialize list for TROPOMI data
-# 	met = {}
-	
-# 	# Store species, QA, lat, lon, time, averaging kernel
-# 	data = xr.open_dataset(filename,group='diagnostics')
-
-# 	qa = data['qa_value'].values
-
-# 	data.close()
-
-# 	data = xr.open_dataset(filename,group='meteo')
-
-# 	landflag = data['landflag'].values
-# 	goodvals=np.where((qa>0.5) & (landflag==0))[0] #Only include land values (landflag=0); no coasts or ocean retrievals
-
-# 	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-# 	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
-# 	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
-# 	met['surface_elevation_sd'] = data['surface_altitude_stdv'].values[goodvals]
-
-# 	data.close()
-
-
-# 	met['qa_value'] = qa[goodvals]
-
-# 	data = xr.open_dataset(filename,group='target_product')
-
-# 	met[species] = data['xch4_blended'].values[goodvals] #nobs
-
-# 	if includeObsError:
-# 		met['Error'] = data['xch4_precision'].values[goodvals] #nobs
-
-# 	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
-# 	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
-
-# 	data.close()
-	
-# 	data = xr.open_dataset(filename,group='instrument')
-
-# 	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
-# 	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
-# 	timeraw = data['time'].values[goodvals,:] #nobs, ntime. Seven entries in format year', 'month', 'day', 'hour','minute', 'second'
-# 	#format as CHEEREIO-compliant string
-# 	timestring = [f'{str(int(timestamp[0]))}-{str(int(timestamp[1])).zfill(2)}-{str(int(timestamp[2])).zfill(2)}T{str(int(timestamp[3])).zfill(2)}:{str(int(timestamp[4])).zfill(2)}:{str(int(timestamp[5])).zfill(2)}Z' for timestamp in timeraw]
-# 	met['utctime'] =  np.array(timestring)
-
-# 	data.close()
-	
-# 	data = xr.open_dataset(filename,group='side_product')
-
-# 	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
-# 	met['albedo_nir'] = data['surface_albedo'].values[goodvals,0]
-# 	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
-# 	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
-
-# 	data.close()
-
-# 	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
-# 	pressures.fill(np.nan)
-# 	for i in range(13):
-# 		pressures[:,i]=surface_pressure-(i*pressure_interval)
-	
-# 	met['pressures'] = pressures
-	
-# 	if filterinfo is not None:
-# 		met = obsop.apply_filters(met,filterinfo)
-
-# 	return met
-
 
 
 #Read the Belasus et al 2023 version of TROPOMI CH4, corrected using GOSAT
@@ -347,7 +280,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	if species=="CO" or "NO2":
+	if species in ["CO", "NO2"]:
 		nobs = GC_SPC.shape[0]
 		GC_on_sat_list = []
 		for k in range(0, nobs, chunk_size):
@@ -386,10 +319,13 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 			GC_to_sat_sum = GC_to_sat.sum(axis=1)
 			mask = GC_to_sat_sum != 0
 			GC_on_sat_chunk[mask] = GC_on_sat_chunk[mask] / GC_to_sat_sum[mask]
-	
+			#add to list
 			GC_on_sat_list.append(GC_on_sat_chunk)
-	
-		GC_on_sat = np.concatenate(GC_on_sat_list, axis=0)
+		#Concatenate list
+		if len(GC_on_sat_list) > 0: #If there are observations
+			GC_on_sat = np.concatenate(GC_on_sat_list, axis=0)
+		else: #No observations
+			GC_on_sat = np.zeros((nobs,sat_edges.shape[1]-1))
 	else:
 		'''
 		The provided edges for GEOS-Chem and the satellite should
@@ -443,7 +379,9 @@ def apply_avker(sat_avker, sat_pressure_weight, GC_SPC, sat_prior=None,filt=None
 	else:
 		filt = filt.astype(int)
 	if sat_prior is None:
-		GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
+		#GC_col = (filt*sat_pressure_weight*sat_avker*GC_SPC)
+		#no sat_pressure_weight version
+		GC_col = filt*sat_avker*GC_SPC
 	else:
 		GC_col = (filt*sat_pressure_weight
 				  *(sat_prior + sat_avker*(GC_SPC - sat_prior)))
@@ -459,26 +397,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		TROPOMI_date_dict = {}
 		for key in list(sourcedirs.keys()):
 			sourcedir = sourcedirs[key]
-			# PRODUCT CHANGE!
-			# if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED': #different filename convention
-			# 	obs_list = glob(f'{sourcedir}/**/s5p_*.nc', recursive=True)
-			# 	obs_list.sort()
-			# 	TROPOMI_date_dict[key] = {}
-			# 	TROPOMI_date_dict[key]['start'] = []
-			# 	TROPOMI_date_dict[key]['end'] = []
-			# 	for obs in obs_list:
-			# 		data = xr.open_dataset(obs,group='instrument')
-			# 		time = data['time'].values
-			# 		if len(time)>0:
-			# 			start_date = time[0,:]
-			# 			TROPOMI_date_dict[key]['start'].append(datetime(*start_date)) #add initial time to start value
-			# 			end_date = time[-1,:]
-			# 			TROPOMI_date_dict[key]['end'].append(datetime(*end_date))
-			# 		else:
-			# 			TROPOMI_date_dict[key]['start'].append('SKIP') #empty observations, skip
-			# 			TROPOMI_date_dict[key]['end'].append('SKIP')
-			# 		data.close()
-			# else:
 			obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 			obs_list.sort()
 			TROPOMI_date_dict[key] = {}
@@ -496,16 +414,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		else:
 			TROPOMI_date_dict = self.initialReadDate()
 		obs_dates = TROPOMI_date_dict[species]
-		# if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED': #different filename convention
-		# 	obs_list = glob(f'{sourcedir}/**/s5p_*.nc', recursive=True)
-		# 	#Some of these will be empty, so remove
-		# 	obs_list.sort()
-		# 	inds_to_skip = [i for i, e in enumerate(obs_dates['start']) if e == 'SKIP']
-		# 	for i in reversed(inds_to_skip): #delete these elements; go in reverse order so we don't break indexing
-		# 		del obs_list[i]
-		# 		del obs_dates['start'][i]
-		# 		del obs_dates['end'][i]
-		# else:
 		obs_list = glob(f'{sourcedir}/**/S5P_*.nc', recursive=True)
 		obs_list.sort()
 		if interval:
@@ -552,6 +460,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			synthetic_partial_columns = False
 		elif species=='NO2':
 			TROP_PRIOR=None
+			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
+			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
 			synthetic_partial_columns = True
 		elif species=='CO':
 			GC_SPC*=1e9 #scale to mol/mol
@@ -570,11 +481,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			TROP_PRIOR = TROP_PRIOR_ppb
 			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
 			synthetic_partial_columns = False
-		GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
-		GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
-		nan_indices = np.argwhere(np.isnan(GC_on_sat))
-		GC_on_sat = np.nan_to_num(GC_on_sat)
+		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
+			superobs=True
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
 			additional_args_avgGC = {}
 			if doErrCalc:
@@ -595,7 +504,37 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 				additional_args_avgGC['other_fields_to_avg'] = {}
 				for field in extra_obsdata_to_save:
 					additional_args_avgGC['other_fields_to_avg'][field] = TROPOMI[field]
-			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+		else:
+			superobs=False
+		#If user is taking super observations and wants to average before applying averaging kernel, do so now
+		if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
+			presuperobs=True
+			trop_agg_args = {'GC_SPC':GC_SPC,'GC_P':GC_P, 'T_press':TROPOMI['pressures'], 'ak':TROPOMI['column_AK'],'TROP_PW':TROP_PW}
+			if TROP_PRIOR is not None: #only include prior in averaging if there is a prior
+				trop_agg_args['TROP_PRIOR']=TROP_PRIOR
+			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
+			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
+			#If trop prior is provided, use it in the averaging kernel. otherwise, pass in None.
+			if TROP_PRIOR is not None: 
+				tp = agg_data['TROP_PRIOR']
+			else:
+				tp = None
+			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,tp)
+		else:
+			presuperobs=False
+			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
+			GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
+		nan_indices = np.argwhere(np.isnan(GC_on_sat))
+		GC_on_sat = np.nan_to_num(GC_on_sat)
+		if superobs:
+			if presuperobs:
+				toreturn = obsop.ObsData(GC_on_sat,agg_data['obs'],agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
+				if doErrCalc:
+					toreturn.addData(err_av=agg_data['err'])
+				if 'additional_fields' in agg_data:
+					toreturn.addData(**agg_data['additional_fields'])
+			else:
+				toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 		else:
 			timevals = GC.time.values[t]
 			toreturn = obsop.ObsData(GC_on_sat,TROPOMI[species],TROPOMI['latitude'],TROPOMI['longitude'],timevals)

@@ -18,5 +18,10 @@
 		"module_name" : "tccon_tools",
 		"translator_name" : "TCCON_Translator",
 		"implements_initialReadDate" : "True"
+	},
+	"IASI" : {
+		"module_name" : "iasi_tools",
+		"translator_name" : "IASI_Translator",
+		"implements_initialReadDate" : "True"
 	}
 }

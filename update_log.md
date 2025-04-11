@@ -1,6 +1,22 @@
 # Update log
 
-## Version 1.3.0 (under development)
+## In development
+
+* Bug fixes for SatDiagn assimilation, and for scale factor initialization (thanks to Yunxiao Tang).
+* Significant performance and memory improvements (halving my methane assimilation time)
+* Add option, in super observation case, to average data before applying observation operator for performance improvements.
+
+## Version 1.3.1
+
+**Action items for users updating to version 1.2.1:**
+
+* None. This is a small update to fix bugs.
+
+**Updates under version 1.3.1:**
+
+* Bug leading some assimilations to fail is fixed.
+
+## Version 1.3.0
 
 **Action items for users updating to version 1.3.0:**
 

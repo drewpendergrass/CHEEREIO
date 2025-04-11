@@ -14,11 +14,12 @@ path_to_scratch = f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch"
 
 
 DO_ADDL_INFLATION = False
-for species in data['species_not_in_statevec_to_RTPS']:
-	#Don't inflate species in state_vector_conc.
-	if species not in data['STATE_VECTOR_CONC']:
-		DO_ADDL_INFLATION=True
-		break
+if data['Activate_Relaxation_To_Prior_Spread'].lower()=='true':
+	for species in data['species_not_in_statevec_to_RTPS']:
+		#Don't inflate species in state_vector_conc.
+		if species not in data['STATE_VECTOR_CONC']:
+			DO_ADDL_INFLATION=True
+			break
 
 DO_RERUN = data["DO_VARON_RERUN"] == "True"
 if DO_RERUN:

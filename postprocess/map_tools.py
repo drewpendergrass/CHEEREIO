@@ -27,7 +27,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 		plt.clim(clim[0],clim[1])
 	else:
 		plt.clim(np.nanmin(flat), np.nanmax(flat))
-	plt.colorbar(label=labelname)
+	plt.colorbar(label=labelname,extend='both')
 	fig.savefig(outfile)
 
 #Plot points on a map, with color codes
@@ -118,7 +118,7 @@ def plotScaleFactor(m,lat,lon,ppdir, useLognormal = False, aggToMonthly=True,plo
 		if aggToMonthly:
 			dates,scalar = agg_to_monthly(dates, scalar)
 		if useLognormal:
-			scalar = np.exp(np.mean(np.log(scalar),axis=0)) #average across ensemble
+			scalar = np.median(scalar,axis=0) #average across ensemble
 		else:
 			scalar = np.mean(scalar,axis=0) #average across ensemble
 		timelabels = [str(timeval)[0:13] for timeval in dates]

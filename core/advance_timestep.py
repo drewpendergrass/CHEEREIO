@@ -121,7 +121,7 @@ if DO_BURN_IN:
 
 #Check if we have finished the total ensemble run
 if start_datetime >= ENS_END_DATE_datetime:
-	with open(f"{parent_dir}/scratch/ENSEMBLE_COMPLETE", "w") as j:
+	with open(f"{parent_dir}/scratch/ENSEMBLE_COMPLETE", "w") as f:
 		f.write("Ensemble completed; delete this file if you want to re-run.\n") #If so, save flag file to ensemble folder
 
 #Toggle approximation stage if rerunning with approximation; don't do this for the first run period (POSTFIRST)

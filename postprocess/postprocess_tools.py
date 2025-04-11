@@ -9,16 +9,16 @@ import sys
 import pickle
 import pandas as pd
 sys.path.append('../core')
-from HIST_Ens import HIST_Ens 
 import settings_interface as si 
 
-spc_config = si.getSpeciesConfig()
-
-gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
-if gc_version>=14.1:
-	spcconc_name = "SpeciesConcVV"
-else:
-	spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+def getSpcConcName():
+	spc_config = si.getSpeciesConfig()
+	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
+	if gc_version>=14.1:
+		spcconc_name = "SpeciesConcVV"
+	else:
+		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
+	return spcconc_name
 
 
 def globDirs(ensemble_dir,removeNature=False,includeOutputDir=False):
@@ -83,7 +83,7 @@ def combineScaleFactors(ensemble_dir,output_dir,timeperiod=None,flag_snapshot=Fa
 	if return_not_write:
 		return to_return
 
-def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
+def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None,prefix=''):
 	subdirs,dirnames,subdir_numbers = globDirs(ensemble_dir,removeNature=True,includeOutputDir=True)
 	combined_ds = []
 	for subdir in subdirs:
@@ -97,9 +97,9 @@ def combineHemcoDiag(ensemble_dir,output_dir,timeperiod=None):
 	ds.assign_coords({'Ensemble':np.array(subdir_numbers)})
 	if timeperiod is not None:
 		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
-	ds.to_netcdf(output_dir+'/combined_HEMCO_diagnostics.nc')
+	ds.to_netcdf(f'{output_dir}/{prefix}combined_HEMCO_diagnostics.nc')
 
-def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
+def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None,prefix=''):
 	paths = glob(f'{control_dir}/OutputDir/HEMCO_diagnostics.*.nc')
 	paths.sort()
 	ds_files = []
@@ -108,12 +108,12 @@ def combineHemcoDiagControl(control_dir,output_dir,timeperiod=None):
 	ds = xr.concat(ds_files,'time')
 	if timeperiod is not None:
 		ds = ds.sel(time=slice(timeperiod[0], timeperiod[1]))
-	ds.to_netcdf(output_dir+'/control_HEMCO_diagnostics.nc')
+	ds.to_netcdf(f'{output_dir}/{prefix}control_HEMCO_diagnostics.nc')
 
 
 def makeDatasetForDirectory(hist_dir,species_names,timeperiod=None,hourlysub = 6,subset_rule = 'SURFACE', fullpath_output_name = None):
 	specconc_list = globSubDir(hist_dir,timeperiod,hourlysub)
-	concstrings = [f'{spcconc_name}_{name}' for name in species_names]
+	concstrings = [f'{getSpcConcName()}_{name}' for name in species_names]
 	ds = xr.open_mfdataset(specconc_list,concat_dim='time',combine="nested",data_vars='minimal', coords='minimal', compat='override')
 	ds = ds[concstrings]
 	if subset_rule=='SURFACE':
@@ -203,7 +203,7 @@ def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includ
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'{spcconc_name}_{species_name}'].isel(lat=latind,lon=lonind)
+	da = ds[f'{getSpcConcName()}_{species_name}'].isel(lat=latind,lon=lonind)
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier
@@ -224,7 +224,7 @@ def plotSurfaceMean(ds,species_name,outfile=None,unit='ppt',includesNature=False
 		multiplier = 1e12
 	else:
 		raise ValueError('Unit not recognized.')
-	da = ds[f'{spcconc_name}_{species_name}'].mean(axis=(2,3))
+	da = ds[f'{getSpcConcName()}_{species_name}'].mean(axis=(2,3))
 	time = np.array(ds['time'])
 	if includesNature:
 		ens = da[1::,:]*multiplier

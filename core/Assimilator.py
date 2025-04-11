@@ -65,6 +65,7 @@ class Assimilator(object):
 		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
 		self.SaveObsPack = spc_config["ACTIVATE_OBSPACK"] == "true"
+		self.SaveSatDiagn = spc_config["SaveSatDiagn"] == "True"
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
@@ -103,9 +104,9 @@ class Assimilator(object):
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useSatDiagn=self.SaveSatDiagn,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useSatDiagn=self.SaveSatDiagn,verbose=self.verbose)
 			self.bigYpostprocess = False
 		if (spc_config['DO_VARON_RERUN'] == 'True') and (spc_config['APPROXIMATE_VARON_RERUN'] == 'True'):
 			do_approx = False
