@@ -149,6 +149,8 @@ for hour_offset in range(total_hours + 1):
 
         # Create a subset with selected variables
         hour_subset_ds = ds[variables_to_keep].isel(time=hour_indices)
+        print(hour_subset_ds)
+        print(hour_subset_ds.time)
         
         hour_subset_ds = hour_subset_ds.drop_duplicates('time', keep='first')
         
