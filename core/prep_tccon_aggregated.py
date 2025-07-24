@@ -152,7 +152,7 @@ for hour_offset in range(total_hours + 1):
         
         #hour_subset_ds = hour_subset_ds.drop_duplicates('time', keep='first') #From Sina's code
         _, unique_index = np.unique(hour_subset_ds['time'], return_index=True) #Equivalent to Sina's code, but works with older versions of xr
-        hour_subset_ds = hour_subset_ds.isel(time=index)
+        hour_subset_ds = hour_subset_ds.isel(time=unique_index)
         
 
         if hour_subset_ds.sizes['time'] == 0:
