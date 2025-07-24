@@ -1,6 +1,8 @@
 # TCCON CO operator (v1) prepared by Sina Voshtani -- with pressure adjustment (2024/03/15)
 # Update: Include TCCON InSb CO measurements at East Trout Lake. Bug fixed and tested (2024/08/30)
 
+## TCCON operator incorporated into main CHEEREIO code branch and extended to N2O by Drew Pendergrass (2025/07/24)
+
 from datetime import datetime
 from glob import glob
 import pickle
@@ -10,40 +12,51 @@ import numpy as np
 import observation_operators as obsop
 from scipy.interpolate import interp1d
 
+
 def read_tccon(filename, species, filterinfo=None, includeObsError = False):
 
 	met = {}
 	
 	data = xr.open_dataset(filename)
-	idx = data['xco'].values[0,:,:] #time,latitude,longitude
 	if species=='CO':
+		idx = data['xco'].values[0,:,:] #time,latitude,longitude
 		la,lo=np.where(idx>0) # include all quality controlled XCO
 		met[species] = data['xco'].values[0,la,lo] # TCCON column (ppb)
+	elif species=='N2O':
+		idx = data['xn2o'].values[0,:,:] #time,latitude,longitude
+		la,lo=np.where(idx>0) # include all quality controlled XCO
+		met[species] = data['xn2o'].values[0,la,lo] # TCCON column (ppb)
 	else:
 		raise ValueError('Species not supported')
 
 	if includeObsError:
 		if species=='CO':
 			met['Error'] = data['xco_error'].values[0,la,lo] #TCCON column error (ppb)
+		elif species=='N2O':
+			met['Error'] = data['xn2o_error'].values[0,la,lo] #TCCON column error (ppb)
 	
 	met['longitude'] = data['longitude'].values[:]
 	met['latitude'] = data['latitude'].values[:]
 	met['utctime'] = data['time_utc'].values[:]
 
+	met['pressure_AK'] = data['ak_pressure'].values[0,la,lo,:] # hPa 
+	met['pressure_apriori'] = data['prior_pressure'].values[0,la,lo,:] * 101325/100 # hPa  
+	met['h2o_profile_apriori'] = data['prior_h2o'].values[0,la,lo,:] # parts
+	met['altitude_apriori'] = 1000*data['prior_altitude'].values[:] # m
+	met['pout'] = data['pout'].values[0,la,lo] # TCCON (surface) pressure hPa
 	if species=='CO':
 		met['column_AK'] = data['ak_xco'].values[0,la,lo,:] #time,latitude,longitude,layer
-		met['pressure_AK'] = data['ak_pressure'].values[0,la,lo,:] # hPa 
-		met['pressure_apriori'] = data['prior_pressure'].values[0,la,lo,:] * 101325/100 # hPa  
 		met['co_profile_apriori'] = data['prior_co'].values[0,la,lo,:] # ppb
-		met['h2o_profile_apriori'] = data['prior_h2o'].values[0,la,lo,:] # parts
-		met['altitude_apriori'] = 1000*data['prior_altitude'].values[:] # m
-		met['pout'] = data['pout'].values[0,la,lo] # TCCON (surface) pressure hPa
-		data.close()
+	elif species=='N2O':
+		met['column_AK'] = data['ak_n2o'].values[0,la,lo,:] #time,latitude,longitude,layer
+		met['n2o_profile_apriori'] = data['prior_n2o'].values[0,la,lo,:] # ppb
 	
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
 
 	return met
+
+	data.close()
 
 # map the veritcal levels of the model into the observation levels
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
@@ -76,7 +89,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	return GC_on_sat
 
 
-# compute g at verticl layers for each observation site
+# compute g at vertical layers for each observation site
 def gravity(altitudes, latitudes):
 	gm = 3.9862216e+14  # Gravitational constant times Earth's Mass (m3/s2) in GFIT
 	omega = 7.292116E-05  # Earth's angular rotational velocity (radians/s) from GFIT
@@ -244,7 +257,6 @@ class TCCON_Translator(obsop.Observation_Translator):
 		obs_dates = TCCON_date_dict[species]
 		obs_list = glob(f'{sourcedir}/**/tccon_avg_*.nc', recursive=True)
 		obs_list.sort()
-
 		if interval:
 			obs_list = [obs for obs,t1,t2 in zip(obs_list,obs_dates['start'],obs_dates['end']) if (t1>=timeperiod[0]) and (t2<timeperiod[1]) and ((t1.hour % interval == 0) or (t1.hour % interval == (interval-1)))]
 		else:
@@ -258,16 +270,15 @@ class TCCON_Translator(obsop.Observation_Translator):
 		filterinfo = {}
 		if species=='CO':
 			if (self.spc_config['Extensions']['TCCON_CO']=="True") and (self.spc_config['TCCON_CO_FILTERS']=="True"):
-				filterinfo["TCCON_CO"] = [float(self.spc_config['TCCON_CO_filter_blended_albedo']),float(self.spc_config['TCCON_CO_filter_swir_albedo_low']),float(self.spc_config['TCCON_CO_filter_swir_albedo_high']),float(self.spc_config['TCCON_CO_filter_winter_lat']),float(self.spc_config['TCCON_CO_filter_roughness']),float(self.spc_config['TCCON_CO_filter_swir_aot'])]
+				pass #no filters implemented
+		elif species=='N2O':
+			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['TCCON_N2O_FILTERS']=="True"):
+				pass #no filters implemented
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
-		
 		# read tccon files
 		for obs in obs_list:
-			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'ACMG':
-				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
-			else: 
-				tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError))
+			tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
 		for key in list(tccon_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in tccon_obs])
@@ -279,15 +290,13 @@ class TCCON_Translator(obsop.Observation_Translator):
 		GC_col_data = obsop.getGCCols(GC,TCCON,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
 		GC_SPC = GC_col_data['GC_SPC']
 		GC_P = GC_col_data['GC_P'] # (PEDGE)
-		GC_H2O = GC_col_data['GC_H2O']
+		GC_H2O = GC_col_data['Met_AVGW'] #We require this field from Met History for TCCON observations
 		i,j,t = GC_col_data['indices']
-		if species=='CO':
-			synthetic_partial_columns = False
 		ff = TCCON['pout']/TCCON['pressure_apriori'][:, 0]
 		TCCON_P_fix = TCCON['pressure_apriori'] * ff[:, np.newaxis]	
-		GC_on_sat_l_co  = GC_to_sat_levels(GC_SPC, GC_P, TCCON_P_fix) # GC a-priori co on TCCON layer
+		GC_on_sat_l  = GC_to_sat_levels(GC_SPC, GC_P, TCCON_P_fix) # GC a-priori co on TCCON layer
 		GC_on_sat_l_h2o = GC_to_sat_levels(GC_H2O, GC_P, TCCON_P_fix) # GC a-priori h2o on TCCON layer
-		GC_on_sat = integrate_column(GC_on_sat_l_co,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+		GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
 		#print("GC-TCCON:", GC_on_sat - TCCON[species])
 		nan_indices = np.argwhere(np.isnan(GC_on_sat))
 		GC_on_sat = np.nan_to_num(GC_on_sat)
@@ -296,8 +305,7 @@ class TCCON_Translator(obsop.Observation_Translator):
 			additional_args_avgGC = {}
 			if doErrCalc:
 				if useObserverError:
-					if species=='CO':
-						TCCON['Error']=1*TCCON['Error'] # it is in ppb already
+					TCCON['Error']=1*TCCON['Error'] # it is in ppb already
 					additional_args_avgGC['obsInstrumentError'] = TCCON['Error']
 					additional_args_avgGC['modelTransportError'] = transportError
 				elif prescribed_error is not None:

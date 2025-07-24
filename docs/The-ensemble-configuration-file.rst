@@ -1029,3 +1029,19 @@ Below we list the settings that you can set with extensions.
 	
 		Filter out OMI NO2 observations with a surface albedo above this value. Set to "nan" to ignore.
 
+.. option:: TCCON_N2O extension
+	
+	Specialized settings for the TCCON N2O operator.
+
+	.. option:: TCCON_N2O_FILTERS
+	
+		Not currently implemented; leave False.
+
+.. option:: TCCON_CO extension
+	
+	Specialized settings for the TCCON CO operator.
+
+	.. option:: TCCON_CO_FILTERS
+	
+		Not currently implemented; leave False.
+

@@ -1,10 +1,21 @@
 # Update log
 
-## In development
+## Version 1.4.0 (rc)
 
+**Action items for users updating to version 1.4.0:**
+
+* Update ens_config.json by comparing with templates, as new fields are now expected!
+
+**Updates under version 1.4.0:**
+
+* Added TCCON and TROPOMI CO operators (thanks to Sina Voshtani)
+* Added IASI NH3 operator.
 * Bug fixes for SatDiagn assimilation, and for scale factor initialization (thanks to Yunxiao Tang).
 * Significant performance and memory improvements (halving my methane assimilation time)
 * Add option, in super observation case, to average data before applying observation operator for performance improvements.
+* Streamlined running nested grid simulations.
+* Removed DOFS pseudoinverse approach (long deprecated, never used) and replaced with an information quantification metric from Voshtani et al., 2025 (in review).
+* Additional bug fixes and improvements.
 
 ## Version 1.3.1
 

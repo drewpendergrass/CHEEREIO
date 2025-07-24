@@ -112,9 +112,11 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=Tru
 	else:
 		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 	to_return = {}
-	to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
-  #TOFIX H2O FOR CO ONLY
-	to_return['GC_H2O'] = GC[f'Met_AVGW'].values[t,:,j,i] # water vapor valumn mixing ratio in dry air
+	gc_overrides = si.checkGCSpeciesOverride(spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+	if (len(gc_overrides)>0)&(species in gc_overrides):
+		to_return['GC_SPC'] = GC[f'{spcconc_name}_{gc_overrides[species]}'].values[t,:,j,i]
+	else:
+		to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
 	if returnLevelEdge:
 		to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:

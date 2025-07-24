@@ -54,3 +54,16 @@ def getLatLonVals(data=None):
 	with open(f"{data['MY_PATH']}/{data['RUN_NAME']}/scratch/latlon_vals.json") as f:
 		ll_data = json.load(f)
 	return [ll_data['lat'],ll_data['lon']]
+
+#Check if we need to override a GC field. This is relevant for the version of CH4 that reads CH4 as N2O.
+def checkGCSpeciesOverride(spc_config):
+	gc_keys = [key for key in spc_config if key.startswith("INTERPRET_GC_")]
+	if len(gc_keys)>0:
+		return {}
+	else:
+		to_return = {}
+		for key in gc_keys:
+			if spc_config[key] == 'True':
+				to_return[key.split('_')[4]]=key.split('_')[2]
+		return to_return
+

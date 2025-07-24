@@ -166,7 +166,12 @@ class DataBundle(object):
 				print(f"GC_translator number {self.num} has loaded scaling factors for {name}")
 	#Since only one timestamp, returns in format lev,lat,lon
 	def getSpecies3Dconc(self, species):
-		da = np.array(self.restart_ds[f'SpeciesRst_{species}']).squeeze()
+		gc_overrides = si.checkGCSpeciesOverride(self.species_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+		if (len(gc_overrides)>0)&(species in gc_overrides):
+			species_name = f'SpeciesRst_{gc_overrides[species]}'
+		else:
+			species_name = f'SpeciesRst_{species}'
+		da = np.array(self.restart_ds[species_name]).squeeze()
 		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} got 3D conc for species {species} which are of dimension {np.shape(da)}.")
 		return da
@@ -175,7 +180,12 @@ class DataBundle(object):
 		conc4d = conc3d.reshape(np.concatenate([np.array([1]),baseshape]))
 		if self.verbose>=3:
 			print(f"GC_Translator number {self.num} set 3D conc for species {species} which are of dimension {np.shape(conc4d)}.")
-		self.restart_ds[f'SpeciesRst_{species}'] = (["time","lev","lat","lon"],conc4d,{"long_name":f"Dry mixing ratio of species {species}","units":"mol mol-1 dry","averaging_method":"instantaneous"})
+		gc_overrides = si.checkGCSpeciesOverride(self.species_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+		if (len(gc_overrides)>0)&(species in gc_overrides):
+			species_name = f'SpeciesRst_{gc_overrides[species]}'
+		else:
+			species_name = f'SpeciesRst_{species}'
+		self.restart_ds[species_name] = (["time","lev","lat","lon"],conc4d,{"long_name":f"Dry mixing ratio of species {species}","units":"mol mol-1 dry","averaging_method":"instantaneous"})
 	def setSpeciesConcByLayer(self, species, conc2d, layer):
 		da = self.getSpecies3Dconc(species)
 		da[layer,:,:] = conc2d #overwrite layer
