@@ -241,8 +241,8 @@ class TCCON_Translator(obsop.Observation_Translator):
 			obs_list = glob(f'{sourcedir}/**/tccon_avg_*.nc', recursive=True)
 			obs_list.sort()
 			TCCON_date_dict[key] = {}
-			TCCON_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-3], "%Y%m%dT%H%M%S") for obs in obs_list]
-			TCCON_date_dict[key]['end'] = [datetime.strptime(obs.split('_')[-2], "%Y%m%dT%H%M%S") for obs in obs_list]
+			TCCON_date_dict[key]['start'] = [datetime.strptime(obs.split('_')[-2], "%Y%m%dT%H%M%S") for obs in obs_list]
+			TCCON_date_dict[key]['end'] = [datetime.strptime(obs.split('_')[-1].split('.')[0], "%Y%m%dT%H%M%S") for obs in obs_list]
 		with open(f"{self.scratch}/tccon_dates.pickle", 'wb') as handle:
 			pickle.dump(TCCON_date_dict, handle)
 		return TCCON_date_dict
