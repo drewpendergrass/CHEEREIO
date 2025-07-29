@@ -58,7 +58,7 @@ def getLatLonVals(data=None):
 #Check if we need to override a GC field. This is relevant for the version of CH4 that reads CH4 as N2O.
 def checkGCSpeciesOverride(spc_config):
 	gc_keys = [key for key in spc_config if key.startswith("INTERPRET_GC_")]
-	if len(gc_keys)>0:
+	if len(gc_keys)==0:
 		return {}
 	else:
 		to_return = {}
