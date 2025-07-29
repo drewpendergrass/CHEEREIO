@@ -296,7 +296,12 @@ class TCCON_Translator(obsop.Observation_Translator):
 		TCCON_P_fix = TCCON['pressure_apriori'] * ff[:, np.newaxis]	
 		GC_on_sat_l  = GC_to_sat_levels(GC_SPC, GC_P, TCCON_P_fix) # GC a-priori co on TCCON layer
 		GC_on_sat_l_h2o = GC_to_sat_levels(GC_H2O, GC_P, TCCON_P_fix) # GC a-priori h2o on TCCON layer
-		GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+		if species=="CO":
+			GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+		elif species=="N2O":
+			GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['n2o_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+		else: 
+			raise ValueError(f'Species {species} not recognized')
 		#print("GC-TCCON:", GC_on_sat - TCCON[species])
 		nan_indices = np.argwhere(np.isnan(GC_on_sat))
 		GC_on_sat = np.nan_to_num(GC_on_sat)
