@@ -15,6 +15,7 @@
 * Add option, in super observation case, to average data before applying observation operator for performance improvements.
 * Streamlined running nested grid simulations.
 * Removed DOFS pseudoinverse approach (long deprecated, never used) and replaced with an information quantification metric from Voshtani et al., 2025 (in review).
+* Improved Python scripting so that code works across a wider variety of shells. 
 * Additional bug fixes and improvements.
 
 ## Version 1.3.1
