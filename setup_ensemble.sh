@@ -15,7 +15,7 @@
 
 # Turn on/off different steps. This will allow you to come back to this
 # script and set up different stages later.
-SetupTemplateRundir=true
+SetupTemplateRundir=false
 CompileTemplateRundir=true
 SetupSpinupRun=false
 SetupControlRun=false
