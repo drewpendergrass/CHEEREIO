@@ -48,7 +48,7 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False):
 		met['column_AK'] = data['ak_xco'].values[0,la,lo,:] #time,latitude,longitude,layer
 		met['co_profile_apriori'] = data['prior_co'].values[0,la,lo,:] # ppb
 	elif species=='N2O':
-		met['column_AK'] = data['ak_n2o'].values[0,la,lo,:] #time,latitude,longitude,layer
+		met['column_AK'] = data['ak_xn2o'].values[0,la,lo,:] #time,latitude,longitude,layer
 		met['n2o_profile_apriori'] = data['prior_n2o'].values[0,la,lo,:] # ppb
 	
 	if filterinfo is not None:
