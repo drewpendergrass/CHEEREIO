@@ -110,7 +110,7 @@ class HIST_Ens(object):
 			to_return = err_av**2
 		else:
 			if errtype=='absolute':
-				to_return = np.diag(np.repeat(errval**2,len(inds))) #we are assuming the user provides the square root of variance
+				to_return = np.repeat(errval**2,len(inds)) #we are assuming the user provides the square root of variance
 			elif errtype=='relative':
 				obsdat = self.bigYDict[species]
 				obscol = obsdat.getObsCol()
