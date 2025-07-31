@@ -3,18 +3,18 @@
 	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
 	"comment002" : "***************************************************************************",
 	"GC_VERSION" : "14.1.1",
-	"RES" : "4.0x4.5",
+	"RES" : "4.0x5.0",
 	"met_name" : "MERRA2",
 	"LEVS" : "47",
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "N2O_TCCON_v01",
+	"RUN_NAME" : "N2O_TCCON_v03",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/hpc/group/shindell/ap851/N2O/N2O_Asia_4x5/Restarts/GEOSChem.Restart.20180101_0000z.nc4",
+	"RESTART_FILE" : "/hpc/group/shindell/ap851/N2O/N2O_Asia_4x5/Restarts/GEOSChem.Restart.20181201_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -28,7 +28,7 @@
 	"CONTROL_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
-	"ENS_SPINUP_START" : "20180101",
+	"ENS_SPINUP_START" : "20181201",
 	"ENS_SPINUP_END" : "20190101",
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190201",
@@ -44,8 +44,8 @@
 	"BURN_IN_END" : "20180601",
 	"POSTPROCESS_START_DATE":"20190101",
 	"POSTPROCESS_END_DATE":"20200101",
-	"nEnsemble" : "12",
-	"verbose":"0",
+	"nEnsemble" : "8",
+	"verbose":"2",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
@@ -87,7 +87,7 @@
 	"SPINUP_HISTORY_freq" : "00000100 000000",
 	"SPINUP_HISTORY_dur" : "00000100 000000",
 	"SaveLevelEdgeDiags" : "True",
-	"SaveStateMet" : "False",
+	"SaveStateMet" : "True",
 	"SaveArea" : "False",
 	"SaveSatDiagn" : "False",
 	"HistorySpeciesConcToSave" : [
@@ -101,7 +101,8 @@
 		"Met_PS1DRY",
 		"Met_TMPU1",
 		"Met_BXHEIGHT",
-		"Met_TropLev"
+		"Met_TropLev",
+		"Met_DELPDRY"
 	],
 	"HistoryStateMetToSave" : [
 		"Met_AD",
@@ -152,7 +153,7 @@
 		"N2O":"True"
 	},
 	"corrDistances" : {
-		"CH4":"1500"
+		"N2O":"1500"
 	},
 	"speedyCorrelationApprox" : "True",
 	"lognormalErrors" : "True",
@@ -202,20 +203,20 @@
 		"N2O_TCCON":"1"
 	},
 	"OBS_ERROR": {
-		"N2O_TCCON":"10"
+		"N2O_TCCON":"3"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"N2O_TCCON":""
+		"N2O_TCCON":"0"
 	},
 	"MIN_OBS_ERROR":{
-		"N2O_TCCON":"10"
+		"N2O_TCCON":"0"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
 		"N2O_TCCON":{
-			"transport_error":""
+			"transport_error":"0"
 		}
 	},
 	"AV_TO_GC_GRID" : {
@@ -270,6 +271,7 @@
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"N2O_TCCON" : [
+			"station_id"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
@@ -279,6 +281,7 @@
 	"extra_plot_field_units":{
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
+		"N2O_TCCON":"station_id"
 	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
