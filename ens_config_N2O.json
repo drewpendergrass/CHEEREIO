@@ -270,6 +270,7 @@
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"N2O_TCCON" : [
+			"station_id"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
@@ -279,6 +280,7 @@
 	"extra_plot_field_units":{
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
+		"N2O_TCCON":"station_id"
 	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
