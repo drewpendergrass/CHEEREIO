@@ -189,7 +189,7 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
 			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		else:
-			gc_overrides = si.checkGCSpeciesOverride(spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+			gc_overrides = si.checkGCSpeciesOverride(self.spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
 			if (len(gc_overrides)>0)&(species in gc_overrides):
 				gc_sim = GC[gc_overrides[species]].values*1e9
 			else:
