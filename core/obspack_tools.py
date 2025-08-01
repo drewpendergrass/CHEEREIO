@@ -8,6 +8,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import observation_operators as obsop
+import settings_interface as si 
 
 data_vars = ['time', 'start_time', 'midpoint_time', 'time_components', 'value',
 'latitude', 'longitude', 'altitude', 'assimilation_concerns',
