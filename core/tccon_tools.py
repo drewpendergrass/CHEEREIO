@@ -38,12 +38,14 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False):
 	met['longitude'] = data['longitude'].values[:]
 	met['latitude'] = data['latitude'].values[:]
 	met['utctime'] = data['time_utc'].values[:]
+	met['station_id'] = data['station_id'].values[:]
 
 	met['pressure_AK'] = data['ak_pressure'].values[0,la,lo,:] # hPa 
 	met['pressure_apriori'] = data['prior_pressure'].values[0,la,lo,:] * 101325/100 # hPa  
 	met['h2o_profile_apriori'] = data['prior_h2o'].values[0,la,lo,:] # parts
 	met['altitude_apriori'] = 1000*data['prior_altitude'].values[:] # m
 	met['pout'] = data['pout'].values[0,la,lo] # TCCON (surface) pressure hPa
+
 	if species=='CO':
 		met['column_AK'] = data['ak_xco'].values[0,la,lo,:] #time,latitude,longitude,layer
 		met['co_profile_apriori'] = data['prior_co'].values[0,la,lo,:] # ppb
