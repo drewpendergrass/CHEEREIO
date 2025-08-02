@@ -3,7 +3,7 @@
 import pickle
 import sys
 import argparse
-import Assimilator as Assimilator 
+from Assimilator import Assimilator 
 import testing_tools as tt
 
 def str2bool(v):
