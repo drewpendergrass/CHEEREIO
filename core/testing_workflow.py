@@ -28,7 +28,7 @@ parser.add_argument('-lon', '--lon_ind', type=int, help='Lon ind for assimilatio
 
 args = parser.parse_args()
 
-assim = new Assimilator(args.date,args.ens_num,args.core_num, args.rip_date)
+assim = Assimilator(args.date,args.ens_num,args.core_num, args.rip_date)
 
 #Pickle assimilator
 with open(args.file_out, 'wb') as f:
