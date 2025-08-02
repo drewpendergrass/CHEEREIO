@@ -144,7 +144,7 @@
 	"ACTIVATE_OBSPACK" : "true",
 	"preprocess_raw_obspack_files" : "false",
 	"raw_obspack_path" : "/hpc/group/shindell/ap851/N2O/obspack",
-	"gc_obspack_path" : "/hpc/group/shindell/ap851/N2O/obspack4gc",
+	"gc_obspack_path" : "/hpc/group/shindell/ap851/N2O/obspack_agage_wdcgg_for_gc",
 	"obspack_gc_input_file" : "obspack_n2o.YYYYMMDD.nc",
 	"HistoryObsPackToSave" : [
 		"pressure",
