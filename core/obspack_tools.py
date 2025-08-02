@@ -33,16 +33,6 @@ def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 		#Save out the site code
 		site_code = data.attrs['site_code']
 		data['site_code'] = xr.DataArray([site_code]*len(data.obs), dims=('obs'))
-		# Correct to local timezone if it's an in situ or surface observation
-		if (len(data.obs) > 0) and (platform in ['surface', 'tower']):
-			utc_conv = data.attrs['site_utc2lst']
-			if int(utc_conv) != utc_conv:
-				print('UTC CONVERSION FACTOR IS NOT AN INTEGER : ', data.attrs['dataset_name'])
-			data['utc_conv'] = xr.DataArray(utc_conv*np.ones(len(data.obs)),dims=('obs'))
-			# data['time_ltc'] = dc(data['time']) + np.timedelta64(int(utc_conv), 'h')
-		else:
-			data['utc_conv'] = xr.DataArray(np.zeros(len(data.obs)), dims=('obs'))
-			# data['time_ltc'] = dc(data['time'])
 		return data
 	return filter_obspack
 
@@ -126,7 +116,7 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		daily.to_netcdf(f'{gc_obspack_dir}/{name_str}{day.year:04d}{day.month:02d}{day.day:02d}.nc',unlimited_dims=['obs'])
 
 def filter_postprocess_obspack_from_file(data):
-	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'utc_conv', 'platform','site_code']]
+	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'platform','site_code']]
 
 class ObsPack_Translator(obsop.Observation_Translator):
 	def __init__(self,verbose=1):
@@ -166,7 +156,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			met['latitude'] = obspack['latitude'].values
 			met['altitude'] = obspack['altitude'].values
 			met['utctime'] = obspack['time'].values
-			met['utc_conv'] = obspack['utc_conv'].values
 			met['platform'] = obspack['platform'].values
 			met['obspack_id'] = obspack['obspack_id'].values
 			met['site_code'] = obspack['site_code'].values
@@ -177,7 +166,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			met['latitude'] = np.array([])
 			met['altitude'] = np.array([])
 			met['utctime'] = np.array([])
-			met['utc_conv'] = np.array([])
 			met['platform'] = np.array([])
 			met['obspack_id'] = np.array([])
 			met['site_code'] = np.array([])
@@ -187,7 +175,7 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		#Have to convert to PPB
 		if len(ObsPack['value'])==0:
 			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+			toreturn.addData(altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		else:
 			gc_overrides = si.checkGCSpeciesOverride(self.spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
 			if (len(gc_overrides)>0)&(species in gc_overrides):
@@ -195,6 +183,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			else:
 				gc_sim = GC[species].values*1e9
 			toreturn = obsop.ObsData(gc_sim,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+			toreturn.addData(altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		return toreturn
 
