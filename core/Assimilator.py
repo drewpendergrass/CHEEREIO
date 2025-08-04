@@ -195,8 +195,12 @@ class Assimilator(object):
 			print(f'C made in Assimilator. It has dimension {np.shape(self.C)} and value {self.C}')
 	def makePtildeAnalysis(self):
 		cyb = self.C @ self.Ypert_background
+		if self.verbose>=3:
+			print(f'C*Ypert_background made in Assimilator. It has dimension {np.shape(cyb)} and value {cyb}')
 		k = len(self.ensemble_numbers)
 		iden = (k-1)*np.identity(k)/(1+self.inflation)
+		if self.verbose>=3:
+			print(f'C*Ypert_background+identity made in Assimilator. It has dimension {np.shape(iden+cyb)} and value {iden+cyb}')
 		self.PtildeAnalysis = la.inv(iden+cyb)
 		if self.verbose>=3:
 			print(f'PtildeAnalysis made in Assimilator. It has dimension {np.shape(self.PtildeAnalysis)} and value {self.PtildeAnalysis}')
