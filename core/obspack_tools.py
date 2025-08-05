@@ -174,19 +174,21 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		#Have to convert to PPB
 		if species=='CH4':
-			multiplier = 1e9
+			obs_multiplier = 1e9
+			gc_multiplier=1e9
 		elif species=='N2O':
-			multiplier = 1
+			obs_multiplier = 1
+			gc_multiplier=1e9
 		if len(ObsPack['value'])==0:
-			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*obs_multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
 			toreturn.addData(altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		else:
 			gc_overrides = si.checkGCSpeciesOverride(self.spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
 			if (len(gc_overrides)>0)&(species in gc_overrides):
-				gc_sim = GC[gc_overrides[species]].values*multiplier
+				gc_sim = GC[gc_overrides[species]].values*gc_multiplier
 			else:
-				gc_sim = GC[species].values*multiplier
-			toreturn = obsop.ObsData(gc_sim,ObsPack['value']*multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+				gc_sim = GC[species].values*gc_multiplier
+			toreturn = obsop.ObsData(gc_sim,ObsPack['value']*obs_multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
 			toreturn.addData(altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		return toreturn
 
