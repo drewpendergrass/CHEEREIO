@@ -1,0 +1,306 @@
+{
+	"comment000" : "***************************************************************************",
+	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
+	"comment002" : "***************************************************************************",
+	"GC_VERSION" : "14.1.1",
+	"RES" : "4.0x5.0",
+	"met_name" : "MERRA2",
+	"LEVS" : "47",
+	"NEST" : "F",
+	"REGION" : "",
+	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
+	"RUN_NAME" : "NH3_IASI_v01",
+	"MY_PATH" : "/work/ap851/CHEEREIO",
+	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
+	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
+	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
+	"RESTART_FILE" : "/hpc/group/shindell/ap851/NH3/input_data/GEOSChem.Restart.20190620_0000z.nc4",
+	"BC_FILES" : "/n/holyscratch01/jacob_lab/yunxiaot/Boundary/OutputDir/GEOSChem.BoundaryConditions.$YYYY$MM$DD_$HH$MNz.nc4",
+	"sim_name" : "fullchem",
+	"chemgrid" : "trop+strat",
+	"sim_extra_option" : "none",
+	"DO_SPINUP" : "false",
+	"SPINUP_START" : "",
+	"SPINUP_END" : "",
+	"DO_CONTROL_RUN" : "true",
+	"DO_CONTROL_WITHIN_ENSEMBLE_RUNS" : "true",
+	"CONTROL_START" : "",
+	"CONTROL_END" : "",
+	"DO_ENS_SPINUP" : "false",
+	"ENS_SPINUP_FROM_BC_RESTART" : "false",
+	"ENS_SPINUP_START" : "",
+	"ENS_SPINUP_END" : "",
+	"START_DATE" : "20190620",
+	"ASSIM_START_DATE" : "20190702",
+	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "false",
+	"END_DATE" : "20190731",
+	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "false",
+	"SPREAD_AMPLIFICATION_FACTOR" : "1",
+	"species_to_amplify_not_in_statevec" : [
+	],
+	"DO_BURN_IN" : "false",
+	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
+	"BURN_IN_END" : "",
+	"POSTPROCESS_START_DATE":"20190701",
+	"POSTPROCESS_END_DATE":"20190731",
+	"nEnsemble" : "8",
+	"verbose":"2",
+	"comment003" : "***************************************************************************",
+	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
+	"comment005" : "***************************************************************************",
+	"NumCores" : "8",
+	"NumCtrlCores" : "8",
+	"Partition" : "common",
+	"Memory" : "60000",
+	"EnsCtrlSpinupMemory" : "",
+	"WallTime" : "2-00\\:00",
+	"EnsSpinupWallTime" : "1-00\\:00",
+	"ControlWallTime" : "0-04\\:00",
+	"SpinupWallTime" : "",
+	"CondaEnv" : "cheereio",
+	"AnimationEnv" : "animation",
+	"MaxPar" : "4",
+	"comment006" : "******************************************************************************",
+	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
+	"comment008" : "******************************************************************************",
+	"STATE_VECTOR_CONC" : [
+	],
+	"CONTROL_VECTOR_CONC" : [
+	],
+	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
+	"CONTROL_VECTOR_EMIS" : {
+		"NH3":"NH3"
+	},
+	"comment009" : "******************************************************************************",
+	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
+	"comment011" : "******************************************************************************",
+	"HISTORY_collections_to_customize" : [
+		"SpeciesConc",
+		"Restart",
+		"LevelEdgeDiags",
+		"StateMet"
+	],
+	"HISTORY_freq" : "00000000 010000",
+	"HISTORY_dur" : "00000001 000000",
+	"SPINUP_HISTORY_freq" : "00000100 000000",
+	"SPINUP_HISTORY_dur" : "00000100 000000",
+	"SaveLevelEdgeDiags" : "True",
+	"SaveStateMet" : "True",
+	"SaveArea" : "False",
+	"SaveSatDiagn" : "False",
+	"HistorySpeciesConcToSave" : [
+		"NO",
+		"NO2",
+		"HNO3",
+		"HNO4",
+		"PAN",
+		"MPAN",
+		"N2O5",
+		"NH3"
+	],
+	"HistoryLevelEdgeDiagsToSave" : [
+		"Met_PEDGE"
+	],
+	"HistoryRestartToSave" : [
+		"SpeciesRst_?ALL?",
+		"Chem_H2O2AfterChem",
+		"Chem_SO2AfterChem",
+		"Chem_DryDepNitrogen",
+		"Chem_WetDepNitrogen",
+		"Chem_KPPHvalue",
+		"Chem_StatePSC",
+		"Met_DELPDRY",
+		"Met_PS1WET",
+		"Met_PS1DRY",
+		"Met_SPHU1",
+		"Met_TMPU1",
+		"Met_BXHEIGHT",
+		"Met_TropLev",
+		"Met_AIRDEN"
+	],
+	"HistoryStateMetToSave" : [
+		"Met_AIRDEN",
+		"Met_TropLev",
+		"Met_BXHEIGHT",
+		"Met_T"
+	],
+	"HistorySatDiagnToSave" : [
+	],
+	"comment012" : "******************************************************************************",
+	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
+	"comment014" : "******************************************************************************",
+	"OBSERVED_SPECIES" : {
+		"NH3_IASI": "NH3"
+	},
+	"OBS_TYPE" : {
+		"NH3_IASI":"IASI"
+	},
+	"ASSIMILATE_OBS" : {
+		"NH3_IASI":"True"
+	},
+	"TROPOMI_dirs" : {
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/tropomi/NO2/2019/07"
+	},
+	"OMI_dirs" : {
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/omi/NO2"
+	},
+	"IASI_dirs" : {
+		"NH3" : "/hpc/group/shindell/ap851/NH3/IASI/"
+	},
+	"filter_obs_poleward_of_n_degrees" : {
+		"NH3_IASI":"70"
+	},
+	"SaveDOFS" : "False",
+	"DOFS_filter" : "nan",
+	"ACTIVATE_OBSPACK" : "false",
+	"preprocess_raw_obspack_files" : "false",
+	"raw_obspack_path" : "",
+	"gc_obspack_path" :  "",
+	"obspack_gc_input_file" : "",
+	"HistoryObsPackToSave" : [
+	],
+	"comment015" : "******************************************************************************",
+	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
+	"comment017" : "******************************************************************************",
+	"init_std_dev" : {
+		"NH3":"0.3"
+	},
+	"correlatedInitialScalings" : {
+		"NH3":"True"
+	},
+	"corrDistances" : {
+		"NH3":"600"
+	},
+	"speedyCorrelationApprox" : "True",
+	"lognormalErrors" : "True",
+	"additional_init_perturbation_from_emis" : {
+		"NH3":{
+			"do_add_pert":"False",
+			"file":{
+				"file":"",
+				"variable":""
+			},
+			"max_pert":"",
+			"saturation":""
+		}
+	},
+	"MaskOceanScaleFactor" : {
+		"NH3":"True"
+	},
+	"MaskCoastsGT25pctOcean" : "True",
+	"Mask60NScaleFactor" : {
+		"NH3":"True"
+	},
+	"Mask60SScaleFactor" : {
+		"NH3":"True"
+	},
+	"MinimumScalingFactorAllowed" : {
+		"NH3":"nan"
+	},
+	"MaximumScalingFactorAllowed" : {
+		"NH3":"nan"
+	},
+	"InflateScalingsToXOfInitialStandardDeviation" : {
+		"NH3":"nan"
+	},
+	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
+		"NH3":"nan"
+	},
+	"comment018" : "******************************************************************************",
+	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
+	"comment020" : "******************************************************************************",
+	"REGULARIZING_FACTOR_GAMMA": {
+		"NH3_IASI":"0.6"
+	},
+	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
+		"NH3_IASI":"False"
+	},
+	"GAMMA_FOR_BURN_IN" : {
+		"NH3_IASI":""
+	},
+	"OBS_ERROR": {
+		"NH3_IASI":"nan" 
+	},
+	"OBS_ERROR_TYPE":{
+		"NH3_IASI":"product"
+	},
+	"OBS_ERROR_SELF_CORRELATION" : {
+		"NH3_IASI":"0.3"
+	},
+	"MIN_OBS_ERROR":{
+		"NH3_IASI":"0"
+	},
+	"OTHER_OBS_ERROR_PARAMETERS":{
+		"NH3_IASI":{
+			"transport_error":"0"
+		}
+	},
+	"AV_TO_GC_GRID" : {
+		"NH3_IASI":"True"
+	},
+	"SUPER_OBSERVATION_FUNCTION":{
+		"NH3_IASI":"default"
+	},
+	"SUPER_OBS_BEFORE_Hx":{
+		"NH3_IASI":"True"
+	},
+	"INFLATION_FACTOR": "0.1",
+	"ASSIM_TIME": "24",
+	"MAXNUMOBS" : "3000",
+	"MINNUMOBS" : "1",
+	"LOCALIZATION_RADIUS_km" : "1000",
+	"smooth_localization_with_gaspari_cohn" : "True",
+	"AveragePriorAndPosterior" : "False",
+	"PriorWeightinPriorPosteriorAverage" : "0.5",
+	"AverageScaleFactorPosteriorWithPrior" : "False",
+	"PriorWeightinSFAverage" : "0.5",
+	"Activate_Relaxation_To_Prior_Spread" : "True",
+	"RTPS_parameter" : "1.0",
+	"species_not_in_statevec_to_RTPS" : [
+	],
+	"comment021" : "******************************************************************************",
+	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
+	"comment023" : "******************************************************************************",
+	"DO_RUN_IN_PLACE" : "False",
+	"rip_update_time" : "24",
+	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
+	"rip_burnin_update_time" : "24",
+	"DO_VARON_RERUN" : "False",
+	"APPROXIMATE_VARON_RERUN" : "False",
+	"species_to_approximate_for_rerun" : [],
+	"number_of_windows_to_rerun" :"1",
+	"comment024" : "**********************************************************************************",
+	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
+	"comment026" : "**********************************************************************************",
+	"animation_fps_scalingfactor":"2",
+	"animation_fps_concentrations":"18",
+	"omit_diff_cells_with_fewer_than_n_observations":"10",
+	"hemco_diags_to_process" : [
+		"EmisNH3_Total"
+	],
+	"useLogScaleForEmissionsMaps" : "False",
+	"min_emis_value_to_plot" : "1e-14",
+	"min_emis_std_value_to_plot" : "1e-15",
+	"OBSERVATION_UNITS":{
+		"NH3_IASI": "mol/m2"
+	},
+	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
+		"NH3_IASI" : []
+	},
+	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
+		"NH3_IASI" : []
+	},
+	"extra_plot_field_units":{
+	},
+	"OBSERVERS_TO_PLOT_AS_POINTS":{
+	},
+	"scalefactor_plot_freq" : "all",
+	"comment027" : "**********************************************************************************",
+	"comment028" : "******************************BEGIN SETTING EXTENSIONS****************************",
+	"comment029" : "**********************************************************************************",
+	"Extensions": {
+		"TROPOMI_CH4":"False",
+		"CH4":"False",
+		"TROPOMI_NO2":"False"
+	}
+}
