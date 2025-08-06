@@ -2,6 +2,7 @@
 # Update: Include TCCON InSb CO measurements at East Trout Lake. Bug fixed and tested (2024/08/30)
 
 ## TCCON operator incorporated into main CHEEREIO code branch and extended to N2O by Drew Pendergrass (2025/07/24)
+## Update: included TCCON N2O temperature correction from Josh Laughner; will be unnecessary after GGG2020.1 (2025/08/05)
 
 from datetime import datetime
 from glob import glob
@@ -13,7 +14,7 @@ import observation_operators as obsop
 from scipy.interpolate import interp1d
 
 
-def read_tccon(filename, species, filterinfo=None, includeObsError = False):
+def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2OCorrectionPT700=False):
 
 	met = {}
 	
@@ -46,6 +47,13 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False):
 	met['altitude_apriori'] = 1000*data['prior_altitude'].values[:] # m
 	met['pout'] = data['pout'].values[0,la,lo] # TCCON (surface) pressure hPa
 
+	#Do N2O temp correction, if we are using GGG2020 (this should be included in GGG2020.1 when it's released)
+	if doN2OCorrectionPT700 and species=='N2O':
+		if includeObsError:
+			met[species],met['Error']=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values[0,la,lo,:],met['pressure_apriori'],xn2o_error=met['Error'])
+		else:
+			met[species]=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values[0,la,lo,:],met['pressure_apriori'])
+
 	if species=='CO':
 		met['column_AK'] = data['ak_xco'].values[0,la,lo,:] #time,latitude,longitude,layer
 		met['co_profile_apriori'] = data['prior_co'].values[0,la,lo,:] # ppb
@@ -55,12 +63,41 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False):
 	
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
-
+	
+	data.close()
 	return met
 
-	data.close()
 
-# map the veritcal levels of the model into the observation levels
+# Based on Josh Laughner's code from GitHub: py_tccon_netcdf/write_tccon_netcdf/bias_corrections.py
+def correct_xn2o_from_pt700(xn2o,prior_temperature,prior_pressure,xn2o_error=None,n2o_aicf=0.9821, m=0.000626, b=0.787):
+	# We need to remove the AICF because the correction was calculated for pre-AICF XN2O data
+	xn2o = xn2o * n2o_aicf
+	xn2o_error = xn2o_error * n2o_aicf
+	pt700 = _compute_pt700(prior_temperature,prior_pressure)
+	# Apply the temperature correction. Counterintuitively, we do *NOT* need to reapply the AICF.
+	# That is only because for N2O the AICF was calculated as the value of this fit at 310 K.
+	# Hence, essentially this is applying a *temperature dependent* AICF. 
+	xn2o_corr = xn2o / (m * pt700 + b)
+	if xn2o_error is not None:
+		xn2o_error_corr = xn2o_error / (m * pt700 + b)
+		return xn2o_corr, xn2o_error_corr
+	else:
+		return xn2o_corr
+
+# Based on Josh Laughner's code from GitHub: py_tccon_netcdf/write_tccon_netcdf/bias_corrections.py
+def _compute_pt700(prior_temperature,prior_pressure):
+	pt700 = np.full(prior_temperature.shape[0], np.nan, dtype=prior_temperature.dtype)
+	for (i, (tprof, pprof)) in enumerate(zip(prior_temperature, prior_pressure)):
+		# Normally I would interpolate temperature vs. ln(p). But the bias plot does a 
+		# straight linear-linear interpolation, so we do the same so that our PT that
+		# we use to determine the bias correction is calculated the same way as that
+		# used to determine the bias correction slope.
+		f = interp1d(pprof, tprof)
+		t700_i = f(700.0)
+		pt700[i] = t700_i * (1000.0 / 700.0) ** 0.286
+	return pt700
+
+# map the vertical levels of the model into the observation levels
 def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	# Adjusting bottom and top edges
 	idx_bottom = np.less(GC_edges[:, 0], sat_edges[:, 0])
@@ -86,7 +123,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges):
 	GC_on_sat = GC_on_sat / GC_to_sat.sum(axis=1)
 
 	if np.any(np.isnan(GC_on_sat)) or np.any(np.isinf(GC_on_sat)):
-	    print("Warning: NaN or inf values encountered in GC_on_sat.")
+		print("Warning: NaN or inf values encountered in GC_on_sat.")
 
 	return GC_on_sat
 
@@ -115,7 +152,7 @@ def gravity(altitudes, latitudes):
 		ge = gm / (eqrad ** 2)
 		
 		g = (ge * (1 - shc * (3 * np.sin(gclat) ** 2 - 1) / ff) / ff - hh * np.cos(gclat) ** 2) * (
-		    1 + 0.5 * (np.sin(gclat) * np.cos(gclat) * (hh / ge + 2 * shc / ff ** 2)) ** 2)
+			1 + 0.5 * (np.sin(gclat) * np.cos(gclat) * (hh / ge + 2 * shc / ff ** 2)) ** 2)
 		
 		# Average every two levels for the middle values
 		g_layer = 0.5 * (g[:-1] + g[1:])
@@ -270,17 +307,20 @@ class TCCON_Translator(obsop.Observation_Translator):
 		obs_list = self.globObs(species,timeperiod,interval)
 		tccon_obs = []
 		filterinfo = {}
+		pt700=False
 		if species=='CO':
 			if (self.spc_config['Extensions']['TCCON_CO']=="True") and (self.spc_config['TCCON_CO_FILTERS']=="True"):
 				pass #no filters implemented
 		elif species=='N2O':
 			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['TCCON_N2O_FILTERS']=="True"):
 				pass #no filters implemented
+			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['PT700_N2O_CORRECTION']=="True"):
+				pt700=True #Do GGG2020 N2O correction
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		# read tccon files
 		for obs in obs_list:
-			tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError))
+			tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError,doN2OCorrectionPT700=pt700))
 		met = {}
 		for key in list(tccon_obs[0].keys()):
 			met[key] = np.concatenate([metval[key] for metval in tccon_obs])

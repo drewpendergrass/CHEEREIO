@@ -33,13 +33,13 @@ file_pattern = args.input_file_pattern
 file_paths = glob.glob(os.path.join(args.input_path, file_pattern)) # provide the path of standard TCCON files (public and/or private files) - e.g., download from  https://tccondata.org/
 
 # List of variables to keep
-variables_to_keep = ['time', 'prior_time', 'prior_altitude', 'prior_pressure', 'prior_h2o',  'ak_pressure',  'lat', 'long', 'pout']
+variables_to_keep = ['time', 'prior_time', 'prior_altitude', 'prior_pressure','prior_temperature', 'prior_h2o',  'ak_pressure',  'lat', 'long', 'pout']
 # List of species-dependent variables and their corresponding error variables
 species_dependent_vars = {}
 # List of variables with two dimensions and their corresponding second dimensions
 two_dimensional_vars = {}
 
-to_convert = ['prior_pressure', 'ak_pressure', 'prior_h2o', 'time_utc', 'pout']
+to_convert = ['prior_pressure','prior_temperature', 'ak_pressure', 'prior_h2o', 'time_utc', 'pout']
 
 species_to_keep = args.species_to_keep.split(',')
 for species in species_to_keep:
