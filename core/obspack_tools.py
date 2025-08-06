@@ -188,6 +188,22 @@ class ObsPack_Translator(obsop.Observation_Translator):
 				gc_sim = GC[gc_overrides[species]].values*gc_multiplier
 			else:
 				gc_sim = GC[species].values*gc_multiplier
+			# Apply error filter from the extension. Remove observations where error exceeds some (very high) maximum threshhold as being likely in error.
+			if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
+				maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
+				if ~np.isnan(maxerr):
+					err = np.abs(gc_sim-ObsPack['value']*obs_multiplier)
+					valid = np.where(err<maxerr)[0]
+					gc_sim = gc_sim[valid]
+					ObsPack['value'] = ObsPack['value'][valid]
+					ObsPack['latitude'] = ObsPack['latitude'][valid]
+					ObsPack['longitude'] = ObsPack['longitude'][valid]
+					ObsPack['utctime'] = ObsPack['utctime'][valid]
+					ObsPack['altitude'] = ObsPack['altitude'][valid]
+					GC['pressure'].values = GC['pressure'].values[valid]
+					ObsPack['obspack_id'] = ObsPack['obspack_id'][valid]
+					ObsPack['platform'] = ObsPack['platform'][valid]
+					ObsPack['site_code'] = ObsPack['site_code'][valid]
 			toreturn = obsop.ObsData(gc_sim,ObsPack['value']*obs_multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
 			toreturn.addData(altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		return toreturn

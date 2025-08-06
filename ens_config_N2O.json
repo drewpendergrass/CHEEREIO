@@ -202,7 +202,7 @@
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
 		"N2O_TCCON":"1",
-		"N2O_OBSPACK":"1"
+		"N2O_OBSPACK":"0.05"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"N2O_TCCON":"False",
@@ -213,8 +213,8 @@
 		"N2O_OBSPACK":"1"
 	},
 	"OBS_ERROR": {
-		"N2O_TCCON":"1",
-		"N2O_OBSPACK":"3"
+		"N2O_TCCON":"3",
+		"N2O_OBSPACK":"6"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute",
@@ -316,6 +316,7 @@
 	"comment029" : "**********************************************************************************",
 	"Extensions": {
 		"TCCON_N2O":"True",
+		"Obspack_N2O":"True",
 		"N2O":"True",
 		"CH4":"False"
 	}
