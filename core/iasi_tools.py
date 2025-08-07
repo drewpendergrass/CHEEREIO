@@ -144,7 +144,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			except Exception as e:
 				print(f"Skipping {obs} read of species {species} due to error: {e}")
 		met = {}
-		if len(iasi_obs>0)
+		if len(iasi_obs>0):
 			for key in list(iasi_obs[0].keys()):
 				if key in ['level_edge','level_middle']: #Don't concatenate these; all equal.
 					met[key] = iasi_obs[0][key]
