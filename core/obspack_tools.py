@@ -217,7 +217,7 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		#We allow an option to average to the GC grid
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True": 
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
-			i,j,t=nearest_loc(GC,{'latitude':obslat,'longitude':obslon,'utctime':obstime})
+			i,j,t=obsop.nearest_loc(GC,{'latitude':obslat,'longitude':obslon,'utctime':obstime})
 			additional_args_avgGC = {}
 			if doErrCalc:
 				if useObserverError:
