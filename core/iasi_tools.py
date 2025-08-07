@@ -139,76 +139,35 @@ class IASI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
+			try:
+				iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
+			except Exception as e:
+        		print(f"Skipping {obs} read of species {species} due to error: {e}")
 		met = {}
-		for key in list(iasi_obs[0].keys()):
-			if key in ['level_edge','level_middle']: #Don't concatenate these; all equal.
-				met[key] = iasi_obs[0][key]
-			else:
-				met[key] = np.concatenate([metval[key] for metval in iasi_obs])
+		if len(iasi_obs>0)
+			for key in list(iasi_obs[0].keys()):
+				if key in ['level_edge','level_middle']: #Don't concatenate these; all equal.
+					met[key] = iasi_obs[0][key]
+				else:
+					met[key] = np.concatenate([metval[key] for metval in iasi_obs])
+		else: #If no observations, return something empty
+			met = {}
+			met['qa'] = np.array([])
+			met['utctime'] = np.array([])
+			met['latitude'] = np.array([])
+			met['longitude'] = np.array([])
+			met['level_edge'] = np.array([])
+			met['level_middle'] = np.array([])
+			if includeObsError:
+				met['Error'] = np.array([])
+			met['column_AK'] = np.array([])
+			met['HRI'] = np.array([])
 		return met
 	def gcCompare(self,specieskey,IASI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		extra_obsdata_to_save = self.spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y'][specieskey]
-		GC_col_data = obsop.getGCCols(GC,IASI,species,self.spc_config,returninds=True,returnLevelEdge=False,returnStateMet=True,GC_area=GC_area)
-		GC_SPC = GC_col_data['GC_SPC']
-		if ('Met_BXHEIGHT' not in GC_col_data) or ('Met_AIRDEN' not in GC_col_data):
-			raise ValueError('ERROR: missing met fields. Ensure Met_BXHEIGHT and Met_AIRDEN are saved out in HistoryRC and listed in ens_config.')
-		GC_bxheight = GC_col_data['Met_BXHEIGHT']
-		GC_AIRDEN = GC_col_data['Met_AIRDEN']
-		IASI_EDGES = IASI['level_edge']*1e3 #km to m
-		IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
-		#Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
-		GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
-		i,j,t = GC_col_data['indices']
-		#If super observations, prep the error calculation
-		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
-			superobs=True
-			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
-			additional_args_avgGC = {}
-			if doErrCalc:
-				if useObserverError:
-					additional_args_avgGC['obsInstrumentError'] = IASI['Error']
-					additional_args_avgGC['modelTransportError'] = transportError
-				elif prescribed_error is not None:
-					additional_args_avgGC['prescribed_error'] = prescribed_error
-					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
-				if minError is not None:
-					additional_args_avgGC['minError'] = minError
-				if errorCorr is not None:
-					additional_args_avgGC['errorCorr'] = errorCorr
-			additional_args_avgGC['other_fields_to_avg'] = {}
-			#save HRI for postfilter
-			additional_args_avgGC['other_fields_to_avg']['HRI'] = IASI['HRI']
-			for field in extra_obsdata_to_save:
-				additional_args_avgGC['other_fields_to_avg'][field] = IASI[field]
-		else:
-			superobs=False
-		#If user is taking super observations and wants to average before applying averaging kernel, do so now
-		if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
-			presuperobs=True
-			iasi_agg_args = {'GC_SPC':GC_SPC, 'ak':IASI['column_AK'],'GC_bxheight':GC_bxheight}
-			agg_data = obsop.averageFieldsToGC(i,j,t,GC,IASI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**iasi_agg_args)
-			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'],agg_data['GC_bxheight'], IASI_EDGES)
-			GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'])
-		else:
-			presuperobs=False
-			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_bxheight, IASI_EDGES)
-			GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI['column_AK'],IASI[species])
-		nan_indices = np.argwhere(np.isnan(GC_SPC_final))
-		GC_SPC_final = np.nan_to_num(GC_SPC_final)
-		if superobs:
-			if presuperobs:
-				toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
-				if doErrCalc:
-					toreturn.addData(err_av=agg_data['err'])
-				if 'additional_fields' in agg_data:
-					toreturn.addData(**agg_data['additional_fields'])
-			else:
-				toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
-		else:
-			timevals = GC.time.values[t]
-			toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
+		if len(IASI['value'])==0: #return something empty
+			toreturn = obsop.ObsData(np.array([]),IASI['value'],IASI['latitude'],IASI['longitude'],IASI['utctime'])
 			data_to_add = {}
 			data_to_add['HRI'] = IASI['HRI']
 			#If saving extra fields, add them here
@@ -217,14 +176,82 @@ class IASI_Translator(obsop.Observation_Translator):
 			toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=IASI['Error'])
-		#Apply postfilter.
-		SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
-		valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
-		#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
-		#We do this because different ensemble members will allow slightly different observations
-		#Depending on column shape.
-		toreturn.addData(postfilter=valid_after_postfilter) 
-		return toreturn
+		else:
+			GC_col_data = obsop.getGCCols(GC,IASI,species,self.spc_config,returninds=True,returnLevelEdge=False,returnStateMet=True,GC_area=GC_area)
+			GC_SPC = GC_col_data['GC_SPC']
+			if ('Met_BXHEIGHT' not in GC_col_data) or ('Met_AIRDEN' not in GC_col_data):
+				raise ValueError('ERROR: missing met fields. Ensure Met_BXHEIGHT and Met_AIRDEN are saved out in HistoryRC and listed in ens_config.')
+			GC_bxheight = GC_col_data['Met_BXHEIGHT']
+			GC_AIRDEN = GC_col_data['Met_AIRDEN']
+			IASI_EDGES = IASI['level_edge']*1e3 #km to m
+			IASI_BXHEIGHT = IASI_EDGES[1::]-IASI_EDGES[0:-1] #calculate box height
+			#Convert GC_SPC from mol/mol to mol/m3 (still fine for regridding)
+			GC_SPC = GC_SPC*(GC_AIRDEN / 0.028964) # apply model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+			i,j,t = GC_col_data['indices']
+			#If super observations, prep the error calculation
+			if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
+				superobs=True
+				superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+				additional_args_avgGC = {}
+				if doErrCalc:
+					if useObserverError:
+						additional_args_avgGC['obsInstrumentError'] = IASI['Error']
+						additional_args_avgGC['modelTransportError'] = transportError
+					elif prescribed_error is not None:
+						additional_args_avgGC['prescribed_error'] = prescribed_error
+						additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+					if minError is not None:
+						additional_args_avgGC['minError'] = minError
+					if errorCorr is not None:
+						additional_args_avgGC['errorCorr'] = errorCorr
+				additional_args_avgGC['other_fields_to_avg'] = {}
+				#save HRI for postfilter
+				additional_args_avgGC['other_fields_to_avg']['HRI'] = IASI['HRI']
+				for field in extra_obsdata_to_save:
+					additional_args_avgGC['other_fields_to_avg'][field] = IASI[field]
+			else:
+				superobs=False
+			#If user is taking super observations and wants to average before applying averaging kernel, do so now
+			if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
+				presuperobs=True
+				iasi_agg_args = {'GC_SPC':GC_SPC, 'ak':IASI['column_AK'],'GC_bxheight':GC_bxheight}
+				agg_data = obsop.averageFieldsToGC(i,j,t,GC,IASI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**iasi_agg_args)
+				GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'],agg_data['GC_bxheight'], IASI_EDGES)
+				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'])
+			else:
+				presuperobs=False
+				GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_bxheight, IASI_EDGES)
+				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI['column_AK'],IASI[species])
+			nan_indices = np.argwhere(np.isnan(GC_SPC_final))
+			GC_SPC_final = np.nan_to_num(GC_SPC_final)
+			if superobs:
+				if presuperobs:
+					toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
+					if doErrCalc:
+						toreturn.addData(err_av=agg_data['err'])
+					if 'additional_fields' in agg_data:
+						toreturn.addData(**agg_data['additional_fields'])
+				else:
+					toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+			else:
+				timevals = GC.time.values[t]
+				toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
+				data_to_add = {}
+				data_to_add['HRI'] = IASI['HRI']
+				#If saving extra fields, add them here
+				for field in extra_obsdata_to_save:
+					data_to_add[field] = IASI[field]
+				toreturn.addData(**data_to_add)
+				if doErrCalc and useObserverError:
+					toreturn.addData(err_av=IASI['Error'])
+			#Apply postfilter.
+			SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
+			valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
+			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
+			#We do this because different ensemble members will allow slightly different observations
+			#Depending on column shape.
+			toreturn.addData(postfilter=valid_after_postfilter) 
+			return toreturn
 
 #Testing zone.
 #Full assimilator
