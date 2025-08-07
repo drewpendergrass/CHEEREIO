@@ -192,19 +192,29 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
 				maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
 				if ~np.isnan(maxerr):
-					err = np.abs(gc_sim-ObsPack['value']*obs_multiplier)
+					err = np.abs(gc_sim-ObsPack['value'].values*obs_multiplier)
 					valid = np.where(err<maxerr)[0]
 					gc_sim = gc_sim[valid]
-					ObsPack['value'] = ObsPack['value'][valid]
-					ObsPack['latitude'] = ObsPack['latitude'][valid]
-					ObsPack['longitude'] = ObsPack['longitude'][valid]
-					ObsPack['utctime'] = ObsPack['utctime'][valid]
-					ObsPack['altitude'] = ObsPack['altitude'][valid]
-					GC['pressure'].values = GC['pressure'].values[valid]
-					ObsPack['obspack_id'] = ObsPack['obspack_id'][valid]
-					ObsPack['platform'] = ObsPack['platform'][valid]
-					ObsPack['site_code'] = ObsPack['site_code'][valid]
-			toreturn = obsop.ObsData(gc_sim,ObsPack['value']*obs_multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-			toreturn.addData(altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+					obsval = ObsPack['value'][valid]*obs_multiplier
+					obslat = ObsPack['latitude'][valid]
+					obslon = ObsPack['longitude'][valid]
+					obstime = ObsPack['utctime'][valid]
+					obsalt = ObsPack['altitude'][valid]
+					gcpressure = GC['pressure'].values[valid]
+					obsid = ObsPack['obspack_id'][valid]
+					obsplat = ObsPack['platform'][valid]
+					obssite = ObsPack['site_code'][valid]
+				else:
+					obsval = ObsPack['value']*obs_multiplier
+					obslat = ObsPack['latitude']
+					obslon = ObsPack['longitude']
+					obstime = ObsPack['utctime']
+					obsalt = ObsPack['altitude']
+					gcpressure = GC['pressure'].values
+					obsid = ObsPack['obspack_id']
+					obsplat = ObsPack['platform']
+					obssite = ObsPack['site_code']
+			toreturn = obsop.ObsData(gc_sim,obsval,obslat,obslon,obstime)
+			toreturn.addData(altitude=obsalt,pressure=gcpressure,obspack_id=obsid,platform=obsplat,site_code=obssite)
 		return toreturn
 
