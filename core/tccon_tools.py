@@ -72,7 +72,8 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 def correct_xn2o_from_pt700(xn2o,prior_temperature,prior_pressure,xn2o_error=None,n2o_aicf=0.9821, m=0.000626, b=0.787):
 	# We need to remove the AICF because the correction was calculated for pre-AICF XN2O data
 	xn2o = xn2o * n2o_aicf
-	xn2o_error = xn2o_error * n2o_aicf
+	if xn2o_error is not None:
+		xn2o_error = xn2o_error * n2o_aicf
 	pt700 = _compute_pt700(prior_temperature,prior_pressure)
 	# Apply the temperature correction. Counterintuitively, we do *NOT* need to reapply the AICF.
 	# That is only because for N2O the AICF was calculated as the value of this fit at 310 K.
