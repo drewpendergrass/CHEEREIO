@@ -142,7 +142,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			try:
 				iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
 			except Exception as e:
-        		print(f"Skipping {obs} read of species {species} due to error: {e}")
+				print(f"Skipping {obs} read of species {species} due to error: {e}")
 		met = {}
 		if len(iasi_obs>0)
 			for key in list(iasi_obs[0].keys()):
