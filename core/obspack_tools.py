@@ -192,7 +192,7 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
 				maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
 				if ~np.isnan(maxerr):
-					err = np.abs(gc_sim-ObsPack['value'].values*obs_multiplier)
+					err = np.abs(gc_sim-ObsPack['value']*obs_multiplier)
 					valid = np.where(err<maxerr)[0]
 					gc_sim = gc_sim[valid]
 					obsval = ObsPack['value'][valid]*obs_multiplier
