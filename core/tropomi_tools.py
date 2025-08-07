@@ -491,7 +491,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 					if species=='CO':
 						TROPOMI['Error']=1e9*TROPOMI['Error']/AIRMOL_COL # convert tropomi errro from mol/m2 to ppbv
 					additional_args_avgGC['obsInstrumentError'] = TROPOMI['Error']
-					additional_args_avgGC['modelTransportError'] = transportError
 				elif prescribed_error is not None:
 					additional_args_avgGC['prescribed_error'] = prescribed_error
 					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
@@ -499,6 +498,8 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 					additional_args_avgGC['minError'] = minError
 				if errorCorr is not None:
 					additional_args_avgGC['errorCorr'] = errorCorr
+				if transportError is not None:
+					additional_args_avgGC['modelTransportError'] = transportError
 			#If saving extra fields, add them here
 			if len(extra_obsdata_to_save)>0:
 				additional_args_avgGC['other_fields_to_avg'] = {}

@@ -9,12 +9,12 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "N2O_TCCON_obspack_v03",
+	"RUN_NAME" : "N2O_TCCON_obspack_v04",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/hpc/group/shindell/ap851/N2O/N2O_Asia_4x5/Restarts/GEOSChem.Restart.20180101_0000z.nc4",
+	"RESTART_FILE" : "/hpc/group/shindell/ap851/N2O/N2O_Asia_4x5/Restarts/GEOSChem.Restart.20181201_0000z.nc4",
 	"BC_FILES" : "",
 	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
@@ -28,7 +28,7 @@
 	"CONTROL_END" : "",
 	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
-	"ENS_SPINUP_START" : "20180101",
+	"ENS_SPINUP_START" : "20181201",
 	"ENS_SPINUP_END" : "20190101",
 	"START_DATE" : "20190101",
 	"ASSIM_START_DATE" : "20190201",
@@ -202,7 +202,7 @@
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
 		"N2O_TCCON":"1",
-		"N2O_OBSPACK":"0.05"
+		"N2O_OBSPACK":"1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"N2O_TCCON":"False",
@@ -238,11 +238,11 @@
 	},
 	"AV_TO_GC_GRID" : {
 		"N2O_TCCON":"False",
-		"N2O_OBSPACK":"False"
+		"N2O_OBSPACK":"True"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
-		"N2O_TCCON":"default",
-		"N2O_OBSPACK":"default"
+		"N2O_TCCON":"constant",
+		"N2O_OBSPACK":"constant"
 	},
 	"SUPER_OBS_BEFORE_Hx":{
 		"N2O_TCCON":"False",
@@ -292,10 +292,6 @@
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"N2O_TCCON" : [
 			"station_id"
-		],
-		"N2O_OBSPACK" : [
-			"obspack_id",
-			"site_code"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
@@ -307,8 +303,7 @@
 	"extra_plot_field_units":{
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
-		"N2O_TCCON":"station_id",
-		"N2O_OBSPACK":"site_code"
+		"N2O_TCCON":"station_id"
 	},
 	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",

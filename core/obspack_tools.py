@@ -214,6 +214,28 @@ class ObsPack_Translator(obsop.Observation_Translator):
 					obsid = ObsPack['obspack_id']
 					obsplat = ObsPack['platform']
 					obssite = ObsPack['site_code']
+		#We allow an option to average to the GC grid
+		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True": 
+			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+			i,j,t=nearest_loc(GC,{'latitude':obslat,'longitude':obslon,'utctime':obstime})
+			additional_args_avgGC = {}
+			if doErrCalc:
+				if useObserverError:
+					raise ValueError('No observer error supported for ObsPack')
+				elif prescribed_error is not None:
+					additional_args_avgGC['prescribed_error'] = prescribed_error
+					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+				if minError is not None:
+					additional_args_avgGC['minError'] = minError
+				if errorCorr is not None:
+					additional_args_avgGC['errorCorr'] = errorCorr
+				if transportError is not None:
+					additional_args_avgGC['modelTransportError'] = transportError
+				additional_args_avgGC['other_fields_to_avg'] = {}
+				additional_args_avgGC['other_fields_to_avg']['altitude']=obsalt
+				additional_args_avgGC['other_fields_to_avg']['pressure']=gcpressure
+			toreturn = obsop.averageByGC(i,j,t,GC,gc_sim,obsval,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+		else:				
 			toreturn = obsop.ObsData(gc_sim,obsval,obslat,obslon,obstime)
 			toreturn.addData(altitude=obsalt,pressure=gcpressure,obspack_id=obsid,platform=obsplat,site_code=obssite)
 		return toreturn
