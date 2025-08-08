@@ -288,6 +288,8 @@
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"N2O_TCCON" : [
 			"station_id"
+		],
+		"N2O_OBSPACK" : [
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
