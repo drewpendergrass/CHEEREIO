@@ -166,8 +166,8 @@ class IASI_Translator(obsop.Observation_Translator):
 	def gcCompare(self,specieskey,IASI,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		extra_obsdata_to_save = self.spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y'][specieskey]
-		if len(IASI['value'])==0: #return something empty
-			toreturn = obsop.ObsData(np.array([]),IASI['value'],IASI['latitude'],IASI['longitude'],IASI['utctime'])
+		if len(IASI[species])==0: #return something empty
+			toreturn = obsop.ObsData(np.array([]),IASI[species],IASI['latitude'],IASI['longitude'],IASI['utctime'])
 			data_to_add = {}
 			data_to_add['HRI'] = IASI['HRI']
 			#If saving extra fields, add them here
