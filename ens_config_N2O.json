@@ -229,12 +229,6 @@
 		"N2O_OBSPACK":"0"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
-		"N2O_TCCON":{
-			"transport_error":"0"
-		},
-		"N2O_OBSPACK":{
-			"transport_error":"0"
-		}
 	},
 	"AV_TO_GC_GRID" : {
 		"N2O_TCCON":"False",
