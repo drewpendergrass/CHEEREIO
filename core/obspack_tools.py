@@ -188,32 +188,28 @@ class ObsPack_Translator(obsop.Observation_Translator):
 				gc_sim = GC[gc_overrides[species]].values*gc_multiplier
 			else:
 				gc_sim = GC[species].values*gc_multiplier
-			# Apply error filter from the extension. Remove observations where error exceeds some (very high) maximum threshhold as being likely in error.
-			if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
-				maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
-				if ~np.isnan(maxerr):
-					err = np.abs(gc_sim-ObsPack['value']*obs_multiplier)
-					valid = np.where(err<maxerr)[0]
-					gc_sim = gc_sim[valid]
-					obsval = ObsPack['value'][valid]*obs_multiplier
-					obslat = ObsPack['latitude'][valid]
-					obslon = ObsPack['longitude'][valid]
-					obstime = ObsPack['utctime'][valid]
-					obsalt = ObsPack['altitude'][valid]
-					gcpressure = GC['pressure'].values[valid]
-					obsid = ObsPack['obspack_id'][valid]
-					obsplat = ObsPack['platform'][valid]
-					obssite = ObsPack['site_code'][valid]
-				else:
-					obsval = ObsPack['value']*obs_multiplier
-					obslat = ObsPack['latitude']
-					obslon = ObsPack['longitude']
-					obstime = ObsPack['utctime']
-					obsalt = ObsPack['altitude']
-					gcpressure = GC['pressure'].values
-					obsid = ObsPack['obspack_id']
-					obsplat = ObsPack['platform']
-					obssite = ObsPack['site_code']
+			if species in ['CH4','N2O']: #Filter out data where obspack collection returns 0 for GC. Very rare but annoying bug.
+				valid = np.where(gc_sim>1)[0]
+				gc_sim = gc_sim[valid]
+				obsval = ObsPack['value'][valid]*obs_multiplier
+				obslat = ObsPack['latitude'][valid]
+				obslon = ObsPack['longitude'][valid]
+				obstime = ObsPack['utctime'][valid]
+				obsalt = ObsPack['altitude'][valid]
+				gcpressure = GC['pressure'].values[valid]
+				obsid = ObsPack['obspack_id'][valid]
+				obsplat = ObsPack['platform'][valid]
+				obssite = ObsPack['site_code'][valid]
+			else:
+				obsval = ObsPack['value']*obs_multiplier
+				obslat = ObsPack['latitude']
+				obslon = ObsPack['longitude']
+				obstime = ObsPack['utctime']
+				obsalt = ObsPack['altitude']
+				gcpressure = GC['pressure'].values
+				obsid = ObsPack['obspack_id']
+				obsplat = ObsPack['platform']
+				obssite = ObsPack['site_code']
 		#We allow an option to average to the GC grid
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True": 
 			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
@@ -238,5 +234,13 @@ class ObsPack_Translator(obsop.Observation_Translator):
 		else:				
 			toreturn = obsop.ObsData(gc_sim,obsval,obslat,obslon,obstime)
 			toreturn.addData(altitude=obsalt,pressure=gcpressure,obspack_id=obsid,platform=obsplat,site_code=obssite)
+		# Apply error filter from the extension. Remove observations where error exceeds some (very high) maximum threshhold as being likely in error.
+		if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
+			maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
+			err = np.abs(toreturn.getObsCol()-toreturn.getGCCol())
+			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
+			#We do this because different ensemble members will allow slightly different observations
+			#Depending on column shape.
+			toreturn.addData(postfilter=err>maxerr) 
 		return toreturn
 
