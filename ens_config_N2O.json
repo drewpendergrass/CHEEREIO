@@ -64,14 +64,19 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
-		"N2O"
 	],
 	"CONTROL_VECTOR_CONC" : [
-		"N2O"
 	],
 	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
-		"N2O":"N2O"
+		"N2O":"N2O",
+		"N2O_loss":[
+			"GLOBAL_O1D",
+			"N2O_photo"
+		]
+
+	},
+	"CONTROL_VECTOR_LOSS" : {
 	},
 	"comment009" : "******************************************************************************",
 	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
@@ -153,49 +158,60 @@
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
-	"init_std_dev" : {
-		"N2O":"0.15"
-	},
-	"correlatedInitialScalings" : {
-		"N2O":"True"
-	},
-	"corrDistances" : {
-		"N2O":"1500"
-	},
-	"speedyCorrelationApprox" : "True",
-	"lognormalErrors" : "True",
-	"additional_init_perturbation_from_emis" : {
-		"N2O" : {
-			"do_add_pert":"false",
-			"file":{
-				"file" : "",
-				"variable" : ""
+	"sf_initialization":{
+		"N2O":{
+			"sf_dim":"2D",
+			"lognormalErrors" : "True",
+			"MaskOceanScaleFactor" :"False",
+			"MaskCoastsGT25pctOcean" : "True",
+			"Mask60NScaleFactor" : "False",
+			"Mask60SScaleFactor" : "False",
+			"2D_settings":{
+				"init_std_dev":"0.15",
+				"correlatedInitialScalings":"True",
+				"corrDistances":"1500",
+				"speedyCorrelationApprox" : "True",
+				"additional_init_perturbation_from_emis" : {
+					"do_add_pert":"false",
+					"file":{
+						"file" : "",
+						"variable" : ""
+					},
+					"max_pert":"",
+					"saturation":""
+				},
 			},
-			"max_pert":"",
-			"saturation":""
+			"1D_settings":{}
+		},
+		"N2O_loss":{
+			"sf_dim":"1D",
+			"lognormalErrors" : "False",
+			"MaskOceanScaleFactor" :"False",
+			"MaskCoastsGT25pctOcean" : "True",
+			"Mask60NScaleFactor" : "False",
+			"Mask60SScaleFactor" : "False",
+			"2D_settings":{},
+			"1D_settings":{
+				"init_std_dev":"0.1",
+				"latitudinal_length_scale":"5000"
+			}
 		}
 	},
-	"MaskOceanScaleFactor" : {
-		"N2O":"False"
-	},
-	"MaskCoastsGT25pctOcean" : "True",
-	"Mask60NScaleFactor" : {
-		"N2O":"False"
-	},
-	"Mask60SScaleFactor" : {
-		"N2O":"False"
-	},
 	"MinimumScalingFactorAllowed" : {
-		"N2O":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"MaximumScalingFactorAllowed" : {
-		"N2O":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"N2O":"0.5"
+		"N2O":"0.5",
+		"N2O_loss":"0.5"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
-		"N2O":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"comment018" : "******************************************************************************",
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",

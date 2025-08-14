@@ -162,38 +162,32 @@
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
-	"init_std_dev" : {
-		"NH3":"0.3"
-	},
-	"correlatedInitialScalings" : {
-		"NH3":"True"
-	},
-	"corrDistances" : {
-		"NH3":"600"
-	},
-	"speedyCorrelationApprox" : "True",
-	"lognormalErrors" : "True",
-	"additional_init_perturbation_from_emis" : {
+	"sf_initialization":{
 		"NH3":{
-			"do_add_pert":"False",
-			"file":{
-				"file":"",
-				"variable":""
+			"sf_dim":"2D",
+			"lognormalErrors" : "True",
+			"MaskOceanScaleFactor" :"True",
+			"MaskCoastsGT25pctOcean" : "True",
+			"Mask60NScaleFactor" : "True",
+			"Mask60SScaleFactor" : "True",
+			"2D_settings":{
+				"init_std_dev":"0.3",
+				"correlatedInitialScalings":"True",
+				"corrDistances":"600",
+				"speedyCorrelationApprox" : "True",
+				"additional_init_perturbation_from_emis" : {
+					"do_add_pert":"False",
+					"file":{
+						"file":"",
+						"variable":""
+					},
+					"max_pert":"",
+					"saturation":""
+				},
 			},
-			"max_pert":"",
-			"saturation":""
+			"1D_settings":{}
 		}
-	},
-	"MaskOceanScaleFactor" : {
-		"NH3":"True"
-	},
-	"MaskCoastsGT25pctOcean" : "True",
-	"Mask60NScaleFactor" : {
-		"NH3":"True"
-	},
-	"Mask60SScaleFactor" : {
-		"NH3":"True"
-	},
+	},	
 	"MinimumScalingFactorAllowed" : {
 		"NH3":"nan"
 	},

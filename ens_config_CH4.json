@@ -140,37 +140,31 @@
 	"comment015" : "******************************************************************************",
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
-	"init_std_dev" : {
-		"CH4":"0.15"
-	},
-	"correlatedInitialScalings" : {
-		"CH4":"True"
-	},
-	"corrDistances" : {
-		"CH4":"500"
-	},
-	"speedyCorrelationApprox" : "True",
-	"lognormalErrors" : "True",
-	"additional_init_perturbation_from_emis" : {
-		"CH4" : {
-			"do_add_pert":"True",
-			"file":{
-				"file" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
-				"variable" : "EmisCH4_Total"
+	"sf_initialization":{
+		"CH4":{
+			"sf_dim":"2D",
+			"lognormalErrors" : "True",
+			"MaskOceanScaleFactor" :"True",
+			"MaskCoastsGT25pctOcean" : "True",
+			"Mask60NScaleFactor" : "False",
+			"Mask60SScaleFactor" : "True",
+			"2D_settings":{
+				"init_std_dev":"0.15",
+				"correlatedInitialScalings":"True",
+				"corrDistances":"500",
+				"speedyCorrelationApprox" : "True",
+				"additional_init_perturbation_from_emis" : {
+					"do_add_pert":"True",
+					"file":{
+						"file" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/input_data/agg_control_CH4_HEMCO_diagnostics_gmd_paper.nc",
+						"variable" : "EmisCH4_Total"
+					},
+					"max_pert":"0.5",
+					"saturation":"0.5e-9"
+				},
 			},
-			"max_pert":"0.5",
-			"saturation":"0.5e-9"
+			"1D_settings":{}
 		}
-	},
-	"MaskOceanScaleFactor" : {
-		"CH4":"True"
-	},
-	"MaskCoastsGT25pctOcean" : "True",
-	"Mask60NScaleFactor" : {
-		"CH4":"False"
-	},
-	"Mask60SScaleFactor" : {
-		"CH4":"True"
 	},
 	"MinimumScalingFactorAllowed" : {
 		"CH4":"nan"
