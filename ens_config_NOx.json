@@ -165,15 +165,15 @@
 	"sf_initialization":{
 		"NOx":{
 			"sf_dim":"2D",
+			"init_std_dev":"0.1",
+			"correlatedInitialScalings":"True",
+			"corrDistances":"500",
 			"lognormalErrors" : "True",
 			"MaskOceanScaleFactor" :"True",
 			"MaskCoastsGT25pctOcean" : "True",
 			"Mask60NScaleFactor" : "False",
 			"Mask60SScaleFactor" : "True",
 			"2D_settings":{
-				"init_std_dev":"0.1",
-				"correlatedInitialScalings":"True",
-				"corrDistances":"500",
 				"speedyCorrelationApprox" : "True",
 				"additional_init_perturbation_from_emis" : {
 					"do_add_pert":"False",
