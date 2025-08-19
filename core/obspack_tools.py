@@ -241,6 +241,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
 			#We do this because different ensemble members will allow slightly different observations
 			#Depending on column shape.
-			toreturn.addData(postfilter=err>maxerr) 
+			toreturn.addData(postfilter=err<maxerr) 
 		return toreturn
 
