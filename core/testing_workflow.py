@@ -29,19 +29,5 @@ parser.add_argument('-lon', '--lon_ind', type=int, help='Lon ind for assimilatio
 args = parser.parse_args()
 
 assim = Assimilator(args.date,args.ens_num,args.core_num, args.rip_date)
-
-#Pickle assimilator
-with open(args.file_out, 'wb') as f:
-    pickle.dump(assim, f)
-
-print('Saved Assimilator object! You can load this and manipulate for further testing. Use the following code:')
-print('')
-print('')
-print(f"import pickle")
-print('')
-print(f"with open('{args.file_out}', 'rb') as f:")
-print(f"     assim = pickle.load(f)")
-print('')
-print('')
 tt.walkThroughAssimilation(assim,latind=args.lat_ind,lonind=args.lon_ind)
 
