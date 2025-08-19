@@ -38,7 +38,7 @@ if len(spc_config["REGION"])==0:
 else:
 	gridlabel = f'{spc_config["REGION"]}_{spc_config["met_name"]}'
 
-lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel,mask_coast_bool)
+lon,lat,mask = tx.makeLatLonGridWithMask(gridlabel,False)
 
 buildDistMat=False
 
@@ -125,7 +125,11 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 		if ~np.isnan(maxval): #Enforce maximum sf.
 			scaling_factors[scaling_factors>maxval] = maxval
 		if maskoceanboolval=='True':
-			scaling_factors[mask[1],mask[0]] = 1
+			if initialization["MaskCoastsGT25pctOcean"]=='True': #mask coasts
+				_,_,mask2use = tx.makeLatLonGridWithMask(gridlabel,True)
+			else:
+				mask2use=mask
+			scaling_factors[mask2use[1],mask2use[0]] = 1
 		if maskarcticboolval=='True':
 			latwhere = np.where(lat>=60)[0]
 			scaling_factors[latwhere,:] = 1
