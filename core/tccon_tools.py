@@ -20,46 +20,42 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 	
 	data = xr.open_dataset(filename)
 	if species=='CO':
-		idx = data['xco'].values[0,:,:] #time,latitude,longitude
-		la,lo=np.where(idx>0) # include all quality controlled XCO
-		met[species] = data['xco'].values[0,la,lo] # TCCON column (ppb)
+		met[species] = data['xco'].values # TCCON column (ppb). Dim: site
 	elif species=='N2O':
-		idx = data['xn2o'].values[0,:,:] #time,latitude,longitude
-		la,lo=np.where(idx>0) # include all quality controlled XCO
-		met[species] = data['xn2o'].values[0,la,lo] # TCCON column (ppb)
+		met[species] = data['xn2o'].values # TCCON column (ppb)
 	else:
 		raise ValueError('Species not supported')
 
 	if includeObsError:
 		if species=='CO':
-			met['Error'] = data['xco_error'].values[0,la,lo] #TCCON column error (ppb)
+			met['Error'] = data['xco_error'].values #TCCON column error (ppb)
 		elif species=='N2O':
-			met['Error'] = data['xn2o_error'].values[0,la,lo] #TCCON column error (ppb)
+			met['Error'] = data['xn2o_error'].values #TCCON column error (ppb)
 	
-	met['longitude'] = data['longitude'].values[:]
-	met['latitude'] = data['latitude'].values[:]
-	met['utctime'] = data['time_utc'].values[:]
-	met['station_id'] = data['station_id'].values[:]
+	met['longitude'] = data['long'].values
+	met['latitude'] = data['lat'].values
+	met['utctime'] = data['time_utc'].values
+	met['station_id'] = data['station_id'].values
 
-	met['pressure_AK'] = data['ak_pressure'].values[0,la,lo,:] # hPa 
-	met['pressure_apriori'] = data['prior_pressure'].values[0,la,lo,:] * 101325/100 # hPa  
-	met['h2o_profile_apriori'] = data['prior_h2o'].values[0,la,lo,:] # parts
-	met['altitude_apriori'] = 1000*data['prior_altitude'].values[:] # m
-	met['pout'] = data['pout'].values[0,la,lo] # TCCON (surface) pressure hPa
+	met['pressure_AK'] = data['ak_pressure'].values # hPa 
+	met['pressure_apriori'] = data['prior_pressure'].values * 101325/100 # hPa  
+	met['h2o_profile_apriori'] = data['prior_h2o'].values # parts
+	met['altitude_apriori'] = 1000*data['prior_altitude'].values # m
+	met['pout'] = data['pout'].values # TCCON (surface) pressure hPa
 
 	#Do N2O temp correction, if we are using GGG2020 (this should be included in GGG2020.1 when it's released)
 	if doN2OCorrectionPT700 and species=='N2O':
 		if includeObsError:
-			met[species],met['Error']=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values[0,la,lo,:],met['pressure_apriori'],xn2o_error=met['Error'])
+			met[species],met['Error']=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values,met['pressure_apriori'],xn2o_error=met['Error'])
 		else:
-			met[species]=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values[0,la,lo,:],met['pressure_apriori'])
+			met[species]=correct_xn2o_from_pt700(met[species],data['prior_temperature'].values,met['pressure_apriori'])
 
 	if species=='CO':
-		met['column_AK'] = data['ak_xco'].values[0,la,lo,:] #time,latitude,longitude,layer
-		met['co_profile_apriori'] = data['prior_co'].values[0,la,lo,:] # ppb
+		met['column_AK'] = data['ak_xco'].values #time,latitude,longitude,layer
+		met['co_profile_apriori'] = data['prior_co'].values # ppb
 	elif species=='N2O':
-		met['column_AK'] = data['ak_xn2o'].values[0,la,lo,:] #time,latitude,longitude,layer
-		met['n2o_profile_apriori'] = data['prior_n2o'].values[0,la,lo,:] # ppb
+		met['column_AK'] = data['ak_xn2o'].values #time,latitude,longitude,layer
+		met['n2o_profile_apriori'] = data['prior_n2o'].values # ppb
 	
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)

@@ -39,66 +39,18 @@ species_dependent_vars = {}
 # List of variables with two dimensions and their corresponding second dimensions
 two_dimensional_vars = {}
 
-to_convert = ['prior_pressure','prior_temperature', 'ak_pressure', 'prior_h2o', 'time_utc', 'pout']
-
 species_to_keep = args.species_to_keep.split(',')
 for species in species_to_keep:
     variables_to_keep.append(f'prior_{species}')
     variables_to_keep.append(f'ak_x{species}')
     variables_to_keep.append(f'x{species}')
     variables_to_keep.append(f'x{species}_error')
-    to_convert.append(f'prior_{species}')
-    to_convert.append(f'ak_x{species}')
-    to_convert.append(f'x{species}')
-    to_convert.append(f'x{species}_error')
     species_dependent_vars[f'x{species}']=f'x{species}_error'
     species_dependent_vars[f'ak_x{species}']=f'x{species}_error'
     species_dependent_vars[f'prior_{species}']=f'x{species}_error'
     two_dimensional_vars[f'ak_x{species}']='ak_altitude'
     two_dimensional_vars[f'prior_{species}']='prior_altitude'
 
-
-# Combine and restructure TCCON files (at each time, all TCCON station files aggregated into one file formatted for use in CHEEREIO)  
-def reshape_variables(combined_ds):
-    for var_name in combined_ds.data_vars:
-        if var_name in ['lat', 'long', 'time_utc', 'station_id']:
-            if var_name in combined_ds:
-                var_data = combined_ds[var_name]
-                if var_name in ['lat', 'long']:
-                    flat_var = var_data.values.flatten()
-                    flat_var = flat_var[~np.isnan(flat_var)]
-                elif var_name in ['time_utc', 'station_id']:
-                    flat_var = var_data.values.flatten()
-                    flat_var = flat_var[~pd.isnull(flat_var)]
-                    combined_ds = combined_ds.assign_coords(site=range(len(flat_var)))
-                combined_ds[var_name] = (('site'), flat_var)
-        else:
-            if var_name == 'time_utc':
-                continue  # Skip modifying the 'time_utc' variable
-
-            var_data = combined_ds[var_name]
-            if var_data.ndim == 4:
-                var_values = var_data.values  # Get the values of the variable
-                flat_var = var_values[~np.isnan(var_values)].reshape(var_values.shape[2], var_values.shape[3])  # Flatten each segment into (3, 51)
-
-                n = min(var_data.shape[1:])
-                reshaped_var = np.full_like(var_data, np.nan, dtype=np.float32)
-                for i in range(n):
-                    reshaped_var[:, i, i, :] = flat_var[i, :]  # Assign the entire segment to corresponding position in reshaped_var
-
-                combined_ds[var_name] = (var_data.dims, reshaped_var)
-            elif var_data.ndim == 3:
-                flat_var = var_data.values.flatten().astype(float)
-                flat_var = flat_var[~np.isnan(flat_var)]
-
-                n = min(var_data.shape[1:])
-                reshaped_var = np.full_like(var_data, np.nan, dtype=np.float32)
-                for i in range(n):
-                    reshaped_var[:, i, i] = flat_var[i]
-
-                combined_ds[var_name] = (var_data.dims, reshaped_var)
-
-    return combined_ds
 
 start_timestamp = time.time()
 
@@ -192,17 +144,7 @@ for hour_offset in range(total_hours + 1):
             # Add a new variable time_utc
             hourly_median_ds['time_utc'] = hourly_median_ds['time'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
-            hourly_median_ds1 = hourly_median_ds.assign_coords(latitude=hourly_median_ds['lat'].values, longitude=hourly_median_ds['long'].values)
-
-            # Convert dimensions for variables with (time, ak_altitude) and (time, prior_altitude)
-            for species_var in to_convert:
-                if species_var in hourly_median_ds1:
-                    hourly_median_ds1[species_var] = hourly_median_ds1[species_var].expand_dims(
-                        {'latitude': hourly_median_ds1['lat'].values, 'longitude': hourly_median_ds1['long'].values},
-                        axis=(1, 2)
-                    )
-
-            hourly_median_ds1_aligned = hourly_median_ds1
+            hourly_median_ds1_aligned = hourly_median_ds
 
             # Extract station location from the attribute 'short_location'
             station_location = ds.attrs.get('short_location', 'Unknown Location')
@@ -220,8 +162,7 @@ for hour_offset in range(total_hours + 1):
             
     # Concatenate datasets along the latitude dimension only if there is data for the current hour
     if hour_datasets:
-        combined_ds1 = xr.combine_by_coords(hour_datasets, combine_attrs='drop_conflicts')
-        combined_ds = reshape_variables(combined_ds1)
+        combined_ds1 = xr.concat(hour_datasets, dim='site').squeeze('time')
         # Save the combined dataset to a new netCDF file for the current hour
         start_date_str = current_time.astype('M8[s]').astype('O').strftime('%Y%m%dT%H%M%S')
         end_date_str = (current_time + np.timedelta64(1, 'h')).astype('M8[s]').astype('O').strftime('%Y%m%dT%H%M%S')
