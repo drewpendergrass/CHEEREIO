@@ -162,7 +162,7 @@ for hour_offset in range(total_hours + 1):
             
     # Concatenate datasets along the latitude dimension only if there is data for the current hour
     if hour_datasets:
-        combined_ds1 = xr.concat(hour_datasets, dim='site').squeeze('time')
+        combined_ds = xr.concat(hour_datasets, dim='site').squeeze('time')
         # Save the combined dataset to a new netCDF file for the current hour
         start_date_str = current_time.astype('M8[s]').astype('O').strftime('%Y%m%dT%H%M%S')
         end_date_str = (current_time + np.timedelta64(1, 'h')).astype('M8[s]').astype('O').strftime('%Y%m%dT%H%M%S')
