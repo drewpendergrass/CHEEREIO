@@ -100,7 +100,7 @@ for stringnum,num in zip(subdir_numstring,subdir_nums): #Loop through the non-co
 			if emis_name in add_perts:
 				uniform = (np.random.rand(len(lat),len(lon))*add_perts[emis_name]['maxpert']*2)-add_perts[emis_name]['maxpert'] #generate uniform sample from -maxpert to maxpert
 				scaling_factors += (uniform*add_perts[emis_name]['field'])
-		else if initialization['sf_dim']=='1D': #Oherwise, we allow variability only in the latitudinal direction
+		elif initialization['sf_dim']=='1D': #Oherwise, we allow variability only in the latitudinal direction
 			if corrbool == "True": #Will sample a normal with correlation
 				#Latitude does not vary, assume uniform spacing. This gives a distance matrix for latitudes
 				distmat_lat = tx.calcDist_km(lat[1],lon[0],lat[2],lon[0])*np.abs(np.subtract.outer(np.arange(len(lat)), np.arange(len(lat))))
