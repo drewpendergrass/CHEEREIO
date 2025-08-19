@@ -161,7 +161,7 @@
 					},
 					"max_pert":"0.5",
 					"saturation":"0.5e-9"
-				},
+				}
 			},
 			"1D_settings":{}
 		}
