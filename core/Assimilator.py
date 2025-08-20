@@ -53,7 +53,7 @@ class Assimilator(object):
 		self.InflateScalingsToXOfInitialStandardDeviation = spc_config["InflateScalingsToXOfInitialStandardDeviation"]
 		self.emis_names = list(spc_config['CONTROL_VECTOR_EMIS'].keys())
 		self.lognormalErrors = {} 
-		for e in emis_names:
+		for e in self.emis_names:
 			self.lognormalErrors[e] = spc_config["sf_initialization"][e]["lognormalErrors"] == "True"		
 		self.InitEmisSTD = {}
 		for name in self.emis_names:
