@@ -52,8 +52,8 @@ class GC_Translator(object):
 		return self.data.getLev()
 	def getRestartTime(self):
 		return self.data.getRestartTime()
-	def getEmisTime(self):
-		return self.data.getEmisTime()
+	def getEmisTime(self,species=None):
+		return self.data.getEmisTime(species)
 	def getEmisSF(self, species): #Get the emissions from the timestamp nearest to the one supplied by the user.
 		return self.data.getEmisSF(species)
 	def getEmisLat(self, species):
@@ -221,12 +221,15 @@ class DataBundle(object):
 		return np.array(self.restart_ds['lev'])
 	def getRestartTime(self):
 		return np.array(self.restart_ds['time'])
-	def getEmisTime(self):
-		return np.array(list(self.emis_ds_list.values())[0]['time'])
+	def getEmisTime(self,species=None):
+		if species is not None:
+			return self.emis_ds_list[species]['time'].values
+		else:
+			return np.array(list(self.emis_ds_list.values())[0]['time'])
 	#Get the emissions from the timestamp nearest to the one supplied by the user.
 	def getEmisSF(self, species):
 		da = self.emis_ds_list[species]['Scalar']
-		time_array = self.getEmisTime()
+		time_array = self.getEmisTime(species)
 		ind_closest = np.argmin(np.abs(time_array-self.timestamp_as_date))
 		return np.array(da)[ind_closest,:,:].squeeze()
 	def getEmisLat(self, species):
@@ -235,7 +238,7 @@ class DataBundle(object):
 		return np.array(self.emis_ds_list[species]['lon'])
 	#Add 2d emissions scaling factors to the end of the emissions scaling factor
 	def addEmisSF(self, species, emis2d):
-		timelist = self.getEmisTime()
+		timelist = self.getEmisTime(species)
 		last_time = timelist[-1]
 		#new_last_time = last_time+np.timedelta64(assim_time,'h') #Add assim time hours to the last timestamp
 		tstr = f'{self.timestamp[0:4]}-{self.timestamp[4:6]}-{self.timestamp[6:8]}T{self.timestamp[9:11]}:{self.timestamp[11:13]}:00.000000000'
