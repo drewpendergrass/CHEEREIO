@@ -260,6 +260,7 @@ TCCON preprocessing for CHEEREIO
 CHEEREIO has built in preprocessing functions to translate raw GGG2020 TCCON data, as downloaded from the CalTech site, into a form compatible with the CHEEREIO TCCON operator. To use this, execute from the command line (in CHEEREIO/core) before installing CHEEREIO: ``python prep_tccon_aggregated.py ARGUMENTS``
 
 Arguments are as follows:
+
 #. **-i or --input_path (required)**: Path to your input TCCON files, e.g. downloaded from tccondata.org.
 #. **-o or --output_path (required)**: Path to where to save your pre-processed TCCON files, ready for CHEEREIO.
 #. **-s or --start_time (required)**: Start time, in format YYYY-MM-DDTHH:MM:SS. For example, 2023-01-01T00:00:00. Will only process data from after this time.

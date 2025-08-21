@@ -31,6 +31,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    Installing-CHEEREIO
    Overview-Of-Capabilities
    Debugging
+   nested_tips
    citations
 
 .. toctree::
