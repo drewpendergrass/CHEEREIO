@@ -104,7 +104,7 @@ def nearest_loc(GC,OBSDATA):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=False,GC_area=None):
+def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=True,returnStateMet=False,GC_area=None):
 	i,j,t = nearest_loc(GC,OBSDATA)
 	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
 	if gc_version>=14.1:
@@ -112,8 +112,13 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnStateMet=Fals
 	else:
 		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
 	to_return = {}
-	to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
-	to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
+	gc_overrides = si.checkGCSpeciesOverride(spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+	if (len(gc_overrides)>0)&(species in gc_overrides):
+		to_return['GC_SPC'] = GC[f'{spcconc_name}_{gc_overrides[species]}'].values[t,:,j,i]
+	else:
+		to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
+	if returnLevelEdge:
+		to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
 		for metcoll in spc_config['HistoryStateMetToSave']:
 			if len(np.shape(GC[metcoll].values))==3:
@@ -193,6 +198,88 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 		to_return.addData(**additional_fields)
 	if doSuperObs:
 		to_return.addData(err_av=err_av)
+	return to_return
+
+#Utility function for averageFieldsToGC (below)
+def makeEmptyArrayDims(index_len, unique_len, field, returnAxis=False):
+	to_return = list(field.shape)
+	averaging_axis = np.where(np.array(to_return)==index_len)[0][0]
+	if returnAxis:
+		return averaging_axis
+	else:
+		to_return[averaging_axis] = unique_len
+		return to_return
+
+#Utility function for averageFieldsToGC (below)
+def simple_slice(arr, inds, axis):
+	sl = [slice(None)] * arr.ndim
+	sl[axis] = inds
+	return tuple(sl)
+
+#In case where you want to average to GC grid before mapping to observations, use this function
+#Can handle multidimension inputs (e.g. averaging kernels, prior profiles, columns) via kwargs. Autodetects axis with number of observations (defaulting to first axis)
+def averageFieldsToGC(iGC, jGC, tGC, GC, obsvals, doSuperObs=False,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None, **kwargs):
+	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
+	unique_inds = np.unique(index)
+	i_unique = np.floor(unique_inds/100000000).astype(int)-1
+	j_unique = (np.floor(unique_inds/10000).astype(int) % 10000)-1
+	t_unique = (unique_inds % 10000).astype(int)-1
+	lonvals = GC.lon.values[i_unique]
+	latvals = GC.lat.values[j_unique]
+	timevals = GC.time.values[t_unique]
+	av_len = len(unique_inds)
+	obsaxis = {k:makeEmptyArrayDims(len(iGC),av_len,kwargs[k],returnAxis=True) for k in kwargs}
+	to_return = {k:np.zeros(makeEmptyArrayDims(len(iGC),av_len,kwargs[k])) for k in kwargs}
+	to_return['lat'] = np.zeros(av_len)
+	to_return['lon'] = np.zeros(av_len)
+	to_return['time'] = np.zeros(av_len)
+	to_return['num'] = np.zeros(av_len)
+	to_return['obs'] = np.zeros(av_len)
+	if other_fields_to_avg is not None:
+		#Initialize additional fields
+		to_return['additional_fields'] = {}
+		for field in other_fields_to_avg:
+			to_return['additional_fields'][field] = np.zeros(av_len)
+	if doSuperObs:
+		to_return['err'] = np.zeros(av_len)
+	for count,ind in enumerate(unique_inds):
+		indmatch = np.where(index==ind)[0]
+		to_return['lat'][count] = latvals[count]
+		to_return['lon'][count] = lonvals[count]
+		to_return['time'][count] = timevals[count]
+		to_return['num'][count] = len(indmatch)
+		to_return['obs'][count] = np.mean(obsvals[indmatch])
+		#Average the additional fields.
+		if other_fields_to_avg is not None:
+			for field in other_fields_to_avg:
+				to_return['additional_fields'][field][count] = np.mean(other_fields_to_avg[field][indmatch])
+		for k in kwargs:
+			to_return[k][simple_slice(to_return[k],count,obsaxis[k])] = np.mean(kwargs[k][simple_slice(kwargs[k],indmatch,obsaxis[k])],axis=obsaxis[k])
+		if doSuperObs:
+			#SuperObservation function selected by user
+			obs_f = produceSuperObservationFunction(superObsFunction)
+			obs_args = {}
+			#Add arguments that are required by the function:
+			if modelTransportError is not None:
+				obs_args['transportError'] = modelTransportError
+			if errorCorr is not None:
+				obs_args['errorCorr'] = errorCorr
+			if minError is not None: 
+				obs_args['min_error'] = minError
+			#Calculate mean error to be reduced by superobservation function. 
+			if obsInstrumentError is not None:
+				mean_err = np.mean(obsInstrumentError[indmatch])
+			elif prescribed_error is not None:
+				if prescribed_error_type == "relative":
+					mean_err = to_return['obs'][count]*prescribed_error
+				elif prescribed_error_type == "absolute":
+					mean_err = prescribed_error
+				else:
+					raise ValueError("Errors must be prescribed or included with observations; missing needed information")
+			else:
+				raise ValueError("Errors must be prescribed or included with observations; missing needed information")
+			#Baseline model transport error doesn't average out; this is Zhen Qu's formulation; error correlation accounted for following Miyazaki et al 2012 and Eskes et al., 2003
+			to_return['err'][count] = obs_f(mean_error=mean_err,num_obs=to_return['num'][count],**obs_args)
 	return to_return
 
 class Observation_Translator(object):

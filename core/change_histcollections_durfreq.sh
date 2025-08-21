@@ -4,9 +4,7 @@
 #so that the frequency and duration under the restart collection
 #matches ASSIM_TIME in ens_config.json
 
-source activate $(jq -r ".CondaEnv" ../ens_config.json)
-python update_history.py "PREPMAIN"
-conda deactivate
+conda run -n $(jq -r ".CondaEnv" ../ens_config.json) python update_history.py "PREPMAIN"
 
 MY_PATH="$(jq -r ".MY_PATH" ../ens_config.json)"
 RUN_NAME="$(jq -r ".RUN_NAME" ../ens_config.json)"

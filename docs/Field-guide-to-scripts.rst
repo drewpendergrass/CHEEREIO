@@ -61,6 +61,12 @@ update_history.py
 
 A Python toolkit and set of scripts designed to align the ``HISTORY.rc`` output settings with CHEEREIO's needs at various stages of the installation, spinup, and assimilation processes. This script is called in several places by ``setup_ensemble.sh``, ``change_histcollections_durfreq.sh``, and ``change_histrst_durfreq.sh`` to update CHEEREIO output settings at different stages of execution.
 
+
+validate_ensconfig.py
+~~~~~~~~~~~~~
+
+A Python script that checks for common errors in the ens_config.json file before installation.
+
 Run management scripts
 -------------
 
@@ -170,6 +176,31 @@ omi_tools.py
 
 This Python file includes tools and classes necessary for interfacing with OMI satellite products, and is described in detail in the :ref:`OMI tools` entry.
 
+iasi_tools.py
+~~~~~~~~~~~~~
+
+This Python file includes tools and classes necessary for interfacing with IASI satellite products, and is described in detail in the :ref:`iasi` entry.
+
+tccon_tools.py
+~~~~~~~~~~~~~
+
+This Python file includes tools and classes necessary for interfacing with TCCON products, and is described in detail in the :ref:`tccon` entry.
+
+prep_tccon_aggregated.py
+~~~~~~~~~~~~~
+
+This Python file produces TCCON aggregated files ready for CHEEREIO, and is described in detail in the :ref:`tccon` entry.
+
+obspack_tools.py
+~~~~~~~~~~~~~
+
+This Python file includes tools and classes necessary for interfacing with NOAA ObsPack products, and is described in detail in the :ref:`ObsPack tools` entry.
+
+preprocess_obspack.py
+~~~~~~~~~~~~~
+
+This Python file produces ObsPack aggregated files ready for CHEEREIO/GEOS-Chem, and is described in detail in the :ref:`ObsPack tools` entry.
+
 tropomi_tools.py
 ~~~~~~~~~~~~~
 
@@ -182,6 +213,11 @@ testing_tools.py
 ~~~~~~~~~~~~~
 
 A suite of utilities used by CHEEREIO's ``pytest`` suite, as well as some utility functions for generating some assimilation objects for debugging CHEEREIO. See commentary in the script for details.
+
+testing_workflow.py
+~~~~~~~~~~~~~
+
+A convenient script for diagnosing errors in assimilation. It takes command line arguments and uses them to test building an Assimilator object and walking through one assimilation step, with lots of print out for debugging. Essentially a convenience wrapper for part of testing_tools.py.
 
 cleanup_after_kill_ens.sh
 ~~~~~~~~~~~~~

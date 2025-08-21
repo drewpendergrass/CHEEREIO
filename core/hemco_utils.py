@@ -209,7 +209,7 @@ def addScalingFactorNumbers(spc_config,speciesloc,lines):
 			lines[num] = newline #Overwrite line.
 		species_scalid[specname] = specieskeyval #Add scalid to dictionary
 		specieskeyval+=1 #Increment
-		return [lines,species_scalid]
+	return [lines,species_scalid]
 
 def addScalingFactorFile(spc_config,lines,species_scalid,hemco_config_path,scaleFactorLineAdd):
 	#Get range of years from settings.

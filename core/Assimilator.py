@@ -52,6 +52,9 @@ class Assimilator(object):
 		self.MaximumScalingFactorAllowed = spc_config["MaximumScalingFactorAllowed"]
 		self.InflateScalingsToXOfInitialStandardDeviation = spc_config["InflateScalingsToXOfInitialStandardDeviation"]
 		self.emis_names = list(spc_config['CONTROL_VECTOR_EMIS'].keys())
+		self.lognormalErrors = {} 
+		for e in self.emis_names:
+			self.lognormalErrors[e] = spc_config["sf_initialization"][e]["lognormalErrors"] == "True"		
 		self.InitEmisSTD = {}
 		for name in self.emis_names:
 			stds = np.load(f'{path_to_ensemble}/{name}_SCALEFACTOR_INIT_STD.npy')
@@ -62,9 +65,9 @@ class Assimilator(object):
 		self.RTPS = spc_config["Activate_Relaxation_To_Prior_Spread"] == "True"
 		self.RTPS_parameter = float(spc_config["RTPS_parameter"])
 		self.SaveLevelEdgeDiags = spc_config["SaveLevelEdgeDiags"] == "True"
-		self.lognormalErrors = spc_config["lognormalErrors"] == "True"
 		self.SaveStateMet = spc_config["SaveStateMet"] == "True"
 		self.SaveObsPack = spc_config["ACTIVATE_OBSPACK"] == "true"
+		self.SaveSatDiagn = spc_config["SaveSatDiagn"] == "True"
 		self.SaveArea = spc_config["SaveArea"] == "True"
 		self.SaveDOFS = spc_config["SaveDOFS"] == "True"
 		self.DOFS_filter = float(spc_config["DOFS_filter"])
@@ -103,9 +106,9 @@ class Assimilator(object):
 			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
 			self.bigYpostprocess = True
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useControl=self.useControl,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useSatDiagn=self.SaveSatDiagn,useControl=self.useControl,verbose=self.verbose)
 		else: #HIST Ens always uses current timestamp for observation window, no matter run in place setting
-			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,verbose=self.verbose)
+			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useSatDiagn=self.SaveSatDiagn,verbose=self.verbose)
 			self.bigYpostprocess = False
 		if (spc_config['DO_VARON_RERUN'] == 'True') and (spc_config['APPROXIMATE_VARON_RERUN'] == 'True'):
 			do_approx = False
@@ -194,8 +197,12 @@ class Assimilator(object):
 			print(f'C made in Assimilator. It has dimension {np.shape(self.C)} and value {self.C}')
 	def makePtildeAnalysis(self):
 		cyb = self.C @ self.Ypert_background
+		if self.verbose>=3:
+			print(f'C*Ypert_background made in Assimilator. It has dimension {np.shape(cyb)} and value {cyb}')
 		k = len(self.ensemble_numbers)
 		iden = (k-1)*np.identity(k)/(1+self.inflation)
+		if self.verbose>=3:
+			print(f'C*Ypert_background+identity made in Assimilator. It has dimension {np.shape(iden+cyb)} and value {iden+cyb}')
 		self.PtildeAnalysis = la.inv(iden+cyb)
 		if self.verbose>=3:
 			print(f'PtildeAnalysis made in Assimilator. It has dimension {np.shape(self.PtildeAnalysis)} and value {self.PtildeAnalysis}')
@@ -305,9 +312,9 @@ class Assimilator(object):
 					else:
 						if self.verbose>=2:
 							print(f'Ratio {ratio} is greater than inflator standard {inflator}, so doing nothing.')
-		if self.lognormalErrors: #For rest of the corrections transform back to lognormal space.
-			analysisScalefactor = np.exp(analysisScalefactor)
-			backgroundScalefactor = np.exp(backgroundScalefactor)
+			if self.lognormalErrors[emis]: #For rest of the corrections transform back to lognormal space.
+				analysisScalefactor[i,:] = np.exp(analysisScalefactor[i,:])
+				backgroundScalefactor[i,:] = np.exp(backgroundScalefactor[i,:])
 		if self.verbose>=2:
 			print('END section InflateScalingsToXOfInitialStandardDeviation')
 			print(f"Analysis scale factor has dimension {np.shape(analysisScalefactor)} and value {analysisScalefactor}.")
@@ -315,7 +322,6 @@ class Assimilator(object):
 			print(f"Background scale factor has dimension {np.shape(backgroundScalefactor)} and value {backgroundScalefactor}.")
 			print(f"The background ensemble mean is {np.mean(backgroundScalefactor,axis=1)}.")
 			print('BEGIN section MaximumScaleFactorRelativeChangePerAssimilationPeriod')
-		#Transform into lognormal space for the rest of the corrections
 		#Apply maximum relative change per assimilation period:
 		for i,emis in enumerate(self.emis_names):
 			maxchange = float(self.MaximumScaleFactorRelativeChangePerAssimilationPeriod[emis])
@@ -355,8 +361,11 @@ class Assimilator(object):
 		#Done with the scalings
 		if self.verbose>=2:
 			print(f'Old scaling factors at end of analysis subset: {analysisSubset[(-1*self.emcount)::,:]}')
-		if self.lognormalErrors:
-			analysisScalefactor  = np.log(analysisScalefactor) #Transform back to gaussian space.
+		#Transform back to gaussian space and also build a prior scale factor for if AverageScaleFactorPosteriorWithPrior is done. 
+		#Prior scale factor is 1 or 0 depending on which error form we are using.
+		for i,emis in enumerate(self.emis_names):
+			if self.lognormalErrors[emis]: #Transform back to gaussian space..
+				analysisScalefactor[i,:] = np.log(analysisScalefactor[i,:])
 		if self.AverageScaleFactorPosteriorWithPrior:
 			priorweight = self.PriorWeightinSFAverage
 			if (priorweight<0) or (priorweight>1):
@@ -364,11 +373,10 @@ class Assimilator(object):
 			posteriorweight = 1-priorweight
 			if self.verbose>=2:
 				print(f'Averaging prior and posterior scale factors, with prior weight of {priorweight} and posterior weight of {posteriorweight}.')
-			#Prior scale factor is 1 or 0 depending on which error form we are using.
-			if self.lognormalErrors:
-				priorval = 0
-			else:
-				priorval = 1
+			priorval = np.ones(len(self.emis_names))
+			for i,emis in enumerate(self.emis_names):
+				if self.lognormalErrors[emis]: #0 is prior for lognormal errors, 1 is prior for normal errors.
+					priorval[i] = 0
 			analysisScalefactor = (priorval*priorweight)+(analysisScalefactor*posteriorweight)
 		analysisSubset[(-1*self.emcount)::,:] = analysisScalefactor
 		if self.verbose>=2:

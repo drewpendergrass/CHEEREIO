@@ -2,21 +2,21 @@
 	"comment000" : "***************************************************************************",
 	"comment001" : "****************BEGIN BASIC GEOS-CHEM AND ENSEMBLE SETTINGS****************",
 	"comment002" : "***************************************************************************",
-	"GC_VERSION" : "14.0.0",
-	"RES" : "0.5x0.625",
+	"GC_VERSION" : "14.1.1",
+	"RES" : "4.0x5.0",
 	"met_name" : "MERRA2",
 	"LEVS" : "47",
-	"NEST" : "T",
-	"REGION" : "NA",
-	"ASSIM_PATH" : "/n/home11/yxtang/CHEEREIO",
-	"RUN_NAME" : "NOx_regional",
-	"MY_PATH" : "/n/holyscratch01/jacob_lab/yunxiaot/GC-LETKF",
-	"DATA_PATH" : "/n/holyscratch01/external_repos/GEOS-CHEM/gcgrid/gcdata/ExtData",
+	"NEST" : "F",
+	"REGION" : "",
+	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
+	"RUN_NAME" : "N2O_wloss_v02",
+	"MY_PATH" : "/work/ap851/CHEEREIO",
+	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/n/holyscratch01/jacob_lab/yunxiaot/GC-LETKF/input_data/GEOS.nc4",
-	"BC_FILES" : "/n/holyscratch01/jacob_lab/yunxiaot/Boundary/OutputDir/GEOSChem.BoundaryConditions.$YYYY$MM$DD_$HH$MNz.nc4",
-	"sim_name" : "fullchem",
+	"RESTART_FILE" : "/hpc/group/shindell/ap851/N2O/N2O_Asia_4x5/Restarts/GEOSChem.Restart.20180101_0000z.nc4",
+	"BC_FILES" : "",
+	"sim_name" : "CH4",
 	"chemgrid" : "trop+strat",
 	"sim_extra_option" : "none",
 	"DO_SPINUP" : "false",
@@ -26,36 +26,37 @@
 	"DO_CONTROL_WITHIN_ENSEMBLE_RUNS" : "true",
 	"CONTROL_START" : "",
 	"CONTROL_END" : "",
-	"DO_ENS_SPINUP" : "false",
+	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
-	"ENS_SPINUP_START" : "",
-	"ENS_SPINUP_END" : "",
+	"ENS_SPINUP_START" : "20180101",
+	"ENS_SPINUP_END" : "20190101",
 	"START_DATE" : "20190101",
-	"ASSIM_START_DATE" : "20190103",
+	"ASSIM_START_DATE" : "20190201",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"END_DATE" : "20190112",
+	"END_DATE" : "20200101",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
-	"SPREAD_AMPLIFICATION_FACTOR" : "5",
+	"SPREAD_AMPLIFICATION_FACTOR" : "5.0",
 	"species_to_amplify_not_in_statevec" : [
+		"N2O"
 	],
-	"DO_BURN_IN" : "true",
-	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "true",
-	"BURN_IN_END" : "20190106",
-	"POSTPROCESS_START_DATE":"20190107",
-	"POSTPROCESS_END_DATE":"20190112",
-	"nEnsemble" : "6",
-	"verbose":"2",
+	"DO_BURN_IN" : "false",
+	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
+	"BURN_IN_END" : "20180601",
+	"POSTPROCESS_START_DATE":"20190101",
+	"POSTPROCESS_END_DATE":"20200101",
+	"nEnsemble" : "8",
+	"verbose":"3",
 	"comment003" : "***************************************************************************",
 	"comment004" : "***************************BEGIN CLUSTER SETTINGS**************************",
 	"comment005" : "***************************************************************************",
 	"NumCores" : "2",
-	"NumCtrlCores" : "2",
-	"Partition" : "huce_cascade,seas_compute,intermediate",
-	"Memory" : "80000",
+	"NumCtrlCores" : "4",
+	"Partition" : "common",
+	"Memory" : "96000",
 	"EnsCtrlSpinupMemory" : "8000",
-	"WallTime" : "7-00\\:00",
-	"EnsSpinupWallTime" : "1-00\\:00",
-	"ControlWallTime" : "0-04\\:00",
+	"WallTime" : "2-00\\:00",
+	"EnsSpinupWallTime" : "0-05\\:00",
+	"ControlWallTime" : "0-05\\:00",
 	"SpinupWallTime" : "",
 	"CondaEnv" : "cheereio",
 	"AnimationEnv" : "animation",
@@ -64,25 +65,27 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
-		"NO",
-		"NO2"
 	],
 	"CONTROL_VECTOR_CONC" : [
-		"NO",
-		"NO2"
 	],
-	"STATE_VECTOR_CONC_REPRESENTATION" : "trop_sum",
+	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
-		"NOx":["NO","NO2"]
+		"N2O":"N2O",
+		"N2O_loss":[
+			"GLOBAL_O1D",
+			"N2O_photo"
+		]
+
 	},
 	"comment009" : "******************************************************************************",
 	"comment010" : "**********************SPECIFY BELOW HISTORY.RC SETTINGS**********************",
 	"comment011" : "******************************************************************************",
 	"HISTORY_collections_to_customize" : [
 		"SpeciesConc",
-		"Restart",
+		"CH4",
 		"LevelEdgeDiags",
-		"StateMet"
+		"StateMet",
+		"Restart"
 	],
 	"HISTORY_freq" : "00000000 010000",
 	"HISTORY_dur" : "00000001 000000",
@@ -93,37 +96,22 @@
 	"SaveArea" : "False",
 	"SaveSatDiagn" : "False",
 	"HistorySpeciesConcToSave" : [
-		"NO",
-		"NO2",
-		"HNO3",
-		"HNO4",
-		"PAN",
-		"MPAN",
-		"N2O5"
+		"CH4"
 	],
 	"HistoryLevelEdgeDiagsToSave" : [
 		"Met_PEDGE"
 	],
 	"HistoryRestartToSave" : [
 		"SpeciesRst_?ALL?",
-		"Chem_H2O2AfterChem",
-		"Chem_SO2AfterChem",
-		"Chem_DryDepNitrogen",
-		"Chem_WetDepNitrogen",
-		"Chem_KPPHvalue",
-		"Chem_StatePSC",
-		"Met_DELPDRY",
-		"Met_PS1WET",
 		"Met_PS1DRY",
-		"Met_SPHU1",
 		"Met_TMPU1",
 		"Met_BXHEIGHT",
-		"Met_TropLev"
+		"Met_TropLev",
+		"Met_DELPDRY"
 	],
 	"HistoryStateMetToSave" : [
-		"Met_TropLev",
-		"Met_BXHEIGHT",
-		"Met_T"
+		"Met_AD",
+		"Met_AVGW"
 	],
 	"HistorySatDiagnToSave" : [
 	],
@@ -131,30 +119,37 @@
 	"comment013" : "**********************SPECIFY BELOW OBSERVATION SETTINGS**********************",
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
-		"NO2_TROPOMI": "NO2"
+		"N2O_TCCON": "N2O",
+		"N2O_OBSPACK": "N2O"
 	},
 	"OBS_TYPE" : {
-		"NO2_TROPOMI":"TROPOMI"
+		"N2O_TCCON":"TCCON",
+		"N2O_OBSPACK": "OBSPACK"
 	},
 	"ASSIMILATE_OBS" : {
-		"NO2_TROPOMI":"True"
+		"N2O_TCCON":"True",
+		"N2O_OBSPACK":"True"
 	},
 	"TROPOMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/tropomi"
+		"CH4" : "/n/holylfs05/LABS/jacob_lab/imi/ch4/blended"
 	},
 	"OMI_dirs" : {
-		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/yunxiaot/omi/NO2"
+		"NO2" : "/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/omi/NO2"
+	},
+	"TCCON_dirs" : {
+		"N2O" : "/hpc/group/shindell/ap851/N2O/TCCON4GC"
 	},
 	"filter_obs_poleward_of_n_degrees" : {
-		"NO2_TROPOMI":"60"
+		"N2O_TCCON":"nan",
+		"N2O_OBSPACK":"nan"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
-	"ACTIVATE_OBSPACK" : "false",
+	"ACTIVATE_OBSPACK" : "true",
 	"preprocess_raw_obspack_files" : "false",
-	"raw_obspack_path" : "",
-	"gc_obspack_path" :  "",
-	"obspack_gc_input_file" : "",
+	"raw_obspack_path" : "/hpc/group/shindell/ap851/N2O/obspack",
+	"gc_obspack_path" : "/hpc/group/shindell/ap851/N2O/obspack_agage_wdcgg_for_gc",
+	"obspack_gc_input_file" : "obspack_n2o.YYYYMMDD.nc",
 	"HistoryObsPackToSave" : [
 		"pressure",
 		"CH4"
@@ -163,137 +158,174 @@
 	"comment016" : "********************SPECIFY BELOW SCALING FACTOR SETTINGS*********************",
 	"comment017" : "******************************************************************************",
 	"sf_initialization":{
-		"NOx":{
+		"N2O":{
 			"sf_dim":"2D",
-			"init_std_dev":"0.1",
+			"init_std_dev":"0.15",
 			"correlatedInitialScalings":"True",
-			"corrDistances":"500",
+			"corrDistances":"2500",
 			"lognormalErrors" : "True",
-			"MaskOceanScaleFactor" :"True",
+			"MaskOceanScaleFactor" :"False",
 			"MaskCoastsGT25pctOcean" : "True",
 			"Mask60NScaleFactor" : "False",
-			"Mask60SScaleFactor" : "True",
+			"Mask60SScaleFactor" : "False",
 			"2D_settings":{
 				"speedyCorrelationApprox" : "True",
 				"additional_init_perturbation_from_emis" : {
-					"do_add_pert":"False",
+					"do_add_pert":"false",
 					"file":{
-						"file":"",
-						"variable":""
+						"file" : "",
+						"variable" : ""
 					},
 					"max_pert":"",
 					"saturation":""
 				}
 			},
 			"1D_settings":{}
+		},
+		"N2O_loss":{
+			"sf_dim":"1D",
+			"init_std_dev":"0.05",
+			"correlatedInitialScalings":"True",
+			"corrDistances":"5000",
+			"lognormalErrors" : "False",
+			"MaskOceanScaleFactor" :"False",
+			"MaskCoastsGT25pctOcean" : "True",
+			"Mask60NScaleFactor" : "False",
+			"Mask60SScaleFactor" : "False",
+			"2D_settings":{},
+			"1D_settings":{}
 		}
-	},		
+	},
 	"MinimumScalingFactorAllowed" : {
-		"NOx":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"MaximumScalingFactorAllowed" : {
-		"NOx":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
-		"NOx":"nan"
+		"N2O":"0.5",
+		"N2O_loss":"0.5"
 	},
 	"MaximumScaleFactorRelativeChangePerAssimilationPeriod" : {
-		"NOx":"nan"
+		"N2O":"nan",
+		"N2O_loss":"nan"
 	},
 	"comment018" : "******************************************************************************",
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NO2_TROPOMI":"0.1"
+		"N2O_TCCON":"1",
+		"N2O_OBSPACK":"0.3"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
-		"NO2_TROPOMI":"False"
+		"N2O_TCCON":"False",
+		"N2O_OBSPACK":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
-		"NO2_TROPOMI":""
+		"N2O_TCCON":"1",
+		"N2O_OBSPACK":"1"
 	},
 	"OBS_ERROR": {
-		"NO2_TROPOMI":"0.1"
+		"N2O_TCCON":"5",
+		"N2O_OBSPACK":"10"
 	},
 	"OBS_ERROR_TYPE":{
-		"NO2_TROPOMI":"relative"
+		"N2O_TCCON":"absolute",
+		"N2O_OBSPACK":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
-		"NO2_TROPOMI":"0.15"
+		"N2O_TCCON":"0",
+		"N2O_OBSPACK":"0"
 	},
 	"MIN_OBS_ERROR":{
-		"NO2_TROPOMI":"0"
+		"N2O_TCCON":"0",
+		"N2O_OBSPACK":"0"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
-		"NO2_TROPOMI":{
-			"transport_error":"0"
-		}
+		"N2O_TCCON" : {},
+		"N2O_OBSPACK" : {}
 	},
 	"AV_TO_GC_GRID" : {
-		"NO2_TROPOMI":"True"
+		"N2O_TCCON":"False",
+		"N2O_OBSPACK":"True"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
-		"NO2_TROPOMI":"default"
+		"N2O_TCCON":"constant",
+		"N2O_OBSPACK":"constant"
 	},
-	"INFLATION_FACTOR": "0.04",
-	"ASSIM_TIME": "24",
-	"MAXNUMOBS" : "3000",
+	"SUPER_OBS_BEFORE_Hx":{
+		"N2O_TCCON":"False",
+		"N2O_OBSPACK":"False"
+	},
+	"INFLATION_FACTOR": "0.08",
+	"ASSIM_TIME": "3600",
+	"MAXNUMOBS" : "30000",
 	"MINNUMOBS" : "1",
-	"LOCALIZATION_RADIUS_km" : "500",
+	"LOCALIZATION_RADIUS_km" : "5000",
 	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
 	"AverageScaleFactorPosteriorWithPrior" : "False",
-	"PriorWeightinSFAverage" : "0.5",
-	"Activate_Relaxation_To_Prior_Spread" : "False",
+	"PriorWeightinSFAverage" : "0.01",
+	"Activate_Relaxation_To_Prior_Spread" : "True",
 	"RTPS_parameter" : "0.9",
 	"species_not_in_statevec_to_RTPS" : [
 	],
 	"comment021" : "******************************************************************************",
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
-	"DO_RUN_IN_PLACE" : "False",
-	"rip_update_time" : "24",
+	"DO_RUN_IN_PLACE" : "True",
+	"rip_update_time" : "720",
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
-	"DO_VARON_RERUN" : "True",
+	"DO_VARON_RERUN" : "False",
 	"APPROXIMATE_VARON_RERUN" : "False",
-	"species_to_approximate_for_rerun" : [],
-	"number_of_windows_to_rerun" :"1",
+	"species_to_approximate_for_rerun" : ["CH4"],
+	"number_of_windows_to_rerun" : "3", 
 	"comment024" : "**********************************************************************************",
 	"comment025" : "******************************BEGIN POSTPROCESS SETTINGS***************************",
 	"comment026" : "**********************************************************************************",
 	"animation_fps_scalingfactor":"2",
 	"animation_fps_concentrations":"18",
-	"omit_diff_cells_with_fewer_than_n_observations":"10",
+	"omit_diff_cells_with_fewer_than_n_observations":"50",
 	"hemco_diags_to_process" : [
-		"EmisNO_Total",
-		"EmisNO_Anthro",
-		"EmisNO2_Anthro"
+		"EmisN2O_Total"
 	],
 	"useLogScaleForEmissionsMaps" : "False",
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
-		"NO2_TROPOMI": "molec/cm2"
+		"N2O_TCCON": "ppb",
+		"N2O_OBSPACK": "ppb"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
-		"NO2_TROPOMI" : []
+		"N2O_TCCON" : [
+			"station_id"
+		],
+		"N2O_OBSPACK" : [
+		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
-		"NO2_TROPOMI" : []
+		"N2O_TCCON" : [
+		],
+		"N2O_OBSPACK" : [
+		]
 	},
 	"extra_plot_field_units":{
 	},
 	"OBSERVERS_TO_PLOT_AS_POINTS":{
+		"N2O_TCCON":"station_id"
 	},
-	"scalefactor_plot_freq" : "all",
+	"scalefactor_plot_freq" : "monthly",
 	"comment027" : "**********************************************************************************",
 	"comment028" : "******************************BEGIN SETTING EXTENSIONS****************************",
 	"comment029" : "**********************************************************************************",
 	"Extensions": {
-		"TROPOMI_CH4":"False",
-		"CH4":"False",
-		"TROPOMI_NO2":"True"
+		"TCCON_N2O":"True",
+		"Obspack_N2O":"True",
+		"N2O":"True",
+		"CH4":"False"
 	}
 }

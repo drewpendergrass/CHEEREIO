@@ -10,10 +10,8 @@ end_timestamp="$(tail -n 1 ${MY_PATH}/${RUN_NAME}/scratch/INPUT_GEOS_TEMP)"
 end_timestamp="${end_timestamp%??}" #Clear last two characters
 end_timestamp="${end_timestamp// /_}" #Replace space with underscore
     
-source activate ${CONDA_ENV} #Activate conda environment.
-python -u par_letkf.py ${end_timestamp} ${1} ${2} ${3} ${4} ${5} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${1}_${2}.out
+conda run -n ${CONDA_ENV} python -u par_letkf.py ${end_timestamp} ${1} ${2} ${3} ${4} ${5} >> ${MY_PATH}/${RUN_NAME}/ensemble_runs/logs/letkf_${1}_${2}.out
 py_exit_status=$?
-conda deactivate #Exit Conda environment
 
 #If python does not exit with exit code one, make file that will break loop
 if [ $py_exit_status != 0 ]; then

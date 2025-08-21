@@ -15,7 +15,7 @@
 
 # Turn on/off different steps. This will allow you to come back to this
 # script and set up different stages later.
-SetupTemplateRundir=true
+SetupTemplateRundir=false
 CompileTemplateRundir=true
 SetupSpinupRun=false
 SetupControlRun=false
@@ -55,14 +55,12 @@ if "$SetupTemplateRundir"; then
   printf "${thinline}"
 
   #Update HISTORY.rc
-  source activate $(jq -r ".CondaEnv" ../ens_config.json) 
   if [ "${DO_ENS_SPINUP}" = true ]; then
-    python update_history.py "SPINUP"
+    conda run -n $(jq -r ".CondaEnv" ../ens_config.json) python update_history.py "SPINUP"
   else
-    python update_history.py "TEMPLATEDIR"
+    conda run -n $(jq -r ".CondaEnv" ../ens_config.json) python update_history.py "TEMPLATEDIR"
   fi
 
-  conda deactivate
   printf "${thinline}"
 
   printf "\n  -- Template run directory created at ${MY_PATH}/${RUN_NAME}/${RUN_TEMPLATE}."

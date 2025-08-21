@@ -13,7 +13,7 @@ CHEEREIO ships with observation operators that have produced by the community. U
 TROPOMI tools
 -------------
 
-The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are two TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\ and CO (the latter contributed by Sina Voshtani). Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species. An NO\ :sub:`2`\ operator is partially written but not yet functional as of version 1.2.
+The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are three TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\, CO (the latter contributed by Sina Voshtani), and NO\ :sub:`2`\ . Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species.
 
 To activate TROPOMI observations, list "TROPOMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
@@ -153,6 +153,121 @@ The OMI observation operator calls two utility functions to process observations
    :return: A dictionary containing flattened observation values and metadata, with bad data removed, ready for input into the `gcCompare`` method of the ``OMI_Translator`` class.
    :rtype: dict
 
+.. _iasi:
+
+IASI tools
+-------------
+
+The Infrared Atmospheric Sounding Interferometer (IASI) instrument measures trace gases of interest to CHEEREIO users. Currently, NH\ :sub:`3`\ (as retrieved by the ANNI v4 algorithm from the Université Libre de Bruxelles group) is the only IASI operator written for CHEEREIO, but users can follow the pattern in ``iasi_tools.py`` to add support for additional species.
+
+To activate IASI observations, list "IASI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
+
+IASI fields available to save and plot in CHEEREIO
+~~~~~~~~~~~~~
+
+Users can list additional fields (beyond the minimum observations and spatiotemporal location) they would like to save from IASI in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the IASI operator, all data read in by the read_iasi function are available to be saved and/or plotted.**
+
+Note that the IASI operator calculates whether an observation should be discarded *after* the operator is applied, as we can only evaluate whether the observation is in appropriate error bounds recommended by ULB once we replace the prior column with the GC column. This is implemented through the postfilter functionality, as described on the :ref:`postfilter` entry.
+
+IASI operator support functions
+~~~~~~~~~~~~~
+
+The IASI observation operator calls two utility functions to process observations from file and format them in such a way that the ``gcCompare`` method of the ``IASI_Translator`` class can perform relevant computations. They are documented below:
+
+.. py:function:: read_iasi(filename, species, filterinfo=None, includeObsError = False)
+
+   A utility function which loads IASI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``IASI_Translator`` class.
+
+   :param str filename: NetCDF file containing IASI observations to be loaded. Expects standard level 2 data. 
+   :param str species: Name of species to be loaded. Currently, only "NH3" is supported.
+   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
+   :param bool includeObsError: True or False, read the errors associated with individual observations. 
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``IASI_Translator`` class.
+   :rtype: dict
+
+.. py:function:: GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges)
+
+   See the function from TROPOMI_tools. Note that for the IASI product we only have height from surface, so the function uses GC Boxheight diagnostic to do a pressure level regrid approximation.
+
+.. _tccon:
+
+TCCON tools
+-------------
+
+The Total Carbon Column Observing Network (TCCON) measures trace gases of interest to CHEEREIO users. Currently, CO and nitrous oxide are supported for CHEEREIO, but users can follow the pattern in ``tccon_tools.py`` to add support for additional species. To activate TCCON observations, list "TCCON" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
+
+The TCCON operator was originally built by Sina Voshtani. See :ref:`appropriate citations` for a recommended citation.
+
+TCCON fields available to save and plot in CHEEREIO
+~~~~~~~~~~~~~
+
+Users can list additional fields (beyond the minimum observations and spatiotemporal location) they would like to save from TCCON in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TCCON operator, all data read in by the read_tccon function are available to be saved and/or plotted.**
+
+TCCON operator support functions
+~~~~~~~~~~~~~
+
+The TCCON observation operator calls two utility functions to process observations from file and format them in such a way that the ``gcCompare`` method of the ``TCCON_Translator`` class can perform relevant computations. They are documented below:
+
+.. py:function:: read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2OCorrectionPT700=False)
+
+   A utility function which loads TCCON observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TCCON_Translator`` class.
+
+   :param str filename: NetCDF file containing IASI observations to be loaded. Expects data produced through the prep_tccon_aggregated.py script, as described below. 
+   :param str species: Name of species to be loaded. Currently, only "N2O" and "CO" are supported.
+   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
+   :param bool includeObsError: True or False, read the errors associated with individual observations.
+   :param bool doN2OCorrectionPT700: True or False, do the temperature correction for N2O in the GGG2020.0 product set? This won't be necessary after 2020.1 is released.
+   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TCCON_Translator`` class.
+   :rtype: dict
+
+.. py:function:: correct_xn2o_from_pt700(xn2o,prior_temperature,prior_pressure,xn2o_error=None,n2o_aicf=0.9821, m=0.000626, b=0.787)
+
+   Handle temperature-dependent bias in TCCON N2O. Based on Josh Laughner's code for GGG2020: py_tccon_netcdf/write_tccon_netcdf/bias_corrections.py. Will no longer be needed after GGG2020.1 is released.
+
+.. py:function:: _compute_pt700(prior_temperature,prior_pressure)
+
+   Handle temperature-dependent bias in TCCON N2O. Based on Josh Laughner's code for GGG2020: py_tccon_netcdf/write_tccon_netcdf/bias_corrections.py. Will no longer be needed after GGG2020.1 is released.
+
+.. py:function:: GC_to_sat_levels(GC_SPC, GC_edges, sat_edges)
+
+   See the function from TROPOMI_tools.
+
+.. py:function:: gravity(altitudes, latitudes)
+
+   Compute g at vertical layers for each TCCON observation site.
+
+.. py:function:: gravity(altitudes, latitudes)
+
+   Compute g at vertical layers for each observation site.
+
+.. py:function:: integrate_column(gas_profile,h2o_profile,obh2o_profile,obpout,obpressure_profile,altitude_profile,ensemble_profile,oblat,AK)
+
+   This is the main function for TCCON column intergation, using its a-priori and averaging kernels.
+
+   :param array gas_profile: The model gas profile of interest. 
+   :param array h2o_profile: The model h2o profile.
+   :param array obh2o_profile: The observation h2o profile. 
+   :param array pressure_profile: The model pressure profile that corresponds with the gas profile in hPa.
+   :param array ensemble_profile: The ensemble profile from equation 25 in Rodgers and Connor 2000 - this will likely be the a priori profile from GFIT; most often multiplied by the scaling factors (VSF) from GFIT for the spectra near the aircraft overpass
+   :param float obalt: The altitude of the ground-based site in m - geometric altitude
+   :param float oblat: The latitude (in degrees) of the ground-based site
+   :param array AK: The averaging kernels for all windows of the molecule of interest, in a structure
+
+
+TCCON preprocessing for CHEEREIO
+~~~~~~~~~~~~~
+
+CHEEREIO has built in preprocessing functions to translate raw GGG2020 TCCON data, as downloaded from the CalTech site, into a form compatible with the CHEEREIO TCCON operator. To use this, execute from the command line (in CHEEREIO/core) before installing CHEEREIO: ``python prep_tccon_aggregated.py ARGUMENTS``
+
+Arguments are as follows:
+
+#. **-i or --input_path (required)**: Path to your input TCCON files, e.g. downloaded from tccondata.org.
+#. **-o or --output_path (required)**: Path to where to save your pre-processed TCCON files, ready for CHEEREIO.
+#. **-s or --start_time (required)**: Start time, in format YYYY-MM-DDTHH:MM:SS. For example, 2023-01-01T00:00:00. Will only process data from after this time.
+#. **-e or --end_time (required)**: End time, in format YYYY-MM-DDTHH:MM:SS. For example, 2023-02-01T00:00:00. Will only process data from before this time.
+#. **-s2k or --species_to_keep (optional)**: Species to keep in your pre-processed TCCON files (e.g. just "co" or "co,co2"). If multiple, comma separated.
+#. **-p or --input_file_pattern (optional)**: File pattern for input tccon files. If you have the public files, you do not need to modify (default is ``*public.qc.nc``).
+
 .. _ObsPack tools:
 
 ObsPack tools
@@ -166,10 +281,6 @@ ObsPack fields available to save and plot in CHEEREIO
 ~~~~~~~~~~~~~
 
 All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. Below are a list of the supported fields which users can save in ObsPack:
-
-.. option:: utc_conv
-   
-   A conversion constant that can change UTC timestamps into local time.
 
 .. option:: altitude
    

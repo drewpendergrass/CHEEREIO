@@ -8,6 +8,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import observation_operators as obsop
+import settings_interface as si 
 
 data_vars = ['time', 'start_time', 'midpoint_time', 'time_components', 'value',
 'latitude', 'longitude', 'altitude', 'assimilation_concerns',
@@ -32,16 +33,6 @@ def make_filter_fxn(start_date,end_date,lat_bounds=None,lon_bounds=None):
 		#Save out the site code
 		site_code = data.attrs['site_code']
 		data['site_code'] = xr.DataArray([site_code]*len(data.obs), dims=('obs'))
-		# Correct to local timezone if it's an in situ or surface observation
-		if (len(data.obs) > 0) and (platform in ['surface', 'tower']):
-			utc_conv = data.attrs['site_utc2lst']
-			if int(utc_conv) != utc_conv:
-				print('UTC CONVERSION FACTOR IS NOT AN INTEGER : ', data.attrs['dataset_name'])
-			data['utc_conv'] = xr.DataArray(utc_conv*np.ones(len(data.obs)),dims=('obs'))
-			# data['time_ltc'] = dc(data['time']) + np.timedelta64(int(utc_conv), 'h')
-		else:
-			data['utc_conv'] = xr.DataArray(np.zeros(len(data.obs)), dims=('obs'))
-			# data['time_ltc'] = dc(data['time'])
 		return data
 	return filter_obspack
 
@@ -125,7 +116,7 @@ def prep_obspack(raw_obspack_dir,gc_obspack_dir,filename_format,start_date,end_d
 		daily.to_netcdf(f'{gc_obspack_dir}/{name_str}{day.year:04d}{day.month:02d}{day.day:02d}.nc',unlimited_dims=['obs'])
 
 def filter_postprocess_obspack_from_file(data):
-	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'utc_conv', 'platform','site_code']]
+	return data[['obspack_id', 'value', 'altitude', 'latitude', 'longitude', 'time', 'platform','site_code']]
 
 class ObsPack_Translator(obsop.Observation_Translator):
 	def __init__(self,verbose=1):
@@ -165,7 +156,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			met['latitude'] = obspack['latitude'].values
 			met['altitude'] = obspack['altitude'].values
 			met['utctime'] = obspack['time'].values
-			met['utc_conv'] = obspack['utc_conv'].values
 			met['platform'] = obspack['platform'].values
 			met['obspack_id'] = obspack['obspack_id'].values
 			met['site_code'] = obspack['site_code'].values
@@ -176,7 +166,6 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			met['latitude'] = np.array([])
 			met['altitude'] = np.array([])
 			met['utctime'] = np.array([])
-			met['utc_conv'] = np.array([])
 			met['platform'] = np.array([])
 			met['obspack_id'] = np.array([])
 			met['site_code'] = np.array([])
@@ -184,11 +173,74 @@ class ObsPack_Translator(obsop.Observation_Translator):
 	def gcCompare(self,specieskey,ObsPack,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		#Have to convert to PPB
+		if species=='CH4':
+			obs_multiplier = 1e9
+			gc_multiplier=1e9
+		elif species=='N2O':
+			obs_multiplier = 1
+			gc_multiplier=1e9
 		if len(ObsPack['value'])==0:
-			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+			toreturn = obsop.ObsData(np.array([]),ObsPack['value']*obs_multiplier,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
+			toreturn.addData(altitude=ObsPack['altitude'],pressure=np.array([]),obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
 		else:
-			toreturn = obsop.ObsData(GC[species].values*1e9,ObsPack['value']*1e9,ObsPack['latitude'],ObsPack['longitude'],ObsPack['utctime'])
-			toreturn.addData(utc_conv=ObsPack['utc_conv'],altitude=ObsPack['altitude'],pressure=GC['pressure'].values,obspack_id=ObsPack['obspack_id'],platform=ObsPack['platform'],site_code=ObsPack['site_code'])
+			gc_overrides = si.checkGCSpeciesOverride(self.spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
+			if (len(gc_overrides)>0)&(species in gc_overrides):
+				gc_sim = GC[gc_overrides[species]].values*gc_multiplier
+			else:
+				gc_sim = GC[species].values*gc_multiplier
+			if species in ['CH4','N2O']: #Filter out data where obspack collection returns 0 for GC. Very rare but annoying bug.
+				valid = np.where(gc_sim>1)[0]
+				gc_sim = gc_sim[valid]
+				obsval = ObsPack['value'][valid]*obs_multiplier
+				obslat = ObsPack['latitude'][valid]
+				obslon = ObsPack['longitude'][valid]
+				obstime = ObsPack['utctime'][valid]
+				obsalt = ObsPack['altitude'][valid]
+				gcpressure = GC['pressure'].values[valid]
+				obsid = ObsPack['obspack_id'][valid]
+				obsplat = ObsPack['platform'][valid]
+				obssite = ObsPack['site_code'][valid]
+			else:
+				obsval = ObsPack['value']*obs_multiplier
+				obslat = ObsPack['latitude']
+				obslon = ObsPack['longitude']
+				obstime = ObsPack['utctime']
+				obsalt = ObsPack['altitude']
+				gcpressure = GC['pressure'].values
+				obsid = ObsPack['obspack_id']
+				obsplat = ObsPack['platform']
+				obssite = ObsPack['site_code']
+		#We allow an option to average to the GC grid
+		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True": 
+			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+			i,j,t=obsop.nearest_loc(GC,{'latitude':obslat,'longitude':obslon,'utctime':obstime})
+			additional_args_avgGC = {}
+			if doErrCalc:
+				if useObserverError:
+					raise ValueError('No observer error supported for ObsPack')
+				elif prescribed_error is not None:
+					additional_args_avgGC['prescribed_error'] = prescribed_error
+					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+				if minError is not None:
+					additional_args_avgGC['minError'] = minError
+				if errorCorr is not None:
+					additional_args_avgGC['errorCorr'] = errorCorr
+				if transportError is not None:
+					additional_args_avgGC['modelTransportError'] = transportError
+				additional_args_avgGC['other_fields_to_avg'] = {}
+				additional_args_avgGC['other_fields_to_avg']['altitude']=obsalt
+				additional_args_avgGC['other_fields_to_avg']['pressure']=gcpressure
+			toreturn = obsop.averageByGC(i,j,t,GC,gc_sim,obsval,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+		else:				
+			toreturn = obsop.ObsData(gc_sim,obsval,obslat,obslon,obstime)
+			toreturn.addData(altitude=obsalt,pressure=gcpressure,obspack_id=obsid,platform=obsplat,site_code=obssite)
+		# Apply error filter from the extension. Remove observations where error exceeds some (very high) maximum threshhold as being likely in error.
+		if (self.spc_config['Extensions']['Obspack_N2O']=="True"):
+			maxerr = float(self.spc_config['Max_Obspack_N2O_Error'])
+			err = np.abs(toreturn.getObsCol()-toreturn.getGCCol())
+			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
+			#We do this because different ensemble members will allow slightly different observations
+			#Depending on column shape.
+			toreturn.addData(postfilter=err<maxerr) 
 		return toreturn
 

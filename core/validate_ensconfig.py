@@ -44,9 +44,6 @@ upper_case_booleans = ["SaveLevelEdgeDiags",
 "SaveStateMet",
 "SaveArea",
 "SaveDOFS",
-"speedyCorrelationApprox",
-"lognormalErrors",
-"MaskCoastsGT25pctOcean",
 "AveragePriorAndPosterior",
 "AverageScaleFactorPosteriorWithPrior",
 "DO_RUN_IN_PLACE",
@@ -60,11 +57,7 @@ for b in upper_case_booleans:
 		raise ValueError(f'Setting {b} must be True or False (case sensitive); current value is {val}.')
 
 
-upper_case_boolean_dicts = ["correlatedInitialScalings",
-"MaskOceanScaleFactor",
-"Mask60NScaleFactor",
-"Mask60SScaleFactor",
-"USE_DIFFERENT_GAMMA_FOR_BURN_IN",
+upper_case_boolean_dicts = ["USE_DIFFERENT_GAMMA_FOR_BURN_IN",
 "ASSIMILATE_OBS",
 "AV_TO_GC_GRID",
 "Extensions"]
