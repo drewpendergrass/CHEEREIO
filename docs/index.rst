@@ -21,7 +21,7 @@ CHEEREIO follows four design principles:
 
 This manual assumes that you are familiar with setting up and running the GEOS-Chem chemical transport model. For more information and background, please see the `GEOS-Chem Wiki <http://wiki.seas.harvard.edu/geos-chem/index.php/Main_Page>`__. Although this manual offers an intuitive explanation of CHEEREIO's data assimilation algorithm in the :ref:`How CHEEREIO works` section, you should probably consider the original algorithm paper `Hunt. et. al., [2007] <https://doi.org/10.1016/j.physd.2006.11.008>`__ as a prerequisite to using CHEEREIO. Don't worry, it's quite readable!
 
-I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at pendergrass [AT] g [DOT] harvard [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. However, these questions along with any bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
+I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at andrew.pendergrass [AT] duke [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. However, these questions along with any bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
 
 .. toctree::
    :maxdepth: 4   
@@ -31,6 +31,7 @@ I am more than happy to collaborate with you, however you choose to use CHEEREIO
    Installing-CHEEREIO
    Overview-Of-Capabilities
    Debugging
+   citations
 
 .. toctree::
    :maxdepth: 4  
