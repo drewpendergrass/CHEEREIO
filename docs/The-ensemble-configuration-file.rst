@@ -759,7 +759,7 @@ LETKF settings
 
 	.. attention::
 
-		This setting can lead your ensemble to ignore observations, and often comes up in debugging emails to you. If your simulation is not updating, try setting to "False."
+		This setting can lead your ensemble to ignore observations, and often comes up in debugging emails to me. If your simulation is not updating, try setting to "False."
 
 
 .. option:: PriorWeightinSFAverage

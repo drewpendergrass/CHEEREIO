@@ -158,7 +158,7 @@ The OMI observation operator calls two utility functions to process observations
 IASI tools
 -------------
 
-The Infrared Atmospheric Sounding Interferometer (IASI) instrument measures trace gases of interest to CHEEREIO users. Currently, NH\ :sub:`3`\ (as retrieved by the ANNI v4 algorithm from the Université Libre de Bruxelles group) is the only IASI operator written for CHEEREIO, but users can follow the pattern in ``iasi_tools.py`` to add support for additional species.
+The Infrared Atmospheric Sounding Interferometer (IASI) instrument measures trace gases of interest to CHEEREIO users. Currently, NH\ :sub:`3`\  (as retrieved by the ANNI v4 algorithm from the Université Libre de Bruxelles group) is the only IASI operator written for CHEEREIO, but users can follow the pattern in ``iasi_tools.py`` to add support for additional species.
 
 To activate IASI observations, list "IASI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
@@ -234,10 +234,6 @@ The TCCON observation operator calls two utility functions to process observatio
 
 .. py:function:: gravity(altitudes, latitudes)
 
-   Compute g at vertical layers for each TCCON observation site.
-
-.. py:function:: gravity(altitudes, latitudes)
-
    Compute g at vertical layers for each observation site.
 
 .. py:function:: integrate_column(gas_profile,h2o_profile,obh2o_profile,obpout,obpressure_profile,altitude_profile,ensemble_profile,oblat,AK)
@@ -273,7 +269,7 @@ Arguments are as follows:
 ObsPack tools
 -------------
 
-`ObsPack <https://doi.org/10.5194/essd-6-375-2014>`__is a standardized dataset containing measurements from  surface monitors distributed around the world, aimed at carbon cycle studies. CHEEREIO users often use ObsPack data for validation of CO or CH4 inversions, or as observations for the inversion itself. The ObsPack observation operator, contained in the ``obspack_tools.py`` file, wraps around the the `ObsPack diagnostic <https://geos-chem.readthedocs.io/en/stable/gcclassic-user-guide/obspack.html>`__ produced by GEOS-Chem and translates it into a form acceptable to CHEEREIO.
+`ObsPack <https://doi.org/10.5194/essd-6-375-2014>`__ is a standardized dataset containing measurements from  surface monitors distributed around the world, aimed at carbon cycle studies. CHEEREIO users often use ObsPack data for validation of CO or CH4 inversions, or as observations for the inversion itself. The ObsPack observation operator, contained in the ``obspack_tools.py`` file, wraps around the the `ObsPack diagnostic <https://geos-chem.readthedocs.io/en/stable/gcclassic-user-guide/obspack.html>`__ produced by GEOS-Chem and translates it into a form acceptable to CHEEREIO.
 
 To activate ObsPack, see the :ref:`Observation settings` page for information on the correct settings for  ``ens_config.json``. 
 
