@@ -4,6 +4,7 @@
 
 * Will remove DOFS pseudoinverse approach (long deprecated, never used) and replaced with an information quantification metric from Voshtani et al., 2025 (in review).
 * Will streamline running nested grid simulations.
+* Other features, to be determined.
 
 ## Version 1.4.0 (rc)
 
@@ -20,7 +21,7 @@
 * Bug fixes for SatDiagn assimilation, and for scale factor initialization (thanks to Yunxiao Tang).
 * Significant performance and memory improvements (halving my methane assimilation time)
 * Allowed a mix of normal and lognormal optimization for different state vector elements.
-* Allowed 1D variation of scale factor initialization along latitude. This is to support best practices for optimizing certain kinds of loss fields (e.g. OH for methane).
+* Allowed option for 1D variation of scale factor initialization along latitude (as opposed to 2D multivariate normal perturbations). 
 * Add option, in super observation case, to average data before applying observation operator for performance improvements.
 * Improved Python scripting so that code works across a wider variety of shells. 
 * Additional bug fixes and improvements.
