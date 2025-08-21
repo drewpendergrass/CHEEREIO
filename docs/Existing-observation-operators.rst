@@ -269,7 +269,7 @@ Arguments are as follows:
 ObsPack tools
 -------------
 
-`ObsPack <https://doi.org/10.5194/essd-6-375-2014>`__ is a standardized dataset containing measurements from  surface monitors distributed around the world, aimed at carbon cycle studies. CHEEREIO users often use ObsPack data for validation of CO or CH4 inversions, or as observations for the inversion itself. The ObsPack observation operator, contained in the ``obspack_tools.py`` file, wraps around the the `ObsPack diagnostic <https://geos-chem.readthedocs.io/en/stable/gcclassic-user-guide/obspack.html>`__ produced by GEOS-Chem and translates it into a form acceptable to CHEEREIO.
+`ObsPack <https://doi.org/10.5194/essd-6-375-2014>`__ is a standardized dataset containing measurements from  surface monitors distributed around the world, aimed at carbon cycle studies. CHEEREIO users often use ObsPack data for validation of CO or CH4 inversions, or as observations for the inversion itself. The ObsPack observation operator, contained in the ``obspack_tools.py`` file, wraps around the Obspack `diagnostic <https://geos-chem.readthedocs.io/en/stable/gcclassic-user-guide/obspack.html>`__ produced by GEOS-Chem and translates it into a form acceptable to CHEEREIO.
 
 To activate ObsPack, see the :ref:`Observation settings` page for information on the correct settings for  ``ens_config.json``. 
 
