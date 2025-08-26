@@ -123,7 +123,7 @@ class HIST_Ens(object):
 				to_return = err_av**2
 		#Apply gaspari cohn localization.
 		if self.spc_config['smooth_localization_with_gaspari_cohn'].lower()=='true':
-			loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
+			loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_by_observation'][species])
 			gaco = tx.make_gaspari_cohn(loc_rad/2)
 			weights = gaco(distances) #will be between 0 and 1, shouldn't have anything at zero.
 			weights[weights<=0.001] = 0.001 #Set a floor so inverse doesn't explode
@@ -238,7 +238,7 @@ class HIST_Ens(object):
 			obsdata_toreturn[species]=applyPostfilter(to_postprocess[species],self.ensemble_numbers)
 		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind,return_dist=False):
-		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_km'])
+		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_by_observation'][species])
 		origlat,origlon = si.getLatLonVals(self.spc_config)
 		latval = origlat[latind]
 		lonval = origlon[lonind]

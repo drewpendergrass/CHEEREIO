@@ -226,6 +226,9 @@
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "500",
+	"LOCALIZATION_RADIUS_by_observation":{
+		"CO_TROPOMI":"500"
+	},
 	"smooth_localization_with_gaspari_cohn" : "False",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",

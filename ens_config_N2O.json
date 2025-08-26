@@ -282,6 +282,11 @@
 	"MAXNUMOBS" : "30000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "5000",
+	"LOCALIZATION_RADIUS_by_observation":{
+		"N2O_TCCON":"5000",
+		"N2O_OBSPACK":"5000",
+		"N2O_SWOOSH":"300"
+	},
 	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",

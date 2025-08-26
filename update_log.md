@@ -2,11 +2,18 @@
 
 ## Version 1.5.0 (in progress, not yet released)
 
+### Implemented
+
+* SWOOSH N2O operator (ACE-FTS+MLS fusion).
+* Allowed different localization radii for different observation operators
+
+### Planned
+
 * Will remove DOFS pseudoinverse approach (long deprecated, never used) and replaced with an information quantification metric from Voshtani et al., 2025 (in review).
 * Will streamline running nested grid simulations.
 * Other features, to be determined.
 
-## Version 1.4.0 (rc)
+## Version 1.4.0
 
 **Action items for users updating to version 1.4.0:**
 

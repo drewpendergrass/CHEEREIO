@@ -243,6 +243,9 @@
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "1000",
+	"LOCALIZATION_RADIUS_by_observation":{
+		"NH3_IASI":"1000"
+	},
 	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",
