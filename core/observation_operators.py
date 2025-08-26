@@ -104,19 +104,24 @@ def nearest_loc(GC,OBSDATA):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=True,returnStateMet=False,GC_area=None):
-	i,j,t = nearest_loc(GC,OBSDATA)
+def getGC_SPC(GC,species,spc_config):
 	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
 	if gc_version>=14.1:
 		spcconc_name = "SpeciesConcVV"
 	else:
 		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
-	to_return = {}
 	gc_overrides = si.checkGCSpeciesOverride(spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
 	if (len(gc_overrides)>0)&(species in gc_overrides):
-		to_return['GC_SPC'] = GC[f'{spcconc_name}_{gc_overrides[species]}'].values[t,:,j,i]
+		GC_SPC = GC[f'{spcconc_name}_{gc_overrides[species]}']
 	else:
-		to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
+		GC_SPC = GC[f'{spcconc_name}_{species}']
+	return GC_SPC
+
+
+def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=True,returnStateMet=False,GC_area=None):
+	i,j,t = nearest_loc(GC,OBSDATA)
+	to_return = {}
+	to_return['GC_SPC'] = getGC_SPC(GC,species,spc_config).values[t,:,j,i]
 	if returnLevelEdge:
 		to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:

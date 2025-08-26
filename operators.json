@@ -23,5 +23,10 @@
 		"module_name" : "iasi_tools",
 		"translator_name" : "IASI_Translator",
 		"implements_initialReadDate" : "True"
+	},
+	"SWOOSH" : {
+		"module_name" : "swoosh_tools",
+		"translator_name" : "SWOOSH_Translator",
+		"implements_initialReadDate" : "False"
 	}
 }

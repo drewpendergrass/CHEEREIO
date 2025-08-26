@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "N2O_wloss_v02",
+	"RUN_NAME" : "N2O_wloss_v03",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -120,15 +120,18 @@
 	"comment014" : "******************************************************************************",
 	"OBSERVED_SPECIES" : {
 		"N2O_TCCON": "N2O",
-		"N2O_OBSPACK": "N2O"
+		"N2O_OBSPACK": "N2O",
+		"N2O_SWOOSH": "N2O"
 	},
 	"OBS_TYPE" : {
 		"N2O_TCCON":"TCCON",
-		"N2O_OBSPACK": "OBSPACK"
+		"N2O_OBSPACK": "OBSPACK",
+		"N2O_SWOOSH": "SWOOSH"
 	},
 	"ASSIMILATE_OBS" : {
 		"N2O_TCCON":"True",
-		"N2O_OBSPACK":"True"
+		"N2O_OBSPACK":"True",
+		"N2O_SWOOSH":"True"
 	},
 	"TROPOMI_dirs" : {
 		"CH4" : "/n/holylfs05/LABS/jacob_lab/imi/ch4/blended"
@@ -139,9 +142,13 @@
 	"TCCON_dirs" : {
 		"N2O" : "/hpc/group/shindell/ap851/N2O/TCCON4GC"
 	},
+	"SWOOSH_dirs" : {
+		"N2O" : "/hpc/group/shindell/ap851/N2O/swoosh-v02.7-198401-202408-latpress-5deg-L31.n2omod.nc"
+	},
 	"filter_obs_poleward_of_n_degrees" : {
 		"N2O_TCCON":"nan",
-		"N2O_OBSPACK":"nan"
+		"N2O_OBSPACK":"nan",
+		"N2O_SWOOSH":"nan"
 	},
 	"SaveDOFS" : "False",
 	"DOFS_filter" : "nan",
@@ -217,50 +224,61 @@
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
 		"N2O_TCCON":"1",
-		"N2O_OBSPACK":"0.3"
+		"N2O_OBSPACK":"0.3",
+		"N2O_SWOOSH":"1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"N2O_TCCON":"False",
-		"N2O_OBSPACK":"False"
+		"N2O_OBSPACK":"False",
+		"N2O_SWOOSH":"False"
 	},
 	"GAMMA_FOR_BURN_IN" : {
 		"N2O_TCCON":"1",
-		"N2O_OBSPACK":"1"
+		"N2O_OBSPACK":"1",
+		"N2O_SWOOSH":"1"
 	},
 	"OBS_ERROR": {
 		"N2O_TCCON":"5",
-		"N2O_OBSPACK":"10"
+		"N2O_OBSPACK":"10",
+		"N2O_SWOOSH":"10"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute",
-		"N2O_OBSPACK":"absolute"
+		"N2O_OBSPACK":"absolute",
+		"N2O_SWOOSH":"absolute"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
 		"N2O_TCCON":"0",
-		"N2O_OBSPACK":"0"
+		"N2O_OBSPACK":"0",
+		"N2O_SWOOSH":"0"
 	},
 	"MIN_OBS_ERROR":{
 		"N2O_TCCON":"0",
-		"N2O_OBSPACK":"0"
+		"N2O_OBSPACK":"0",
+		"N2O_SWOOSH":"0"
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
 		"N2O_TCCON" : {},
-		"N2O_OBSPACK" : {}
+		"N2O_OBSPACK" : {},
+		"N2O_SWOOSH" : {}
 	},
 	"AV_TO_GC_GRID" : {
 		"N2O_TCCON":"False",
-		"N2O_OBSPACK":"True"
+		"N2O_OBSPACK":"True",
+		"N2O_SWOOSH":"False"
 	},
 	"SUPER_OBSERVATION_FUNCTION":{
 		"N2O_TCCON":"constant",
-		"N2O_OBSPACK":"constant"
+		"N2O_OBSPACK":"constant",
+		"N2O_SWOOSH":"constant"
 	},
 	"SUPER_OBS_BEFORE_Hx":{
 		"N2O_TCCON":"False",
-		"N2O_OBSPACK":"False"
+		"N2O_OBSPACK":"False",
+		"N2O_SWOOSH":"False"
 	},
 	"INFLATION_FACTOR": "0.08",
-	"ASSIM_TIME": "3600",
+	"ASSIM_TIME": "720",
 	"MAXNUMOBS" : "30000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "5000",
@@ -277,7 +295,7 @@
 	"comment022" : "*********************SPECIFY BELOW RUN-IN-PLACE SETTINGS**********************",
 	"comment023" : "******************************************************************************",
 	"DO_RUN_IN_PLACE" : "True",
-	"rip_update_time" : "720",
+	"rip_update_time" : "240",
 	"DIFFERENT_RUN_IN_PLACE_FOR_BURN_IN" : "False",
 	"rip_burnin_update_time" : "24",
 	"DO_VARON_RERUN" : "False",
@@ -298,19 +316,24 @@
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
 		"N2O_TCCON": "ppb",
-		"N2O_OBSPACK": "ppb"
+		"N2O_OBSPACK": "ppb",
+		"N2O_SWOOSH": "ppb"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"N2O_TCCON" : [
 			"station_id"
 		],
 		"N2O_OBSPACK" : [
+		],
+		"N2O_SWOOSH" : [
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
 		"N2O_TCCON" : [
 		],
 		"N2O_OBSPACK" : [
+		],
+		"N2O_SWOOSH" : [
 		]
 	},
 	"extra_plot_field_units":{
