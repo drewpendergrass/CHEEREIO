@@ -42,6 +42,16 @@ class SWOOSH_Translator(obsop.Observation_Translator):
 		# Band means averaged over both lat & lon (per band)
 		GC_SPC_latbands = GC_SPC.groupby_bins("lat", bins=latbins, right=False).mean(dim=("lat", "lon"))*1e9 #convert to ppb
 		GC_P_latbands = GC_P.groupby_bins("lat", bins=latbins, right=False).mean(dim=("lat", "lon"))
+		#Double check that we have equal dimensions in GC and SWOOSH. This can not be the case if we are on the edge of a month boundary
+		if len(swoosh.time.values)!=len(GC_SPC_latbands.time.values):
+			common = np.intersect1d(ym_code(GC_SPC_latbands), ym_code(swoosh))
+			#Handle GC first
+			mask = ym_code(GC_SPC_latbands).isin(common)
+			GC_SPC_latbands = GC_SPC_latbands.where(mask, drop=True)
+			GC_P_latbands = GC_P_latbands.where(mask, drop=True)
+			#Handle swoosh now
+			mask = ym_code(swoosh).isin(common)
+			swoosh = swoosh.where(mask, drop=True)
 		# Iterate through and interpolate GC
 		gc_to_save = []
 		obs_to_save = []
@@ -92,5 +102,6 @@ class SWOOSH_Translator(obsop.Observation_Translator):
 		toreturn.addData(level=df['levs'].values)
 		return toreturn
 
-
+def ym_code(da):
+	return da.time.dt.year * 100 + da.time.dt.month
 
