@@ -240,7 +240,7 @@
 	"OBS_ERROR": {
 		"N2O_TCCON":"5",
 		"N2O_OBSPACK":"10",
-		"N2O_SWOOSH":"10"
+		"N2O_SWOOSH":"20"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute",
