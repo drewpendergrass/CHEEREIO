@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "N2O_wloss_v04",
+	"RUN_NAME" : "N2O_wloss_v05",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -65,8 +65,10 @@
 	"comment007" : "****************SPECIFY BELOW SPECIES IN STATE/CONTROL VECTORS****************",
 	"comment008" : "******************************************************************************",
 	"STATE_VECTOR_CONC" : [
+		"N2O"
 	],
 	"CONTROL_VECTOR_CONC" : [
+		"N2O"
 	],
 	"STATE_VECTOR_CONC_REPRESENTATION" : "3D",
 	"CONTROL_VECTOR_EMIS" : {
@@ -225,7 +227,7 @@
 	"REGULARIZING_FACTOR_GAMMA": {
 		"N2O_TCCON":"1",
 		"N2O_OBSPACK":"0.3",
-		"N2O_SWOOSH":"1"
+		"N2O_SWOOSH":"0.1"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"N2O_TCCON":"False",
@@ -240,7 +242,7 @@
 	"OBS_ERROR": {
 		"N2O_TCCON":"5",
 		"N2O_OBSPACK":"10",
-		"N2O_SWOOSH":"20"
+		"N2O_SWOOSH":"50"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute",
