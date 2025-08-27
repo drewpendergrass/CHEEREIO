@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "NH3_IASI_v02",
+	"RUN_NAME" : "NH3_IASI_v03",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -34,9 +34,10 @@
 	"ASSIM_START_DATE" : "20190702",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "false",
 	"END_DATE" : "20190731",
-	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "false",
-	"SPREAD_AMPLIFICATION_FACTOR" : "1",
+	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
+	"SPREAD_AMPLIFICATION_FACTOR" : "3",
 	"species_to_amplify_not_in_statevec" : [
+		"NH3"
 	],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
@@ -204,7 +205,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"NH3_IASI":"1"
+		"NH3_IASI":"0.5"
 	},
 	"USE_DIFFERENT_GAMMA_FOR_BURN_IN" : {
 		"NH3_IASI":"False"
@@ -213,10 +214,10 @@
 		"NH3_IASI":""
 	},
 	"OBS_ERROR": {
-		"NH3_IASI":"1e-6" 
+		"NH3_IASI":"nan" 
 	},
 	"OBS_ERROR_TYPE":{
-		"NH3_IASI":"absolute"
+		"NH3_IASI":"product"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
 		"NH3_IASI":"0.3"
@@ -226,7 +227,7 @@
 	},
 	"OTHER_OBS_ERROR_PARAMETERS":{
 		"NH3_IASI":{
-			"transport_error":"1e-7"
+			"transport_error":"5e-5"
 		}
 	},
 	"AV_TO_GC_GRID" : {
