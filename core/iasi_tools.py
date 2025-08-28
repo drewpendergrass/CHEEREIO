@@ -250,7 +250,12 @@ class IASI_Translator(obsop.Observation_Translator):
 			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
 			#We do this because different ensemble members will allow slightly different observations
 			#Depending on column shape.
-			toreturn.addData(postfilter=valid_after_postfilter) 
+			toreturn.addData(postfilter=valid_after_postfilter)
+			#CHEEREIO gets finicky with small numbers. This is because of numerical issues with LETKF. Convert to umol m-2
+			toreturn.gccol *= 1e6 
+			toreturn.obscol *= 1e6 
+			if 'err_av' in toreturn.additional_data:
+				toreturn.additional_data['err_av']*=1e6
 			return toreturn
 
 #Testing zone.
