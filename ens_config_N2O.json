@@ -9,7 +9,7 @@
 	"NEST" : "F",
 	"REGION" : "",
 	"ASSIM_PATH" : "/hpc/home/ap851/CHEEREIO",
-	"RUN_NAME" : "N2O_wloss_v05",
+	"RUN_NAME" : "N2O_wloss_v06",
 	"MY_PATH" : "/work/ap851/CHEEREIO",
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
@@ -209,7 +209,7 @@
 		"N2O_loss":"nan"
 	},
 	"MaximumScalingFactorAllowed" : {
-		"N2O":"nan",
+		"N2O":"1000",
 		"N2O_loss":"nan"
 	},
 	"InflateScalingsToXOfInitialStandardDeviation" : {
@@ -224,7 +224,7 @@
 	"comment019" : "*************************SPECIFY BELOW LETKF SETTINGS*************************",
 	"comment020" : "******************************************************************************",
 	"REGULARIZING_FACTOR_GAMMA": {
-		"N2O_TCCON":"1",
+		"N2O_TCCON":"0.1",
 		"N2O_OBSPACK":"0.3",
 		"N2O_SWOOSH":"0.1"
 	},
@@ -239,14 +239,14 @@
 		"N2O_SWOOSH":"1"
 	},
 	"OBS_ERROR": {
-		"N2O_TCCON":"5",
+		"N2O_TCCON":"10",
 		"N2O_OBSPACK":"10",
-		"N2O_SWOOSH":"50"
+		"N2O_SWOOSH":"nan"
 	},
 	"OBS_ERROR_TYPE":{
 		"N2O_TCCON":"absolute",
 		"N2O_OBSPACK":"absolute",
-		"N2O_SWOOSH":"absolute"
+		"N2O_SWOOSH":"product"
 	},
 	"OBS_ERROR_SELF_CORRELATION" : {
 		"N2O_TCCON":"0",
@@ -332,6 +332,8 @@
 		"N2O_OBSPACK" : [
 		],
 		"N2O_SWOOSH" : [
+			"level",
+			"err_av"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
