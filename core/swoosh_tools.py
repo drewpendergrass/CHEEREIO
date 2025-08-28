@@ -101,7 +101,7 @@ class SWOOSH_Translator(obsop.Observation_Translator):
 		toreturn = obsop.ObsData(df['gc'].values,df['obs'].values,df['lats'].values,df['lons'].values,df['times'].values)
 		toreturn.addData(level=df['levs'].values)
 		#Do error 
-		if useObserverError:
+		if useObserverError and doErrCalc:
 			toreturn.addData(err_av=swoosh_err_by_lev(df['levs'].values))
 		return toreturn
 
