@@ -100,8 +100,24 @@ class SWOOSH_Translator(obsop.Observation_Translator):
 		#Save out ObsData
 		toreturn = obsop.ObsData(df['gc'].values,df['obs'].values,df['lats'].values,df['lons'].values,df['times'].values)
 		toreturn.addData(level=df['levs'].values)
+		#Do error 
+		if useObserverError:
+			toreturn.addData(err_av=swoosh_err_by_lev(df['levs'].values))
 		return toreturn
 
 def ym_code(da):
 	return da.time.dt.year * 100 + da.time.dt.month
+
+#using table 3.17.1 from the MLS Version 5.0x Level 2 and 3 data quality and description document.
+_swoosh_err_regions = np.array([1,2.2,4.6,10,22,46,68,100])
+_swoosh_err_precision = np.array([17,18,16,15,14,12,12,12])
+_swoosh_err_accuracy = np.array([2,4,5,6,13,24,30,55])
+
+def swoosh_err_by_lev(levels):
+	transport_err = 40 #assume a steady GC transport err
+	total_err_by_region = np.sqrt(_swoosh_err_precision**2+_swoosh_err_accuracy**2+transport_err**2)
+	f = interp1d(_swoosh_err_regions, total_err_by_region, kind='linear') #Interpolate err recomendations
+	return f(levels)
+	
+
 
