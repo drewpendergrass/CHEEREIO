@@ -284,7 +284,9 @@
 		"NH3_IASI": "mol/m2"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
-		"NH3_IASI" : []
+		"NH3_IASI" : [
+			"err_av"
+		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
 		"NH3_IASI" : []
