@@ -278,8 +278,8 @@ class Assimilator(object):
 		if self.verbose>=2:
 			print(f"applyAnalysisCorrections called for index {(latind,lonind)}.")
 		#Get scalefactors off the end of statevector
-		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
-		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
+		analysisScalefactor = np.copy(analysisSubset[(-1*self.emcount)::,:]) #This is the column being assimilated, so only one emissions factor per species grouping
+		backgroundScalefactor = np.copy(backgroundSubset[(-1*self.emcount)::,:])
 		if self.verbose>=2:
 			#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
 			#We do this in gaussian space (no log transform)
