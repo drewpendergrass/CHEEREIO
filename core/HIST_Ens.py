@@ -218,6 +218,8 @@ class HIST_Ens(object):
 			to_postprocess[species][firstens] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,**gccompare_kwargs)
 			if self.verbose>=3:
 				print(f'Within getCols() and for species {species} in the first ensemble member, ObsData generated from Observation Translator gcCompare function with call gcCompare(species={species},OBSDATA=withheld,hist4D_allspecies=withheld,{",".join([f"{key}={gccompare_kwargs[key]}" for key in gccompare_kwargs])})')
+				print(f'Post-operator GC column shape for species {species} for first ensemble member: {to_postprocess[species][firstens].getGCCol().shape}')
+				print(f'Post-operator Obs column shape for species {species} for first ensemble member: {to_postprocess[species][firstens].getObsCol().shape}')
 		#Perform the rest of the retrievals
 		for i in self.ensemble_numbers:
 			if i!=firstens:
@@ -227,15 +229,24 @@ class HIST_Ens(object):
 					hist4D_allspecies.info()
 				for species in self.observed_species:
 					to_postprocess[species][i] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False)
+					if self.verbose>=3:
+						print(f'Post-operator GC column shape for species {species} and ensemble member number {i}: {to_postprocess[species][i].getGCCol().shape}')
+						print(f'Post-operator Obs column shape for species {species} and ensemble member number {i}: {to_postprocess[species][i].getObsCol().shape}')
 		#Retrieve control, if user asks
 		if self.useControl:
 			hist4D_allspecies = self.control_ht.combineHist(self.useLevelEdge,self.useStateMet,self.useObsPack,self.useSatDiagn)
 			for species in self.observed_species:
 				to_postprocess[species]['control'] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False)
+				if self.verbose>=3:
+					print(f'Post-operator GC column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getGCCol().shape}')
+					print(f'Post-operator Obs column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getObsCol().shape}')
 		#Now apply filters to combine all these obs data objects into single dataset
 		obsdata_toreturn = {}
 		for species in self.observed_species:
 			obsdata_toreturn[species]=applyPostfilter(to_postprocess[species],self.ensemble_numbers)
+			if self.verbose>=3:
+				print(f'After fusing ensemble members together and applying final filters, we have post-operator GC shape for species {species}: {obsdata_toreturn[species].getGCCol().shape}')
+				print(f'After fusing ensemble members together and applying final filters, we have post-operator Obs shape for species {species}: {obsdata_toreturn[species].getObsCol().shape}')
 		return obsdata_toreturn
 	def getIndsOfInterest(self,species,latind,lonind,return_dist=False):
 		loc_rad = float(self.spc_config['LOCALIZATION_RADIUS_by_observation'][species])
@@ -287,6 +298,7 @@ class HIST_Ens(object):
 def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 	firstens = ensemble_numbers[0]
 	toreturn = dict_of_obsdatas[firstens]
+	obscounter = 1
 	if 'postfilter' in dict_of_obsdatas[firstens].additional_data:
 		#Get elements which all obsdatas agree to keep.
 		valid_after_postfilter = np.copy(dict_of_obsdatas[firstens].getDataByKey('postfilter'))
@@ -310,8 +322,12 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 		conc2D = np.zeros(shape2D)
 		for ensnum in ensemble_numbers:
 			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()[valid_after_postfilter]
+			toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol()[valid_after_postfilter] #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
+			obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()[valid_after_postfilter]
+			toreturn.obscol += dict_of_obsdatas['control'].getObsCol()[valid_after_postfilter] #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
+			obscounter +=1 
 		else:
 			control = None
 	else:
@@ -323,12 +339,18 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 		conc2D = np.zeros(shape2D)
 		for ensnum in ensemble_numbers:
 			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()
+			toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
+			obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()
+			toreturn.obscol += dict_of_obsdatas['control'].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
+			obscounter +=1 
 		else:
 			control = None
 	#Store data
 	toreturn.setGCCol(conc2D)
 	if control is not None:
 		toreturn.addData(control=control)
+	#Finalize obs average
+	toreturn.obscol *= obscounter
 	return toreturn
