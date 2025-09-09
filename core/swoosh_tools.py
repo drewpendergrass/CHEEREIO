@@ -84,7 +84,7 @@ class SWOOSH_Translator(obsop.Observation_Translator):
 				lat_to_save.append(np.repeat(swoosh.lat.values[i],len(GC_lontile))) #Save latitude. Everything is the same, so just repeat
 				lon_to_save.append(np.repeat(GC.lon.values,len(swoosh.level.values))) #Repeats lon values each swoosh.levels in a row, as expected from flattening
 				levs_to_save.append(np.tile(swoosh.level.values,len(GC.lon))) #Tiles lev values each lon times in a row, as expected from flattening
-				time_to_save.append(np.repeat(swoosh.time.values[0],len(GC_lontile))) #Save time. Everything is the same, so just repeat
+				time_to_save.append(np.repeat(swoosh.time.values[t],len(GC_lontile))) #Save time. Everything is the same, so just repeat
 		#Do final quality checks
 		df = pd.DataFrame()
 		df['gc']=np.concatenate(gc_to_save)
