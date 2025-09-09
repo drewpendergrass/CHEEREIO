@@ -238,8 +238,8 @@ class HIST_Ens(object):
 			for species in self.observed_species:
 				to_postprocess[species]['control'] = self.OBS_TRANSLATOR[species].gcCompare(species,self.OBS_DATA[species],hist4D_allspecies,GC_area=self.AREA,doErrCalc=False)
 				if self.verbose>=3:
-					print(f'Post-operator GC column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getGCCol().shape}')
-					print(f'Post-operator Obs column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getObsCol().shape}')
+					print(f"Post-operator GC column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getGCCol().shape}")
+					print(f"Post-operator Obs column shape for species {species} and control ensemble member: {to_postprocess[species]['control'].getObsCol().shape}")
 		#Now apply filters to combine all these obs data objects into single dataset
 		obsdata_toreturn = {}
 		for species in self.observed_species:
