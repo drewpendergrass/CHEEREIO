@@ -59,13 +59,20 @@ class HISTORY_Translator():
 				daydiff = assim_start_day-start_day
 				hourdiff = (datetime.strptime(self.spc_config['ASSIM_START_DATE'], "%Y%m%d")-datetime.strptime(self.spc_config['START_DATE'], "%Y%m%d")).total_seconds() / 3600
 				if (daydiff<0) | (hourdiff!=int(self.spc_config['ASSIM_TIME'])):
-					print('Unusual first interval detected; defaulting to saving restart every ASSIM_TIME')
-					ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) 
-					assim_days = int(np.floor(ASSIM_TIME/24))
-					assim_hours = ASSIM_TIME%24
-					daystr = str(assim_days).zfill(2)
-					hourstr = str(assim_hours).zfill(2)
-					timestr = f'000000{daystr} {hourstr}0000'
+					#We've detected an unusual first interval. Two possible default cases:
+					#1. The user is doing scaling at the end of first assim period. Then, Restart saved at end
+					#2. The user is doing regular assimilation. Then, restart saved at every ASSIM_TIME. This should work for all other cases
+					if self.spc_config['SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD']=="true":
+						print('Unusual first interval detected; defaulting to "End" restart setting')
+						timestr="'End'"
+					else:
+						print('Unusual first interval detected; defaulting to saving restart every ASSIM_TIME')
+						ASSIM_TIME = int(self.spc_config['ASSIM_TIME']) 
+						assim_days = int(np.floor(ASSIM_TIME/24))
+						assim_hours = ASSIM_TIME%24
+						daystr = str(assim_days).zfill(2)
+						hourstr = str(assim_hours).zfill(2)
+						timestr = f'000000{daystr} {hourstr}0000'
 				else:
 					yearstr = str(yeardiff).zfill(4)
 					monthstr = str(monthdiff).zfill(2)
