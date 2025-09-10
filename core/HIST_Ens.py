@@ -298,7 +298,6 @@ class HIST_Ens(object):
 def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 	firstens = ensemble_numbers[0]
 	toreturn = dict_of_obsdatas[firstens]
-	obscounter = 1
 	if 'postfilter' in dict_of_obsdatas[firstens].additional_data:
 		#Get elements which all obsdatas agree to keep.
 		valid_after_postfilter = np.copy(dict_of_obsdatas[firstens].getDataByKey('postfilter'))
@@ -324,7 +323,6 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()[valid_after_postfilter]
 			if ensnum != firstens:
 				toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol()[valid_after_postfilter] #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
-				obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()[valid_after_postfilter]
 		else:
@@ -339,7 +337,6 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 		for ensnum in ensemble_numbers:
 			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()
 			toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
-			obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()
 		else:
@@ -348,6 +345,6 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 	toreturn.setGCCol(conc2D)
 	if control is not None:
 		toreturn.addData(control=control)
-	#Finalize obs average
-	toreturn.obscol /= obscounter
+	#Finalize obs average, dividing by number of ensemble members
+	toreturn.obscol /= len(ensemble_numbers)
 	return toreturn
