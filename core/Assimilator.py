@@ -103,7 +103,8 @@ class Assimilator(object):
 			self.avtogcgrid = spc_config['AV_TO_GC_GRID']
 			for a in self.avtogcgrid:
 				self.avtogcgrid[a] = self.avtogcgrid[a]=="True" #parse as booleans
-			self.bigy_filename = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy/{timestamp}.pkl"
+			self.bigy_filepath = f"{spc_config['MY_PATH']}/{spc_config['RUN_NAME']}/postprocess/bigy"
+			self.bigy_filename = f"{timestamp}.pkl"
 			self.bigYpostprocess = True
 			#HIST Ens always uses current timestamp for observation window, no matter run in place setting
 			self.histens = HIST_Ens(timestamp,useLevelEdge=self.SaveLevelEdgeDiags,useStateMet = self.SaveStateMet,useObsPack = self.SaveObsPack,useArea=self.SaveArea,useSatDiagn=self.SaveSatDiagn,useControl=self.useControl,verbose=self.verbose)
@@ -278,8 +279,8 @@ class Assimilator(object):
 		if self.verbose>=2:
 			print(f"applyAnalysisCorrections called for index {(latind,lonind)}.")
 		#Get scalefactors off the end of statevector
-		analysisScalefactor = analysisSubset[(-1*self.emcount)::,:] #This is the column being assimilated, so only one emissions factor per species grouping
-		backgroundScalefactor = backgroundSubset[(-1*self.emcount)::,:]
+		analysisScalefactor = np.copy(analysisSubset[(-1*self.emcount)::,:]) #This is the column being assimilated, so only one emissions factor per species grouping
+		backgroundScalefactor = np.copy(backgroundSubset[(-1*self.emcount)::,:])
 		if self.verbose>=2:
 			#Inflate scalings to the X percent of the background standard deviation, per Miyazaki et al 2015
 			#We do this in gaussian space (no log transform)
@@ -425,6 +426,8 @@ class Assimilator(object):
 		for species_key in self.observed_species:
 			if self.assimilate_observation[species_key]: #Only use species where assimilation is turned on
 				scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
+				if self.verbose>=2:
+					print(f"For species {species_key} we have to scale GC by factor {scale_factors_by_species_key[species_key]} to match observations.")
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
@@ -441,6 +444,7 @@ class Assimilator(object):
 			count = scale_factors_by_species_count[species]
 			if count > 1:
 				scale_factors_by_species[species] = scale_factors_by_species[species]/count #complete the average
+			print(f"After combining scalars, scaling species {species} by factor {scale_factors_by_species[species]} to match observations.")
 		for species in scale_factors_by_species: #Now we can actually go and scale
 			scaling_factor = scale_factors_by_species[species]
 			for i in self.ensemble_numbers:
@@ -474,7 +478,7 @@ class Assimilator(object):
 			self.gt[i].saveRestart()
 		if self.control is not None: #save control if we are using.
 			self.control.saveRestart()
-	def saveBigY(self):
+	def saveBigY(self,mode='LETKF'):
 		bigy = self.histens.bigYDict
 		for spec in list(bigy.keys()):
 			t = [np.datetime64(int(tt),'ns') for tt in bigy[spec].getTime()]
@@ -498,7 +502,10 @@ class Assimilator(object):
 			df['time'] = t
 			bigy[spec] = df
 		#save out the file to postprocessing for later.
-		f = open(self.bigy_filename,"wb")
+		if mode == 'LETKF':
+			f = open(f"{self.bigy_filepath}/{self.bigy_filename}","wb")
+		elif mode == 'Scale':
+			f = open(f"{self.bigy_filepath}/scaling_{self.bigy_filename}","wb")
 		pickle.dump(bigy,f)
 		f.close()
 	def LETKF(self):
@@ -542,6 +549,6 @@ class Assimilator(object):
 				dofsmat[latval,lonval] = dofs
 		#Loop is complete. If applicable, save final items.
 		if self.bigYpostprocess:
-			self.saveBigY()
+			self.saveBigY(mode='LETKF')
 		if self.SaveDOFS:
 			np.save(f'{self.path_to_logs}/dofs_scratch/{self.parfilename}_dofsgrid.npy',dofsmat)
