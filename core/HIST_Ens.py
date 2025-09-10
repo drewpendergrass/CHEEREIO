@@ -327,8 +327,6 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 				obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()[valid_after_postfilter]
-			toreturn.obscol += dict_of_obsdatas['control'].getObsCol()[valid_after_postfilter] #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
-			obscounter +=1 
 		else:
 			control = None
 	else:
@@ -344,8 +342,6 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 			obscounter +=1 
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()
-			toreturn.obscol += dict_of_obsdatas['control'].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
-			obscounter +=1 
 		else:
 			control = None
 	#Store data
@@ -353,5 +349,5 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 	if control is not None:
 		toreturn.addData(control=control)
 	#Finalize obs average
-	toreturn.obscol *= obscounter
+	toreturn.obscol /= obscounter
 	return toreturn
