@@ -337,7 +337,8 @@ def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 		conc2D = np.zeros(shape2D)
 		for ensnum in ensemble_numbers:
 			conc2D[:,ensnum-1] = dict_of_obsdatas[ensnum].getGCCol()
-			toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
+			if ensnum != firstens:
+				toreturn.obscol += dict_of_obsdatas[ensnum].getObsCol() #Average obs columns, in case slight difference between them (rare and slight if it does happen, as in case where GC column replaces retreival prior)
 		if 'control' in dict_of_obsdatas:
 			control = dict_of_obsdatas['control'].getGCCol()
 		else:
