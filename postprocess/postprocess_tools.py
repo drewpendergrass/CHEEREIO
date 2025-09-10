@@ -150,6 +150,7 @@ def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,startdate=None,enddate=
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
 	bigy_list.sort()
+	bigy_list = [by for by in bigy_list if 'scaling' not in by.split('/')[-1].split('.')[0]]
 	timestamps = [by.split('/')[-1].split('.')[0] for by in bigy_list]
 	timestamps_datetime = [datetime.strptime(timestamp, "%Y%m%d_%H%M") for timestamp in timestamps]
 	timebounds = getDatesToSubsetEachYAssimPeriod(timestamps_datetime, assim_time)
