@@ -9,6 +9,7 @@ import settings_interface as si
 import os.path
 from datetime import date,datetime,timedelta
 from HIST_Translator import HIST_Translator
+import copy
 
 #USER: if you have implemented a new observation operator, add it to the operators.json file following the instructions on the Observations page in the documentation
 translators = si.importObsTranslators()
@@ -297,7 +298,7 @@ class HIST_Ens(object):
 #Supply dictionary of form ensnum:obsdata, where control replaces ensnum for control.
 def applyPostfilter(dict_of_obsdatas,ensemble_numbers):
 	firstens = ensemble_numbers[0]
-	toreturn = dict_of_obsdatas[firstens]
+	toreturn = copy.deepcopy(dict_of_obsdatas[firstens])
 	if 'postfilter' in dict_of_obsdatas[firstens].additional_data:
 		#Get elements which all obsdatas agree to keep.
 		valid_after_postfilter = np.copy(dict_of_obsdatas[firstens].getDataByKey('postfilter'))
