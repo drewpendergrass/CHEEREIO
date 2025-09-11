@@ -39,6 +39,12 @@ lognormalErrors=data['lognormalErrors']=="true"
 POSTPROCESS_START_DATE=datetime.strptime(data['POSTPROCESS_START_DATE'], "%Y%m%d")
 POSTPROCESS_END_DATE=datetime.strptime(data['POSTPROCESS_END_DATE'], "%Y%m%d")
 ASSIM_TIME=data['ASSIM_TIME']
+OBS_TYPE=data['OBS_TYPE']
+if "SWOOSH" in list(OBS_TYPE.values()):
+	swoosh_path = data['SWOOSH_dirs']['N2O'] #Only N2O currently supported
+else:
+	swoosh_path = None 
+
 delta = timedelta(hours=int(ASSIM_TIME))
 timeperiod = (POSTPROCESS_START_DATE,POSTPROCESS_END_DATE)
 av_to_gc_grid = data['AV_TO_GC_GRID']
@@ -95,7 +101,7 @@ if "histprocess" in sys.argv:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
 		print('Observation postprocessing files not detected; generating now.')
-		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),OBS_TYPE=data['OBS_TYPE'],startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),OBS_TYPE=OBS_TYPE,startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
 	print('Simulated observation vs actual observation (Y) postprocessed and loaded.')
 
 	print('Beginning to regrid simulated observation vs actual observation (Y) for plotting and analysis.')
@@ -104,7 +110,7 @@ if "histprocess" in sys.argv:
 			arraysbase=pickle.load(f)
 	except FileNotFoundError:
 		print('Gridded observation postprocessing (Y) files not detected; generating now.')
-		arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,OBS_TYPE=data['OBS_TYPE'],extra_obsdata_fields=extra_obsdata_fields,useControl=useControl)
+		arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,OBS_TYPE=OBS_TYPE,extra_obsdata_fields=extra_obsdata_fields,useControl=useControl,swoosh_path=swoosh_path)
 		file = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
 		pickle.dump(arraysbase,file)
 		file.close()

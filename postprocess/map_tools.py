@@ -14,7 +14,7 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	m.drawcountries(color='lightgray')
 	m.drawcoastlines(color='lightgray')
 	if cmap is None:
-		cmap = plt.cm.jet
+		cmap = plt.cm.plasma
 	if useLog:
 		if minval is not None:
 			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
@@ -30,13 +30,55 @@ def plotMap(m,lat,lon,flat,labelname,outfile,clim=None,cmap=None,useLog=False,mi
 	plt.colorbar(label=labelname,extend='both')
 	fig.savefig(outfile)
 
+#Plot 2d field over lats/levs
+def plotProfile(lat,lev,flat,labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
+	fig = plt.figure(figsize=(8, 8))
+	if cmap is None:
+		cmap = plt.cm.plasma
+	if useLog:
+		if minval is not None:
+			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
+		else:
+			flat[flat<=0] = np.nan
+	if clim is None:
+		clim = [np.nanmin(flat), np.nanmax(flat)]
+	to_return = []
+	#Quick and dirty one-sided approximation of pressure boundaries
+	Y = []
+	for i in range(len(lev)):
+		if i==0:
+			diffrange = (lev[i+1]-lev[i])/2
+			Y.append(lev[i]-diffrange)
+			Y.append(lev[i]+diffrange)
+	    else:
+			diffrange = np.abs((lev[i-1]-lev[i])/2)
+			Y.append(lev[i]+diffrange)
+	Y = np.array(Y)
+	#Lat bounds
+	latdiff = np.mean(np.diff(lat))
+	X = np.concatenate([lat-(latdiff/2),[lat[-1]+(latdiff/2)]]) ##Latitude boundaries
+	Y = np.tile(Y, (len(X),1)).transpose()
+	X = np.tile(X, (len(lev)+1, 1)) 
+	if useLog:
+		plt.pcolormesh(X,Y,flat,vmin=cmin[0],vmax=cmin[1],cmap=cmap,norm=LogNorm())
+	else:
+		plt.pcolormesh(X,Y,flat,vmin=cmin[0],vmax=cmin[1],cmap=cmap)
+	plt.yscale('log')
+	plt.gca().invert_yaxis()
+	# Add labels and title (optional)
+	plt.xlabel('Latitude (°)')
+	plt.ylabel('Pressure (hPa)')
+	plt.colorbar(label=labelname,extend='both')
+	fig.savefig(outfile)
+
+
 #Plot points on a map, with color codes
 def plotMapPoints(m, lat, lon, zvals, labelname,outfile,clim=None,cmap=None,useLog=False,minval = None):
 	fig = plt.figure(figsize=(10, 6))
 	m.drawcountries(color='lightgray')
 	m.drawcoastlines(color='lightgray')
 	if cmap is None:
-		cmap = plt.cm.jet
+		cmap = plt.cm.plasma
 	if useLog:
 		if minval is not None:
 			zvals[zvals<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
@@ -212,6 +254,22 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 					else:
 						indices = np.where(np.logical_not(np.isnan(true_obs[:,j,k])))[0]
 						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.average(true_obs[indices,j,k],weights=total_satellite_obs[indices,j,k])
+		elif spec_dict['interpret_as'] == 'profile':
+			dates = spec_dict["dates"]
+			datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
+			true_obs = spec_dict["obs"]
+			sim_obs = spec_dict["sim_obs"]
+			ctrl_obs = spec_dict["control"]
+			if timeperiod is not None: #Slice data down to timeperiod
+				inds = [i for i, e in enumerate(datevals) if (e >= timeperiod[0]) & (e < timeperiod[1])]
+				true_obs = true_obs[inds,:,:]
+				sim_obs = sim_obs[inds,:,:]
+				ctrl_obs = ctrl_obs[inds,:,:]
+			to_return[species]['mean_obs'] = np.nanmean(true_obs,axis=0)
+			to_return[species]['assim_minus_obs'] = np.nanmean(sim_obs,axis=0)-to_return[species]['mean_obs']
+			to_return[species]['ctrl_minus_obs'] = np.nanmean(ctrl_obs,axis=0)-to_return[species]['mean_obs']
+			to_return[species]['lat'] = spec_dict["lat"]
+			to_return[species]['lev'] = spec_dict["lev"]
 	return to_return
 
 def agg_to_monthly(dates, to_agg):

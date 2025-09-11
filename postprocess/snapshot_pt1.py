@@ -48,6 +48,11 @@ useControl=data['DO_CONTROL_RUN']=="true"
 controlInEns = data['DO_CONTROL_WITHIN_ENSEMBLE_RUNS']=="true"
 OBSERVERS_TO_PLOT_AS_POINTS=data['OBSERVERS_TO_PLOT_AS_POINTS']
 extra_obsdata_fields=data['EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT']
+OBS_TYPE=data['OBS_TYPE']
+if "SWOOSH" in list(OBS_TYPE.values()):
+	swoosh_path = data['SWOOSH_dirs']['N2O'] #Only N2O currently supported
+else:
+	swoosh_path = None 
 
 av_to_gc_grid = data['AV_TO_GC_GRID']
 
@@ -59,7 +64,7 @@ else:
 	control_dir = None
 
 print('Loading simulated observation and observation dictionaries...')
-bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),OBS_TYPE=data['OBS_TYPE'],fullpath_output_name=f'{pp_dir}/SNAPSHOT_bigY.pkl')
+bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),OBS_TYPE=OBS_TYPE,fullpath_output_name=f'{pp_dir}/SNAPSHOT_bigY.pkl')
 print('Simulated observation and observation dictionaries loaded.')
 print('')
 
@@ -68,7 +73,7 @@ gclat = np.array(gclat)
 gclon = np.array(gclon)
 
 print('Gridding simulated observation and observation dictionaries...')
-arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=OBSERVERS_TO_PLOT_AS_POINTS,OBS_TYPE=data['OBS_TYPE'],extra_obsdata_fields=extra_obsdata_fields,useControl=do_control)
+arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=OBSERVERS_TO_PLOT_AS_POINTS,OBS_TYPE=OBS_TYPE,extra_obsdata_fields=extra_obsdata_fields,useControl=do_control,swoosh_path=swoosh_path)
 
 f = open(f'{pp_dir}/SNAPSHOT_bigy_arrays_for_plotting.pkl',"wb")
 pickle.dump(arraysbase,f)

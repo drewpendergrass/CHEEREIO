@@ -346,7 +346,7 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 		plt.show()
 
 #Process BigY as output by the Assimilator so that it is either (1) gridded and ready for plotting/analysis, or (2) combined by sensor.
-def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_point,OBS_TYPE,extra_obsdata_fields=None,useControl=False):
+def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_points,OBS_TYPE,extra_obsdata_fields=None,useControl=False,swoosh_path=None):
 	dates = list(bigy.keys())
 	specieslist = list(bigy[dates[0]].keys())
 	to_return = {}
@@ -367,6 +367,16 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 		#Unless we have SWOOSH data, in which case we will be doing vertical profiles
 		if OBS_TYPE[species] == "SWOOSH":
 			to_return[species]['interpret_as'] = 'profile'
+			swoosh = xr.open_dataset(swoosh_path)
+			slat = swoosh.lat.values
+			slev = swoosh.level[swoosh.level<=100].values
+			to_return[species]['sim_obs'] = np.zeros([len(dates),len(slat),len(slev)])*np.nan
+			to_return[species]['obs'] = np.zeros([len(dates),len(slat),len(slev)])*np.nan
+			to_return[species]['dates'] = dates
+			to_return[species]['lat'] = slat
+			to_return[species]['lev'] = slev
+			if useControl:
+				to_return[species]['control'] = np.zeros([len(dates),len(slat),len(slev)])*np.nan
 		if species in observers_to_plot_as_points:
 			to_return[species]['interpret_as'] = 'points'
 		else:
@@ -448,7 +458,21 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 						to_return[species][station]['control'].append(np.array(ydict['Control'])[dictind])
 					for field in bonus_fields:
 						to_return[species][station][field].append(np.array(ydict[field])[dictind])
-		#If this is a map, we're done. If this is a point, we need to concatenate and sort by date.
+			#Aggregate for SWOOSH vertical profile
+			elif to_return[species]['interpret_as'] == 'profile':
+				profiles = ydict.groupby(['Latitude','level']).mean().reset_index().drop('Longitude',axis=1)
+				sim_obs = profiles[[c for c in profiles.columns if 'Ens' in c]].mean(axis=1).values
+				for i in range(len(sim_obs)):
+					curlat = profiles['Latitude'].values[i]
+					curlev = profiles['level'].values[i]
+					#We now have indices for saving
+					latind = np.argmin(np.abs(to_return[species]['lat']-curlat))
+					levind = np.argmin(np.abs(to_return[species]['lev']-curlev))
+					to_return[species]['sim_obs'][date_index,latind,levind] = profiles[i]
+					to_return[species]['obs'][date_index,latind,levind] = profiles['Observations'].values[i]
+					if useControl:
+						to_return[species]['control'][date_index,latind,levind] = profiles['Control'].values[i]
+		#If this is a map or a profile, we're done. If this is a point, we need to concatenate and sort by date.
 		if to_return[species]['interpret_as'] == 'points':
 			for station in to_return[species]:
 				if station == 'interpret_as': #this is the one entry that is not a station in this dictionary
