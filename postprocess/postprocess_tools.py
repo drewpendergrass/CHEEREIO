@@ -146,7 +146,8 @@ def getArea(ensemble_dir,pp_dir):
 	area = ds['AREA'].values
 	np.save(f'{pp_dir}/area.npy',area)
 
-def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,startdate=None,enddate=None,fullpath_output_name = None):
+#If you want to ensure SWOOSH data handled correctly, make sure to pass 
+def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,OBS_TYPE,startdate=None,enddate=None,fullpath_output_name = None):
 	masterY = {}
 	bigy_list = glob(f'{path_to_bigy_subsets}/*.pkl')
 	bigy_list.sort()
@@ -165,9 +166,13 @@ def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,startdate=None,enddate=
 		print(f'Processing the Y dictionary for time {timestamp}')
 		with open(bigy_file,'rb') as f:
 			bigy=pickle.load(f)
-		#subset bigy to right times; needed for RIP.
+		#subset bigy to right times; needed for RIP (but not SWOOSH)
 		bigy_start,bigy_end = timebounds[timedate]
-		bigy = subsetYDict(bigy,bigy_start,bigy_end)
+		for spec in list(bigy.keys()):
+			if OBS_TYPE[spec]!='SWOOSH':
+				df = bigy[spec]
+				df = df[(df['time']>=startdate) & (df['time']<enddate)]
+				bigy[spec] = df
 		masterY[timestamp] = bigy
 	if fullpath_output_name:
 		f = open(fullpath_output_name,"wb")
@@ -186,13 +191,6 @@ def getDatesToSubsetEachYAssimPeriod(timestamps, assim_time):
 			prev_time = timestamps[ind-1]
 			timebounds[timestamp] = [prev_time,timestamp]
 	return timebounds
-
-def subsetYDict(ydict, startdate,enddate):
-	for spec in list(ydict.keys()):
-		df = ydict[spec]
-		df = df[(df['time']>=startdate) & (df['time']<enddate)]
-		ydict[spec] = df
-	return ydict
 
 
 def plotSurfaceCell(ds,species_name,latind,lonind,outfile=None,unit='ppt',includesNature=False):
@@ -348,7 +346,7 @@ def tsPlot(time,ensmean,enssd,species_name,unit,nature=None,priortime=None,prior
 		plt.show()
 
 #Process BigY as output by the Assimilator so that it is either (1) gridded and ready for plotting/analysis, or (2) combined by sensor.
-def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_points={},extra_obsdata_fields=None,useControl=False):
+def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_point,OBS_TYPE,extra_obsdata_fields=None,useControl=False):
 	dates = list(bigy.keys())
 	specieslist = list(bigy[dates[0]].keys())
 	to_return = {}
@@ -356,6 +354,7 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 	#If we aren't averaging to GC grid for DA, we do that here for plotting.
 	#However, for surface observations, we might treat these differently, and instead aggregate by id.
 	#The id used to aggregate is supplied as the value in the key/value pair OBSERVERS_TO_PLOT_AS_POINTS.
+	#Finally, for SWOOSH data, we average to vertical profiles
 	for species in specieslist:
 		to_return[species] = {}
 		is_Av = av_to_grid[species] == 'True'
@@ -365,6 +364,9 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 			bonus_fields = []
 		#If plotting as points, dictionary will have keys for location codes (given as values in observers_to_plot_as_points dictionary)
 		#Otherwise, we will be generating maps, and will prep them with empty arrys
+		#Unless we have SWOOSH data, in which case we will be doing vertical profiles
+		if OBS_TYPE[species] == "SWOOSH":
+			to_return[species]['interpret_as'] = 'profile'
 		if species in observers_to_plot_as_points:
 			to_return[species]['interpret_as'] = 'points'
 		else:

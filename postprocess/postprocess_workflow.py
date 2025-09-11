@@ -95,7 +95,7 @@ if "histprocess" in sys.argv:
 			bigy=pickle.load(f)
 	except FileNotFoundError:
 		print('Observation postprocessing files not detected; generating now.')
-		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
+		bigy = pt.makeYEachAssimPeriod(path_to_bigy_subsets=f"{pp_dir}/bigy",assim_time=int(ASSIM_TIME),OBS_TYPE=data['OBS_TYPE'],startdate=POSTPROCESS_START_DATE,enddate=POSTPROCESS_END_DATE, fullpath_output_name=f"{pp_dir}/bigY.pkl")
 	print('Simulated observation vs actual observation (Y) postprocessed and loaded.')
 
 	print('Beginning to regrid simulated observation vs actual observation (Y) for plotting and analysis.')
@@ -104,7 +104,7 @@ if "histprocess" in sys.argv:
 			arraysbase=pickle.load(f)
 	except FileNotFoundError:
 		print('Gridded observation postprocessing (Y) files not detected; generating now.')
-		arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,extra_obsdata_fields=extra_obsdata_fields,useControl=useControl)
+		arraysbase = pt.makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid=av_to_gc_grid, observers_to_plot_as_points=observers_to_plot_as_points,OBS_TYPE=data['OBS_TYPE'],extra_obsdata_fields=extra_obsdata_fields,useControl=useControl)
 		file = open(f'{pp_dir}/bigy_arrays_for_plotting.pkl',"wb")
 		pickle.dump(arraysbase,file)
 		file.close()
