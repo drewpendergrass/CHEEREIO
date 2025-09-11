@@ -171,7 +171,7 @@ def makeYEachAssimPeriod(path_to_bigy_subsets,assim_time,OBS_TYPE,startdate=None
 		for spec in list(bigy.keys()):
 			if OBS_TYPE[spec]!='SWOOSH':
 				df = bigy[spec]
-				df = df[(df['time']>=startdate) & (df['time']<enddate)]
+				df = df[(df['time']>=bigy_start) & (df['time']<bigy_end)]
 				bigy[spec] = df
 		masterY[timestamp] = bigy
 	if fullpath_output_name:
