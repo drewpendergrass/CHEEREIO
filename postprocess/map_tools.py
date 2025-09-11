@@ -35,13 +35,15 @@ def plotProfile(lat,lev,flat,labelname,outfile,clim=None,cmap=None,useLog=False,
 	fig = plt.figure(figsize=(8, 8))
 	if cmap is None:
 		cmap = plt.cm.plasma
+	if clim is None:
+		clim = [np.nanmin(flat), np.nanmax(flat)]
 	if useLog:
 		if minval is not None:
 			flat[flat<=minval] = np.nan #user can optionally supply minimum value for log plots; anything below is not shown
+			clim[0] = minval
 		else:
 			flat[flat<=0] = np.nan
-	if clim is None:
-		clim = [np.nanmin(flat), np.nanmax(flat)]
+			clim[0] = np.nanmin(flat)
 	to_return = []
 	#Quick and dirty one-sided approximation of pressure boundaries
 	Y = []
@@ -60,9 +62,9 @@ def plotProfile(lat,lev,flat,labelname,outfile,clim=None,cmap=None,useLog=False,
 	Y = np.tile(Y, (len(X),1)).transpose()
 	X = np.tile(X, (len(lev)+1, 1)) 
 	if useLog:
-		plt.pcolormesh(X,Y,flat,vmin=cmin[0],vmax=cmin[1],cmap=cmap,norm=LogNorm())
+		plt.pcolormesh(X,Y,flat,vmin=clim[0],vmax=clim[1],cmap=cmap,norm=LogNorm())
 	else:
-		plt.pcolormesh(X,Y,flat,vmin=cmin[0],vmax=cmin[1],cmap=cmap)
+		plt.pcolormesh(X,Y,flat,vmin=clim[0],vmax=clim[1],cmap=cmap)
 	plt.yscale('log')
 	plt.gca().invert_yaxis()
 	# Add labels and title (optional)
