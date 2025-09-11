@@ -249,11 +249,14 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 					if np.sum(~np.isnan(true_obs[:,j,k]))>0:
 						to_return[species]['assim_minus_obs'][j,k] = np.nanmean(sim_obs[:,j,k]-true_obs[:,j,k])
 						to_return[species]['ctrl_minus_obs'][j,k] = np.nanmean(ctrl_obs[:,j,k]-true_obs[:,j,k])
-					if np.sum(total_satellite_obs[:,j,k]) == 0:
+					if (np.sum(total_satellite_obs[:,j,k]) == 0) or (np.sum(~np.isnan(true_obs[:,j,k]))==0):
 						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.nan
 					else:
 						indices = np.where(np.logical_not(np.isnan(true_obs[:,j,k])))[0]
-						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.average(true_obs[indices,j,k],weights=total_satellite_obs[indices,j,k])
+						if np.sum(total_satellite_obs[indices,j,k]>0)
+							to_return[species]['total_weighted_mean_true_obs'][j,k] = np.average(true_obs[indices,j,k],weights=total_satellite_obs[indices,j,k])
+						else:
+							to_return[species]['total_weighted_mean_true_obs'][j,k] = np.nan
 		elif spec_dict['interpret_as'] == 'profile':
 			dates = spec_dict["dates"]
 			datevals = [datetime.strptime(dateval,'%Y%m%d_%H%M') for dateval in dates]
