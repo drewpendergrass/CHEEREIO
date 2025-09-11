@@ -253,7 +253,7 @@ def regridBigYdata(bigy,gclat,gclon,timeperiod=None):
 						to_return[species]['total_weighted_mean_true_obs'][j,k] = np.nan
 					else:
 						indices = np.where(np.logical_not(np.isnan(true_obs[:,j,k])))[0]
-						if np.sum(total_satellite_obs[indices,j,k]>0)
+						if np.sum(total_satellite_obs[indices,j,k]>0):
 							to_return[species]['total_weighted_mean_true_obs'][j,k] = np.average(true_obs[indices,j,k],weights=total_satellite_obs[indices,j,k])
 						else:
 							to_return[species]['total_weighted_mean_true_obs'][j,k] = np.nan
