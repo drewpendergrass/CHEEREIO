@@ -468,7 +468,7 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 					#We now have indices for saving
 					latind = np.argmin(np.abs(to_return[species]['lat']-curlat))
 					levind = np.argmin(np.abs(to_return[species]['lev']-curlev))
-					to_return[species]['sim_obs'][date_index,latind,levind] = profiles[i]
+					to_return[species]['sim_obs'][date_index,latind,levind] = sim_obs[i]
 					to_return[species]['obs'][date_index,latind,levind] = profiles['Observations'].values[i]
 					if useControl:
 						to_return[species]['control'][date_index,latind,levind] = profiles['Control'].values[i]
