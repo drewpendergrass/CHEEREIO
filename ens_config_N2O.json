@@ -332,8 +332,6 @@
 		"N2O_OBSPACK" : [
 		],
 		"N2O_SWOOSH" : [
-			"level",
-			"err_av"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
