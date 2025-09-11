@@ -57,10 +57,7 @@ def plotProfile(lat,lev,flat,labelname,outfile,clim=None,cmap=None,useLog=False,
 			Y.append(lev[i]+diffrange)
 	Y = np.array(Y)
 	#Lat bounds
-	latdiff = np.mean(np.diff(lat))
 	X = np.concatenate([lat-(latdiff/2),[lat[-1]+(latdiff/2)]]) ##Latitude boundaries
-	Y = np.tile(Y, (len(X),1)).transpose()
-	X = np.tile(X, (len(lev)+1, 1)) 
 	if useLog:
 		plt.pcolormesh(X,Y,flat,vmin=clim[0],vmax=clim[1],cmap=cmap,norm=LogNorm())
 	else:
