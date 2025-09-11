@@ -50,7 +50,7 @@ def plotProfile(lat,lev,flat,labelname,outfile,clim=None,cmap=None,useLog=False,
 			diffrange = (lev[i+1]-lev[i])/2
 			Y.append(lev[i]-diffrange)
 			Y.append(lev[i]+diffrange)
-	    else:
+		else:
 			diffrange = np.abs((lev[i-1]-lev[i])/2)
 			Y.append(lev[i]+diffrange)
 	Y = np.array(Y)
