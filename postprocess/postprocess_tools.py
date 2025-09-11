@@ -377,7 +377,7 @@ def makeBigYArrays(bigy,gclat,gclon,nEnsemble,av_to_grid,observers_to_plot_as_po
 			to_return[species]['lev'] = slev
 			if useControl:
 				to_return[species]['control'] = np.zeros([len(dates),len(slat),len(slev)])*np.nan
-		if species in observers_to_plot_as_points:
+		elif species in observers_to_plot_as_points:
 			to_return[species]['interpret_as'] = 'points'
 		else:
 			to_return[species]['interpret_as'] = 'map'
