@@ -319,56 +319,34 @@ class TCCON_Translator(obsop.Observation_Translator):
 		for obs in obs_list:
 			tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError,doN2OCorrectionPT700=pt700))
 		met = {}
-		for key in list(tccon_obs[0].keys()):
-			met[key] = np.concatenate([metval[key] for metval in tccon_obs])
+		if len(tccon_obs>0):
+			for key in list(tccon_obs[0].keys()):
+				met[key] = np.concatenate([metval[key] for metval in tccon_obs])
+		else: #If no observations, return something empty
+			met['species'] = np.array([])
+			if includeObsError:
+				met['Error'] = np.array([])
+			met['longitude'] = np.array([])
+			met['latitude'] = np.array([])
+			met['station_id'] = np.array([])
+			met['utctime'] = np.array([])
+			met['pressure_AK'] = np.array([])
+			met['pressure_apriori'] = np.array([])
+			met['h2o_profile_apriori'] = np.array([])
+			met['altitude_apriori'] = np.array([])
+			met['pout'] = np.array([])
+			met['column_AK'] = np.array([])
+			if species=='CO':
+				met['co_profile_apriori'] = np.array([])
+			elif species=='N2O':
+				met['n2o_profile_apriori'] = np.array([])
 		return met
 	def gcCompare(self,specieskey,TCCON,GC,GC_area=None,doErrCalc=True,useObserverError=False, prescribed_error=None,prescribed_error_type=None,transportError = None, errorCorr = None,minError=None):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
 		extra_obsdata_to_save = self.spc_config['EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y'][specieskey]
 		returnStateMet = self.spc_config['SaveStateMet']=='True'
-		GC_col_data = obsop.getGCCols(GC,TCCON,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
-		GC_SPC = GC_col_data['GC_SPC']
-		GC_P = GC_col_data['GC_P'] # (PEDGE)
-		GC_H2O = GC_col_data['Met_AVGW'] #We require this field from Met History for TCCON observations
-		i,j,t = GC_col_data['indices']
-		ff = TCCON['pout']/TCCON['pressure_apriori'][:, 0]
-		TCCON_P_fix = TCCON['pressure_apriori'] * ff[:, np.newaxis]	
-		GC_on_sat_l  = GC_to_sat_levels(GC_SPC, GC_P, TCCON_P_fix) # GC a-priori co on TCCON layer
-		GC_on_sat_l_h2o = GC_to_sat_levels(GC_H2O, GC_P, TCCON_P_fix) # GC a-priori h2o on TCCON layer
-		if species=="CO":
-			GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
-		elif species=="N2O":
-			GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['n2o_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
-		else: 
-			raise ValueError(f'Species {species} not recognized')
-		#print("GC-TCCON:", GC_on_sat - TCCON[species])
-		nan_indices = np.argwhere(np.isnan(GC_on_sat))
-		GC_on_sat = np.nan_to_num(GC_on_sat)
-		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
-			superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
-			additional_args_avgGC = {}
-			if doErrCalc:
-				if useObserverError:
-					TCCON['Error']=1*TCCON['Error'] # it is in ppb already
-					additional_args_avgGC['obsInstrumentError'] = TCCON['Error']
-				elif prescribed_error is not None:
-					additional_args_avgGC['prescribed_error'] = prescribed_error
-					additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
-				if minError is not None:
-					additional_args_avgGC['minError'] = minError
-				if errorCorr is not None:
-					additional_args_avgGC['errorCorr'] = errorCorr
-				if transportError is not None:
-					additional_args_avgGC['modelTransportError'] = transportError
-			#If saving extra fields, add them here
-			if len(extra_obsdata_to_save)>0:
-				additional_args_avgGC['other_fields_to_avg'] = {}
-				for field in extra_obsdata_to_save:
-					additional_args_avgGC['other_fields_to_avg'][field] = TCCON[field]
-			toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TCCON[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
-		else:
-			timevals = GC.time.values[t]
-			toreturn = obsop.ObsData(GC_on_sat,TCCON[species],TCCON['latitude'],TCCON['longitude'],timevals)
+		if len(TCCON[species])==0: #return empty arrays
+			toreturn = obsop.ObsData(np.array([]),TCCON[species],TCCON['latitude'],TCCON['longitude'],TCCON['utctime'])
 			#If saving extra fields, add them here
 			if len(extra_obsdata_to_save)>0:
 				data_to_add = {}
@@ -377,5 +355,57 @@ class TCCON_Translator(obsop.Observation_Translator):
 				toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=TCCON['Error'])
+		else:
+			GC_col_data = obsop.getGCCols(GC,TCCON,species,self.spc_config,returninds=True,returnStateMet=returnStateMet,GC_area=GC_area)
+			GC_SPC = GC_col_data['GC_SPC']
+			GC_P = GC_col_data['GC_P'] # (PEDGE)
+			GC_H2O = GC_col_data['Met_AVGW'] #We require this field from Met History for TCCON observations
+			i,j,t = GC_col_data['indices']
+			ff = TCCON['pout']/TCCON['pressure_apriori'][:, 0]
+			TCCON_P_fix = TCCON['pressure_apriori'] * ff[:, np.newaxis]	
+			GC_on_sat_l  = GC_to_sat_levels(GC_SPC, GC_P, TCCON_P_fix) # GC a-priori co on TCCON layer
+			GC_on_sat_l_h2o = GC_to_sat_levels(GC_H2O, GC_P, TCCON_P_fix) # GC a-priori h2o on TCCON layer
+			if species=="CO":
+				GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+			elif species=="N2O":
+				GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['n2o_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+			else: 
+				raise ValueError(f'Species {species} not recognized')
+			#print("GC-TCCON:", GC_on_sat - TCCON[species])
+			nan_indices = np.argwhere(np.isnan(GC_on_sat))
+			GC_on_sat = np.nan_to_num(GC_on_sat)
+			if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
+				superObsFunction = self.spc_config['SUPER_OBSERVATION_FUNCTION'][specieskey]
+				additional_args_avgGC = {}
+				if doErrCalc:
+					if useObserverError:
+						TCCON['Error']=1*TCCON['Error'] # it is in ppb already
+						additional_args_avgGC['obsInstrumentError'] = TCCON['Error']
+					elif prescribed_error is not None:
+						additional_args_avgGC['prescribed_error'] = prescribed_error
+						additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
+					if minError is not None:
+						additional_args_avgGC['minError'] = minError
+					if errorCorr is not None:
+						additional_args_avgGC['errorCorr'] = errorCorr
+					if transportError is not None:
+						additional_args_avgGC['modelTransportError'] = transportError
+				#If saving extra fields, add them here
+				if len(extra_obsdata_to_save)>0:
+					additional_args_avgGC['other_fields_to_avg'] = {}
+					for field in extra_obsdata_to_save:
+						additional_args_avgGC['other_fields_to_avg'][field] = TCCON[field]
+				toreturn = obsop.averageByGC(i,j,t,GC,GC_on_sat,TCCON[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+			else:
+				timevals = GC.time.values[t]
+				toreturn = obsop.ObsData(GC_on_sat,TCCON[species],TCCON['latitude'],TCCON['longitude'],timevals)
+				#If saving extra fields, add them here
+				if len(extra_obsdata_to_save)>0:
+					data_to_add = {}
+					for field in extra_obsdata_to_save:
+						data_to_add[field] = TCCON[field]
+					toreturn.addData(**data_to_add)
+				if doErrCalc and useObserverError:
+					toreturn.addData(err_av=TCCON['Error'])
 		return toreturn
 
