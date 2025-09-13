@@ -319,11 +319,11 @@ class TCCON_Translator(obsop.Observation_Translator):
 		for obs in obs_list:
 			tccon_obs.append(read_tccon(obs,species,filterinfo,includeObsError=includeObsError,doN2OCorrectionPT700=pt700))
 		met = {}
-		if len(tccon_obs>0):
+		if len(tccon_obs)>0:
 			for key in list(tccon_obs[0].keys()):
 				met[key] = np.concatenate([metval[key] for metval in tccon_obs])
 		else: #If no observations, return something empty
-			met['species'] = np.array([])
+			met[species] = np.array([])
 			if includeObsError:
 				met['Error'] = np.array([])
 			met['longitude'] = np.array([])
