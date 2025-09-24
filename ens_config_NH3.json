@@ -14,7 +14,7 @@
 	"DATA_PATH" : "/hpc/group/shindell/ap851/ExtData",
 	"CH4_HEMCO_ROOT" : "/n/seasasfs02/CH4_inversion/InputData/HEMCO",
 	"USE_CHEEREIO_TEMPLATE_CH4_HEMCO_Config" : "False",
-	"RESTART_FILE" : "/hpc/group/shindell/ap851/NH3/input_data/GEOSChem.Restart.20130215_0000z.nc4",
+	"RESTART_FILE" : "/hpc/group/shindell/ap851/NH3/input_data/NH3_longrun_spinup/Restarts/GEOSChem.Restart.20130201_0000z.nc4",
 	"BC_FILES" : "/n/holyscratch01/jacob_lab/yunxiaot/Boundary/OutputDir/GEOSChem.BoundaryConditions.$YYYY$MM$DD_$HH$MNz.nc4",
 	"sim_name" : "fullchem",
 	"chemgrid" : "trop+strat",
