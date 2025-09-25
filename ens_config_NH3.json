@@ -26,11 +26,11 @@
 	"DO_CONTROL_WITHIN_ENSEMBLE_RUNS" : "true",
 	"CONTROL_START" : "",
 	"CONTROL_END" : "",
-	"DO_ENS_SPINUP" : "false",
+	"DO_ENS_SPINUP" : "true",
 	"ENS_SPINUP_FROM_BC_RESTART" : "false",
-	"ENS_SPINUP_START" : "",
-	"ENS_SPINUP_END" : "",
-	"START_DATE" : "20130201",
+	"ENS_SPINUP_START" : "20130201",
+	"ENS_SPINUP_END" : "20130309",
+	"START_DATE" : "20130309",
 	"ASSIM_START_DATE" : "20130310",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"END_DATE" : "20241231",
@@ -281,11 +281,10 @@
 	"min_emis_value_to_plot" : "1e-14",
 	"min_emis_std_value_to_plot" : "1e-15",
 	"OBSERVATION_UNITS":{
-		"NH3_IASI": "mol/m2"
+		"NH3_IASI": "umol/m2"
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y":{
 		"NH3_IASI" : [
-			"err_av"
 		]
 	},
 	"EXTRA_OBSDATA_FIELDS_TO_REGRID_AND_PLOT":{
