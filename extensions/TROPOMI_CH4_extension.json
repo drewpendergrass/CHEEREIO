@@ -1,5 +1,5 @@
 {
-	"WHICH_TROPOMI_PRODUCT" : "BLENDED",
+	"WHICH_TROPOMI_CH4_PRODUCT" : "BLENDED",
 	"TROPOMI_CH4_FILTERS" : "False",
 	"TROPOMI_CH4_filter_blended_albedo" : "0.75",
 	"TROPOMI_CH4_filter_swir_albedo_low" : "0.05",

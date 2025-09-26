@@ -435,9 +435,9 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'ACMG':
+			if self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'ACMG':
 				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
-			elif self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED':
+			elif self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'BLENDED':
 				trop_obs.append(read_tropomi_gosat_corrected(obs,species,filterinfo,includeObsError=includeObsError))
 			else:
 				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
