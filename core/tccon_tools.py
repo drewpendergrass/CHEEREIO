@@ -23,6 +23,8 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 		met[species] = data['xco'].values # TCCON column (ppb). Dim: site
 	elif species=='N2O':
 		met[species] = data['xn2o'].values # TCCON column (ppb)
+	elif species=='CH4':
+		met[species] = data['xch4'].values # TCCON column (ppb)
 	else:
 		raise ValueError('Species not supported')
 
@@ -31,6 +33,8 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 			met['Error'] = data['xco_error'].values #TCCON column error (ppb)
 		elif species=='N2O':
 			met['Error'] = data['xn2o_error'].values #TCCON column error (ppb)
+		elif species=='CH4':
+			met['Error'] = data['xch4_error'].values #TCCON column error (ppb)
 	
 	met['longitude'] = data['long'].values
 	met['latitude'] = data['lat'].values
@@ -56,7 +60,10 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 	elif species=='N2O':
 		met['column_AK'] = data['ak_xn2o'].values #time,latitude,longitude,layer
 		met['n2o_profile_apriori'] = data['prior_n2o'].values # ppb
-	
+	elif species=='CH4':
+		met['column_AK'] = data['ak_xch4'].values #time,latitude,longitude,layer
+		met['ch4_profile_apriori'] = data['prior_ch4'].values # ppb
+
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
 	
@@ -308,6 +315,9 @@ class TCCON_Translator(obsop.Observation_Translator):
 		if species=='CO':
 			if (self.spc_config['Extensions']['TCCON_CO']=="True") and (self.spc_config['TCCON_CO_FILTERS']=="True"):
 				pass #no filters implemented
+		elif species=='CH4':
+			if (self.spc_config['Extensions']['TCCON_CH4']=="True") and (self.spc_config['TCCON_CH4_FILTERS']=="True"):
+				pass #no filters implemented
 		elif species=='N2O':
 			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['TCCON_N2O_FILTERS']=="True"):
 				pass #no filters implemented
@@ -369,6 +379,8 @@ class TCCON_Translator(obsop.Observation_Translator):
 				GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['co_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
 			elif species=="N2O":
 				GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['n2o_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])
+			elif species=="CH4":
+				GC_on_sat = integrate_column(GC_on_sat_l,GC_on_sat_l_h2o,TCCON['h2o_profile_apriori'],TCCON['pout'],TCCON['pressure_apriori'],TCCON['altitude_apriori'][:51],TCCON['ch4_profile_apriori'],TCCON['latitude'],TCCON['column_AK'])			
 			else: 
 				raise ValueError(f'Species {species} not recognized')
 			#print("GC-TCCON:", GC_on_sat - TCCON[species])
