@@ -458,12 +458,14 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
 			synthetic_partial_columns = False
+			chunk_size=-1 #Not relevant
 		elif species=='NO2':
 			TROP_PRIOR=None
 			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
 			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
 			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
 			synthetic_partial_columns = True
+			chunk_size=int(self.spc_config['TROPOMI_NO2_CHUNK_SIZE'])
 		elif species=='CO':
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_P0=TROPOMI['pressures'][:,0]
@@ -481,6 +483,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			TROP_PRIOR = TROP_PRIOR_ppb
 			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
 			synthetic_partial_columns = False
+			chunk_size=int(self.spc_config['TROPOMI_CO_CHUNK_SIZE'])
 		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 			superobs=True
@@ -514,7 +517,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			if TROP_PRIOR is not None: #only include prior in averaging if there is a prior
 				trop_agg_args['TROP_PRIOR']=TROP_PRIOR
 			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
-			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
+			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species, chunk_size=chunk_size)
 			#If trop prior is provided, use it in the averaging kernel. otherwise, pass in None.
 			if TROP_PRIOR is not None: 
 				tp = agg_data['TROP_PRIOR']
@@ -523,7 +526,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,tp)
 		else:
 			presuperobs=False
-			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
+			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species, chunk_size=chunk_size)
 			GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
 		nan_indices = np.argwhere(np.isnan(GC_on_sat))
 		GC_on_sat = np.nan_to_num(GC_on_sat)

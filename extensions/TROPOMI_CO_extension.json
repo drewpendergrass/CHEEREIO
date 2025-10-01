@@ -1,5 +1,6 @@
 {
 	"WHICH_TROPOMI_CO_PRODUCT" : "DEFAULT",
+	"TROPOMI_CO_CHUNK_SIZE" : "10000",
 	"TROPOMI_CO_FILTERS" : "False",
 	"TROPOMI_CO_filter_blended_albedo" : "0.75",
 	"TROPOMI_CO_filter_swir_albedo_low" : "0.05",
