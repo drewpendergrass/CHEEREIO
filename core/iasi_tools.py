@@ -8,7 +8,7 @@ import xarray as xr
 import numpy as np
 import observation_operators as obsop
 
-def read_iasi(filename, species, filterinfo=None, includeObsError = False):
+def read_iasi(filename, species, filterinfo=None, includeObsError = False, method = 2):
 	"""
 	Read IASI data and save important variables to dictionary.
 	Arguments
@@ -34,10 +34,12 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	if filename=='test': #for developer only.
 		filename='/n/holylfs05/LABS/jacob_lab/Users/drewpendergrass/IASI_NH3/v4/2019_07/IASI_METOPB_L2_NH3_20190701_ULB-LATMOS_V4.0.0.nc'
 	data = xr.open_dataset(filename)
-	#qa = data['prefilter'].values+data['postfilter'].values
-	#ind = np.where(qa==2)[0] #Passing both filters. 
-	qa = data['prefilter'].values
-	ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
+	if method == 1:
+		qa = data['prefilter'].values+data['postfilter'].values
+		ind = np.where(qa==2)[0] #Passing both filters. 
+	else:
+		qa = data['prefilter'].values
+		ind = np.where(qa==1)[0] #Keep only those passing prefilter; will apply postfilter later
 	#Store data with prefilter applied
 	met['qa'] = qa[ind]
 	met['utctime'] = data['AERIStime'].values[ind]
@@ -51,7 +53,7 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False):
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
 	numerator = met[species]/data['nh3_AvKnorm'].values[ind]
 	met['column_AK'] = numerator[:, np.newaxis]*(data['nh3_Zcolumn'].values[ind,:]**-1) #Eqn 10, B is zero for NH3.
-	met['HRI'] = data['HRI'].values #For new postfilter
+	met['HRI'] = data['HRI'].values[ind] #For new postfilter
 	data.close()
 	#Apply main filter
 	if filterinfo is not None:
@@ -89,21 +91,30 @@ def GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges):
 	GC_on_sat = GC_on_sat/GC_to_sat.sum(axis=1)
 	return GC_on_sat
 
-#Map GC data (in mol/m3), already on sat levels, to be equivalent to IASI. Both are changed. 
+#TWO AVKER METHODS
+#Both do the following.
+#Map GC data (in mol/m3), already on sat levels, to be equivalent to IASI. In method 2, both are changed. In method 1, only GC is changed.
 #Returns GC data in mol/m2 (Mm) and IASI column retrieved with GC prior (Xm), which are comparable.
-def apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI_AK,IASI_col):
-	#Convert GC from mol/m3 to mol/m2 with IASI box height
-	Mzm=GC_on_sat_l*IASI_BXHEIGHT # convert to column mol/m2 of dry air but keep binned. M_z^m in eq 11
-	Mm=np.copy(Mzm).sum(axis=1) #Sum for total column. M^m in eq 11
-	#Normalized modelled profile m_z defined in eq 11: mz = (M_z^m - Bz)/(M^m - B). No B for ammonia
-	mz = Mzm / Mm[:,np.newaxis]
-	#Calculate Xm (IASI column retrieved with GC normalized profile), defined in eq 13.
-	Xm = IASI_col/(mz*IASI_AK).sum(axis=1)
-	return [Mm,Xm]
+def apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI_AK,IASI_col, method = 2):
+	Mzm=GC_on_sat_l*IASI_BXHEIGHT # convert to column mol/m2 of dry air but keep binned. M_z^m in eqns 11 and 12
+	if method==1:
+		Ma = (IASI_AK*Mzm).sum(axis=1) #Eqn 12. No B for ammonia
+		return [Ma,IASI_col]
+	elif method==2:
+		#Convert GC from mol/m3 to mol/m2 with IASI box height
+		Mm=np.copy(Mzm).sum(axis=1) #Sum for total column. M^m in eq 11
+		#Normalized modelled profile m_z defined in eq 11: mz = (M_z^m - Bz)/(M^m - B). No B for ammonia
+		mz = Mzm / Mm[:,np.newaxis]
+		#Calculate Xm (IASI column retrieved with GC normalized profile), defined in eq 13.
+		Xm = IASI_col/(mz*IASI_AK).sum(axis=1)
+		return [Mm,Xm]
+	else:
+		raise ValueError("Method not recognized.")
 
 class IASI_Translator(obsop.Observation_Translator):
 	def __init__(self,verbose=1):
 		super().__init__(verbose)
+		self.ak_method = int(self.spc_config['IASI_NH3_ak_method'])
 	#Save dictionary of dates for later use
 	#Downloaded all of July 2019 with this code: 
 	#wget https://cds-espri.ipsl.upmc.fr/iasibl2/iasi_nh3/V4.0.0/2019/07/IASI_METOPB_L2_NH3_201907{01..31}_ULB-LATMOS_V4.0.0.nc
@@ -133,6 +144,7 @@ class IASI_Translator(obsop.Observation_Translator):
 		return obs_list
 	def getObservations(self,specieskey,timeperiod, interval=None, includeObsError=False):
 		species = self.spc_config['OBSERVED_SPECIES'][specieskey]
+
 		obs_list = self.globObs(species,timeperiod)
 		iasi_obs = []
 		filterinfo = {}
@@ -140,7 +152,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
 			try:
-				iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError))
+				iasi_obs.append(read_iasi(obs,species,filterinfo,includeObsError=includeObsError,method=self.ak_method))
 			except Exception as e:
 				print(f"Skipping {obs} read of species {species} due to error: {e}")
 		met = {}
@@ -213,26 +225,35 @@ class IASI_Translator(obsop.Observation_Translator):
 				superobs=False
 			#If user is taking super observations and wants to average before applying averaging kernel, do so now
 			if superobs and (self.spc_config['SUPER_OBS_BEFORE_Hx'][specieskey]=="True"):
+				if self.ak_method!=1:
+					raise ValueError('Performing IASI NH3 super observations before Hx can only be done with averaging kernel method 1.')
 				presuperobs=True
 				iasi_agg_args = {'GC_SPC':GC_SPC, 'ak':IASI['column_AK'],'GC_bxheight':GC_bxheight}
 				agg_data = obsop.averageFieldsToGC(i,j,t,GC,IASI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**iasi_agg_args)
 				GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'],agg_data['GC_bxheight'], IASI_EDGES)
-				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'])
+				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,agg_data['ak'],agg_data['obs'],method=self.ak_method)
 			else:
 				presuperobs=False
 				GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_bxheight, IASI_EDGES)
-				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI['column_AK'],IASI[species])
-			nan_indices = np.argwhere(np.isnan(GC_SPC_final))
-			GC_SPC_final = np.nan_to_num(GC_SPC_final)
+				GC_SPC_final,IASI_SPC_final = apply_avker(GC_on_sat_l,IASI_BXHEIGHT,IASI['column_AK'],IASI[species],method=self.ak_method)
 			if superobs:
-				if presuperobs:
+				if presuperobs: #Only using method 1, so no postfilter data required
 					toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,agg_data['lat'],agg_data['lon'], agg_data['time'],num_av=agg_data['num'])
 					if doErrCalc:
 						toreturn.addData(err_av=agg_data['err'])
 					if 'additional_fields' in agg_data:
 						toreturn.addData(**agg_data['additional_fields'])
 				else:
-					toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+					if self.ak_method==1: #Simple case, no post filtering
+						toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+					elif self.ak_method==2: #Complicated case; need post filtering. Set things to nan so they are excluded in averages, but dimensions are fixed. Will flag for HistEns with postfilter entry
+						SFm_inv_abs = np.abs(IASI['HRI']/(IASI_SPC_final*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
+						valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(IASI['HRI'])>1.5) & (IASI_SPC_final < 0)) #These points are all valid after threshholding.
+						invalid_after_postfilter = np.logical_not(valid_after_postfilter)
+						GC_SPC_final[invalid_after_postfilter] = np.nan #set these values to NAN. Will be removed in averaging. If all values for a grid cell are nan, will return nan
+						toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
+				#In any case, if we have an entry with a nan (either because fully removed or some other error), flag it so it is removed from all ensemble members later.
+				toreturn.addData(postfilter=np.logical_not(np.isnan(toreturn.getGCCols())))
 			else:
 				timevals = GC.time.values[t]
 				toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
@@ -244,13 +265,14 @@ class IASI_Translator(obsop.Observation_Translator):
 				toreturn.addData(**data_to_add)
 				if doErrCalc and useObserverError:
 					toreturn.addData(err_av=IASI['Error'])
-			#Apply postfilter.
-			SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
-			valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) #These points are all valid after threshholding.
-			#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
-			#We do this because different ensemble members will allow slightly different observations
-			#Depending on column shape.
-			toreturn.addData(postfilter=valid_after_postfilter)
+				if self.ak_method==2: #Post filter if using method 2
+					#Apply postfilter, since no super overservations complicate things
+					SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
+					valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) & np.logical_not(np.isnan(toreturn.getGCCols())) #These points are all valid after threshholding.
+					#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
+					#We do this because different ensemble members will allow slightly different observations
+					#Depending on column shape.
+					toreturn.addData(postfilter=valid_after_postfilter)
 			#CHEEREIO gets finicky with small numbers. This is because of numerical issues with LETKF. Convert to umol m-2
 			toreturn.gccol *= 1e6 
 			toreturn.obscol *= 1e6 

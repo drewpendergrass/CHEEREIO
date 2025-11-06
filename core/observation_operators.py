@@ -163,16 +163,16 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 		err_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
 		indmatch = np.where(index==ind)[0]
-		gc_av[count] = np.mean(GCmappedtoobs[indmatch])
-		obs_av[count] = np.mean(obsvals[indmatch])
+		gc_av[count] = np.nanmean(GCmappedtoobs[indmatch])
+		obs_av[count] = np.nanmean(obsvals[indmatch])
 		obslat_av[count] = latvals[count]
 		obslon_av[count] = lonvals[count]
 		obstime_av[count] = timevals[count]
-		num_av[count] = len(indmatch)
+		num_av[count] = np.sum(~np.isnan(GCmappedtoobs[indmatch]))
 		#Average the additional fields.
 		if other_fields_to_avg is not None:
 			for field in other_fields_to_avg:
-				additional_fields[field][count] = np.mean(other_fields_to_avg[field][indmatch])
+				additional_fields[field][count] = np.nanmean(other_fields_to_avg[field][indmatch])
 		if doSuperObs:
 			#SuperObservation function selected by user
 			obs_f = produceSuperObservationFunction(superObsFunction)
@@ -186,7 +186,7 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 				obs_args['min_error'] = minError
 			#Calculate mean error to be reduced by superobservation function. 
 			if obsInstrumentError is not None:
-				mean_err = np.mean(obsInstrumentError[indmatch])
+				mean_err = np.nanmean(obsInstrumentError[indmatch])
 			elif prescribed_error is not None:
 				if prescribed_error_type == "relative":
 					mean_err = obs_av[count]*prescribed_error
