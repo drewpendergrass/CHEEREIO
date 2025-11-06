@@ -301,6 +301,7 @@
 	"Extensions": {
 		"TROPOMI_CH4":"False",
 		"CH4":"False",
-		"TROPOMI_NO2":"False"
+		"TROPOMI_NO2":"False",
+		"IASI_NH3":"True"
 	}
 }
