@@ -253,7 +253,7 @@ class IASI_Translator(obsop.Observation_Translator):
 						GC_SPC_final[invalid_after_postfilter] = np.nan #set these values to NAN. Will be removed in averaging. If all values for a grid cell are nan, will return nan
 						toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 				#In any case, if we have an entry with a nan (either because fully removed or some other error), flag it so it is removed from all ensemble members later.
-				toreturn.addData(postfilter=np.logical_not(np.isnan(toreturn.getGCCols())))
+				toreturn.addData(postfilter=np.logical_not(np.isnan(toreturn.getGCCol())))
 			else:
 				timevals = GC.time.values[t]
 				toreturn = obsop.ObsData(GC_SPC_final,IASI_SPC_final,IASI['latitude'],IASI['longitude'],timevals)
@@ -268,7 +268,7 @@ class IASI_Translator(obsop.Observation_Translator):
 				if self.ak_method==2: #Post filter if using method 2
 					#Apply postfilter, since no super overservations complicate things
 					SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
-					valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) & np.logical_not(np.isnan(toreturn.getGCCols())) #These points are all valid after threshholding.
+					valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(toreturn.getDataByKey('HRI'))>1.5) & (toreturn.getObsCol() < 0)) & np.logical_not(np.isnan(toreturn.getGCCol())) #These points are all valid after threshholding.
 					#CHEEREIO will apply postfilter in HIST_Ens, so for now just store it under postfilter label.
 					#We do this because different ensemble members will allow slightly different observations
 					#Depending on column shape.
