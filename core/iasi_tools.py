@@ -251,6 +251,7 @@ class IASI_Translator(obsop.Observation_Translator):
 						valid_after_postfilter = (SFm_inv_abs<1.5e16) & np.logical_not((np.abs(IASI['HRI'])>1.5) & (IASI_SPC_final < 0)) #These points are all valid after threshholding.
 						invalid_after_postfilter = np.logical_not(valid_after_postfilter)
 						GC_SPC_final[invalid_after_postfilter] = np.nan #set these values to NAN. Will be removed in averaging. If all values for a grid cell are nan, will return nan
+						IASI_SPC_final[invalid_after_postfilter] = np.nan #set these values to NAN. Will be removed in averaging. If all values for a grid cell are nan, will return nan
 						toreturn = obsop.averageByGC(i,j,t,GC,GC_SPC_final,IASI_SPC_final,doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC)
 				#In any case, if we have an entry with a nan (either because fully removed or some other error), flag it so it is removed from all ensemble members later.
 				toreturn.addData(postfilter=np.logical_not(np.isnan(toreturn.getGCCol())))

@@ -139,6 +139,14 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=Tru
 #No index, puts loc at GC grid values
 #other_fields_to_avg is a dictionary with keys "variable name" and values of arrays.
 def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None):
+	#Check for nans and remove consistently. This really only comes up with IASI NH3 method 2
+	valid_inds = np.logical_not(np.isnan(GCmappedtoobs))&np.logical_not(np.isnan(obsvals))
+	iGC = iGC[valid_inds]
+	jGC = jGC[valid_inds]
+	tGC = tGC[valid_inds]
+	GCmappedtoobs = GCmappedtoobs[valid_inds]
+	obsvals = obsvals[valid_inds]
+	#Now go about averaging.
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
