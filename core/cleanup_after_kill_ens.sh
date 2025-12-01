@@ -13,6 +13,7 @@ rm ${MY_PATH}/${RUN_NAME}/scratch/ALL_RUNS_COMPLETE
 rm ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS
 rm ${MY_PATH}/${RUN_NAME}/scratch/ALL_COLUMNS_FOUND
 rm ${MY_PATH}/${RUN_NAME}/scratch/ASSIMILATION_COMPLETE
+rm ${MY_PATH}/${RUN_NAME}/scratch/ENSEMBLE_COMPLETE
 rm ${MY_PATH}/${RUN_NAME}/scratch/KILL_ENS
 
 #Remove columns
