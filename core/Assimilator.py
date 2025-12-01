@@ -78,6 +78,7 @@ class Assimilator(object):
 		self.gt = {}
 		self.observed_species = spc_config['OBSERVED_SPECIES']
 		self.assimilate_observation = spc_config['ASSIMILATE_OBS']
+		self.scaling_obs_to_skip = spc_config['OBSERVATIONS_TO_EXCLUDE_FROM_SCALING']
 		for ao in self.assimilate_observation:
 			self.assimilate_observation[ao] = self.assimilate_observation[ao]=="True" #parse as booleans
 		if self.verbose>=2:
@@ -424,14 +425,14 @@ class Assimilator(object):
 			print(f"Scaling all restarts to match observations.")
 		scale_factors_by_species_key = {}
 		for species_key in self.observed_species:
-			if self.assimilate_observation[species_key]: #Only use species where assimilation is turned on
+			if self.assimilate_observation[species_key] and (species_key not in self.scaling_obs_to_skip): #Only use species where assimilation is turned on and we aren't skipping
 				scale_factors_by_species_key[species_key] = self.histens.getScaling(species_key) #Get the scaling factor to make GC ens mean match obs mean.
 				if self.verbose>=2:
 					print(f"For species {species_key} we have to scale GC by factor {scale_factors_by_species_key[species_key]} to match observations.")
 		scale_factors_by_species = {} #If we have multiple scale factors for one species (e.g. surface and satellite observations, average the scalings)
 		scale_factors_by_species_count = {} #We'll use this one to complete the average
 		for species_key in self.observed_species:
-			if self.assimilate_observation[species_key]:
+			if self.assimilate_observation[species_key] and (species_key not in self.scaling_obs_to_skip): #Only use species where assimilation is turned on and we aren't skipping
 				species_value = self.observed_species[species_key]
 				if species_value in list(scale_factors_by_species.keys()):
 					scale_factors_by_species[species_value] += scale_factors_by_species_key[species_key] #add to existing key
