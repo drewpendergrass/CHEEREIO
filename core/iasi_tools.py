@@ -189,6 +189,8 @@ class IASI_Translator(obsop.Observation_Translator):
 			toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
 				toreturn.addData(err_av=IASI['Error'])
+			if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
+				toreturn.addData(num_av=np.array([]))
 		else:
 			GC_col_data = obsop.getGCCols(GC,IASI,species,self.spc_config,returninds=True,returnLevelEdge=False,returnStateMet=True,GC_area=GC_area)
 			GC_SPC = GC_col_data['GC_SPC']
