@@ -282,7 +282,7 @@ class IASI_Translator(obsop.Observation_Translator):
 			toreturn.obscol *= 1e6 
 			if 'err_av' in toreturn.additional_data:
 				toreturn.additional_data['err_av']*=1e6
-			return toreturn
+		return toreturn
 
 #Testing zone.
 #Full assimilator
