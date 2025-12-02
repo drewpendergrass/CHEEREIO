@@ -164,6 +164,7 @@ class IASI_Translator(obsop.Observation_Translator):
 					met[key] = np.concatenate([metval[key] for metval in iasi_obs])
 		else: #If no observations, return something empty
 			met = {}
+			met[species] = np.array([])
 			met['qa'] = np.array([])
 			met['utctime'] = np.array([])
 			met['latitude'] = np.array([])
