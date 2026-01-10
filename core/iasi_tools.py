@@ -49,7 +49,9 @@ def read_iasi(filename, species, filterinfo=None, includeObsError = False, metho
 	met['level_middle'] = data['midlevels'].values #in km, same for all obs (length 14)
 	met[species] = data['nh3_total_column'].values[ind]
 	if includeObsError:
-		met['Error'] = np.sqrt(data['nh3_total_column_random_uncertainty'].values[ind]**2+data['nh3_total_column_systematic_uncertainty'].values[ind]**2)
+		met['Error'] = data['nh3_total_column_random_uncertainty'].values[ind]
+		met['Error_sys'] = data['nh3_total_column_systematic_uncertainty'].values[ind]
+		met['Error_tot'] = np.sqrt(met['Error']**2+met['Error_sys']**2)
 	#We are applying Method 2 from the avkReadMe (accompanying Clarisse et al 2023). 
 	numerator = met[species]/data['nh3_AvKnorm'].values[ind]
 	met['column_AK'] = numerator[:, np.newaxis]*(data['nh3_Zcolumn'].values[ind,:]**-1) #Eqn 10, B is zero for NH3.
@@ -173,6 +175,8 @@ class IASI_Translator(obsop.Observation_Translator):
 			met['level_middle'] = np.array([])
 			if includeObsError:
 				met['Error'] = np.array([])
+				met['Error_sys'] = np.array([])
+				met['Error_tot'] = np.array([])
 			met['column_AK'] = np.array([])
 			met['HRI'] = np.array([])
 		return met
@@ -188,7 +192,7 @@ class IASI_Translator(obsop.Observation_Translator):
 				data_to_add[field] = IASI[field]
 			toreturn.addData(**data_to_add)
 			if doErrCalc and useObserverError:
-				toreturn.addData(err_av=IASI['Error'])
+				toreturn.addData(err_av=np.array([]))
 			if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 				toreturn.addData(num_av=np.array([]))
 		else:
@@ -210,8 +214,11 @@ class IASI_Translator(obsop.Observation_Translator):
 				additional_args_avgGC = {}
 				if doErrCalc:
 					if useObserverError:
-						additional_args_avgGC['obsInstrumentError'] = IASI['Error']
-						additional_args_avgGC['modelTransportError'] = transportError
+						if superObsFunction == 'sys_rand_err':
+							additional_args_avgGC['obsInstrumentError'] = IASI['Error'] #random component
+							additional_args_avgGC['obsSysError'] = IASI['Error_sys'] #systematic component
+						else: 
+							additional_args_avgGC['obsSysError'] = IASI['Error_tot'] #use total error if not accounting for rand/sys in average
 					elif prescribed_error is not None:
 						additional_args_avgGC['prescribed_error'] = prescribed_error
 						additional_args_avgGC['prescribed_error_type'] = prescribed_error_type
@@ -219,6 +226,8 @@ class IASI_Translator(obsop.Observation_Translator):
 						additional_args_avgGC['minError'] = minError
 					if errorCorr is not None:
 						additional_args_avgGC['errorCorr'] = errorCorr
+					if transportError is not None:
+						additional_args_avgGC['modelTransportError'] = transportError
 				additional_args_avgGC['other_fields_to_avg'] = {}
 				#save HRI for postfilter
 				additional_args_avgGC['other_fields_to_avg']['HRI'] = IASI['HRI']
@@ -270,7 +279,7 @@ class IASI_Translator(obsop.Observation_Translator):
 					data_to_add[field] = IASI[field]
 				toreturn.addData(**data_to_add)
 				if doErrCalc and useObserverError:
-					toreturn.addData(err_av=IASI['Error'])
+					toreturn.addData(err_av=IASI['Error_tot']) #Use the error including random and systematic components
 				if self.ak_method==2: #Post filter if using method 2
 					#Apply postfilter, since no super overservations complicate things
 					SFm_inv_abs = np.abs(toreturn.getDataByKey('HRI')/(toreturn.getObsCol()*6.02214076e19))**-1 #convert to molec/cm2 for threshholding.
