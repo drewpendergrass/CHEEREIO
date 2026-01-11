@@ -496,9 +496,9 @@ class Assimilator(object):
 			else:
 				df['Num_Averaged'] = None
 			if 'err_av' in bigy[spec].additional_data:
-				df['Error'] = bigy[spec].getDataByKey('err_av')
+				df['Obs_Error'] = bigy[spec].getDataByKey('err_av')
 			else:
-				df['Error'] = None
+				df['Obs_Error'] = None
 			#Save out extra data.
 			for field in self.obsdata_to_save[spec]:
 				df[field] = bigy[spec].getDataByKey(field)
