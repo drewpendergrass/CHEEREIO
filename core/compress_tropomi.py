@@ -1,3 +1,5 @@
+#Example: python compress_tropomi.py -s CO -i /hpc/group/shindell/ap851/CO/TROPOMI -o /hpc/group/shindell/ap851/CO/compressedTROPOMI
+
 import xarray as xr
 import numpy as np
 from glob import glob
@@ -5,10 +7,22 @@ from tropomi_tools import *
 import argparse
 import os
 
+def str2bool(v):
+	if isinstance(v, bool):
+		return v
+	if v.lower() in ('yes', 'true', 't', 'y', '1'):
+		return True
+	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+		return False
+	else:
+		raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description='Combine SpeciesConc data into an ensemble mean.')
 parser.add_argument('-i', '--path_to_tropomi_input', type=str, help='Path to directory containing TROPOMI input files.')
 parser.add_argument('-o', '--path_to_tropomi_output', type=str, help='Path to directory to save compressed TROPOMI files, following identical format and .')
 parser.add_argument('-s', '--species', type=str,help='Species to compress.')
+parser.add_argument('-d', '--delete_original', type=str2bool, default=False,help='Delete original TROPOMI file after compressing? WARNING: danger!')
+
 args = parser.parse_args()
 
 obs_list = glob(f'{args.path_to_tropomi_input}/**/S5P_*.nc', recursive=True)
@@ -50,4 +64,15 @@ for obs in obs_list:
 	out_path = os.path.join(args.path_to_tropomi_output, rel_path)
 	os.makedirs(os.path.dirname(out_path), exist_ok=True)
 	print(f'Saving {out_path}')
-	ds.to_netcdf(out_path)
+	if args.delete_original:
+		try:
+			ds.to_netcdf(out_path)
+			# Verify file exists and is non-empty before deleting
+			if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+				os.remove(obs)
+			else:
+				print(f"Warning: output file missing or empty, not deleting {obs}")
+		except Exception as e:
+			print(f"Failed to process {obs}: {e}")
+	else:
+		ds.to_netcdf(out_path)
