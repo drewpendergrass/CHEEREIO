@@ -1,4 +1,6 @@
 #Example: python compress_tropomi.py -s CO -i /hpc/group/shindell/ap851/CO/TROPOMI -o /hpc/group/shindell/ap851/CO/compressedTROPOMI
+#Example CO compress with deletion: python compress_tropomi.py -s CO -i /hpc/group/shindell/ap851/CO/TROPOMI/2018-04 -o /hpc/group/shindell/ap851/CO/compressedTROPOMI/2018-04 -d True
+#Example NO2 compress with deletion: python compress_tropomi.py -s NO2 -i /hpc/group/shindell/ap851/NO2/TROPOMI/2018-04 -o /hpc/group/shindell/ap851/NO2/TROPOMI_compressed/2018-04 -d True
 
 import xarray as xr
 import numpy as np

@@ -61,6 +61,28 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		sl = sl[land_mask]
 		gp = gp[land_mask]
 		surface_pressure = surface_pressure[0,sl,gp] #time,scanline,groundpixel
+	elif species=='SO2':
+		sl,gp=np.where(qa>0.75)
+		flag = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+		surface_pressure = flag['surface_pressure'].values
+		classification = flag['surface_classification'].values[0,sl,gp]
+		is_land_nosnowice = (classification%4==0)&(classification<184) #Land is %4 and 184 is ice/snow. 1 if land, 0 if filtering out
+		cloud_flag = flag['cloud_fraction_crb'].values[0,sl,gp]
+		a = flag['tm5_constant_a'].values[0,:] #for so2, time, layer. no edges just midpoints.
+		b = flag['tm5_constant_b'].values[0,:]
+		flag.close() 
+		flag2 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
+		sza_flag = flag2['solar_zenith_angle'].values[0,sl,gp]
+		flag2.close()
+		flag3 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
+		volcano_flag = flag3['sulfurdioxide_detection_flag'].values[0,sl,gp]==2 #flag 2 is likely volcanic signal
+		ak = flag3.averaging_kernel.values #go ahead and store
+		flag3.close()
+		land_mask = np.where((is_land_nosnowice == 1) & (cloud_flag < 0.3) & (sza_flag < 70) & (volcano_flag==0)) #Keep only land, no ice/snow, minimal cloud, good sza, no volcano
+		sl = sl[land_mask]
+		gp = gp[land_mask]
+		surface_pressure = surface_pressure[0,sl,gp] #time,scanline,groundpixel
+		met['column_AK'] = ak.values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 	elif species=="CH4":
 		sl,gp=np.where(qa>0.5)
 	elif species=="CO":
@@ -73,6 +95,9 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		airmassfactor_total = data['air_mass_factor_total'].values[0,sl,gp]
 		trop_layer_index = data['tm5_tropopause_layer_index'].values[0,sl,gp].astype(int)
 		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,sl,gp]
+	if species=='SO2':
+		met[species] = data['sulfurdioxide_total_vertical_column'].values[0,sl,gp] # Only interested in retrieval for anthropogenic scenario. 
+		# TROPOMI also includes volcanic scenarios with higher injection heights, but we filter out likely volcanic signals.
 	elif species=='CH4':
 		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
 	elif species=='CO':
@@ -87,7 +112,9 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
 		elif species=='CO':
 			met['Error'] = data['carbonmonoxide_total_column_precision'].values[0,sl,gp]
-	
+		elif species=='SO2':
+			met['Error'] = data['sulfurdioxide_total_vertical_column_precision'].values[0,sl,gp]
+
 	met['longitude'] = data['longitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['latitude'] = data['latitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['utctime'] = data['time_utc'].values[0,sl] #time, scanline
@@ -149,6 +176,17 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		pressures.fill(np.nan)
 		for i in range(len(surface_pressure)):
 			pressures[i,:]=(a+(b*surface_pressure[i]))/100 #Pa -> hPa
+	elif species=='SO2':
+		#Pressure levels (hpa) with dimension len(sl),levels, -- just midpoint
+		p_lev = np.zeros((len(sl),len(b)),dtype=float)
+		p_lev.fill(np.nan)
+		for i in range(len(surface_pressure)):
+			p_lev[i,:]=(a+(b*surface_pressure[i]))/100 #Pa -> hPa
+		#Convert to edges.
+		pressures = np.empty((p_lev.shape[0], p_lev.shape[1] + 1), dtype=p_lev.dtype)
+		pressures[:, 1:-1] = 0.5 * (p_lev[:, :-1] + p_lev[:, 1:])
+		pressures[:, 0] = surface_pressure/100
+		pressures[:, -1] = np.maximum(0.0, p_lev[:, -1] - 0.5 * (p_lev[:, -2] - p_lev[:, -1]))
 	elif species=='CH4':
 		pressures = np.zeros([len(sl),13],dtype=np.float)
 		pressures.fill(np.nan)
@@ -331,7 +369,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	if species in ["CO", "NO2"]:
+	if species in ["CO", "NO2","SO2"]:
 		nobs = GC_SPC.shape[0]
 		GC_on_sat_list = []
 		for k in range(0, nobs, chunk_size):
@@ -510,15 +548,19 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-			synthetic_partial_columns = False
 			chunk_size=-1 #Not relevant
 		elif species=='NO2':
 			TROP_PRIOR=None
 			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
 			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
 			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
-			synthetic_partial_columns = True
 			chunk_size=int(self.spc_config['TROPOMI_NO2_CHUNK_SIZE'])
+		elif species=='SO2':
+			TROP_PRIOR=None
+			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
+			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
+			chunk_size=int(self.spc_config['TROPOMI_SO2_CHUNK_SIZE'])
 		elif species=='CO':
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_P0=TROPOMI['pressures'][:,0]
@@ -535,7 +577,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			TROP_PRIOR_ppb = ((TROP_PRIOR_mol) / (np.repeat(AIRMOL_COL[:, np.newaxis], TROP_PW.shape[1], axis=1)*TROP_PW)) *1e9 # convert prior in mol/m2 to ppbv
 			TROP_PRIOR = TROP_PRIOR_ppb
 			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
-			synthetic_partial_columns = False
 			chunk_size=int(self.spc_config['TROPOMI_CO_CHUNK_SIZE'])
 		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
