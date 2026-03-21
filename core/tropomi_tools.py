@@ -82,7 +82,7 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		sl = sl[land_mask]
 		gp = gp[land_mask]
 		surface_pressure = surface_pressure[0,sl,gp] #time,scanline,groundpixel
-		met['column_AK'] = ak.values[0,sl,gp,::-1] #time,scanline,groundpixel,layer
+		met['column_AK'] = ak[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 	elif species=="CH4":
 		sl,gp=np.where(qa>0.5)
 	elif species=="CO":
