@@ -1,7 +1,7 @@
 About CHEEREIO
 ==========
 
-For a plain-language description, visit the `CHEEREIO <http://cheere.io>`__ website. For an introductory 30 minute tutorial, watch this `video <https://youtu.be/FKnOQyS1Jfw>`__.
+For a plain-language description, visit the `CHEEREIO <http://cheere.io>`__ website. For an introductory 30 minute tutorial, watch this `video <https://youtu.be/5-MT3kNVR7E>`__.
 
 What CHEEREIO is
 -------------
