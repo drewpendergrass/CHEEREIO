@@ -22,6 +22,7 @@ def read_tccon(filename, species, filterinfo=None, includeObsError = False,doN2O
 	if species=='CO':
 		met[species] = data['xco'].values # TCCON column (ppb). Dim: site
 	elif species=='N2O':
+		raise ValueError('N2O not currently supported.')
 		met[species] = data['xn2o'].values # TCCON column (ppb)
 	elif species=='CH4':
 		met[species] = data['xch4'].values # TCCON column (ppb)
@@ -319,6 +320,7 @@ class TCCON_Translator(obsop.Observation_Translator):
 			if (self.spc_config['Extensions']['TCCON_CH4']=="True") and (self.spc_config['TCCON_CH4_FILTERS']=="True"):
 				pass #no filters implemented
 		elif species=='N2O':
+			raise ValueError('N2O not currently supported.')
 			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['TCCON_N2O_FILTERS']=="True"):
 				pass #no filters implemented
 			if (self.spc_config['Extensions']['TCCON_N2O']=="True") and (self.spc_config['PT700_N2O_CORRECTION']=="True"):
