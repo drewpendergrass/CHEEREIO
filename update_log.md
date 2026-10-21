@@ -13,6 +13,16 @@
 * Will streamline running nested grid simulations.
 * Other features, to be determined.
 
+## Version 1.4.1
+
+**Action items for users updating to version 1.4.1:**
+
+* None. This is a small update to fix bugs.
+
+**Updates under version 1.4.1:**
+
+* Bug leading some assimilations with both RTPS and lognormal errors to fail is fixed.
+
 ## Version 1.4.0
 
 **Action items for users updating to version 1.4.0:**
@@ -35,7 +45,7 @@
 
 ## Version 1.3.1
 
-**Action items for users updating to version 1.2.1:**
+**Action items for users updating to version 1.3.1:**
 
 * None. This is a small update to fix bugs.
 

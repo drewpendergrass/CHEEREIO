@@ -18,4 +18,4 @@ Per Huiru Zhong (PKU): To simulate nested assimilation for eastern China, I made
 
 Per Huiru Zhong (PKU): When these areas are carefully matched, emissions should not be reduced to zero. However, I overlooked some of these steps recently while submitting new tasks when modifying boundary conditions, which caused the emissions to zero out. I suspect that this issue might be due to a mismatch between the dimensions updated with each assimilation and the actual dimensions read by HEMCO, leading to significant discrepancies between simulations and observations.
 
-Thanks to Yifan Li (Tsingua Shenzhen), Huiru Zhong (Peking University), and Yunxiao Tang (Harvard) for their help in compiling these tips. I plan to enforce these settings in later versions of CHEEREIO, streamlining nested grid inversions.
+Thanks to Yifan Li (Tsinghua SIGS [Tsinghua Shenzhen International Graduate School]), Huiru Zhong (Peking University), and Yunxiao Tang (Harvard) for their help in compiling these tips. I plan to enforce these settings in later versions of CHEEREIO, streamlining nested grid inversions.

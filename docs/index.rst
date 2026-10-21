@@ -6,7 +6,9 @@
 Welcome to CHEEREIO!
 ====================================
 
-Welcome to the **CHEEREIO** website and documentation! The GEOS-Chem CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a tool that allows scientists to use observations of pollutants or gases in the atmosphere, such as from satellites or surface stations, to update supercomputer models that simulate the Earth. Other scientists have assembled estimates of emissions of various pollutants from around the world, but our emissions estimates are very uncertain. CHEEREIO uses a model called GEOS-Chem to simulate what the atmosphere would look like if those emissions estimates were correct, and then compares those estimates to the real atmosphere as observed by satellites or equipment on the Earth's surface. CHEEREIO uses the difference between the model simulation and the real world to update our maps of emissions.
+Welcome to the **CHEEREIO** documentation! For a plain-language description of the model, visit the `CHEEREIO <http://cheere.io>`__ website. For an introductory 30 minute tutorial, watch this `video <https://youtu.be/5-MT3kNVR7E>`__.
+
+The GEOS-Chem CHEmistry and Emissions REanalysis Interface with Observations (CHEEREIO) is a tool that allows scientists to use observations of pollutants or gases in the atmosphere, such as from satellites or surface stations, to update supercomputer models that simulate the Earth. Other scientists have assembled estimates of emissions of various pollutants from around the world, but our emissions estimates are very uncertain. CHEEREIO uses a model called GEOS-Chem to simulate what the atmosphere would look like if those emissions estimates were correct, and then compares those estimates to the real atmosphere as observed by satellites or equipment on the Earth's surface. CHEEREIO uses the difference between the model simulation and the real world to update our maps of emissions.
 
 More formally, CHEEREIO is a set of Python and shell scripts that support data assimilation and emissions inversions for arbitrary runs of the GEOS-Chem chemical transport model via an ensemble approach (i.e. without the model adjoint).
 
@@ -21,7 +23,7 @@ CHEEREIO follows four design principles:
 
 This manual assumes that you are familiar with setting up and running the GEOS-Chem chemical transport model. For more information and background, please see the `GEOS-Chem Wiki <http://wiki.seas.harvard.edu/geos-chem/index.php/Main_Page>`__. Although this manual offers an intuitive explanation of CHEEREIO's data assimilation algorithm in the :ref:`How CHEEREIO works` section, you should probably consider the original algorithm paper `Hunt. et. al., [2007] <https://doi.org/10.1016/j.physd.2006.11.008>`__ as a prerequisite to using CHEEREIO. Don't worry, it's quite readable!
 
-I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at andrew.pendergrass [AT] duke [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. However, these questions along with any bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
+I am more than happy to collaborate with you, however you choose to use CHEEREIO: just send an email to me at apenderg [AT] oberlin [DOT] edu. Questions of any kind are also more than welcome. This can be on anything from interpreting results to getting the ensemble installed on your machine. However, these questions along with any bugs should be reported by opening an `issue <https://github.com/drewpendergrass/CHEEREIO/issues>`__ on Github, as this will allow all users to see the solution.
 
 .. toctree::
    :maxdepth: 4   
