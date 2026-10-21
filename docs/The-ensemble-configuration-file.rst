@@ -940,7 +940,9 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: WHICH_TROPOMI_PRODUCT
 
-		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, 'ACMG' for the ACMG TROPOMI product, and 'BLENDED' for Belasus et al., 2023. 
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+		REMOVED as of version 1.5: 'ACMG' and 'BLENDED'. Harvard-specific methane products now read as expected through the DEFAULT workflow (same as operational). Supplying these options in version 1.5.0 or later now will return an error.
 
 	.. option:: TROPOMI_CH4_FILTERS
 	
@@ -988,7 +990,11 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: WHICH_TROPOMI_PRODUCT
 
-		Which TROPOMI product should we use? Currently, only "DEFAULT" is supported. 
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+	.. option:: TROPOMI_CO_CHUNK_SIZE
+
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
 
 	.. option:: TROPOMI_CO_FILTERS
 	
@@ -1024,35 +1030,40 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: TCCON_CO_FILTERS
 	
-		Apply specialized filters for TROPOMI CO? Set to "True" if doing a TROPOMI CO inversion, otherwise set to "False". Leave as "False" as none currently implemented.
+		As of version 1.5.0: leave as "False" as no filters are currently implemented.
 
-.. option:: N2O extension
+.. option:: TCCON_CH4 extension
 	
-	Specialized N2O settings for a custom GC simulation, as yet unreleased. Other users can ignore.
+	Specialized TCCON CH4 settings. None currently implemented, but reserved for future use.
 
-	.. option:: INTERPRET_GC_CH4_AS_N2O
+	.. option:: TCCON_CH4_FILTERS
 	
-		In the custom GC simulation for N2O I am currently using, we save out N2O as CH4 (it is a modification of the CH4 simulation). If this setting is set to True, it overwrites this with "N2O" in internal CHEEREIO logic.
+		As of version 1.5.0: leave as "False" as no filters are currently implemented.
 
-.. option:: TCCON_N2O extension
+.. option:: TROPOMI_NO2 extension
 	
-	Specialized TCCON N2O settings.
+	Specialized TROPOMI NO2 settings.
 
-	.. option:: PT700_N2O_CORRECTION
+	.. option:: WHICH_TROPOMI_PRODUCT
+
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+	.. option:: TROPOMI_NO2_CHUNK_SIZE
+
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
+
+
+.. option:: TROPOMI_SO2 extension
 	
-		Apply Josh Laughner's temperature-dependent bias correction to N2O for GGG2020.0? Set to "True" if so, otherwise set to "False". Will no longer be necessary with GGG2020.1.
+	Specialized TROPOMI SO2 settings.
 
-	.. option:: TCCON_N2O_FILTERS
-	
-		Apply specialized filters for TCCON N2O? Set to "True" if doing a TCCON N2O inversion, otherwise set to "False". Leave as "False" as none currently implemented.
+	.. option:: WHICH_TROPOMI_PRODUCT
 
-.. option:: Obspack_N2O extension 
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
 
-	Specialized ObsPack N2O settings
+	.. option:: TROPOMI_NO2_CHUNK_SIZE
 
-	.. option:: Max_Obspack_N2O_Error
-	
-		Maximum allowable difference (in ppb) between observations and GEOS-Chem. If it exceeds this threshold, discard. Set to nan to ignore.
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
 
 .. option:: OMI_NO2 extension
 	

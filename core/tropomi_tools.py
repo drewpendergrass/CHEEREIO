@@ -255,112 +255,6 @@ def read_tropomi_compressed(filename, species, filterinfo=None, includeObsError 
 		met = obsop.apply_filters(met,filterinfo)
 	return met
 
-#Read the ACMG version of TROPOMI CH4
-def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False):
-
-	if species !='CH4':
-		raise ValueError('Species not supported.')
-	# Initialize list for TROPOMI data
-	met = {}
-	
-	# Store species, QA, lat, lon, time, averaging kernel
-	data = xr.open_dataset(filename)
-	qa = data['qa_value'].values
-	goodvals=np.where(qa>0.5)[0]
-
-	met['qa_value'] = qa[goodvals]
-	met[species] = data['xch4_corrected'].values[goodvals] #nobs
-
-	if includeObsError:
-		met['Error'] = data['xch4_precision'].values[goodvals] #nobs
-	
-	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
-	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
-	timeraw = data['time'].values[goodvals,:] #nobs, ntime. Seven entries in format year', 'month', 'day', 'hour','minute', 'second'
-	#format as CHEEREIO-compliant string
-	timestring = [f'{str(int(timestamp[0]))}-{str(int(timestamp[1])).zfill(2)}-{str(int(timestamp[2])).zfill(2)}T{str(int(timestamp[3])).zfill(2)}:{str(int(timestamp[4])).zfill(2)}:{str(int(timestamp[5])).zfill(2)}Z' for timestamp in timeraw]
-	met['utctime'] =  np.array(timestring)
-
-	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
-	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
-	met['albedo_nir'] = data['surface_albedo'].values[goodvals,0]
-	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
-	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
-
-	#no surface elevation std, make sure it is set to nan in ens_config.
-	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
-	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
-		
-	data.close()
-
-	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
-	pressures.fill(np.nan)
-	for i in range(13):
-		pressures[:,i]=surface_pressure-(i*pressure_interval)
-	
-	met['pressures'] = pressures
-	
-	if filterinfo is not None:
-		met = obsop.apply_filters(met,filterinfo)
-
-	return met
-
-
-
-#Read the Belasus et al 2023 version of TROPOMI CH4, corrected using GOSAT
-#no swir_aot, make sure it is set to nan in ens_config.
-def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False):
-
-	if species !='CH4':
-		raise ValueError('Species not supported.')
-	# Initialize list for TROPOMI data
-	met = {}
-	
-	# Store species, QA, lat, lon, time, averaging kernel
-	data = xr.open_dataset(filename)
-
-	qa = data['qa_value'].values
-
-	landflag = np.bitwise_and(data['surface_classification'].values.astype(int),3) #Get landflag, apply bitwise and of mask value (3) to get 0=land,1=water,2=someland,3=coastline
-	goodvals=np.where((qa>0.5) & (landflag==0))[0] #Only include land values (landflag=0); no coasts or ocean retrievals
-
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-	pressure_interval = data['pressure_interval'].values[goodvals]/100 #nobs #in Pa, convert to hPa
-	surface_pressure = data['surface_pressure'].values[goodvals]/100 #nobs	#in Pa, convert to hPa
-	met['surface_elevation_sd'] = data['surface_altitude_precision'].values[goodvals]
-
-	met['qa_value'] = qa[goodvals]
-
-	met[species] = data['methane_mixing_ratio_blended'].values[goodvals] #nobs
-
-	if includeObsError:
-		met['Error'] = data['methane_mixing_ratio_precision'].values[goodvals] #nobs
-
-	met['methane_profile_apriori']=data['methane_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
-	met['column_AK'] = data['column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
-
-	met['longitude'] = data['longitude'].values[goodvals] #nobs
-	met['latitude'] = data['latitude'].values[goodvals] #nobs
-	met['utctime'] =  data['time_utc'].values[goodvals]
-
-	met['albedo_swir'] = data['surface_albedo_SWIR'].values[goodvals] #nobs, nwin. 0 for nwin is NIR, 1 is swir
-	met['albedo_nir'] = data['surface_albedo_NIR'].values[goodvals]
-	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
-
-	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
-	pressures.fill(np.nan)
-	for i in range(13):
-		pressures[:,i]=surface_pressure-(i*pressure_interval)
-	
-	met['pressures'] = pressures
-	
-	if filterinfo is not None:
-		met = obsop.apply_filters(met,filterinfo)
-
-	return met
-
 #This seems to be the memory bottleneck
 #This is customized for CO due to the more serious memory bottleneck. It processes a chunk of observations at a time and concatenates the outputs,
 #thus keeping the memory usage low depending on the "chunk_size". This can be adaptable to other species and especially in case of memory shortage.
@@ -524,11 +418,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			if self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'ACMG':
-				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
-			elif self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'BLENDED':
-				trop_obs.append(read_tropomi_gosat_corrected(obs,species,filterinfo,includeObsError=includeObsError))
-			elif self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'COMPRESSED':
+			if self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'COMPRESSED':
 				trop_obs.append(read_tropomi_compressed(obs,species,filterinfo,includeObsError=includeObsError))
 			else:
 				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))

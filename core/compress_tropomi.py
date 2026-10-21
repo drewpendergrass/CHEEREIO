@@ -21,7 +21,7 @@ def str2bool(v):
 
 parser = argparse.ArgumentParser(description='Combine SpeciesConc data into an ensemble mean.')
 parser.add_argument('-i', '--path_to_tropomi_input', type=str, help='Path to directory containing TROPOMI input files.')
-parser.add_argument('-o', '--path_to_tropomi_output', type=str, help='Path to directory to save compressed TROPOMI files, following identical format and .')
+parser.add_argument('-o', '--path_to_tropomi_output', type=str, help='Path to directory to save compressed TROPOMI files, following identical filename format and structure.')
 parser.add_argument('-s', '--species', type=str,help='Species to compress.')
 parser.add_argument('-d', '--delete_original', type=str2bool, default=False,help='Delete original TROPOMI file after compressing? WARNING: danger!')
 

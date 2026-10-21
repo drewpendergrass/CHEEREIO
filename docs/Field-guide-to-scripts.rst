@@ -209,6 +209,11 @@ This Python file includes tools and classes necessary for interfacing with TROPO
 Utilities for the user
 -------------
 
+compress_tropomi.py
+~~~~~~~~~~~~~
+
+A utility script that grabs and saves only CHEEREIO-relevant fields from TROPOMI operational products, dramatically reducing storage space. See :ref:`Compress TROPOMI` for details.
+
 testing_tools.py
 ~~~~~~~~~~~~~
 

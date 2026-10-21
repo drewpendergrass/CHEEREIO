@@ -13,7 +13,7 @@ CHEEREIO ships with observation operators that have produced by the community. U
 TROPOMI tools
 -------------
 
-The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are three TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\, CO (the latter contributed by Sina Voshtani), and NO\ :sub:`2`\ . Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species.
+The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are four TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\, CO (contributed by Sina Voshtani), SO\ :sub:`2`\, and NO\ :sub:`2`\ . Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species.
 
 To activate TROPOMI observations, list "TROPOMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
@@ -112,6 +112,35 @@ The remaining three utility functions are very similar. They read TROPOMI level 
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
    :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
    :rtype: dict
+
+
+.. _Compress TROPOMI:
+
+Utility script to compress TROPOMI files
+~~~~~~~~~~~~~
+
+TROPOMI operational files can be very large, and CHEEREIO typically only reads a small fraction of saved fields. Users can optionally run the ``core/compress_tropomi.py`` script from the command line to save out only those fields which CHEEREIO uses. Run the script as follows: 
+
+Within your CHEEREIO conda environment (and probably inside a SLURM batch script, as this process is slow), execute the script (``python compress_tropomi.py``) with the following command line options:
+
+.. option:: --path_to_tropomi_input (-i) [required]
+   
+   Path to directory containing operational TROPOMI input files which you would like to process. The directory can have a nested structure and can also include other files; CHEEREIO processes all files matching ``S5P_*.nc`` structure. An example entry: ``/hpc/group/shindell/ap851/CO/TROPOMI``
+
+.. option:: --path_to_tropomi_output (-o) [required]
+   
+   Path to directory where you would like to store your output compressed TROPOMI files. Files saved into the output directory will have an identical nested structure as the input directory and will also have identical filenames. An example entry: ``/hpc/group/shindell/ap851/CO/compressedTROPOMI``
+
+.. option:: --species (-s) [required]
+   
+   TROPOMI species observed. Supported as of this version: CO, SO2, CH4, and NO2.
+
+.. option:: --delete_original (-d)
+   
+   Delete original TROPOMI file after compressing? True or False (default: False). Use caution with this option, as CHEEREIO will only save out fields used in the inversion. You may be interested in other fields.
+
+Once the TROPOMI files are compressed, you need to tell CHEEREIO to expect this format. In your inversion run directory, change the ``WHICH_TROPOMI_**SPC**_PRODUCT`` inside the ``extensions/TROPOMI_**SPC**_extension.json`` file to ``COMPRESSED`` and ensure that your relevant entry in ``TROPOMI_dirs`` within ``ens_config.json`` points to your compressed output directory (e.g. ``"CO" : "/hpc/group/shindell/ap851/CO/compressedTROPOMI"``). 
+
 
 .. _OMI tools:
 
