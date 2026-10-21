@@ -13,14 +13,14 @@ CHEEREIO ships with observation operators that have produced by the community. U
 TROPOMI tools
 -------------
 
-The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are three TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\, CO (the latter contributed by Sina Voshtani), and NO\ :sub:`2`\ . Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species.
+The TROPOspheric Monitoring Instrument (TROPOMI) onboard Sentinel-5 Precursor satellite satellite measures criteria air pollutants and other trace gases of interest to CHEEREIO users. Currently, there are four TROPOMI operators written for CHEEREIO: CH\ :sub:`4`\, CO (contributed by Sina Voshtani), SO\ :sub:`2`\, and NO\ :sub:`2`\ . Users can follow the pattern in ``tropomi_tools.py`` to add support for additional species.
 
 To activate TROPOMI observations, list "TROPOMI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
 TROPOMI fields available to save and plot in CHEEREIO
 ~~~~~~~~~~~~~
 
-All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TROPOMI operator, all data read in by the read_tropomi function are available to be saved and/or plotted.** Below is a subset of the supported fields which users can save in TROPOMI:
+All observation operators save standard data from observations and GEOS-Chem and pass it on to CHEEREIO (including latitude, longitude, observation values, GC simulated observation values, and timestamps). However, individual operators might also be able to save additional data, such as albedo in remote sensing cases or site IDs in surface observation cases. Users can list the additional data they would like to save in the ``EXTRA_OBSDATA_FIELDS_TO_SAVE_TO_BIG_Y`` setting in ``ens_config.json``, following the instructions on the :ref:`postprocessing settings` page. **With the TROPOMI operator, all data read in by the read_tropomi function into the met dictionary are available to be saved and/or plotted** and users can save out additional fields by modifying the ``met`` dictionary. Below is a subset of the supported fields which users can save in TROPOMI:
 
 .. option:: qa_value
    
@@ -28,23 +28,27 @@ All observation operators save standard data from observations and GEOS-Chem and
 
 .. option:: column_AK
    
-   Satellite averaging kernel.
+   Averaging kernel
 
-.. option:: albedo_swir
+.. option:: albedo_swir 
    
-   Shortwave infrared albedo.
+   Shortwave infrared albedo (methane only).
 
 .. option:: albedo_nir
    
-   Near infrared albedo.
+   Near infrared albedo (methane only).
 
 .. option:: blended_albedo
    
-   Blended albedo.
+   Blended albedo (methane only).
+
+.. option:: swir_aot
+   
+   Shortwave infrared aerosol optical thickness (methane only).
 
 .. option:: methane_profile_apriori
    
-   A priori methane profile. (Methane only)
+   A priori methane profile (methane only).
 
 
 TROPOMI operator support functions
@@ -62,7 +66,7 @@ The first two utility functions are designed to remap GEOS-Chem pressure levels 
    :param array GC_edges: A NumPy array containing GEOS-Chem pressure level edges.
    :param array sat_edges: A NumPy array containing TROPOMI pressure level edges
    :param str species: Species to be processed.
-   :param int chunk_size: For CO, the number of observations to be processed at once. This is to save memory for TROPOMI observations with high vertical resolution.
+   :param int chunk_size: For CO, NO2, and SO2, the number of observations to be processed at once. This is to save memory for TROPOMI observations with high vertical resolution.
    :return: A NumPy array containing GEOS-Chem columns remapped to be on the TROPOMI pressure levels.
    :rtype: array
 
@@ -78,40 +82,57 @@ The first two utility functions are designed to remap GEOS-Chem pressure levels 
    :return: A NumPy array containing simulated GEOS-Chem values such that they are directly comparable to TROPOMI (i.e. because the averaging kernel has been applied).
    :rtype: array
 
-The remaining three utility functions are very similar. They read TROPOMI level 2 observations from file, but for methane there are a variety of TROPOMI observations with a variety of formattings (operational, science product, Harvard-specific standard). Each function is designed to read a different formatting. Users can select which function they would like to use by specifying the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file. ``DEFAULT`` selects the TROPOMI operational product, ``ACMG`` for the ACMG/Harvard TROPOMI product, and ``BLENDED`` for Belasus et al., 2023 which also works for the TROPOMI science product. For CO, users must select the ``DEFAULT`` option.
+The remaining two utility functions are very similar. They read TROPOMI level 2 observations from file either from the operational produce format (``read_tropomi``) or from the CHEEREIO-produced compression script (``read_tropomi_compressed``; see :ref:`Compress TROPOMI` for details). Users can select which function they would like to use by specifying the ``WHICH_TROPOMI_**SPC**_PRODUCT`` setting in the ``TROPOMI_**SPC**_extension.json`` file (where ``**SPC**`` is replaced by CH4, CO, NO2, or SO2). ``DEFAULT`` selects the TROPOMI operational product and ``COMPRESSED`` the compressed workflow.
 
-.. py:function:: read_tropomi(filename, species, filterinfo=None, includeObsError = False)
+.. py:function:: read_tropomi OR read_tropomi_compressed(filename, species, filterinfo=None, includeObsError = False)
 
    **Designed for the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``DEFAULT`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
 
    :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
-   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
+   :param str species: Name of species to be loaded. CH4, NO2, SO2, and CO are supported.
    :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
    :param bool includeObsError: True or False, read the errors associated with individual observations. 
    :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
    :rtype: dict
 
-   .. py:function:: read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False)
 
-   **Designed for the Harvard/ACMG version of the TROPOMI operational level 2 product.** A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``ACMG`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+.. _Compress TROPOMI:
 
-   :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
-   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
-   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
-   :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
-   :rtype: dict
+Utility script to compress TROPOMI files
+~~~~~~~~~~~~~
 
-   .. py:function:: read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False)
+TROPOMI operational files can be very large, and CHEEREIO typically only reads a small fraction of saved fields. Users can optionally run the ``core/compress_tropomi.py`` script from the command line to save out only those fields which CHEEREIO uses. Run the script as follows: 
 
-   **Designed for the Belasus et al., 2023 version of the TROPOMI operational level 2 product,** but also works for the TROPOMI science product. A utility function which loads TROPOMI observations from file, filters them, and returns a dictionary of important data formatted for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class. This function is selected when users supply the ``BLENDED`` value to the ``WHICH_TROPOMI_PRODUCT`` setting in the ``TROPOMI_CH4_extension.json`` file.
+Within your CHEEREIO conda environment (and probably inside a SLURM batch script, as this process is slow), execute the script (``python compress_tropomi.py``) with the following command line options:
 
-   :param str filename: NetCDF file containing TROPOMI observations to be loaded. Expects standard level 2 data. 
-   :param str species: Name of species to be loaded. Currently, only "CH4" is supported, though an "NO2" operator is partially written.
-   :param dict filterinfo: A dictionary of information about data filtering which is passed to a standard observation operator utility function. See :ref:`Observation filters` for more information
-   :param bool includeObsError: True or False, read the errors associated with individual observations. 
-   :return: A dictionary containing observation values and metadata, ready for input into the ``gcCompare`` method of the ``TROPOMI_Translator`` class.
-   :rtype: dict
+.. option:: --path_to_tropomi_input (-i) [required]
+   
+   Path to directory containing operational TROPOMI input files which you would like to process. The directory can have a nested structure and can also include other files; CHEEREIO processes all files matching ``S5P_*.nc`` structure. An example entry: ``/hpc/group/shindell/ap851/CO/TROPOMI``
+
+.. option:: --path_to_tropomi_output (-o) [required]
+   
+   Path to directory where you would like to store your output compressed TROPOMI files. Files saved into the output directory will have an identical nested structure as the input directory and will also have identical filenames. An example entry: ``/hpc/group/shindell/ap851/CO/compressedTROPOMI``
+
+.. option:: --species (-s) [required]
+   
+   TROPOMI species observed. Supported as of this version: CO, SO2, CH4, and NO2.
+
+.. option:: --delete_original (-d)
+   
+   Delete original TROPOMI file after compressing? True or False (default: False). Use caution with this option, as CHEEREIO will only save out fields used in the inversion. You may be interested in other fields.
+
+Once the TROPOMI files are compressed, you need to tell CHEEREIO to expect this format. In your inversion run directory, change the ``WHICH_TROPOMI_**SPC**_PRODUCT`` inside the ``extensions/TROPOMI_**SPC**_extension.json`` file to ``COMPRESSED`` (where ``**SPC**`` is replaced by CH4, CO, NO2, or SO2) and ensure that your relevant entry in ``TROPOMI_dirs`` within ``ens_config.json`` points to your compressed output directory (e.g. ``"CO" : "/hpc/group/shindell/ap851/CO/compressedTROPOMI"``). 
+
+
+A note on TROPOMI NO2 and SO2 autofiltering
+~~~~~~~~~~~~~
+
+As of version 1.5.0, certain filters are hard-coded in to the read_tropomi function for NO2 and SO2:
+
+#. Land mask: Only data over land and with no snow or ice are retained (both products)
+#. Cloud flag: only keep if below 0.3 (minimal cloud; both products).
+#. Solar zenith angle: only keep if below 70 (both products).
+#. Volcano flag: only keep if likely not the result of a volcanic eruption (SO2 only)
 
 .. _OMI tools:
 
@@ -162,6 +183,10 @@ The Infrared Atmospheric Sounding Interferometer (IASI) instrument measures trac
 
 To activate IASI observations, list "IASI" as an observation type in the ``OBS_TYPE`` setting, as described on the :ref:`Observation settings` page.
 
+.. warning::
+   CHEEREIO saves out IASI data in μmol per mol (both from GEOS-Chem and adjusted from the operational product; multiplying each by :math:`10^6`). This is to avoid some floating point errors.
+
+
 IASI fields available to save and plot in CHEEREIO
 ~~~~~~~~~~~~~
 
@@ -188,6 +213,20 @@ The IASI observation operator calls two utility functions to process observation
 .. py:function:: GC_to_sat_levels(GC_SPC, GC_bxheight, sat_edges)
 
    See the function from TROPOMI_tools. Note that for the IASI product we only have height from surface, so the function uses GC Boxheight diagnostic to do a pressure level regrid approximation.
+
+.. _iasi error:
+
+IASI observational error
+~~~~~~~~~~~~~
+
+The IASI operational product separates observational error into systematic and random components (see `the IASI v4 paper <https://doi.org/10.5194/amt-16-5009-2023>`__ for details). If you would like to use this information in your inversion (recommended) when aggregating to the GEOS-Chem grid (super-observations) then be sure to do the following in ``ens_config.json``:
+
+#. Set the NH3 IASI observation key under ``OBS_ERROR_TYPE`` to ``product``
+#. Set the NH3 IASI observation key under ``AV_TO_GC_GRID`` to ``True``
+#. Set the NH3 IASI observation key under ``SUPER_OBSERVATION_FUNCTION`` to ``sys_rand_err``
+#. Provide an estimate for systematic transport error under ``OTHER_OBS_ERROR_PARAMETERS`` for a NH3 IASI observation subdictionary by including the following key-value pair: ``"transport_error":"TKTKT"`` where you would replace TKTKT with your estimate. See CHEEREIO papers for estimating this value.
+
+The transport and systematic error components are taken to be fully correlated and thus irreducible from averaging, while the random component follows the central limit theorem and reduces as the observation count increases; the total super-observation error covariance is obtained by adding these components in quadrature. See the :ref:`New superobservation` entry for more information
 
 .. _tccon:
 

@@ -177,6 +177,7 @@ class ObsPack_Translator(obsop.Observation_Translator):
 			obs_multiplier = 1e9
 			gc_multiplier=1e9
 		elif species=='N2O':
+			raise ValueError('N2O not currently supported.')
 			obs_multiplier = 1
 			gc_multiplier=1e9
 		if len(ObsPack['value'])==0:

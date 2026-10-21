@@ -33,11 +33,13 @@
 	"START_DATE" : "20180501",
 	"ASSIM_START_DATE" : "20180529",
 	"SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD" : "true",
+	"OBSERVATIONS_TO_EXCLUDE_FROM_SCALING" : [],
 	"END_DATE" : "20191225",
 	"AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD" : "true",
 	"SPREAD_AMPLIFICATION_FACTOR" : "1.0",
 	"species_to_amplify_not_in_statevec" : [
 	],
+	"OBSERVATIONS_TO_EXCLUDE_FROM_SCALING" : [],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
 	"BURN_IN_END" : "20180601",
@@ -221,6 +223,9 @@
 	"MAXNUMOBS" : "3000",
 	"MINNUMOBS" : "1",
 	"LOCALIZATION_RADIUS_km" : "1500",
+	"LOCALIZATION_RADIUS_by_observation":{
+		"CH4_TROPOMI":"1500"
+	},
 	"smooth_localization_with_gaspari_cohn" : "True",
 	"AveragePriorAndPosterior" : "False",
 	"PriorWeightinPriorPosteriorAverage" : "0.5",

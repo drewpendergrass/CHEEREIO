@@ -25,9 +25,15 @@ parser.add_argument('-ens', '--ens_num', type=int,default=1, help='Ensemble numb
 parser.add_argument('-core', '--core_num', type=int,default=1, help='Core number for Assimilator.')
 parser.add_argument('-lat', '--lat_ind', type=int, help='Lat ind for assimilation walkthrough.')
 parser.add_argument('-lon', '--lon_ind', type=int, help='Lon ind for assimilation walkthrough.')
+parser.add_argument('-scaleRestarts', '--scaleRestarts', type=str2bool, default=False, help='If true, do not do assimilation walkthrough; instead, scale restarts.')
 
 args = parser.parse_args()
 
 assim = Assimilator(args.date,args.ens_num,args.core_num, args.rip_date)
-tt.walkThroughAssimilation(assim,latind=args.lat_ind,lonind=args.lon_ind)
+assim.verbose=3
+
+if args.scaleRestarts:
+	assim.scaleRestarts()
+else:
+	tt.walkThroughAssimilation(assim,latind=args.lat_ind,lonind=args.lon_ind)
 

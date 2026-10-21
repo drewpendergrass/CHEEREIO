@@ -47,15 +47,42 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	qa = data['qa_value'].values[0,:,:] #time,scanline,groundpixel
 	if species=='NO2':
 		sl,gp=np.where(qa>0.75)
-		with xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA') as flag:
-			with xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS') as flag2:
-				with xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/GEOLOCATIONS') as flag3:
-					ocean_flag = flag['snow_ice_flag'].values[0,sl,gp]
-					cloud_flag = flag2['cloud_radiance_fraction_nitrogendioxide_window'].values[0, sl, gp]
-					sza_flag = flag3['solar_zenith_angle'].values[0, sl, gp]
-					land_mask = np.where((ocean_flag == 0) & (cloud_flag < 0.3) & (sza_flag < 70))
-					sl = sl[land_mask]
-					gp = gp[land_mask]
+		flag = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+		surface_pressure = flag['surface_pressure'].values
+		ocean_flag = flag['snow_ice_flag'].values[0,sl,gp]
+		flag.close()
+		flag2 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
+		cloud_flag = flag2['cloud_radiance_fraction_nitrogendioxide_window'].values[0,sl,gp]
+		flag2.close()
+		flag3 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
+		sza_flag = flag3['solar_zenith_angle'].values[0,sl,gp]
+		flag3.close()
+		land_mask = np.where((ocean_flag == 0) & (cloud_flag < 0.3) & (sza_flag < 70))
+		sl = sl[land_mask]
+		gp = gp[land_mask]
+		surface_pressure = surface_pressure[0,sl,gp] #time,scanline,groundpixel
+	elif species=='SO2':
+		sl,gp=np.where(qa>0.75)
+		flag = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
+		surface_pressure = flag['surface_pressure'].values
+		classification = flag['surface_classification'].values[0,sl,gp]
+		is_land_nosnowice = (classification%4==0)&(classification<184) #Land is %4 and 184 is ice/snow. 1 if land, 0 if filtering out
+		cloud_flag = flag['cloud_fraction_crb'].values[0,sl,gp]
+		a = flag['tm5_constant_a'].values[0,:] #for so2, time, layer. no edges just midpoints.
+		b = flag['tm5_constant_b'].values[0,:]
+		flag.close() 
+		flag2 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/GEOLOCATIONS')
+		sza_flag = flag2['solar_zenith_angle'].values[0,sl,gp]
+		flag2.close()
+		flag3 = xr.open_dataset(filename, group = 'PRODUCT/SUPPORT_DATA/DETAILED_RESULTS')
+		volcano_flag = flag3['sulfurdioxide_detection_flag'].values[0,sl,gp]==2 #flag 2 is likely volcanic signal
+		ak = flag3.averaging_kernel.values #go ahead and store
+		flag3.close()
+		land_mask = np.where((is_land_nosnowice == 1) & (cloud_flag < 0.3) & (sza_flag < 70) & (volcano_flag==0)) #Keep only land, no ice/snow, minimal cloud, good sza, no volcano
+		sl = sl[land_mask]
+		gp = gp[land_mask]
+		surface_pressure = surface_pressure[0,sl,gp] #time,scanline,groundpixel
+		met['column_AK'] = ak[0,sl,gp,::-1] #time,scanline,groundpixel,layer
 	elif species=="CH4":
 		sl,gp=np.where(qa>0.5)
 	elif species=="CO":
@@ -68,6 +95,9 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		airmassfactor_total = data['air_mass_factor_total'].values[0,sl,gp]
 		trop_layer_index = data['tm5_tropopause_layer_index'].values[0,sl,gp].astype(int)
 		met[species] = data['nitrogendioxide_tropospheric_column'].values[0,sl,gp]
+	if species=='SO2':
+		met[species] = data['sulfurdioxide_total_vertical_column'].values[0,sl,gp] # Only interested in retrieval for anthropogenic scenario. 
+		# TROPOMI also includes volcanic scenarios with higher injection heights, but we filter out likely volcanic signals.
 	elif species=='CH4':
 		met[species] = data['methane_mixing_ratio_bias_corrected'].values[0,sl,gp] #time,scanline,groundpixel
 	elif species=='CO':
@@ -82,7 +112,9 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 			met['Error'] = data['methane_mixing_ratio_precision'].values[0,sl,gp]
 		elif species=='CO':
 			met['Error'] = data['carbonmonoxide_total_column_precision'].values[0,sl,gp]
-	
+		elif species=='SO2':
+			met['Error'] = data['sulfurdioxide_total_vertical_column_precision'].values[0,sl,gp]
+
 	met['longitude'] = data['longitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['latitude'] = data['latitude'].values[0,sl,gp] #time,scanline,groundpixel
 	met['utctime'] = data['time_utc'].values[0,sl] #time, scanline
@@ -123,12 +155,8 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		pressure_interval = data['pressure_interval'].values[0,sl,gp]/100 #time,scanline,groundpixel
 		surface_pressure = data['surface_pressure'].values[0,sl,gp]/100 #time,scanline,groundpixel				# Pa -> hPa
 		data.close()
-	elif species=='NO2':
-		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
-		surface_pressure = data['surface_pressure'].values[0,sl,gp] #time,scanline,groundpixel				# Leave Pa
-		data.close()
 	# Store CO prior profile (missing in older version of TROPOMI CO!)  
-	if species=='CO':
+	elif species=='CO':
 		data = xr.open_dataset(filename, group='PRODUCT/SUPPORT_DATA/INPUT_DATA')
 		met['carbonmonoxide_profile_apriori']=data['carbonmonoxide_profile_apriori'].values[0,sl,gp,::-1] # in mol/m2
 		met['surface_elevation']=data['surface_altitude'].values[0,sl,gp] #in m
@@ -148,6 +176,17 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 		pressures.fill(np.nan)
 		for i in range(len(surface_pressure)):
 			pressures[i,:]=(a+(b*surface_pressure[i]))/100 #Pa -> hPa
+	elif species=='SO2':
+		#Pressure levels (hpa) with dimension len(sl),levels, -- just midpoint
+		p_lev = np.zeros((len(sl),len(b)),dtype=float)
+		p_lev.fill(np.nan)
+		for i in range(len(surface_pressure)):
+			p_lev[i,:]=(a+(b*surface_pressure[i]))/100 #Pa -> hPa
+		#Convert to edges.
+		pressures = np.empty((p_lev.shape[0], p_lev.shape[1] + 1), dtype=p_lev.dtype)
+		pressures[:, 1:-1] = 0.5 * (p_lev[:, :-1] + p_lev[:, 1:])
+		pressures[:, 0] = surface_pressure/100
+		pressures[:, -1] = np.maximum(0.0, p_lev[:, -1] - 0.5 * (p_lev[:, -2] - p_lev[:, -1]))
 	elif species=='CH4':
 		pressures = np.zeros([len(sl),13],dtype=np.float)
 		pressures.fill(np.nan)
@@ -166,110 +205,54 @@ def read_tropomi(filename, species, filterinfo=None, includeObsError = False):
 	return met
 
 
-#Read the ACMG version of TROPOMI CH4
-def read_tropomi_acmg(filename, species, filterinfo=None, includeObsError = False):
+def read_tropomi_compressed(filename, species, filterinfo=None, includeObsError = False):
+	"""
+	IF the user already went through the tropomi fields, just load the compressed netcdfs.
 
-	if species !='CH4':
-		raise ValueError('Species not supported.')
+	Arguments
+		filename [str]  : TROPOMI netcdf data file to read
+		species [str]   : Species string 
+
+	Returns
+		met	  [dict] : Dictionary of important variables from TROPOMI:
+							- species
+ 							- Latitude
+							- Longitude
+	   						- QA value
+ 							- UTC time
+							- Averaging kernel
+							- Prior profile
+							- Dry air subcolumns
+							- Latitude bounds
+ 							- Longitude bounds
+							- Vertical pressure profile
+	"""
 	# Initialize list for TROPOMI data
 	met = {}
-	
-	# Store species, QA, lat, lon, time, averaging kernel
 	data = xr.open_dataset(filename)
-	qa = data['qa_value'].values
-	goodvals=np.where(qa>0.5)[0]
-
-	met['qa_value'] = qa[goodvals]
-	met[species] = data['xch4_corrected'].values[goodvals] #nobs
-
+	met['qa_value'] = data['qa_value'].values
+	met[species] = data[species].values
 	if includeObsError:
-		met['Error'] = data['xch4_precision'].values[goodvals] #nobs
-	
-	met['longitude'] = data['longitude_center'].values[goodvals] #nobs
-	met['latitude'] = data['latitude_center'].values[goodvals] #nobs
-	timeraw = data['time'].values[goodvals,:] #nobs, ntime. Seven entries in format year', 'month', 'day', 'hour','minute', 'second'
-	#format as CHEEREIO-compliant string
-	timestring = [f'{str(int(timestamp[0]))}-{str(int(timestamp[1])).zfill(2)}-{str(int(timestamp[2])).zfill(2)}T{str(int(timestamp[3])).zfill(2)}:{str(int(timestamp[4])).zfill(2)}:{str(int(timestamp[5])).zfill(2)}Z' for timestamp in timeraw]
-	met['utctime'] =  np.array(timestring)
-
-	met['column_AK'] = data['xch4_column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
-	met['albedo_swir'] = data['surface_albedo'].values[goodvals,1] #nobs, nwin. 0 for nwin is NIR, 1 is swir
-	met['albedo_nir'] = data['surface_albedo'].values[goodvals,0]
-	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
-	met['swir_aot'] = data['aerosol_optical_thickness'].values[goodvals,1]
-
-	#no surface elevation std, make sure it is set to nan in ens_config.
-	met['methane_profile_apriori']=data['ch4_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-	pressure_interval = data['dp'].values[goodvals] #nobs #already in hPa
-	surface_pressure = data['surface_pressure'].values[goodvals] #nobs	#already in hPa
-		
+		met['Error'] = data['Error'].values
+	met['longitude'] = data['longitude'].values
+	met['latitude'] = data['latitude'].values
+	met['utctime'] = data['utctime'].values
+	met['column_AK'] = data['column_AK'].values
+	met['pressures'] = data['pressures'].values
+	if species=='CH4':
+		met['albedo_swir'] = data['albedo_swir'].values
+		met['albedo_nir'] = data['albedo_nir'].values
+		met['blended_albedo'] = met['blended_albedo'].values
+		met['swir_aot'] = data['swir_aot'].values
+		met['methane_profile_apriori']=data['methane_profile_apriori'].values
+		met['dry_air_subcolumns']=data['dry_air_subcolumns'].values
+		met['surface_elevation_sd'] = data['surface_elevation_sd'].values
+	elif species=='CO':
+		met['carbonmonoxide_profile_apriori']=data['carbonmonoxide_profile_apriori'].values
+		met['surface_elevation']=data['surface_elevation'].values
 	data.close()
-
-	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
-	pressures.fill(np.nan)
-	for i in range(13):
-		pressures[:,i]=surface_pressure-(i*pressure_interval)
-	
-	met['pressures'] = pressures
-	
 	if filterinfo is not None:
 		met = obsop.apply_filters(met,filterinfo)
-
-	return met
-
-
-
-#Read the Belasus et al 2023 version of TROPOMI CH4, corrected using GOSAT
-#no swir_aot, make sure it is set to nan in ens_config.
-def read_tropomi_gosat_corrected(filename, species, filterinfo=None, includeObsError = False):
-
-	if species !='CH4':
-		raise ValueError('Species not supported.')
-	# Initialize list for TROPOMI data
-	met = {}
-	
-	# Store species, QA, lat, lon, time, averaging kernel
-	data = xr.open_dataset(filename)
-
-	qa = data['qa_value'].values
-
-	landflag = np.bitwise_and(data['surface_classification'].values.astype(int),3) #Get landflag, apply bitwise and of mask value (3) to get 0=land,1=water,2=someland,3=coastline
-	goodvals=np.where((qa>0.5) & (landflag==0))[0] #Only include land values (landflag=0); no coasts or ocean retrievals
-
-	met['dry_air_subcolumns']=data['dry_air_subcolumns'].values[goodvals,::-1] #nobs,layer. in molec/cm2
-	pressure_interval = data['pressure_interval'].values[goodvals]/100 #nobs #in Pa, convert to hPa
-	surface_pressure = data['surface_pressure'].values[goodvals]/100 #nobs	#in Pa, convert to hPa
-	met['surface_elevation_sd'] = data['surface_altitude_precision'].values[goodvals]
-
-	met['qa_value'] = qa[goodvals]
-
-	met[species] = data['methane_mixing_ratio_blended'].values[goodvals] #nobs
-
-	if includeObsError:
-		met['Error'] = data['methane_mixing_ratio_precision'].values[goodvals] #nobs
-
-	met['methane_profile_apriori']=data['methane_profile_apriori'].values[goodvals,::-1] #nobs,layer. in molec/cm2, but conversion factor divides out
-	met['column_AK'] = data['column_averaging_kernel'].values[goodvals,::-1] #nobs,layer
-
-	met['longitude'] = data['longitude'].values[goodvals] #nobs
-	met['latitude'] = data['latitude'].values[goodvals] #nobs
-	met['utctime'] =  data['time_utc'].values[goodvals]
-
-	met['albedo_swir'] = data['surface_albedo_SWIR'].values[goodvals] #nobs, nwin. 0 for nwin is NIR, 1 is swir
-	met['albedo_nir'] = data['surface_albedo_NIR'].values[goodvals]
-	met['blended_albedo'] = (met['albedo_nir']*2.4)-(met['albedo_swir']*1.13)
-
-	pressures = np.zeros([len(goodvals),13],dtype=np.float) #nobs,layer
-	pressures.fill(np.nan)
-	for i in range(13):
-		pressures[:,i]=surface_pressure-(i*pressure_interval)
-	
-	met['pressures'] = pressures
-	
-	if filterinfo is not None:
-		met = obsop.apply_filters(met,filterinfo)
-
 	return met
 
 #This seems to be the memory bottleneck
@@ -280,7 +263,7 @@ def GC_to_sat_levels(GC_SPC, GC_edges, sat_edges, species, chunk_size=10000):
 	The provided edges for GEOS-Chem and the satellite should
 	have dimension number of observations x number of edges
 	'''
-	if species in ["CO", "NO2"]:
+	if species in ["CO", "NO2","SO2"]:
 		nobs = GC_SPC.shape[0]
 		GC_on_sat_list = []
 		for k in range(0, nobs, chunk_size):
@@ -429,16 +412,11 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if species=='CH4':
 			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
 				filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
-		elif species=='CO':
-			if (self.spc_config['Extensions']['TROPOMI_CO']=="True") and (self.spc_config['TROPOMI_CO_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
-				filterinfo["TROPOMI_CO"] = [float(self.spc_config['TROPOMI_CO_filter_blended_albedo']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CO_filter_winter_lat']),float(self.spc_config['TROPOMI_CO_filter_roughness']),float(self.spc_config['TROPOMI_CO_filter_swir_aot'])]
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:
-			if self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'ACMG':
-				trop_obs.append(read_tropomi_acmg(obs,species,filterinfo,includeObsError=includeObsError))
-			elif self.spc_config['WHICH_TROPOMI_PRODUCT'] == 'BLENDED':
-				trop_obs.append(read_tropomi_gosat_corrected(obs,species,filterinfo,includeObsError=includeObsError))
+			if self.spc_config[f'WHICH_TROPOMI_{species}_PRODUCT'] == 'COMPRESSED':
+				trop_obs.append(read_tropomi_compressed(obs,species,filterinfo,includeObsError=includeObsError))
 			else:
 				trop_obs.append(read_tropomi(obs,species,filterinfo,includeObsError=includeObsError))
 		met = {}
@@ -457,13 +435,19 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if species=='CH4':
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_PRIOR = 1e9*(TROPOMI['methane_profile_apriori']/TROPOMI['dry_air_subcolumns'])
-			synthetic_partial_columns = False
+			chunk_size=-1 #Not relevant
 		elif species=='NO2':
 			TROP_PRIOR=None
 			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
 			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
 			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
-			synthetic_partial_columns = True
+			chunk_size=int(self.spc_config['TROPOMI_NO2_CHUNK_SIZE'])
+		elif species=='SO2':
+			TROP_PRIOR=None
+			AIRMOL_VOL=GC_col_data['Met_AIRDEN'] / 0.028964 # get model layer dry air density in mol/m3 (air molar mass: 0.028964 kg/mol), Met_AIRDEN(kg/m3)
+			AIRMOL_M2=(AIRMOL_VOL*GC_col_data['Met_BXHEIGHT']) # convert to column mol/m2 of dry air
+			GC_SPC = GC_SPC*AIRMOL_M2 # convert GEOS-CHEM NO2 from VVdry to mol/m2. Scale up by 1.
+			chunk_size=int(self.spc_config['TROPOMI_SO2_CHUNK_SIZE'])
 		elif species=='CO':
 			GC_SPC*=1e9 #scale to mol/mol
 			TROP_P0=TROPOMI['pressures'][:,0]
@@ -480,7 +464,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			TROP_PRIOR_ppb = ((TROP_PRIOR_mol) / (np.repeat(AIRMOL_COL[:, np.newaxis], TROP_PW.shape[1], axis=1)*TROP_PW)) *1e9 # convert prior in mol/m2 to ppbv
 			TROP_PRIOR = TROP_PRIOR_ppb
 			TROPOMI[species]=1e9*TROPOMI[species]/AIRMOL_COL # convert TROPOMI CO from mol/m2 to ppbv
-			synthetic_partial_columns = False
+			chunk_size=int(self.spc_config['TROPOMI_CO_CHUNK_SIZE'])
 		#If super observations, prep the error calculation
 		if self.spc_config['AV_TO_GC_GRID'][specieskey]=="True":
 			superobs=True
@@ -514,7 +498,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			if TROP_PRIOR is not None: #only include prior in averaging if there is a prior
 				trop_agg_args['TROP_PRIOR']=TROP_PRIOR
 			agg_data = obsop.averageFieldsToGC(i,j,t,GC,TROPOMI[species],doSuperObs=doErrCalc,superObsFunction=superObsFunction,**additional_args_avgGC,**trop_agg_args)
-			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species)
+			GC_on_sat_l = GC_to_sat_levels(agg_data['GC_SPC'], agg_data['GC_P'], agg_data['T_press'],species, chunk_size=chunk_size)
 			#If trop prior is provided, use it in the averaging kernel. otherwise, pass in None.
 			if TROP_PRIOR is not None: 
 				tp = agg_data['TROP_PRIOR']
@@ -523,7 +507,7 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 			GC_on_sat = apply_avker(agg_data['ak'],agg_data['TROP_PW'], GC_on_sat_l,tp)
 		else:
 			presuperobs=False
-			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species)
+			GC_on_sat_l = GC_to_sat_levels(GC_SPC, GC_P, TROPOMI['pressures'],species, chunk_size=chunk_size)
 			GC_on_sat = apply_avker(TROPOMI['column_AK'],TROP_PW, GC_on_sat_l,TROP_PRIOR)
 		nan_indices = np.argwhere(np.isnan(GC_on_sat))
 		GC_on_sat = np.nan_to_num(GC_on_sat)

@@ -14,6 +14,11 @@ def produceSuperObservationFunction(fname):
 	elif fname == "sqrt":
 		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return np.max([(mean_error * np.sqrt(((1-errorCorr)/num_obs) + errorCorr) ),min_error])
+	elif fname == "sys_rand_err":
+		#Here we pass the random component of error (e.g. in IASI) as mean_err, the systematic component as mean_sys_error. 
+		#We use a rough approximation that the systematic component of error is irreducible
+		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0,transportError=0,mean_sys_error=0):
+			return np.max([np.sqrt((mean_error**2/num_obs)+ (mean_sys_error**2) + (transportError**2)),min_error])
 	elif fname == "constant":
 		def super_obs(mean_error,num_obs,errorCorr=0,min_error=0):
 			return mean_error
@@ -104,19 +109,24 @@ def nearest_loc(GC,OBSDATA):
 	tGC = tGC.argmin(axis=0)
 	return iGC, jGC, tGC
 
-def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=True,returnStateMet=False,GC_area=None):
-	i,j,t = nearest_loc(GC,OBSDATA)
+def getGC_SPC(GC,species,spc_config):
 	gc_version = float(spc_config['GC_VERSION'][0:-2]) #major plus minor version
 	if gc_version>=14.1:
 		spcconc_name = "SpeciesConcVV"
 	else:
 		spcconc_name = "SpeciesConc" #Starting in 14.1 we have to specify VV
-	to_return = {}
 	gc_overrides = si.checkGCSpeciesOverride(spc_config) #Here we check to see if GC stores the species under a different name. Only applies for N2O.
 	if (len(gc_overrides)>0)&(species in gc_overrides):
-		to_return['GC_SPC'] = GC[f'{spcconc_name}_{gc_overrides[species]}'].values[t,:,j,i]
+		GC_SPC = GC[f'{spcconc_name}_{gc_overrides[species]}']
 	else:
-		to_return['GC_SPC'] = GC[f'{spcconc_name}_{species}'].values[t,:,j,i]
+		GC_SPC = GC[f'{spcconc_name}_{species}']
+	return GC_SPC
+
+
+def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=True,returnStateMet=False,GC_area=None):
+	i,j,t = nearest_loc(GC,OBSDATA)
+	to_return = {}
+	to_return['GC_SPC'] = getGC_SPC(GC,species,spc_config).values[t,:,j,i]
 	if returnLevelEdge:
 		to_return['GC_P'] = GC[f'Met_PEDGE'].values[t,:,j,i]
 	if returnStateMet:
@@ -133,7 +143,7 @@ def getGCCols(GC,OBSDATA,species,spc_config,returninds=False,returnLevelEdge=Tru
 
 #No index, puts loc at GC grid values
 #other_fields_to_avg is a dictionary with keys "variable name" and values of arrays.
-def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None):
+def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None, obsSysError=None):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -158,16 +168,16 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 		err_av = np.zeros(av_len)
 	for count,ind in enumerate(unique_inds):
 		indmatch = np.where(index==ind)[0]
-		gc_av[count] = np.mean(GCmappedtoobs[indmatch])
-		obs_av[count] = np.mean(obsvals[indmatch])
+		gc_av[count] = np.nanmean(GCmappedtoobs[indmatch])
+		obs_av[count] = np.nanmean(obsvals[indmatch])
 		obslat_av[count] = latvals[count]
 		obslon_av[count] = lonvals[count]
 		obstime_av[count] = timevals[count]
-		num_av[count] = len(indmatch)
+		num_av[count] = np.sum(~np.isnan(GCmappedtoobs[indmatch]))
 		#Average the additional fields.
 		if other_fields_to_avg is not None:
 			for field in other_fields_to_avg:
-				additional_fields[field][count] = np.mean(other_fields_to_avg[field][indmatch])
+				additional_fields[field][count] = np.nanmean(other_fields_to_avg[field][indmatch])
 		if doSuperObs:
 			#SuperObservation function selected by user
 			obs_f = produceSuperObservationFunction(superObsFunction)
@@ -179,9 +189,12 @@ def averageByGC(iGC, jGC, tGC, GC,GCmappedtoobs,obsvals,doSuperObs,superObsFunct
 				obs_args['errorCorr'] = errorCorr
 			if minError is not None: 
 				obs_args['min_error'] = minError
+			if obsSysError is not None:
+				#Calculate mean systematic error to be passed to the superobservation function. 
+				obs_args['mean_sys_error'] = np.nanmean(obsSysError[indmatch])
 			#Calculate mean error to be reduced by superobservation function. 
 			if obsInstrumentError is not None:
-				mean_err = np.mean(obsInstrumentError[indmatch])
+				mean_err = np.nanmean(obsInstrumentError[indmatch])
 			elif prescribed_error is not None:
 				if prescribed_error_type == "relative":
 					mean_err = obs_av[count]*prescribed_error
@@ -218,7 +231,7 @@ def simple_slice(arr, inds, axis):
 
 #In case where you want to average to GC grid before mapping to observations, use this function
 #Can handle multidimension inputs (e.g. averaging kernels, prior profiles, columns) via kwargs. Autodetects axis with number of observations (defaulting to first axis)
-def averageFieldsToGC(iGC, jGC, tGC, GC, obsvals, doSuperObs=False,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None, **kwargs):
+def averageFieldsToGC(iGC, jGC, tGC, GC, obsvals, doSuperObs=False,superObsFunction=None,other_fields_to_avg=None, prescribed_error=None,prescribed_error_type=None, obsInstrumentError = None, modelTransportError = None, errorCorr = None,minError=None,obsSysError=None, **kwargs):
 	index = ((iGC+1)*100000000)+((jGC+1)*10000)+(tGC+1)
 	unique_inds = np.unique(index)
 	i_unique = np.floor(unique_inds/100000000).astype(int)-1
@@ -266,6 +279,9 @@ def averageFieldsToGC(iGC, jGC, tGC, GC, obsvals, doSuperObs=False,superObsFunct
 				obs_args['errorCorr'] = errorCorr
 			if minError is not None: 
 				obs_args['min_error'] = minError
+			if obsSysError is not None:
+				#Calculate mean systematic error to be passed to the superobservation function. 
+				obs_args['mean_sys_error'] = np.nanmean(obsSysError[indmatch])
 			#Calculate mean error to be reduced by superobservation function. 
 			if obsInstrumentError is not None:
 				mean_err = np.mean(obsInstrumentError[indmatch])

@@ -227,6 +227,11 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then amplify the species listed here even if they aren't included in the statevector. This can be useful if you are assimilating emissions only but still would like to amplify the spread of observed species. 
 
+.. option:: OBSERVATIONS_TO_EXCLUDE_FROM_SCALING
+
+	If ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` is set to "true", CHEEREIO will scale concentrations to match observations. If there are multiple observers of the same species (e.g. OMI and TROPOMI NO2), then the scaling is designed to match the mean of the observing systems. If you would like to exclude one or more observing systems from the simple scaling calculation, you may include their observation key(s) (defined as the key in the key-value pairs under ``OBSERVED_SPECIES``) in the list here.
+
+
 .. option:: DO_BURN_IN
 
 	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. For more information on the burn-in period, see :ref:`Burn in period`.
@@ -249,7 +254,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: nEnsemble
 	
-	Number of ensemble members. 24, 32, or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
+	Number of ensemble members. 16, 24, 32, or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
 
 .. option:: verbose
 	
@@ -271,7 +276,7 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 
 .. option:: Partition
 	
-	Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice.
+	Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice. You can comma separate and include multiple if you'd like, since CHEEREIO parallelization requires no shared memory across runs.
 
 .. option:: Memory
 	
@@ -337,7 +342,7 @@ One useful feature of CHEEREIO is its distinction between "control" and "state" 
 
 .. option:: STATE_VECTOR_CONC_REPRESENTATION
 	
-	How are concentrations represented within the state vector? There are several options. "3D" puts all 3D concentrations of the species in ``STATE_VECTOR_CONC`` from the restart file into the state vector. ``column_sum`` computes the partial columns of the species of interest and then sums to obtain units molec/cm2. Finally, ``trop_sum`` is identical to ``column_sum`` except that it only represents the tropospheric column. 
+	How are concentrations represented within the state vector? There are several options. "3D" puts all 3D concentrations of the species in ``STATE_VECTOR_CONC`` from the restart file into the state vector. ``column_sum`` computes the partial columns of the species of interest and then sums to obtain units molec/cm2. Finally, ``trop_sum`` is identical to ``column_sum`` except that it only represents the tropospheric column. When in doubt, 3D is probably the best option. Do not expect large updates to concentrations.
 
 .. option:: CONTROL_VECTOR_EMIS
 	
@@ -490,15 +495,15 @@ Observation settings
 
 .. option:: SaveDOFS
 	
-	Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
+	DEPRECATED; DO NOT USE. Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
 
 	.. attention::
 
-		*Note: this option is functional but DOFS values are not easily interpretable. In CHEEREIO 1.5, we will include an information metric from Voshtani et al., 2025 instead (see the citations page).*
+		*Note: this option is functional but DOFS values are not easily interpretable. In CHEEREIO 2.0, we will include an information metric from Voshtani et al., 2025 instead (see the citations page).*
 
 .. option:: DOFS_filter
 	
-	What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
+	DEPRECATED; DO NOT USE. What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
 
 	.. attention::
 
@@ -714,11 +719,11 @@ LETKF settings
 
 .. option:: SUPER_OBSERVATION_FUNCTION
 	
-	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the :ref:`New superobservation` entry. These include ``default``, ``sqrt``, or ``constant``. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
+	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the :ref:`New superobservation` entry. These include ``default``, ``sqrt``, ``constant``, or ``sys_rand_err`` (IASI ammonia only; see :ref:`iasi error` for more information). Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information and for details on each allowed error function. 
 
 .. option:: SUPER_OBS_BEFORE_Hx
 	
-	For some observation operators (e.g. TROPOMI), users have the option to calculate superobservations *before* applying the observation operator. This leads to substantial computational savings. 
+	For some observation operators (e.g. TROPOMI, IASI using averaging kernel method 1), users have the option to calculate superobservations *before* applying the observation operator. This leads to substantial computational savings. 
 
 
 .. option:: INFLATION_FACTOR
@@ -739,7 +744,11 @@ LETKF settings
 
 .. option:: LOCALIZATION_RADIUS_km
 	
-	When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
+	When updating a column and emissions grid, CHEEREIO only constructs state vector information using model data this radius (in kilometers).
+
+.. option:: LOCALIZATION_RADIUS_by_observation
+	
+	When updating a column and emissions grid, CHEEREIO gathers observations from this radius (in kilometers) for each given observer type (e.g. provide a key value pair, with keys corresponding to keys under ``OBSERVED_SPECIES``). When in doubt, set all values equal to the one used in ``LOCALIZATION_RADIUS_km`` but it can be useful to have large observation radii for longer lived species.
 
 .. option:: smooth_localization_with_gaspari_cohn
 
@@ -940,7 +949,9 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: WHICH_TROPOMI_PRODUCT
 
-		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, 'ACMG' for the ACMG TROPOMI product, and 'BLENDED' for Belasus et al., 2023. 
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+		REMOVED as of version 1.5: 'ACMG' and 'BLENDED'. Harvard-specific methane products now read as expected through the DEFAULT workflow (same as operational). Supplying these options in version 1.5.0 or later now will return an error.
 
 	.. option:: TROPOMI_CH4_FILTERS
 	
@@ -988,35 +999,11 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: WHICH_TROPOMI_PRODUCT
 
-		Which TROPOMI product should we use? Currently, only "DEFAULT" is supported. 
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
 
-	.. option:: TROPOMI_CO_FILTERS
-	
-		Apply specialized filters for TROPOMI CO? Set to "True" if doing a TROPOMI CO inversion, otherwise set to "False".
-	
-	.. option:: TROPOMI_CO_filter_blended_albedo
-	
-		Filter out TROPOMI CO observations with a blended albedo above this value. Set to "nan" to ignore.
+	.. option:: TROPOMI_CO_CHUNK_SIZE
 
-	.. option:: TROPOMI_CO_filter_swir_albedo_low
-	
-		Filter out TROPOMI CO observations with a SWIR albedo below this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_swir_albedo_high
-	
-		Filter out TROPOMI CO observations with a SWIR albedo above this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_winter_lat
-	
-		Filter out TROPOMI CO observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_roughness
-	
-		Filter out TROPOMI CO observations with a surface roughness above this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_swir_aot
-	
-		Filter out TROPOMI CO observations with a SWIR AOT above this value. Set to "nan" to ignore.
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
 
 .. option:: TCCON_CO extension
 	
@@ -1024,35 +1011,61 @@ Below we list the settings that you can set with extensions.
 
 	.. option:: TCCON_CO_FILTERS
 	
-		Apply specialized filters for TROPOMI CO? Set to "True" if doing a TROPOMI CO inversion, otherwise set to "False". Leave as "False" as none currently implemented.
+		As of version 1.5.0: leave as "False" as no filters are currently implemented.
 
-.. option:: N2O extension
+.. option:: TCCON_CH4 extension
 	
-	Specialized N2O settings for a custom GC simulation, as yet unreleased. Other users can ignore.
+	Specialized TCCON CH4 settings. None currently implemented, but reserved for future use.
 
-	.. option:: INTERPRET_GC_CH4_AS_N2O
+	.. option:: TCCON_CH4_FILTERS
 	
-		In the custom GC simulation for N2O I am currently using, we save out N2O as CH4 (it is a modification of the CH4 simulation). If this setting is set to True, it overwrites this with "N2O" in internal CHEEREIO logic.
+		As of version 1.5.0: leave as "False" as no filters are currently implemented.
 
-.. option:: TCCON_N2O extension
+.. option:: TROPOMI_NO2 extension
 	
-	Specialized TCCON N2O settings.
+	Specialized TROPOMI NO2 settings.
 
-	.. option:: PT700_N2O_CORRECTION
+	.. option:: WHICH_TROPOMI_PRODUCT
+
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+	.. option:: TROPOMI_NO2_CHUNK_SIZE
+
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
+
+
+.. option:: TROPOMI_SO2 extension
 	
-		Apply Josh Laughner's temperature-dependent bias correction to N2O for GGG2020.0? Set to "True" if so, otherwise set to "False". Will no longer be necessary with GGG2020.1.
+	Specialized TROPOMI SO2 settings.
 
-	.. option:: TCCON_N2O_FILTERS
+	.. option:: WHICH_TROPOMI_PRODUCT
+
+		Which TROPOMI product should we use? "DEFAULT" for the TROPOMI operational product, or "COMPRESSED" if pre-processing observations through the ``compress_tropomi.py`` workflow to save storage space (see :ref:`Compress TROPOMI` for details). 
+
+	.. option:: TROPOMI_NO2_CHUNK_SIZE
+
+		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
+
+.. option:: IASI NH3 extension
 	
-		Apply specialized filters for TCCON N2O? Set to "True" if doing a TCCON N2O inversion, otherwise set to "False". Leave as "False" as none currently implemented.
+	Specialized settings for the IASI NH3 operator.
 
-.. option:: Obspack_N2O extension 
+	.. option:: IASI_NH3_ak_method
+		
+		There are two options for ``IASI_NH3_ak_method``. The first method simulates IASI would retrieve if it observed the GEOS-Chem columns using the IASI vertical a priori column. The second method re-retrieves the IASI NH3 column using the GEOS-Chem simulation as the vertical a priori profile rather than the standard IASI a priori vertical profile. Pros and cons are discussed below:
 
-	Specialized ObsPack N2O settings
+		.. option:: IASI_NH3_ak_method equals 1
+		
+			Pro: Filtering out bad IASI retrievals is trivially simple with this method. This allows users to set ``SUPER_OBS_BEFORE_Hx`` to ``True`` for IASI NH3 and thus delivers substantial computational savings. 
 
-	.. option:: Max_Obspack_N2O_Error
-	
-		Maximum allowable difference (in ppb) between observations and GEOS-Chem. If it exceeds this threshold, discard. Set to nan to ignore.
+			Con: Vulnerable to bias if the IASI a priori profile deviates significantly from the true NH3 profile. Less theoretically appealing.
+
+		.. option:: IASI_NH3_ak_method equals 2
+
+			Pro: More appealing mathematically, with greater control over how NH3 vertical distribution potentially impacts results.
+
+			Con: Filtering out bad IASI retrievals becomes much more complicated with this approach, as the IASI retrieval involves filtering steps both before and after retrievals. CHEEREIO takes care of the details under the hood, but the upshot is that users CANNOT set ``SUPER_OBS_BEFORE_Hx`` to ``True`` while using method 2. This can be computationally expensive.
+
 
 .. option:: OMI_NO2 extension
 	

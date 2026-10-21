@@ -68,6 +68,11 @@ for species in regridded_bigy:
 		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], regridded_bigy[species]['mean_obs'], species,f'{pp_dir}/mean_obs_{species}.png')
 		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], assim_minus_obs, species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
 		plotMapPoints(m, regridded_bigy[species]['lat'], regridded_bigy[species]['lon'], ctrl_minus_obs, species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+	elif regridded_bigy[species]['interpret_as'] == 'profile':
+		clim_abs = np.max([np.nanmax(np.abs(assim_minus_obs)),np.nanmax(np.abs(ctrl_minus_obs))])
+		plotProfile(regridded_bigy[species]['lat'], regridded_bigy[species]['lev'], assim_minus_obs, species,f'{pp_dir}/assim_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotProfile(regridded_bigy[species]['lat'], regridded_bigy[species]['lev'], ctrl_minus_obs, species,f'{pp_dir}/ctrl_minus_obs_{species}.png',cmap=plt.cm.seismic,clim = [-1*clim_abs,clim_abs])
+		plotProfile(regridded_bigy[species]['lat'], regridded_bigy[species]['lev'], regridded_bigy[species]['mean_obs'],species,f'{pp_dir}/mean_obs_{species}.png',cmap=plt.cm.plasma)
 	print(f'For species {species} we have, for assimilation minus observations, a mean of {np.nanmean(assim_minus_obs)} and a standard deviation of {np.nanstd(assim_minus_obs)}')
 	print(f'For species {species} we have, for control minus observations, a mean of {np.nanmean(ctrl_minus_obs)} and a standard deviation of {np.nanstd(ctrl_minus_obs)}')
 

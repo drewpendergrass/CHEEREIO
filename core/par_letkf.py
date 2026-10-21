@@ -77,6 +77,7 @@ if just_scale:
 			a.amplifySpreads()
 		a.scaleRestarts()
 		a.saveRestarts()
+		a.saveBigY(mode='Scale')
 		with open(f"{path_to_scratch}/ASSIMILATION_COMPLETE", "w") as f:
 			f.write("Done.\n") #If so, save flag file to ensemble folder
 		end = time.time()
