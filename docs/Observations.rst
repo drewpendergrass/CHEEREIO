@@ -476,7 +476,11 @@ In CHEEREIO, users can opt to average observations to the GEOS-Chem grid by sett
 
 .. option:: default
 
-   As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irriducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` etnry.
+   As with "sqrt", but with an additional term accounting for the fact that GEOS-Chem transport errors are perfectly correlated. Because perfectly correlated errors are irreducible no matter how many realizations are averaged, the resulting equation is given by :math:`\max\left[\sqrt{\bar{\sigma}^2\cdot\left(\frac{1-c}{n}+c\right)+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` entry.
+
+.. option:: sys_rand_err
+
+   As with "default", but for those observational products that already separate retrieval error into random :math:`\sigma_r` and systematic :math:`\sigma_s` components (currently only IASI NH3; see :ref:`iasi error` for more information). Here we do not need to use a correlation term as in the above two options, as error separation is given explicitly The resulting equation is given by :math:`\max\left[\sqrt{\frac{\bar{\sigma_r}^2}{n}+\sigma_s^2+\sigma_t^2},\sigma_{\min}\right]` where :math:`\sigma_t` is transport error supplied by the "transport_error" entry from ``OTHER_OBS_ERROR_PARAMETERS`` entry.
 
 .. option:: constant
 

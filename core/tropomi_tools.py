@@ -412,9 +412,6 @@ class TROPOMI_Translator(obsop.Observation_Translator):
 		if species=='CH4':
 			if (self.spc_config['Extensions']['TROPOMI_CH4']=="True") and (self.spc_config['TROPOMI_CH4_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
 				filterinfo["TROPOMI_CH4"] = [float(self.spc_config['TROPOMI_CH4_filter_blended_albedo']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CH4_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CH4_filter_winter_lat']),float(self.spc_config['TROPOMI_CH4_filter_roughness']),float(self.spc_config['TROPOMI_CH4_filter_swir_aot'])]
-		elif species=='CO':
-			if (self.spc_config['Extensions']['TROPOMI_CO']=="True") and (self.spc_config['TROPOMI_CO_FILTERS']=="True"): #Check first if extension is on before doing the TROPOMI filtering
-				filterinfo["TROPOMI_CO"] = [float(self.spc_config['TROPOMI_CO_filter_blended_albedo']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_low']),float(self.spc_config['TROPOMI_CO_filter_swir_albedo_high']),float(self.spc_config['TROPOMI_CO_filter_winter_lat']),float(self.spc_config['TROPOMI_CO_filter_roughness']),float(self.spc_config['TROPOMI_CO_filter_swir_aot'])]
 		if specieskey in list(self.spc_config["filter_obs_poleward_of_n_degrees"].keys()):
 			filterinfo['MAIN']=[float(self.spc_config["filter_obs_poleward_of_n_degrees"][specieskey])]
 		for obs in obs_list:

@@ -714,7 +714,7 @@ LETKF settings
 
 .. option:: SUPER_OBSERVATION_FUNCTION
 	
-	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the :ref:`New superobservation` entry. These include ``default``, ``sqrt``, or ``constant``. Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information. 
+	A dictionary with a key corresponding with each key in ``OBSERVED_SPECIES``, and a value corresponding to one of the super observation error reduction functions listed in the :ref:`New superobservation` entry. These include ``default``, ``sqrt``, ``constant``, or ``sys_rand_err`` (IASI ammonia only; see :ref:`iasi error` for more information). Users can add new superobservation functions within the ``produceSuperObservationFunction`` closure in the ``observation_operators.py`` file and activate them from this entry; see the :ref:`New superobservation` entry for more information and for details on each allowed error function. 
 
 .. option:: SUPER_OBS_BEFORE_Hx
 	
@@ -995,34 +995,6 @@ Below we list the settings that you can set with extensions.
 	.. option:: TROPOMI_CO_CHUNK_SIZE
 
 		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
-
-	.. option:: TROPOMI_CO_FILTERS
-	
-		Apply specialized filters for TROPOMI CO? Set to "True" if doing a TROPOMI CO inversion, otherwise set to "False".
-	
-	.. option:: TROPOMI_CO_filter_blended_albedo
-	
-		Filter out TROPOMI CO observations with a blended albedo above this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_swir_albedo_low
-	
-		Filter out TROPOMI CO observations with a SWIR albedo below this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_swir_albedo_high
-	
-		Filter out TROPOMI CO observations with a SWIR albedo above this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_winter_lat
-	
-		Filter out TROPOMI CO observations beyond this latitude in the winter hemisphere. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_roughness
-	
-		Filter out TROPOMI CO observations with a surface roughness above this value. Set to "nan" to ignore.
-
-	.. option:: TROPOMI_CO_filter_swir_aot
-	
-		Filter out TROPOMI CO observations with a SWIR AOT above this value. Set to "nan" to ignore.
 
 .. option:: TCCON_CO extension
 	

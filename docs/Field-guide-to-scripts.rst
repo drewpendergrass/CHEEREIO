@@ -31,6 +31,11 @@ hemco_config_updater.py
 
 A very short Python script that invokes ``hemco_utils.py`` and updates ``HEMCO_Config.rc`` to match user settings specified in ``ens_config.json``. This is called in the template run directory creation stage of ``setup_ensemble.sh``.
 
+hemco_delink_scalefactors.py
+~~~~~~~~~~~~~
+
+This utility removes links to scalefactors from a given HEMCO Config file in a run directory (path supplied by user). This is accomplished by replacing scalefactor nc files with ones (no scaling). It is used to turn a directory into a control/spinup run.
+
 hemco_utils.py
 ~~~~~~~~~~~~~
 
@@ -190,6 +195,11 @@ prep_tccon_aggregated.py
 ~~~~~~~~~~~~~
 
 This Python file produces TCCON aggregated files ready for CHEEREIO, and is described in detail in the :ref:`tccon` entry.
+
+obspack_switch.py
+~~~~~~~~~~~~~
+
+This is a simple utility code that ensures that GEOS-Chem obspack settings align with the user preferences set in ``ens_config.json``.
 
 obspack_tools.py
 ~~~~~~~~~~~~~
