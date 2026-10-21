@@ -227,6 +227,11 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 	If ``AMPLIFY_ENSEMBLE_SPREAD_FOR_FIRST_ASSIM_PERIOD`` is set to "true", then amplify the species listed here even if they aren't included in the statevector. This can be useful if you are assimilating emissions only but still would like to amplify the spread of observed species. 
 
+.. option:: OBSERVATIONS_TO_EXCLUDE_FROM_SCALING
+
+	If ``SIMPLE_SCALE_FOR_FIRST_ASSIM_PERIOD`` is set to "true", CHEEREIO will scale concentrations to match observations. If there are multiple observers of the same species (e.g. OMI and TROPOMI NO2), then the scaling is designed to match the mean of the observing systems. If you would like to exclude one or more observing systems from the simple scaling calculation, you may include their observation key(s) (defined as the key in the key-value pairs under ``OBSERVED_SPECIES``) in the list here.
+
+
 .. option:: DO_BURN_IN
 
 	Should CHEEREIO do a burn-in period? "true" or "false." A burn-in period is a time period where full LETKF assimilation is being applied, but the results will be discarded from final analysis. The idea of a burn in period is to allow CHEEREIO's emissions to "catch up" with the system, as it takes time for the updated emissions in CHEEREIO to become consistent with observations. For more information on the burn-in period, see :ref:`Burn in period`.
@@ -249,7 +254,7 @@ The first section of the ``ens_config.json`` file (i.e. between the first two co
 
 .. option:: nEnsemble
 	
-	Number of ensemble members. 24, 32, or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
+	Number of ensemble members. 16, 24, 32, or 48 are usually good numbers. This number of run directories will be created in the ``ensemble_runs`` folder and will be run simultaneously.
 
 .. option:: verbose
 	
@@ -271,7 +276,7 @@ The next section of the ``ens_config.json`` file controls settings that will be 
 
 .. option:: Partition
 	
-	Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice.
+	Partition of your cluster you are submitting to. At Harvard, ``huce_intel`` is a good choice. You can comma separate and include multiple if you'd like, since CHEEREIO parallelization requires no shared memory across runs.
 
 .. option:: Memory
 	
@@ -337,7 +342,7 @@ One useful feature of CHEEREIO is its distinction between "control" and "state" 
 
 .. option:: STATE_VECTOR_CONC_REPRESENTATION
 	
-	How are concentrations represented within the state vector? There are several options. "3D" puts all 3D concentrations of the species in ``STATE_VECTOR_CONC`` from the restart file into the state vector. ``column_sum`` computes the partial columns of the species of interest and then sums to obtain units molec/cm2. Finally, ``trop_sum`` is identical to ``column_sum`` except that it only represents the tropospheric column. 
+	How are concentrations represented within the state vector? There are several options. "3D" puts all 3D concentrations of the species in ``STATE_VECTOR_CONC`` from the restart file into the state vector. ``column_sum`` computes the partial columns of the species of interest and then sums to obtain units molec/cm2. Finally, ``trop_sum`` is identical to ``column_sum`` except that it only represents the tropospheric column. When in doubt, 3D is probably the best option. Do not expect large updates to concentrations.
 
 .. option:: CONTROL_VECTOR_EMIS
 	
@@ -490,15 +495,15 @@ Observation settings
 
 .. option:: SaveDOFS
 	
-	Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
+	DEPRECATED; DO NOT USE. Should CHEEREIO calculate and save the Degrees of Freedom for Signal (DOFS), or the trace of the observing system averaging kernel matrix? Note that since the prior error covariance matrix is not invertible because of our ensemble approach the pseudoinverse is used instead. See section 11.5.3 of Brasseur and Jacob for more information. The idea here is that if there is not enough information in a localized assimilation calculation we should set the posterior equal to the prior. 
 
 	.. attention::
 
-		*Note: this option is functional but DOFS values are not easily interpretable. In CHEEREIO 1.5, we will include an information metric from Voshtani et al., 2025 instead (see the citations page).*
+		*Note: this option is functional but DOFS values are not easily interpretable. In CHEEREIO 2.0, we will include an information metric from Voshtani et al., 2025 instead (see the citations page).*
 
 .. option:: DOFS_filter
 	
-	What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
+	DEPRECATED; DO NOT USE. What is the minimum DOFS for a localized region for the assimilation to be saved? If DOFS is below this threshold the posterior is set equal to the prior.
 
 	.. attention::
 
@@ -718,7 +723,7 @@ LETKF settings
 
 .. option:: SUPER_OBS_BEFORE_Hx
 	
-	For some observation operators (e.g. TROPOMI), users have the option to calculate superobservations *before* applying the observation operator. This leads to substantial computational savings. 
+	For some observation operators (e.g. TROPOMI, IASI using averaging kernel method 1), users have the option to calculate superobservations *before* applying the observation operator. This leads to substantial computational savings. 
 
 
 .. option:: INFLATION_FACTOR
@@ -739,7 +744,11 @@ LETKF settings
 
 .. option:: LOCALIZATION_RADIUS_km
 	
-	When updating a column, CHEEREIO only considers data and observations within this radius (in kilometers).
+	When updating a column and emissions grid, CHEEREIO only constructs state vector information using model data this radius (in kilometers).
+
+.. option:: LOCALIZATION_RADIUS_by_observation
+	
+	When updating a column and emissions grid, CHEEREIO gathers observations from this radius (in kilometers) for each given observer type (e.g. provide a key value pair, with keys corresponding to keys under ``OBSERVED_SPECIES``). When in doubt, set all values equal to the one used in ``LOCALIZATION_RADIUS_km`` but it can be useful to have large observation radii for longer lived species.
 
 .. option:: smooth_localization_with_gaspari_cohn
 
@@ -1036,6 +1045,27 @@ Below we list the settings that you can set with extensions.
 	.. option:: TROPOMI_NO2_CHUNK_SIZE
 
 		How many observations should we chunk to process in parallel? The details are technical, but the larger this number (1) the faster CHEEREIO will go and (2) the more memory (RAM) CHEEREIO will use. To save memory, set to a smaller number and sacrifice speed.
+
+.. option:: IASI NH3 extension
+	
+	Specialized settings for the IASI NH3 operator.
+
+	.. option:: IASI_NH3_ak_method
+		
+		There are two options for ``IASI_NH3_ak_method``. The first method simulates IASI would retrieve if it observed the GEOS-Chem columns using the IASI vertical a priori column. The second method re-retrieves the IASI NH3 column using the GEOS-Chem simulation as the vertical a priori profile rather than the standard IASI a priori vertical profile. Pros and cons are discussed below:
+
+		.. option:: IASI_NH3_ak_method equals 1
+		
+			Pro: Filtering out bad IASI retrievals is trivially simple with this method. This allows users to set ``SUPER_OBS_BEFORE_Hx`` to ``True`` for IASI NH3 and thus delivers substantial computational savings. 
+
+			Con: Vulnerable to bias if the IASI a priori profile deviates significantly from the true NH3 profile. Less theoretically appealing.
+
+		.. option:: IASI_NH3_ak_method equals 2
+
+			Pro: More appealing mathematically, with greater control over how NH3 vertical distribution potentially impacts results.
+
+			Con: Filtering out bad IASI retrievals becomes much more complicated with this approach, as the IASI retrieval involves filtering steps both before and after retrievals. CHEEREIO takes care of the details under the hood, but the upshot is that users CANNOT set ``SUPER_OBS_BEFORE_Hx`` to ``True`` while using method 2. This can be computationally expensive.
+
 
 .. option:: OMI_NO2 extension
 	

@@ -39,6 +39,7 @@
 	"SPREAD_AMPLIFICATION_FACTOR" : "5",
 	"species_to_amplify_not_in_statevec" : [
 	],
+	"OBSERVATIONS_TO_EXCLUDE_FROM_SCALING" : [],
 	"DO_BURN_IN" : "false",
 	"SIMPLE_SCALE_AT_END_OF_BURN_IN_PERIOD" : "false",
 	"BURN_IN_END" : "20190202",
