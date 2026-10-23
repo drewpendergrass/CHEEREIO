@@ -34,9 +34,15 @@ Voshtani, S., Jones, D. B. A., Wunch, D., Pendergrass, D. C., Wennberg, P. O., P
 
 Pendergrass, D. C., Jacob, D. J., Balasus, N., Estrada, L., Varon, D. J., East, J. D., He, M., Mooring, T. A., Penn, E., Nesser, H., & Worden, J. R. (2025). Trends and seasonality of 2019–2023 global methane emissions inferred from a localized ensemble transform Kalman filter (CHEEREIO v1.3.1) applied to TROPOMI satellite observations. Atmospheric Chemistry and Physics, 25(21), 14353–14369. https://doi.org/10.5194/acp-25-14353-2025
 
+**CHEEREIO users that use IASI NH\ :sub:`3` should cite the following paper**:
+
+Pendergrass, D. C., Shindell, D. T., Clarisse, L., Van Damme, M., Beaudor, M., Jiang, J., Zhai, S. Attributing 2013–2024 drivers of global ammonia emissions using IASI observations: implications under future climate change. Submitted.
+
 **Below are a list of papers which report results from using CHEEREIO**, in reverse chronological order:
 
-#. Li, Y, D. C. Pendergrass, D. J. Jacob, Y. Tang, J. Qiu, and B. Zheng. Trends and drivers of China’s methane emissions 2019–2024 inferred from regional atmospheric inversion. Submitted to Science Advances.
+#. Pendergrass, D. C., Shindell, D. T., Clarisse, L., Van Damme, M., Beaudor, M., Jiang, J., Zhai, S. Attributing 2013–2024 drivers of global ammonia emissions using IASI observations: implications under future climate change. Submitted.
+#. Zhong, H., Shen, L., Pendergrass, D. C., Qin, K., Peng, S., Qu, M., Jin, J., and Gautam, R. Satellite observations reveal stable global fossil fuel methane emissions despite rising production since 2019. Submitted.
+#. Li, Y, D. C. Pendergrass, D. J. Jacob, Y. Tang, J. Qiu, and B. Zheng. Trends and drivers of China’s methane emissions 2019–2024 inferred from regional atmospheric inversion. Submitted.
 #. Pendergrass, D. C., Jacob, D. J., Balasus, N., Estrada, L., Varon, D. J., East, J. D., He, M., Mooring, T. A., Penn, E., Nesser, H., & Worden, J. R. (2025). Trends and seasonality of 2019–2023 global methane emissions inferred from a localized ensemble transform Kalman filter (CHEEREIO v1.3.1) applied to TROPOMI satellite observations. Atmospheric Chemistry and Physics, 25(21), 14353–14369. https://doi.org/10.5194/acp-25-14353-2025
 #. Voshtani, S., Jones, D. B. A., Wunch, D., Pendergrass, D. C., Wennberg, P. O., Pollard, D. F., Morino, I., Ohyama, H., Deutscher, N. M., Hase, F., Sussmann, R., Weidmann, D., Kivi, R., García, O., Té, Y., Chen, J., Anderson, K., Stevens, R., Kondragunta, S., … Murata, I. (2025). Quantifying CO emissions from boreal wildfires by assimilating TROPOMI and TCCON observations. Atmospheric Chemistry and Physics, 25(21), 15527–15565. doi:10.5194/acp-25-15527-2025
 #. Pendergrass, D. C., Jacob, D. J., Nesser, H., Varon, D. J., Sulprizio, M., Miyazaki, K., & Bowman, K. W. (2023). CHEEREIO 1.0: A versatile and user-friendly ensemble-based chemical data assimilation and emissions inversion platform for the GEOS-Chem chemical transport model. Geoscientific Model Development, 16(16), 4793–4810. https://doi.org/10.5194/gmd-16-4793-2023
